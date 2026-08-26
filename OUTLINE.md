@@ -27,15 +27,18 @@ satisfying the thing the checker stands for. Current state, honestly:
 | Smith, Friston & Whyte (2022) | section structure extracted; body **not read** | 9, 11 |
 | Parr, Pezzulo & Friston (2022) | chapter structure only; body **not read** | 5, 9, 11 |
 | Buckley et al. (2017) | **read in full** (2026-08-26) | 2, 3, 5, 6, 7, 8 |
-| Bogacz (2017) | **existence verified only** | 2, 3, 5 |
+| Bogacz (2017) | **read in full** (2026-08-26) | 2, 3, 5 |
 | Da Costa et al. (2020) | **existence verified only** | 9, 10, 11 |
-| everything else in `REFERENCES.md` | **existence verified only** | 5, 9, 10, 12 |
+| Millidge, Sajid, Da Costa, Friston et al. (Week 12 set) | **abstracts and arguments read** (2026-08-26); full derivations not worked | 10, 12 |
+| everything else in `REFERENCES.md` | **existence verified only** | 5, 9 |
 
 So Weeks 1, 4, 5, 6, 7, 8 and 10 are genuinely grounded: Buckley et al. was read
 in full on 2026-08-26 and Weeks 5 to 8 were rewritten against it, which changed
 them substantially rather than cosmetically. Weeks 9 and 11 are grounded in
-structure but not content. Weeks 2, 3 and 12 still rest on papers nobody here has
-opened.
+structure but not content. Weeks 2 and 3 were rewritten against Bogacz, and Week 12 against its four
+sources, on 2026-08-26. Weeks 9 and 11 remain grounded in structure only: the
+Da Costa (2020) discrete synthesis has not been read, and it is the next one that
+should be.
 
 What reading one paper changed, as a calibration of how much the unread weeks are
 worth: it added the Laplace-encoded energy to Week 5, replaced Week 6's postulated
@@ -61,24 +64,65 @@ reading finds. Update this table as sources are read, and do not delete it.
 5. Problems and code · six problems with solutions, notebooks.
 
 ### Week 2 · Hidden state estimation
-- Exact inference where conjugacy allows it; the Gaussian-Gaussian case in full.
-- Point estimates: MLE and MAP, analytically and by gradient ascent.
-- The precision-weighted-average form of the Gaussian posterior mean, which is the seed of predictive coding in Week 5.
-- Multiple observations and posterior contraction; why the posterior precision adds.
-- Widgets: likelihood surface with live gradient ascent; posterior contraction as samples accumulate; conjugate updating.
-- Notebooks: NumPy, JAX (vectorised posteriors over a grid of priors).
-- Sources: Bogacz (2017) §1–2 for the simplest worked case; Buckley et al. (2017) §2.
-  → forward to Week 4, where the point estimate becomes a distribution.
+*Rewritten 2026-08-26 after reading Bogacz (2017) in full.*
+- **Open with the constraints, not the maths.** Two rules a physical nervous system
+  has to obey: **local computation** (a unit computes only from its own inputs and
+  their weights) and **local plasticity** (a connection changes only from the
+  activity at its two ends). Everything in Weeks 2, 3 and 5 is an attempt to meet
+  them. Stating them first turns the derivations into answers rather than exercises.
+- A concrete problem: one hidden variable, one noisy observation, and a **nonlinear**
+  link between them. Nonlinear on purpose; the linear case hides everything.
+- Exact inference by Bayes, then the two reasons a body cannot do it: a nonlinear
+  link makes the posterior non-standard, so it cannot be carried as a mean and a
+  variance, and the normaliser is an integral. This is the **continuous** counterpart
+  of Week 1's combinatorial blow-up, and the lesson should say so.
+  → back to Week 1 §4.
+- **Derive the central result.** Maximise $F = \ln p(\phi) + \ln p(u \mid \phi)$, the
+  log joint, whose maximum in $\phi$ is the maximum of the posterior because the
+  intractable $p(u)$ does not depend on $\phi$. Then
+  $\partial F/\partial\phi$ is **two precision-weighted prediction errors**: one
+  against the prior, one against the data, the second passed back through $g'$.
+  Predictive coding arrives here, in Week 2, out of nothing more than gradient
+  ascent on a log joint. → forward to Week 5, which is this result generalised.
+- **Careful: $F$ here is not yet the free energy.** It is the log joint, and equals
+  the negative variational free energy only when the approximate posterior is a
+  point mass. Say so at the point of use; Week 4 says what the point mass costs.
+- Widgets: gradient ascent on $F$ with the two error terms drawn separately, so the
+  reader watches them trade off; a nonlinear $g$ skewing the posterior away from
+  both the prior mean and the data; posterior contraction as observations accumulate.
+- Notebooks: NumPy, JAX (posteriors over a grid of priors at once).
+- Sources: Bogacz (2017) §1–2 **[read]**; Buckley et al. (2017) §2–4 **[read]**.
 
 ### Week 3 · Learning the model
-- Parameters as another kind of hidden state; the difference between inference and learning is a timescale, not a kind.
-- Bayesian linear regression; linear Gaussian systems.
-- Expectation maximisation, derived rather than quoted, and the free energy lurking inside it.
-- Factor analysis as the worked case.
-- Widgets: EM iterations on a factor-analysis toy, with the responsibility assignment visible; the E-step/M-step alternation as a descent on one objective.
+*Rewritten 2026-08-26 after reading Bogacz (2017) in full.*
+- **The organising idea: one objective, two timescales.** Week 2 climbed $F$ in
+  $\phi$. Learning climbs the same $F$ in the model's parameters. Inference and
+  learning are not different mechanisms; they are the same ascent on different
+  arguments, fast for states and slow for parameters. Framing it this way makes
+  Week 3 a corollary of Week 2 rather than a fresh topic.
+  → back to Week 2.
+- Why maximise $F$ rather than $p(u)$: the same reason as last week. The marginal is
+  an intractable integral; the joint is a product of two things you already have.
+- **Derive** the updates for the prior mean and for both variances,
+  $\partial F/\partial v_p$, $\partial F/\partial\Sigma_p$,
+  $\partial F/\partial\Sigma_u$, and read off what each is doing: the mean chases
+  the inferred state, a variance grows when its error is persistently larger than it.
+- **Derive the payoff: learning comes out Hebbian.** With a tunable link
+  $g(v,\theta) = \theta v$, the gradient is $\partial F/\partial\theta = \varepsilon\,\phi$,
+  the prediction error times the presynaptic activity. That is exactly the local
+  plasticity constraint Week 2 opened with, satisfied without having been aimed at.
+  This is the moment the framework stops looking like statistics and starts looking
+  like a brain, and it belongs here rather than being deferred to Week 5.
+- Precision as the thing being learned, which is where attention enters; and
+  hyperpriors, meaning priors over the precisions themselves.
+- Expectation maximisation as the classical name for this two-timescale split, for
+  readers who already know it. A connection, not the spine: a mathematics postgraduate
+  does not need a week on linear regression.
+- Widgets: the two timescales running at once, states settling within a trial and
+  parameters drifting across trials; learn a wrong $g$ and watch what the errors do;
+  precision learning under a noisy channel.
 - Notebooks: NumPy, JAX.
-- Sources: Bogacz (2017) on learning; Buckley et al. (2017).
-  → back to Week 2; forward to Week 11, where the same parameters are fitted to real behaviour.
+- Sources: Bogacz (2017) §2.4–2.5 and §5 **[read]**; Buckley et al. (2017) §8 **[read]**.
 
 ### Week 4 · Variational free energy — **the pivot of the course**
 - Jensen's inequality and the bound on surprise, in full.
@@ -267,22 +311,55 @@ reading finds. Update this table as sources are read, and do not delete it.
 ## Part IV — Perspective
 
 ### Week 12 · Extensions, connections and objections
-- Sophisticated inference; structure learning. (Factor graphs moved to Week 9,
-  where they are needed rather than mentioned.)
-- Relation to reinforcement learning and control as inference: what active inference adds, and what it renames.
-- The objections, put properly rather than as a footnote:
-  the ergodicity assumption behind Week 1's `H = lim (1/T) Σ surprise`;
-  Bruineberg et al. on Markov blankets; the falsifiability question;
-  the dark-room problem and whether the standard reply works.
-- Every `::: warning` flagged in Weeks 1–11 gets collected and answered here.
-- **Derive** the sophisticated-inference recursion, at least to depth two, so the
-  cost of planning over beliefs about beliefs is visible rather than asserted.
-- Widgets: a shallow agent and a sophisticated one on the same task, side by side;
-  the dark-room objection made concrete, with preferences the agent can satisfy by
-  hiding, and what has to be added to stop it.
-- Sources: Sajid et al. (2021) for the RL comparison; Da Costa et al. (2023) on reward
-  maximisation; Friston et al. (2021) on sophisticated inference; Bruineberg et al.
-  (2022) and Millidge et al. (2021) for the objections. Full details in `REFERENCES.md`.
+*Rewritten 2026-08-26 after reading the four sources below.*
+
+**Part one: sophisticated inference.**
+- Beliefs about beliefs. The ordinary agent asks "what would happen if I did that";
+  the sophisticated one asks "what would I *believe* about what would happen if I
+  did that". The expected free energy becomes recursive, and the resulting search
+  runs over sequences of **belief states** rather than states.
+- **Derive** the recursion to depth two, so the cost of the tree search is visible
+  rather than asserted. → back to Week 10.
+- Structure learning, in brief: what changes when the model's form is not given.
+
+**Part two: the relation to reinforcement learning.** Not a survey; one precise
+result and two honest observations.
+- **The result to state exactly.** On partially observed Markov decision processes,
+  standard discrete active inference produces Bellman-optimal actions for a planning
+  horizon of **one, and not beyond**; sophisticated inference produces them on any
+  finite horizon. That is the crispest available answer to "is this just
+  reinforcement learning with extra steps", and it is a qualified no with the
+  qualification stated.
+- What active inference gets for free that reinforcement learning engineers in:
+  epistemic exploration falls out of the same objective rather than being bolted on
+  as an exploration bonus.
+- What it renames rather than solves: reward becomes an observation the agent prefers,
+  which relocates the reward-design problem into prior-preference design rather than
+  removing it. Say this plainly.
+- Widgets: an agent with a one-step horizon and a sophisticated one on the same
+  task, with the horizon at which the shallow agent fails made visible.
+
+**Part three: the objections, put properly.**
+- **Does exploration really follow from free energy?** Millidge et al. show the
+  expected free energy is *not* simply "the free energy in the future", and that the
+  natural extension of variational free energy into the future actively *discourages*
+  exploration. If that holds, the framework's most attractive selling point does not
+  come from where it is usually said to come from. Week 10 raises this; Week 12 has
+  to answer it or concede it.
+- **The ergodicity assumption** behind Week 1's identification of lifetime entropy
+  with per-moment surprise. → back to Week 1 §1, where it is flagged as a warning.
+- **Markov blankets**: Bruineberg et al. on the difference between a blanket found
+  in a system and one imposed on a model of it. → back to Week 1 §2, where the
+  conditional independence is now written down.
+- **The dark room**, and whether the standard reply works. The published exchange,
+  not the folklore version.
+- Collect every `::: warning` flagged in Weeks 1 to 11 and answer or concede each.
+  That list is the week's real syllabus.
+- Sources: Friston et al. (2021) sophisticated inference **[read: abstract and
+  argument]**; Da Costa et al. (2023) on reward maximisation **[read: abstract and
+  main result]**; Sajid et al. (2021) demystified and compared **[read: abstract and
+  argument]**; Millidge et al. (2021) **[read: abstract and argument]**;
+  Bruineberg et al. (2022); Friston, Thornton & Clark (2012) on the dark room.
 
 ---
 
