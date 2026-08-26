@@ -180,7 +180,7 @@ really doing inference: a circuit that merely accumulates evidence for each
 cause separately cannot produce it, because the effect requires the causes to
 see one another.
 
-## What can actually be done
+## What can be done
 
 There are three families of response, and the entire structure of Part&nbsp;I is
 a tour of them.
@@ -205,7 +205,7 @@ that the intractable term drops out, you can minimise a distance to something
 you cannot evaluate. That trick is variational inference, the quantity you
 descend is the free energy, and it occupies Week&nbsp;4 and everything after.
 
-::: remark Why the third option is the one for embodied agents
+::: remark Why optimisation suits an embodied agent
 The optimisation route is the only one of the three that offers a partial answer
 at every instant, improves continuously with more time, and turns inference into
 a dynamical system. An animal does not get to say "my chain has not mixed yet".

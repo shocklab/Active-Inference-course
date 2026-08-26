@@ -196,7 +196,7 @@ close to a permutation matrix, an observation pins the state down exactly.
 An agent that can choose where to look has an interest in looking where the
 likelihood is sharp. Hold that thought for nine weeks.
 
-## Where the difficulty actually is
+## Where the difficulty is
 
 In the example above the denominator was a sum of three terms and you did it in
 your head. Now count the terms for something less contrived.

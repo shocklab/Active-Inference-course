@@ -27,7 +27,7 @@ examples because they are the ones we monitor. The argument does not depend
 on them; pick any measurable state of your body and the same narrowness holds.
 :::
 
-## The corner is not free
+## Drift is the default
 
 Left alone, a physical system drifts. Heat leaks across gradients, concentrations
 even out, structure decays into mush. There is no force in physics that gently
@@ -222,7 +222,7 @@ the same thing as keeping your surprise low at each moment. A goal you could
 never act on becomes a goal you can act on now.
 :::
 
-::: warning The step that is doing work
+::: warning What this step assumes
 [eq:ergodic] holds if the process is ergodic, and whether living systems are
 ergodic in the required sense is exactly the point at which several careful
 critics plant their flag. (The **free energy principle** is the name for the
@@ -309,7 +309,7 @@ is the **variational free energy**, shortened to just "the free energy" once
 there is no risk of confusing it with the thermodynamic quantity of the same
 name. Week&nbsp;4 constructs it properly.
 
-## An aside on brains, told correctly
+## An aside on brains and sea squirts
 
 There is a story that gets repeated whenever anyone argues that brains exist for
 movement. The sea squirt, it goes, swims about as a larva with a little brain,
