@@ -1,0 +1,19 @@
+# Source material: private drafts and third-party PDFs. Never published.
+source-material/
+
+# OS / editor
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+venv/
+.venv/
+
+# Scratch
+scratch/
+*.tmp

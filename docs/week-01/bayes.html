@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bayes with states and observations · Active Inference</title><meta name="description" content="The posterior is the belief an ideal agent would hold. Writing it down is easy; the trouble is entirely in one denominator."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+:root{
+  --paper:#fdfcf9; --card:#ffffff;
+  --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
+  --rule:#e4e1d9; --rule2:#d3cfc4;
+  --accent:#0f5f57; --accent2:#14837a; --accent-tint:#e9f2f0; --accent-deep:#0a423d;
+  --clay:#9c4d2f; --clay-tint:#f9efe9;
+  --gold:#8a6d1f; --gold-tint:#faf5e6;
+  --tint:#f4f2ec; --code-bg:#f5f4f0;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SF Mono',Menlo,Consolas,monospace;
+  --measure:44rem; --margincol:13rem; --gap:2.5rem; --shell:80rem;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);
+     font-variant-numeric:oldstyle-nums proportional-nums;line-height:1.6}
+::selection{background:var(--accent);color:#fff}
+img,svg,canvas{max-width:100%}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2)}
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.topbar{position:sticky;top:0;z-index:60;background:var(--accent-deep);
+        border-bottom:2px solid var(--accent);}
+.topbar .tin{max-width:var(--shell);margin:0 auto;padding:0 2rem;height:3rem;
+             display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.topbar a.home{font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.13em;
+               text-transform:uppercase;color:rgba(255,255,255,.82)}
+.topbar a.home:hover{color:#fff}
+.topbar .tcode{font-family:var(--sans);font-size:.7rem;font-weight:500;letter-spacing:.2em;
+               text-transform:uppercase;color:rgba(255,255,255,.42)}
+.tocbtn{display:none;font-family:var(--sans);font-size:.75rem;letter-spacing:.1em;
+        text-transform:uppercase;color:rgba(255,255,255,.82);background:none;border:0;cursor:pointer}
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:14rem minmax(0,1fr);gap:0 var(--gap);
+       max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.maincol{min-width:0;max-width:calc(var(--measure) + var(--margincol) + var(--gap))}
+
+/* ── side nav ────────────────────────────────────────────────────────── */
+.sidenav{position:sticky;top:3rem;align-self:start;max-height:calc(100vh - 3rem);
+         overflow-y:auto;padding:2.6rem 0 3rem;scrollbar-width:thin}
+.sidenav::-webkit-scrollbar{width:0}
+.sidenav .part{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--faint);margin:1.6rem 0 .55rem}
+.sidenav .part:first-child{margin-top:0}
+.sidenav a.wk{display:block;font-family:var(--sans);font-size:.83rem;line-height:1.35;
+              color:var(--ink2);padding:.34rem 0 .34rem .8rem;border-left:2px solid var(--rule)}
+.sidenav a.wk:hover{color:var(--accent);border-left-color:var(--rule2)}
+.sidenav a.wk.cur{color:var(--accent);font-weight:500;border-left-color:var(--accent)}
+.sidenav a.wk .n{color:var(--faint);font-variant-numeric:tabular-nums;margin-right:.45rem}
+.sidenav a.wk.cur .n{color:var(--accent2)}
+.sidenav .lessons{margin:.15rem 0 .5rem .8rem;border-left:1px solid var(--rule)}
+.sidenav .lessons a{display:block;font-family:var(--sans);font-size:.76rem;line-height:1.35;
+                    color:var(--muted);padding:.28rem 0 .28rem .75rem;border-left:2px solid transparent;margin-left:-1px}
+.sidenav .lessons a:hover{color:var(--accent)}
+.sidenav .lessons a.cur{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.sidenav .navhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.16em;
+                text-transform:uppercase;color:var(--accent);padding-bottom:.6rem;
+                margin-bottom:1rem;border-bottom:1px solid var(--rule)}
+
+/* ── article head ────────────────────────────────────────────────────── */
+.ahead{padding:3.2rem 0 1.7rem;border-bottom:1px solid var(--rule);max-width:var(--measure)}
+.ahead .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.2em;
+                text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.ahead h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.2vw,2.9rem);
+          line-height:1.08;letter-spacing:-.015em;color:var(--ink);margin-bottom:.85rem;
+          font-variant-numeric:lining-nums}
+.ahead .deck{font-family:var(--serif);font-style:italic;font-size:1.18rem;line-height:1.5;
+             color:var(--muted)}
+.ahead .meta{font-family:var(--sans);font-size:.74rem;letter-spacing:.06em;color:var(--faint);
+             margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap}
+
+/* ── body ────────────────────────────────────────────────────────────── */
+.abody{padding:2rem 0 1rem;font-size:1.115rem;max-width:var(--measure)}
+.abody > *{max-width:var(--measure)}
+.abody p{margin:0 0 1.15rem;color:var(--ink);text-wrap:pretty}
+.abody p.lede{font-size:1.24rem;line-height:1.55;color:var(--ink2)}
+.abody strong{font-weight:600}
+.abody em{font-style:italic}
+.abody a{border-bottom:1px solid var(--rule2)}
+.abody a:hover{border-bottom-color:var(--accent2)}
+.abody h2{font-family:var(--serif);font-weight:500;font-size:1.72rem;line-height:1.16;
+          color:var(--ink);letter-spacing:-.01em;margin:2.9rem 0 .9rem;padding-top:1.6rem;
+          border-top:1px solid var(--rule);scroll-margin-top:4rem}
+.abody h2 .secno{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.6rem;font-weight:400}
+.abody h3{font-family:var(--serif);font-weight:600;font-size:1.24rem;color:var(--ink);
+          margin:2rem 0 .6rem;scroll-margin-top:4rem}
+.abody h4{font-family:var(--sans);font-weight:600;font-size:.78rem;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--accent);margin:1.6rem 0 .5rem}
+.abody ul,.abody ol{margin:0 0 1.25rem;padding-left:1.5rem}
+.abody li{margin-bottom:.45rem;color:var(--ink)}
+.abody ul>li::marker{color:var(--accent)}
+.abody ol>li::marker{color:var(--accent);font-family:var(--sans);font-size:.9em}
+.abody li>ul,.abody li>ol{margin:.45rem 0 .2rem}
+.abody blockquote{border-left:2px solid var(--accent);padding:.15rem 0 .15rem 1.3rem;
+                  margin:1.6rem 0;color:var(--ink2);font-style:italic}
+.abody blockquote p:last-child{margin-bottom:0}
+.abody hr{border:0;border-top:1px solid var(--rule);margin:2.4rem 0}
+
+/* ── code ────────────────────────────────────────────────────────────── */
+.abody code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);
+            padding:.1em .35em;border-radius:2px;border:1px solid var(--rule)}
+.abody pre{background:var(--code-bg);border:1px solid var(--rule);border-left:2px solid var(--accent);
+           padding:1rem 1.15rem;overflow-x:auto;margin:1.5rem 0;line-height:1.55}
+.abody pre code{background:none;border:0;padding:0;font-size:.83rem;color:var(--ink2)}
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.abody .tablewrap{overflow-x:auto;margin:1.7rem 0;
+           width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+.abody table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.86rem}
+.abody th{text-align:left;font-weight:600;color:var(--accent);border-bottom:1.5px solid var(--accent);
+          padding:.5rem .7rem;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;
+          vertical-align:bottom}
+.abody td{padding:.55rem .7rem;border-bottom:1px solid var(--rule);color:var(--ink2);vertical-align:top}
+.abody tbody tr:hover td{background:var(--tint)}
+
+/* ── maths ───────────────────────────────────────────────────────────── */
+.katex{font-size:1.045em}
+.katex-display{margin:0;padding:.15rem 0;overflow-x:auto;overflow-y:hidden}
+.eqn{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;max-width:var(--measure);
+     scroll-margin-top:4.5rem}
+.eqn > .eqbody{flex:1;min-width:0}
+.eqn > .eqno{flex:0 0 auto;font-family:var(--sans);font-size:.8rem;color:var(--faint);
+             font-variant-numeric:tabular-nums}
+.eqn > .eqno a{color:var(--faint);border:0}
+.eqn > .eqno a:hover{color:var(--accent)}
+.eqn:target{background:var(--gold-tint);box-shadow:0 0 0 .7rem var(--gold-tint);border-radius:2px}
+.eqn:target > .eqno a{color:var(--gold)}
+a.eqref{font-variant-numeric:tabular-nums;white-space:nowrap;border-bottom:1px solid var(--rule2)}
+
+/* ── margin notes ────────────────────────────────────────────────────── */
+.mn{float:right;clear:right;width:var(--margincol);
+    margin:.3rem calc(-1 * (var(--margincol) + var(--gap))) 1.1rem var(--gap);
+    font-family:var(--sans);font-size:.775rem;line-height:1.5;color:var(--muted)}
+.mn .mnl{display:block;font-weight:600;font-size:.66rem;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.mn p{margin:0 0 .5rem;font-size:inherit;line-height:inherit;color:inherit}
+.mn p:last-child{margin-bottom:0}
+.mn code{font-size:.85em}
+.mn a{border-bottom:1px solid var(--rule2)}
+
+/* ── boxes ───────────────────────────────────────────────────────────── */
+.box{margin:1.9rem 0;padding:1.15rem 1.35rem;border:1px solid var(--rule);
+     background:var(--card);max-width:var(--measure)}
+.box > :last-child{margin-bottom:0}
+.box .boxhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.15em;
+            text-transform:uppercase;margin-bottom:.6rem;display:flex;gap:.5rem;align-items:baseline}
+.box .boxhd .bt{color:var(--ink2);font-weight:500;letter-spacing:.02em;text-transform:none;
+                font-size:.95rem;font-family:var(--serif);font-style:italic}
+.box p,.box li{font-size:1.03rem}
+
+.box.definition,.box.theorem,.box.proposition,.box.lemma{
+  border-left:2px solid var(--accent);background:var(--card)}
+.box.definition .boxhd,.box.theorem .boxhd,.box.proposition .boxhd,.box.lemma .boxhd{color:var(--accent)}
+
+.box.keyidea{border:0;border-left:2px solid var(--accent);background:var(--accent-tint);
+             padding:1.2rem 1.4rem}
+.box.keyidea .boxhd{color:var(--accent)}
+
+.box.remark,.box.aside{border-left:2px solid var(--rule2);background:var(--tint)}
+.box.remark .boxhd,.box.aside .boxhd{color:var(--muted)}
+
+.box.warning{border-left:2px solid var(--clay);background:var(--clay-tint)}
+.box.warning .boxhd{color:var(--clay)}
+
+.box.derivation{border:1px solid var(--rule);border-left:2px solid var(--gold);background:#fdfcf7;
+                padding:1.25rem 1.45rem}
+.box.derivation .boxhd{color:var(--gold)}
+.box.derivation .eqn{margin:1rem 0}
+.box.derivation p{color:var(--ink2)}
+
+.box.exercise{border-left:2px solid var(--clay)}
+.box.exercise .boxhd{color:var(--clay)}
+.box.exercise details{margin-top:.9rem;border-top:1px solid var(--rule);padding-top:.7rem}
+.box.exercise summary{font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.11em;
+                      text-transform:uppercase;color:var(--clay);cursor:pointer;list-style:none}
+.box.exercise summary::-webkit-details-marker{display:none}
+.box.exercise summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+.box.exercise details[open] summary::before{content:'▾ '}
+.box.exercise details > :nth-child(2){margin-top:.8rem}
+
+.box.checkpoint{border-left:2px solid var(--accent2);background:var(--accent-tint)}
+.box.checkpoint .boxhd{color:var(--accent)}
+.box.checkpoint ul{margin-bottom:0}
+
+/* ── figures & widgets ───────────────────────────────────────────────── */
+.abody figure{margin:2.2rem 0;width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+figure{margin:2.2rem 0}
+figure figcaption{font-family:var(--sans);font-size:.79rem;line-height:1.5;color:var(--muted);
+                  margin-top:.7rem;max-width:var(--measure)}
+figure figcaption .fno{font-weight:600;color:var(--accent);letter-spacing:.03em}
+figure.widget .wmount{border:1px solid var(--rule2);background:var(--card);padding:1rem}
+figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:var(--muted);
+                                 padding:2rem 1rem;text-align:center}
+
+/* widget internals (used by aif-widgets.js) */
+.wpanel{display:grid;gap:1rem}
+.wrow{display:flex;flex-wrap:wrap;gap:1.1rem 1.6rem;align-items:flex-start}
+.wctl{font-family:var(--sans);font-size:.78rem;color:var(--ink2);display:flex;
+      flex-direction:column;gap:.28rem;min-width:11rem;flex:1 1 11rem}
+.wctl .wlab{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline}
+.wctl .wlab b{font-weight:500;color:var(--ink2)}
+.wctl .wlab .wval{font-family:var(--mono);font-size:.76rem;color:var(--accent);
+                  font-variant-numeric:tabular-nums}
+.wctl input[type=range]{width:100%;accent-color:var(--accent);height:1.1rem;cursor:pointer}
+.wbtn{font-family:var(--sans);font-size:.76rem;font-weight:500;letter-spacing:.04em;
+      background:var(--accent);color:#fff;border:0;padding:.42rem .9rem;cursor:pointer;
+      border-radius:2px}
+.wbtn:hover{background:var(--accent2)}
+.wbtn.ghost{background:transparent;color:var(--accent);border:1px solid var(--rule2)}
+.wbtn.ghost:hover{background:var(--accent-tint)}
+.wbtns{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.wnote{font-family:var(--sans);font-size:.78rem;line-height:1.5;color:var(--muted);
+       border-top:1px solid var(--rule);padding-top:.7rem}
+.wnote b{color:var(--accent);font-weight:600}
+.wreadout{font-family:var(--mono);font-size:.78rem;color:var(--ink2);display:flex;
+          flex-wrap:wrap;gap:.4rem 1.3rem;font-variant-numeric:tabular-nums}
+.wreadout span b{color:var(--faint);font-weight:500}
+.wtabs{display:flex;gap:.3rem;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.wtab{font-family:var(--sans);font-size:.75rem;padding:.34rem .75rem;cursor:pointer;
+      color:var(--muted);border:1px solid transparent;border-bottom:0;background:none}
+.wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
+canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
+
+/* ── notation list ───────────────────────────────────────────────────── */
+dl.notation{margin:1.6rem 0;max-width:var(--measure)}
+dl.notation dt{font-family:var(--sans);font-weight:600;font-size:.82rem;color:var(--accent);
+               margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--rule)}
+dl.notation dt:first-child{border-top:0;margin-top:0;padding-top:0}
+dl.notation dd{margin:.25rem 0 0;color:var(--ink2);font-size:1.03rem}
+
+/* ── footer nav ──────────────────────────────────────────────────────── */
+.pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
+         border-top:1px solid var(--rule);margin-top:3.5rem;padding:1.7rem 0 0;
+         max-width:var(--measure)}
+.pagenav a{display:flex;flex-direction:column;gap:.22rem;max-width:20rem;border:0}
+.pagenav a.nx{text-align:right;margin-left:auto}
+.pagenav .dir{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.16em;
+              text-transform:uppercase;color:var(--accent)}
+.pagenav .ttl{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);line-height:1.3}
+.pagenav a:hover .ttl{color:var(--accent)}
+.sitefoot{border-top:1px solid var(--rule);margin-top:3rem;padding:1.6rem 0 3.5rem;
+          font-family:var(--sans);font-size:.76rem;line-height:1.65;color:var(--faint);
+          max-width:var(--measure)}
+.sitefoot a{color:var(--muted);border-bottom:1px solid var(--rule)}
+.sitefoot a:hover{color:var(--accent)}
+.sitefoot p{margin-bottom:.4rem}
+
+/* ── landing page ────────────────────────────────────────────────────── */
+.cover{background:var(--accent-deep);color:#fff;padding:4.5rem 0 3.6rem;margin-bottom:0}
+.cover .cin{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.cover .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.22em;
+                text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1.3rem}
+.cover h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,6vw,4.2rem);
+          line-height:1.04;letter-spacing:-.02em;max-width:24ch;margin-bottom:1.2rem}
+.cover .sub{font-family:var(--serif);font-style:italic;font-size:1.25rem;line-height:1.5;
+            color:rgba(255,255,255,.72);max-width:44rem}
+.cover .rule{width:3rem;height:2px;background:var(--accent2);margin:0 0 1.2rem}
+.wide{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.weeklist{border-top:1px solid var(--rule)}
+.landing .abody>*{max-width:none}
+.landing .abody .introcopy{max-width:44rem}
+.weekrow{display:flex;gap:2.2rem;padding:1.7rem 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.weekrow .wn{flex:0 0 3.4rem;text-align:right}
+.weekrow .wn .l{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.18em;
+                text-transform:uppercase;color:var(--faint)}
+.weekrow .wn .n{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--accent);
+                line-height:1;font-variant-numeric:lining-nums}
+.weekrow .wc{flex:1 1 20rem;min-width:0}
+.weekrow .wc h3{font-family:var(--serif);font-weight:500;font-size:1.28rem;margin-bottom:.3rem}
+.weekrow .wc h3 a{color:var(--ink);border:0}
+.weekrow .wc h3 a:hover{color:var(--accent)}
+.weekrow .wc p{font-family:var(--sans);font-size:.86rem;line-height:1.6;color:var(--muted);
+               margin-bottom:.55rem;max-width:46rem}
+.weekrow .wc ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+.weekrow .wc ul li{font-family:var(--sans);font-size:.79rem;margin:0}
+.weekrow .wc ul li a{color:var(--ink2);border-bottom:1px solid var(--rule)}
+.weekrow .wc ul li a:hover{color:var(--accent);border-bottom-color:var(--accent2)}
+.partband{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.2em;
+          text-transform:uppercase;color:var(--accent);padding:2.2rem 0 .5rem}
+.partband span{color:var(--faint);font-weight:400;letter-spacing:.04em;text-transform:none;
+               font-family:var(--serif);font-style:italic;font-size:1rem;margin-left:.8rem}
+
+/* ── responsive ──────────────────────────────────────────────────────── */
+@media (max-width:1280px){
+  .shell{grid-template-columns:13rem minmax(0,1fr);gap:0 2rem;padding:0 1.6rem}
+  .maincol{max-width:var(--measure)}
+  .mn{float:none;clear:both;width:auto;margin:1rem 0 1.3rem;padding-left:1rem;
+      border-left:2px solid var(--rule2)}
+  .abody .tablewrap,.abody figure{width:auto;max-width:100%}
+  .cover .cin,.wide{padding:0 1.6rem}
+}
+@media (max-width:860px){
+  html{font-size:97%}
+  .shell{grid-template-columns:minmax(0,1fr);padding:0 1.3rem}
+  .sidenav{position:static;max-height:none;padding:1rem 0 0;display:none;
+           border-bottom:1px solid var(--rule);margin-bottom:1rem}
+  .sidenav.open{display:block}
+  .tocbtn{display:block}
+  .topbar .tin{padding:0 1.3rem}
+  .cover{padding:3rem 0 2.4rem}
+  .cover .cin,.wide{padding:0 1.3rem}
+  .abody{font-size:1.06rem}
+  .weekrow{gap:1rem}
+  .weekrow .wn{flex-basis:2.6rem}
+  .eqn{gap:.5rem}
+  .eqn > .eqno{font-size:.72rem}
+}
+@media print{
+  .topbar,.sidenav,.pagenav,.wbtns,.wctl{display:none}
+  .shell{display:block;max-width:none}
+  body{background:#fff}
+}
+</style><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script><script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(!window.renderMathInElement) return;
+  renderMathInElement(document.body,{
+    delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'\\[',right:'\\]',display:true},
+      {left:'$',right:'$',display:false},
+      {left:'\\(',right:'\\)',display:false}
+    ],
+    ignoredTags:['script','noscript','style','textarea','pre','code','option'],
+    throwOnError:false,
+    macros:{
+      '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
+      '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
+      '\\ta':'\\tilde{s}','\\to':'\\tilde{o}'
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.querySelector('.tocbtn'),n=document.querySelector('.sidenav');
+  if(b&&n){b.addEventListener('click',function(){n.classList.toggle('open');});}
+});
+</script>
+</head>
+<body>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">A soft body in a hard world</a><a class="" href="../week-01/process-and-model.html">Two models, not one</a><a class="cur" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>Bayes with states and observations</h1><p class="deck">The posterior is the belief an ideal agent would hold. Writing it down is easy; the trouble is entirely in one denominator.</p><div class="meta"><span>Week 1</span><span>&#167;3</span><span>30 min</span></div></header><article class="abody"><p>The agent has a generative model $P(o,s) = P(o \mid s)P(s)$. An observation
+arrives. What should it now believe about $s$?</p>
+<p>There is only one answer consistent with the axioms of probability, and it is
+the same one you have seen since your first statistics course, dressed for this
+particular occasion:</p>
+<div class="eqn" id="eq-bayes"><div class="eqbody">$$P(s \mid o) \;=\; \frac{P(o \mid s)\,P(s)}{P(o)}, \qquad
+P(o) \;=\; \sum_{s} P(o \mid s)\,P(s).$$</div><div class="eqno"><a href="#eq-bayes" title="Link to equation 1">(1)</a></div></div>
+<p>Everything in this course is a consequence of not being able to compute the
+denominator. It is worth spending a page on why that is, because if you leave
+this lesson thinking Bayes' theorem is hard, you have taken away the wrong
+lesson. Bayes' theorem is trivial. The sum underneath it is not.</p>
+<h2 id="the-four-quantities-named"><span class="secno">1</span>The four quantities, named</h2>
+<dl class="notation"><dt>$P(s)$, the prior</dt><dd>What the agent expects before it looks. Not a statement about the world's frequencies; a statement about the agent's commitments.</dd><dt>$P(o \mid s)$, the likelihood</dt><dd>Read as a function of $s$ for fixed $o$, this scores how well each state would account for the data you actually got. It is not a distribution over $s$ and does not sum to one over $s$.</dd><dt>$P(o)$, the evidence</dt><dd>The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from Lesson&nbsp;1.</dd><dt>$P(s \mid o)$, the posterior</dt><dd>The updated belief. Prior reweighted by how well each state explains the data, then renormalised.</dd></dl>
+<p>Two of these deserve a moment.</p>
+<p>The likelihood is a <strong>column</strong> of a matrix, not a row. If you tabulate
+$P(o \mid s)$ with observations down the side and states across the top, then
+each column is a probability distribution over observations and sums to one.
+When an observation arrives you pick out the corresponding row and read it
+across the states. That row is not a distribution and there is no reason at all
+for it to sum to one. Students trip over this constantly; the matrix does not
+care which way you read it, but the normalisation does.</p>
+<aside class="mn"><span class="mnl">Rows and columns</span><p>We will write this matrix $\mathbf{A}$ from Week&nbsp;9 onwards, with
+$A_{ij} = P(o = i \mid s = j)$. Columns sum to one. Remember it now and the
+discrete half of the course will cost you much less pain.</p></aside>
+<p>The evidence is the odd one out, because it is the only term that requires you
+to know about states you did not observe and are not asking about. To evaluate
+$P(o)$ you must visit every state the model admits, ask what each would have
+predicted, weight by how plausible each was, and add. Nothing about the question
+"was that a leopard?" suggests that answering it should require an inventory of
+everything else that exists. And yet.</p>
+<h2 id="a-worked-example-with-all-the-arithmetic"><span class="secno">2</span>A worked example, with all the arithmetic</h2>
+<p>You are on a mountain path at dusk. Three states of the world concern you:
+there is a <strong>leopard</strong> in the scrub, there is a <strong>baboon</strong> in the scrub, or
+there is <strong>nothing</strong> in the scrub. Three things you might sense: a <strong>tawny
+flash</strong>, a <strong>branch shaking</strong>, or <strong>quiet</strong>.</p>
+<p>Your model is this likelihood matrix. Each column is one state's prediction
+about what you will sense, and so each column sums to one.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>$P(o \mid s)$</th>
+<th>leopard</th>
+<th>baboon</th>
+<th>nothing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tawny flash</td>
+<td>0.70</td>
+<td>0.15</td>
+<td>0.02</td>
+</tr>
+<tr>
+<td>branch shakes</td>
+<td>0.25</td>
+<td>0.75</td>
+<td>0.08</td>
+</tr>
+<tr>
+<td>quiet</td>
+<td>0.05</td>
+<td>0.10</td>
+<td>0.90</td>
+</tr>
+</tbody>
+</table></div>
+<p>Your prior, from a lifetime on this mountain, is
+$P(s) = (0.08,\ 0.22,\ 0.70)$ over (leopard, baboon, nothing). Leopards are rare.</p>
+<p>You see a tawny flash. Take the tawny-flash row and multiply it, elementwise,
+by the prior:</p>
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+P(o \mid s)P(s) \;=\; \big(\,
+&0.70 \times 0.08,\;\;
+0.15 \times 0.22,\;\;
+0.02 \times 0.70 \,\big) \\[2pt]
+\;=\; \big(\,& 0.056,\;\; 0.033,\;\; 0.014 \,\big).
+\end{aligned}$$</div></div>
+<p>These are the three numerators in <a class="eqref" href="#eq-bayes">(1)</a>. Their sum is the denominator:</p>
+<div class="eqn" id="eq-worked-evidence"><div class="eqbody">$$P(o = \text{tawny flash}) \;=\; 0.056 + 0.033 + 0.014 \;=\; 0.103 .$$</div><div class="eqno"><a href="#eq-worked-evidence" title="Link to equation 2">(2)</a></div></div>
+<p>Divide through:</p>
+<div class="eqn" id="eq-worked-posterior"><div class="eqbody">$$P(s \mid o) \;=\; \frac{(0.056,\ 0.033,\ 0.014)}{0.103}
+\;=\; (0.5437,\ 0.3204,\ 0.1359).$$</div><div class="eqno"><a href="#eq-worked-posterior" title="Link to equation 3">(3)</a></div></div>
+<aside class="mn"><span class="mnl">Sanity check</span><p>$0.5437 + 0.3204 + 0.1359 = 1$. If your posterior does not sum to one you have
+divided by the wrong thing, which in practice means you forgot a state.</p></aside>
+<p>Read what happened. The leopard hypothesis started at 8% and finished at 54%,
+a factor of nearly seven. It did not get there by being likely; it got there by
+being the only state that predicts tawny flashes well. Meanwhile "nothing"
+started as the overwhelming favourite at 70% and was demoted to 14%, because
+whatever else is true, empty scrub does not flash tawny.</p>
+<p>Two derived quantities are worth computing while the numbers are in front of us.</p>
+<p><strong>Surprise.</strong> From <a class="eqref" href="#eq-worked-evidence">(2)</a>, $-\ln P(o) = -\ln 0.103 = 2.273$ nats.
+Compare the other two observations: a shaking branch has $P(o) = 0.241$ and
+surprise $1.423$ nats; quiet has $P(o) = 0.656$ and surprise $0.422$ nats.
+Quiet is what this model expects, and it is duly unsurprised by it.</p>
+<p><strong>Information gained.</strong> How far did the observation move you? The natural
+measure is the Kullback&ndash;Leibler divergence from prior to posterior,</p>
+<div class="eqn" id="eq-info-gain"><div class="eqbody">$$D_{\mathrm{KL}}\big[P(s\mid o)\,\|\,P(s)\big]
+\;=\; \sum_{s} P(s \mid o)\,\ln \frac{P(s\mid o)}{P(s)} .$$</div><div class="eqno"><a href="#eq-info-gain" title="Link to equation 4">(4)</a></div></div>
+<p>For the tawny flash this is $0.940$ nats. For the shaking branch, $0.524$. For
+quiet, $0.225$. The observation that surprised you most also taught you most,
+which is intuitive and, as the exercises will show, not a theorem.</p>
+<figure class="widget" id="fig-1"><div class="wmount" data-widget="bayes-discrete"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.</span> The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.</figcaption></figure>
+<h2 id="what-the-ambiguity-slider-is-showing-you"><span class="secno">3</span>What the ambiguity slider is showing you</h2>
+<p>Push $\lambda$ towards 1 in that figure. The likelihood bars flatten until every
+state predicts every observation equally well. Watch the posterior: it slides
+back onto the prior and stays there. The information-gain readout goes to zero.</p>
+<p>This is worth naming, because it will return as a term in an equation in
+Week&nbsp;10. When $P(o \mid s)$ is close to uniform in $o$ for every $s$, the
+sensory channel is <strong>ambiguous</strong>: observations do not discriminate between
+states, so observing costs you effort and buys you nothing. When $P(o \mid s)$ is
+close to a permutation matrix, an observation pins the state down exactly.</p>
+<p>An agent that can choose where to look has an interest in looking where the
+likelihood is sharp. Hold that thought for nine weeks.</p>
+<h2 id="where-the-difficulty-actually-is"><span class="secno">4</span>Where the difficulty actually is</h2>
+<p>In the example above the denominator was a sum of three terms and you did it in
+your head. Now count the terms for something less contrived.</p>
+<p>An animal foraging tracks its own position, its energy reserves, the time since
+it last saw a predator, the wind direction, whether each of several patches has
+been depleted, and what its companions are doing. Each of these is a state
+<em>factor</em>. The joint state space is the product of all of them, so if there are
+$n$ factors with $k$ values each, the sum in <a class="eqref" href="#eq-bayes">(1)</a> has $k^n$ terms.</p>
+<figure class="widget" id="fig-2"><div class="wmount" data-widget="evidence-blowup"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 2.</span> The number of terms in the evidence sum, on a logarithmic vertical axis. The point is not that the numbers are large. The point is which way the exponent sits.</figcaption></figure>
+<p>Nothing about this is fixable by better hardware. Adding one more thing to keep
+track of multiplies the work by $k$, and brains manage this in a few tens of
+milliseconds using about twenty watts.</p>
+<p>So the exact posterior is not available. This is not a temporary engineering
+inconvenience; it is a structural feature of being a finite thing embedded in a
+large world. Everything from Week&nbsp;4 onwards is a response to it: rather
+than computing $P(s \mid o)$, we will posit an approximation $Q(s)$ that we
+<em>can</em> compute with, and then work out how to make it as close to the posterior
+as possible without ever evaluating the posterior.</p>
+<div class="box exercise"><div class="boxhd">Exercise 1<span class="bt">Bayes with a hostile prior</span></div><p>Using the same likelihood matrix, suppose you are a nervous hiker with prior
+$P(s) = (0.40,\ 0.30,\ 0.30)$. You observe <strong>quiet</strong>. Compute the evidence, the
+posterior, and the surprise, and compare the surprise with the $0.422$ nats
+obtained under the original prior.</p><details><summary>Solution</summary><p>The quiet row is $(0.05,\ 0.10,\ 0.90)$. Numerators:</p>
+<div class="eqn"><div class="eqbody">$$(0.05 \times 0.40,\ 0.10 \times 0.30,\ 0.90 \times 0.30)
+= (0.020,\ 0.030,\ 0.270).$$</div></div>
+<p>Evidence $P(o) = 0.020 + 0.030 + 0.270 = 0.320$, so the surprise is
+$-\ln 0.320 = 1.139$ nats, nearly three times the $0.422$ nats of the calm
+hiker. Posterior:</p>
+<div class="eqn"><div class="eqbody">$$\frac{(0.020,\ 0.030,\ 0.270)}{0.320} = (0.0625,\ 0.09375,\ 0.84375).$$</div></div>
+<p>Quiet still argues for an empty path, and it does so strongly enough to take
+"nothing" from 30% to 84%. But the nervous hiker is more surprised by quiet than
+the calm one is, because their model expected trouble. Two agents, one
+observation, different surprise. This is the concrete version of the claim in
+Lesson&nbsp;2 that surprise is a property of the model and not of the world.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 2<span class="bt">Surprise and information are not the same quantity</span></div><p>In the worked example the most surprising observation was also the most
+informative. Show that this cannot be a general law, by constructing a model in
+which the <em>rarest</em> observation carries <em>no</em> information at all.</p><details><summary>Solution</summary><p>Take two states with a flat prior $P(s) = (0.5,\ 0.5)$, and three observations
+with likelihood</p>
+<div class="eqn"><div class="eqbody">$$P(o \mid s) \;=\; \begin{pmatrix} 0.60 & 0.10 \\ 0.35 & 0.85 \\ 0.05 & 0.05 \end{pmatrix},$$</div></div>
+<p>rows indexed $o_1, o_2, o_3$ and columns by state. Both columns sum to one, so
+this is a legitimate likelihood. The third row is deliberately flat: whatever the
+state, $o_3$ turns up 5% of the time.</p>
+<p>Working through <a class="eqref" href="#eq-bayes">(1)</a> for each observation:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>observed</th>
+<th>$P(o)$</th>
+<th>surprise, nats</th>
+<th>posterior</th>
+<th>information gain, nats</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$o_1$</td>
+<td>0.350</td>
+<td>1.050</td>
+<td>(0.857, 0.143)</td>
+<td>0.283</td>
+</tr>
+<tr>
+<td>$o_2$</td>
+<td>0.600</td>
+<td>0.511</td>
+<td>(0.292, 0.708)</td>
+<td>0.089</td>
+</tr>
+<tr>
+<td>$o_3$</td>
+<td>0.050</td>
+<td>2.996</td>
+<td>(0.500, 0.500)</td>
+<td>0.000</td>
+</tr>
+</tbody>
+</table></div>
+<p>The rarest observation, $o_3$, is by some distance the most surprising, and it
+leaves the posterior exactly where the prior was. The most informative
+observation, $o_1$, is six times more probable.</p>
+<p>The structural reason is that the two quantities are averages of different
+things. Averaging surprise over $P(o)$ gives the entropy $\mathrm{H}[P(o)]$;
+averaging information gain over $P(o)$ gives the mutual information $I(s;o)$.
+Nothing links them pointwise. An observation is surprising when the model
+thought it unlikely; it is informative when the states disagree about it. A
+sensory channel can easily be rare and useless at once, and an agent choosing
+where to point its eyes had better be able to tell the difference. That
+distinction becomes the two terms of expected free energy in Week&nbsp;10.</p></details></div>
+<div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
+<li>Why does a row of the likelihood matrix not sum to one, while a column does?</li>
+<li>Which single term in Bayes' theorem is responsible for the intractability, and why does the intractability grow multiplicatively rather than additively?</li>
+<li>If the likelihood is uniform in $o$ for every $s$, what is the posterior, and what is the information gain?</li>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-01/process-and-model.html"><span class="dir">Previous</span><span class="ttl">Two models, not one</span></a><a class="nx" href="../week-01/inverse-problem.html"><span class="dir">Next</span><span class="ttl">The inverse problem</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/active-inference-course">GitHub</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>
+</body>
+</html>
