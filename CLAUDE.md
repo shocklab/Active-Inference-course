@@ -85,6 +85,65 @@ assets/js/wNN.js      per-week widgets, loaded via a lesson's `scripts:` front m
 
 **Never edit `docs/` by hand.** It is generated. Edit `content/` and rebuild.
 
+## The verification pipeline
+
+```bash
+python3 build/check_all.py            # everything offline, ~2 seconds
+python3 build/check_all.py --full     # + DOI resolution and notebook execution
+```
+
+**Run it before every commit; run `--full` before publishing.** Each stage exists
+because something specific went wrong, and the reasons are in each script's
+docstring so nobody deletes a check without knowing what it was for.
+
+| Stage | Catches | Why it exists |
+|---|---|---|
+| `build_site.py` | — | renders `content/` to `docs/`, substituting computed numbers |
+| `check_site.py` | dead `[eq:]` refs, unregistered widgets, dead links, tag imbalance, stray `$` | a widget silently failed to mount; a figure was capped at the wrong width |
+| `check_numbers.py` | any derived number typed by hand | **four wrong values reached a draft of Week 1** because they were worked out by hand |
+| `check_definitions.py` | a symbol used before it is defined; a term bolded as a definition twice | a reader caught `$o$` called "sensory states" one lesson before that distinction existed |
+| `check_outline.py` | a week named but not planned | one probe found a topic mislabelled, uncommitted and uncross-linked |
+| `check_prose.py` | AI-writing tells, per zone, per 1,000 words | wraps the calibrated census at `~/.claude/skills/writing-review/census.py` |
+| `check_references.py` | a DOI that does not resolve or whose metadata drifted | two citations were wrong from memory, including an author list |
+| notebooks | a notebook that no longer runs | the published Colab links are only as good as the last execution |
+
+Blocking stages fail the run. Advisory stages (`outline`, `prose`, `definitions`)
+print a queue to read, never a verdict to obey: this course teaches distinctions,
+so a high keep-rate on the "X, not Y" family is correct, not a defect.
+
+### Numbers are computed, never typed
+
+A week's derived numbers live in `content/week-NN/numbers.py`, which exports a
+`VALUES` dict. The prose refers to them as `{{key:.4f}}` and `build_site.py`
+substitutes at render time, so the published figure **is** the computed figure and
+cannot drift from it. Week 1 has 148 such substitutions.
+
+`check_numbers.py` scans for any decimal still typed literally and reports it.
+Numbers that are genuinely *inputs* rather than results (a prior we chose, a
+matrix entry that defines a model, a cited physiological range) go in its `ALLOW`
+list with a reason; an entry there is a claim that a human checked it.
+
+Add a number to a lesson by adding it to `numbers.py` first. If you find yourself
+typing a digit into prose, stop.
+
+### These checks have all failed in both directions
+
+Do not treat a green pipeline as proof. Recorded so far:
+
+- `check_outline.py` passed a week whose citation had been wired in without anyone
+  reading the paper, and separately flagged the week containing the best derivation
+  in the course as having none, because the bullet said "main result" rather than
+  "Derive".
+- `check_definitions.py` stripped a trailing full stop *before* testing for one, so
+  its own run-in-heading exemption never fired.
+- `check_numbers.py` initially reported 73 failures that were all SVG coordinates.
+- `check_prose.py` reported every equation as a punctuation failure, because KaTeX
+  renders client-side and the static HTML still holds raw LaTeX minus signs.
+- `check_all.py` misattributed every section, because the parent's buffered headers
+  landed after each child's output.
+
+Read the reports. The exit code is a prompt to look, not an answer.
+
 ## Authoring rules
 
 ### Maths

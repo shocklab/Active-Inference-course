@@ -1,0 +1,183 @@
+"""Every derived number in Week 1, computed rather than typed.
+
+The prose refers to these by key, as {{ev_tawny:.4f}}, and build_site.py
+substitutes the computed value. A number that appears in a lesson but not here
+is a number nobody has checked; build/check_numbers.py reports those.
+
+Run standalone to see the values:  python3 content/week-01/numbers.py
+"""
+import itertools
+from math import comb, log, log2, sqrt
+
+# ── the running discrete model (Lessons 3 and 5) ─────────────────────────
+STATES = ["leopard", "baboon", "nothing"]
+OBS = ["tawny flash", "branch shakes", "quiet"]
+
+#            leopard baboon nothing
+A = [[0.70, 0.15, 0.02],      # tawny flash
+     [0.25, 0.75, 0.08],      # branch shakes
+     [0.05, 0.10, 0.90]]      # quiet
+PRIOR = [0.08, 0.22, 0.70]
+PRIOR_NERVOUS = [0.40, 0.30, 0.30]
+
+
+def posterior(A, prior, o):
+    un = [A[o][s] * prior[s] for s in range(len(prior))]
+    ev = sum(un)
+    return [u / ev for u in un], ev
+
+
+def kl(q, p):
+    return sum(qi * log(qi / pi) for qi, pi in zip(q, p) if qi > 0)
+
+
+V = {}
+
+for oi, name in enumerate(OBS):
+    tag = name.split()[0]                       # tawny / branch / quiet
+    post, ev = posterior(A, PRIOR, oi)
+    V[f"ev_{tag}"] = ev
+    V[f"surprise_{tag}"] = -log(ev)
+    V[f"info_{tag}"] = kl(post, PRIOR)
+    for si, sname in enumerate(STATES):
+        V[f"post_{tag}_{sname}"] = post[si]
+    for si, sname in enumerate(STATES):
+        V[f"num_{tag}_{sname}"] = A[oi][si] * PRIOR[si]
+
+# nervous hiker observing quiet (Lesson 3 exercise)
+post_n, ev_n = posterior(A, PRIOR_NERVOUS, 2)
+V["ev_quiet_nervous"] = ev_n
+V["surprise_quiet_nervous"] = -log(ev_n)
+for si, sname in enumerate(STATES):
+    V[f"post_quiet_nervous_{sname}"] = post_n[si]
+    V[f"num_quiet_nervous_{sname}"] = A[2][si] * PRIOR_NERVOUS[si]
+
+# rare-but-uninformative counterexample (Lesson 3 exercise)
+A_CTR = [[0.60, 0.10], [0.35, 0.85], [0.05, 0.05]]
+PRIOR_CTR = [0.5, 0.5]
+for oi in range(3):
+    post, ev = posterior(A_CTR, PRIOR_CTR, oi)
+    V[f"ctr_ev_{oi+1}"] = ev
+    V[f"ctr_surprise_{oi+1}"] = -log(ev)
+    V[f"ctr_info_{oi+1}"] = kl(post, PRIOR_CTR)
+    V[f"ctr_post_{oi+1}_a"] = post[0]
+    V[f"ctr_post_{oi+1}_b"] = post[1]
+
+# tipping-point prior (Lesson 5 exercise)
+_coef = 0.15 * (22 / 92) + 0.02 * (70 / 92)
+V["tip_coef"] = _coef
+V["tip_denominator"] = 0.70 + _coef
+V["tip_q"] = _coef / V["tip_denominator"]
+
+# two observations in sequence (Lesson 5 exercise)
+_p1, _ = posterior(A, PRIOR, 1)                 # branch shakes
+_p2, _ev2 = posterior(A, _p1, 0)                # then tawny flash
+V["seq_ev"] = _ev2
+for si, sname in enumerate(STATES):
+    V[f"seq_post_{sname}"] = _p2[si]
+    V[f"seq_num_{sname}"] = A[0][si] * _p1[si]
+
+# the reverse order of the same two observations (Lesson 5 exercise)
+_a1, _ = posterior(A, PRIOR, 0)                 # tawny flash first
+_a2, _aev = posterior(A, _a1, 1)                # then branch shakes
+V["alt_ev"] = _aev
+for si, sname in enumerate(STATES):
+    V[f"alt_num_{sname}"] = A[1][si] * _a1[si]
+
+# noisy-OR likelihood by number of causes present (Lesson 5 exercise)
+for _k in range(4):
+    V[f"noisy_lik_k{_k}"] = 1 - (0.1 ** _k) * 0.99
+
+# lifetime scaling, stated as a multiple (Lesson 5 exercise)
+# (sigma_ratio defined below, after the sigmas)
+
+# mutual information of the running model (Lesson 3)
+V["mutual_information"] = sum(
+    posterior(A, PRIOR, o)[1] * kl(posterior(A, PRIOR, o)[0], PRIOR) for o in range(3)
+)
+
+# ── explaining away (Lesson 4) ───────────────────────────────────────────
+P_CAUSE, STRENGTH, LEAK = 0.1, 0.9, 0.01
+
+
+def noisy_or(sv):
+    prod = 1.0
+    for x in sv:
+        prod *= (1 - STRENGTH * x)
+    return 1 - prod * (1 - LEAK)
+
+
+def noisy_or_posterior(n):
+    states = list(itertools.product([0, 1], repeat=n))
+    pri = []
+    for sv in states:
+        p = 1.0
+        for x in sv:
+            p *= P_CAUSE if x else 1 - P_CAUSE
+        pri.append(p)
+    un = [p * noisy_or(sv) for p, sv in zip(pri, states)]
+    ev = sum(un)
+    return states, pri, [u / ev for u in un], ev
+
+
+_st, _pri, _post, _ev = noisy_or_posterior(2)
+V["noisy_ev"] = _ev
+V["noisy_surprise"] = -log(_ev)
+for sv, pr, po in zip(_st, _pri, _post):
+    V[f"noisy_prior_{sv[0]}{sv[1]}"] = pr
+    V[f"noisy_lik_{sv[0]}{sv[1]}"] = noisy_or(sv)
+    V[f"noisy_prod_{sv[0]}{sv[1]}"] = pr * noisy_or(sv)
+    V[f"noisy_post_{sv[0]}{sv[1]}"] = po
+
+_m1 = V["noisy_post_10"] + V["noisy_post_11"]
+_m2 = V["noisy_post_01"] + V["noisy_post_11"]
+V["noisy_marg_gust"] = _m1
+V["noisy_marg_bab"] = _m2
+V["noisy_prod_marginals"] = _m1 * _m2
+V["noisy_bab_given_gust1"] = V["noisy_post_11"] / _m1
+V["noisy_bab_given_gust0"] = V["noisy_post_01"] / (1 - _m1)
+
+_p = [V["noisy_post_00"], V["noisy_post_10"], V["noisy_post_01"], V["noisy_post_11"]]
+_q = [(1 - _m1) * (1 - _m2), _m1 * (1 - _m2), (1 - _m1) * _m2, _m1 * _m2]
+V["noisy_meanfield_gap"] = kl(_p, _q)
+
+# three causes (Lesson 5 exercise)
+_st3, _, _post3, _ev3 = noisy_or_posterior(3)
+V["noisy3_ev"] = _ev3
+V["noisy3_marg"] = sum(p for sv, p in zip(_st3, _post3) if sv[0] == 1)
+V["noisy3_joint_mass"] = V["noisy3_marg"] * _ev3
+
+# ── the intractability numbers (Lessons 3 and 4) ─────────────────────────
+V["terms_15_binary"] = 2 ** 15
+V["log10_universe"] = log2(4.4e26) * log(2) / log(10)      # log10 of the same figure
+V["log2_universe"] = log2(4.4e26)
+V["universe_ns"] = 4.4e26
+V["factors_to_exceed_universe"] = int(log2(4.4e26)) + 1     # smallest n with 2^n >
+V["factors_to_add"] = V["factors_to_exceed_universe"] - 15
+
+# ── homeostasis scaling (Lesson 5 exercise) ──────────────────────────────
+V["sigma_lo"], V["sigma_hi"] = 0.035, 0.09
+V["lifetime_ratio"] = (V["sigma_lo"] / V["sigma_hi"]) ** 2
+V["lifetime_factor"] = (V["sigma_hi"] / V["sigma_lo"]) ** 2
+V["sigma_ratio"] = V["sigma_hi"] / V["sigma_lo"]
+
+# percentages, for the prose that reads them as percentages
+for _k in ("leopard", "baboon", "nothing"):
+    V[f"prior_{_k}_pct"] = PRIOR[STATES.index(_k)] * 100
+    V[f"post_tawny_{_k}_pct"] = V[f"post_tawny_{_k}"] * 100
+    V[f"post_quiet_nervous_{_k}_pct"] = V[f"post_quiet_nervous_{_k}"] * 100
+for _k in ("leopard", "baboon", "nothing"):
+    V[f"prior_nervous_{_k}_pct"] = PRIOR_NERVOUS[STATES.index(_k)] * 100
+V["noisy_marg_gust_pct"] = V["noisy_marg_gust"] * 100
+V["noisy3_marg_pct"] = V["noisy3_marg"] * 100
+V["tip_q_pct"] = V["tip_q"] * 100
+
+# ── constants quoted in prose ────────────────────────────────────────────
+V["ln2"] = log(2)
+V["nats_to_bits"] = 1 / log(2)
+
+VALUES = V
+
+if __name__ == "__main__":
+    for k in sorted(VALUES):
+        print(f"  {k:<34} {VALUES[k]}")

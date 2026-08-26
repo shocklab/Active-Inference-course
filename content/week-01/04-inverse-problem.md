@@ -78,34 +78,34 @@ The branch shakes. Multiply prior by likelihood, state by state:
 
 | $s_{\text{gust}}$ | $s_{\text{bab}}$ | prior | $P(o=1 \mid s)$ | product | posterior |
 |---|---|---|---|---|---|
-| 0 | 0 | 0.81 | 0.0100 | 0.008100 | 0.0450 |
-| 0 | 1 | 0.09 | 0.9010 | 0.081090 | 0.4500 |
-| 1 | 0 | 0.09 | 0.9010 | 0.081090 | 0.4500 |
-| 1 | 1 | 0.01 | 0.9901 | 0.009901 | 0.0550 |
+| 0 | 0 | {{noisy_prior_00:.2f}} | {{noisy_lik_00:.4f}} | {{noisy_prod_00:.6f}} | {{noisy_post_00:.4f}} |
+| 0 | 1 | {{noisy_prior_01:.2f}} | {{noisy_lik_01:.4f}} | {{noisy_prod_01:.6f}} | {{noisy_post_01:.4f}} |
+| 1 | 0 | {{noisy_prior_10:.2f}} | {{noisy_lik_10:.4f}} | {{noisy_prod_10:.6f}} | {{noisy_post_10:.4f}} |
+| 1 | 1 | {{noisy_prior_11:.2f}} | {{noisy_lik_11:.4f}} | {{noisy_prod_11:.6f}} | {{noisy_post_11:.4f}} |
 
-The evidence is $P(o=1) = 0.1802$, so the shake carries $1.714$ nats of
-surprise. Both marginals move the same way and by a lot:
+The evidence is $P(o=1) = {{noisy_ev:.4f}}$, so the shake carries
+${{noisy_surprise:.3f}}$ nats of surprise. Both marginals move the same way and by a lot:
 
 $$
-P(s_{\text{gust}} = 1 \mid o) \;=\; P(s_{\text{bab}} = 1 \mid o) \;=\; 0.505,
+P(s_{\text{gust}} = 1 \mid o) \;=\; P(s_{\text{bab}} = 1 \mid o) \;=\; {{noisy_marg_gust:.3f}},
 $$
 
 up from $0.1$. So far so unremarkable. Now look at the joint. If the posterior
 factorised, the probability of *both* causes being present would be the product
-of the marginals, $0.505^2 = 0.255$. The actual value in the table is $0.055$,
-smaller by a factor of nearly five.
+of the marginals, ${{noisy_marg_gust:.3f}}^2 = {{noisy_prod_marginals:.3f}}$. The actual value in the
+table is ${{noisy_post_11:.3f}}$, smaller by a factor of nearly five.
 
 The causes started independent and the observation made them dependent. They are
 now strongly anticorrelated, and you can read the strength directly:
 
 $$
-P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 1,\, o) = 0.109,
+P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 1,\, o) = {{noisy_bab_given_gust1:.3f}},
 \qquad
-P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 0,\, o) = 0.909.
+P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 0,\, o) = {{noisy_bab_given_gust0:.3f}}.
 $$ {#explaining-away}
 
-Learning that there was a gust drags the baboon's probability from $0.505$ all
-the way back down to $0.109$, a hair above its prior. The gust has **explained
+Learning that there was a gust drags the baboon's probability from
+${{noisy_marg_gust:.3f}}$ all the way back down to ${{noisy_bab_given_gust1:.3f}}$, a hair above its prior. The gust has **explained
 away** the shaking branch, and the baboon is no longer needed.
 
 ::: keyidea
@@ -161,7 +161,7 @@ the commonest choice is the family that factorises across state factors:
 $Q(s_1, s_2) = Q(s_1)Q(s_2)$. Look back at [eq:explaining-away]. That family
 cannot represent the true posterior, because the true posterior is correlated
 and no product of marginals is. The best factorised approximation to the
-posterior in the table above still sits $0.369$ nats away from it.
+posterior in the table above still sits ${{noisy_meanfield_gap:.3f}}$ nats away from it.
 
 The approximation is not free and it fails in a specific direction: it
 underestimates how much the causes are competing. Week&nbsp;4 will make this
@@ -183,8 +183,8 @@ explaining away occurs.
 
 The coupling comes from the likelihood varying across the *joint* state in a way
 that does not factor into a function of $s_{\text{gust}}$ times a function of
-$s_{\text{bab}}$. In [eq:noisy-or], the state $(1,1)$ has likelihood $0.9901$,
-which is barely more than the $0.9010$ of $(1,0)$ or $(0,1)$: a second cause
+$s_{\text{bab}}$. In [eq:noisy-or], the state $(1,1)$ has likelihood ${{noisy_lik_11:.4f}}$,
+which is barely more than the ${{noisy_lik_10:.4f}}$ of $(1,0)$ or $(0,1)$: a second cause
 adds almost nothing once the first is present. That diminishing return is the
 source of the competition. If the likelihood were multiplicatively separable, the
 posterior would inherit the prior's independence exactly and the shortcut would
@@ -196,12 +196,12 @@ An agent tracks $n = 15$ binary state factors. Give the number of terms in the
 evidence sum, and state how many factors could be added before the sum exceeds
 the number of nanoseconds since the Big Bang, roughly $4.4 \times 10^{26}$.
 ---solution---
-With $k = 2$ and $n = 15$ the sum has $2^{15} = 32{,}768$ terms, which is
+With $k = 2$ and $n = 15$ the sum has $2^{15} = {{terms_15_binary:,}}$ terms, which is
 nothing: a modern processor does this in microseconds.
 
 For the second part, $2^n > 4.4\times10^{26}$ requires
-$n > \log_2(4.4\times10^{26}) = 26.6/\log_{10} 2 \approx 88.5$, so $n = 89$
-factors. Adding 74 binary variables to a tractable problem makes it impossible
+$n > \log_2(4.4\times10^{26}) = {{log10_universe:.1f}}/\log_{10} 2 \approx {{log2_universe:.1f}}$, so $n = {{factors_to_exceed_universe:d}}$
+factors. Adding {{factors_to_add:d}} binary variables to a tractable problem makes it impossible
 for any physical computer, ever. This is what is meant by saying the difficulty
 is structural rather than an engineering matter, and it is why the response has
 to be a different algorithm rather than a bigger machine.

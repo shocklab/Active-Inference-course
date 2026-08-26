@@ -79,15 +79,15 @@ everything else are
 
 $$
 \frac{0.70\,q}{\left(0.15 \cdot \tfrac{22}{92} + 0.02 \cdot \tfrac{70}{92}\right)(1-q)}
-= \frac{0.70\,q}{0.051\,087\,(1-q)} .
+= \frac{0.70\,q}{{{tip_coef:.6f}}\,(1-q)} .
 $$
 
-Setting this to 1 gives $0.70q = 0.051\,087(1-q)$, so
-$q = 0.051\,087 / 0.751\,087 = 0.0680$.
+Setting this to 1 gives $0.70q = {{tip_coef:.6f}}(1-q)$, so
+$q = {{tip_coef:.6f}} / {{tip_denominator:.6f}} = {{tip_q:.4f}}$.
 
-So a leopard prior of about 6.8% is the tipping point: the model in
+So a leopard prior of about {{tip_q_pct:.1f}}% is the tipping point: the model in
 Lesson&nbsp;3 used $q = 0.08$, which is just above it, which is why the
-posterior came out at $0.544$ rather than exactly a half. The observation is
+posterior came out at ${{post_tawny_leopard:.3f}}$ rather than exactly a half. The observation is
 strong, but it is only just strong enough to overturn a prior of that size, and
 a slightly more sceptical hiker would have remained unconvinced by the same
 evidence.
@@ -106,30 +106,30 @@ Lesson&nbsp;3 prior.
 (c) What feature of the model makes (b) true, and give a physical situation in
 which it would fail.
 ---solution---
-(a) After the shaking branch the posterior was $(0.082988, 0.684647, 0.232365)$.
+(a) After the shaking branch the posterior was $({{post_branch_leopard:.6f}}, {{post_branch_baboon:.6f}}, {{post_branch_nothing:.6f}})$.
 Use this as the prior and apply the tawny-flash row $(0.70, 0.15, 0.02)$:
 
 $$
-(0.70 \times 0.082988,\ 0.15 \times 0.684647,\ 0.02 \times 0.232365)
-= (0.058091,\ 0.102697,\ 0.004647).
+(0.70 \times {{post_branch_leopard:.6f}},\ 0.15 \times {{post_branch_baboon:.6f}},\ 0.02 \times {{post_branch_nothing:.6f}})
+= ({{seq_num_leopard:.6f}},\ {{seq_num_baboon:.6f}},\ {{seq_num_nothing:.6f}}).
 $$
 
-The sum is $0.165436$, giving a posterior of
-$(0.35114,\ 0.62077,\ 0.02809)$.
+The sum is ${{seq_ev:.6f}}$, giving a posterior of
+$({{seq_post_leopard:.5f}},\ {{seq_post_baboon:.5f}},\ {{seq_post_nothing:.5f}})$.
 
 Baboon is now the leading hypothesis at 62%. The shaking branch was strong
 evidence for a baboon, and although the tawny flash pulls back towards leopard,
 it does not pull far enough.
 
 (b) Processing the flash first gives posterior
-$(0.543689, 0.320388, 0.135922)$, then applying the branch row
+$({{post_tawny_leopard:.6f}}, {{post_tawny_baboon:.6f}}, {{post_tawny_nothing:.6f}})$, then applying the branch row
 $(0.25, 0.75, 0.08)$:
 
 $$
-(0.135922,\ 0.240291,\ 0.010874), \quad \text{sum } 0.387087,
+({{alt_num_leopard:.6f}},\ {{alt_num_baboon:.6f}},\ {{alt_num_nothing:.6f}}), \quad \text{sum } {{alt_ev:.6f}},
 $$
 
-which normalises to $(0.35114,\ 0.62077,\ 0.02809)$: identical.
+which normalises to $({{seq_post_leopard:.5f}},\ {{seq_post_baboon:.5f}},\ {{seq_post_nothing:.5f}})$: identical.
 
 (c) Conditional independence given the state. Under it, the joint likelihood
 factorises as $P(o_1, o_2 \mid s) = P(o_1 \mid s) P(o_2 \mid s)$, so the
@@ -167,7 +167,7 @@ exactly to the extent that different states disagree about what it will report.
 Extend the noisy-OR example of Lesson&nbsp;4 to three independent causes, each
 with prior $0.1$ and each firing the observation with probability $0.9$, keeping
 the leak at $0.01$. Compute $P(s_1 = 1 \mid o = 1)$ and compare it with the
-two-cause answer of $0.505$. Explain the direction of the change.
+two-cause answer of ${{noisy_marg_gust:.3f}}$. Explain the direction of the change.
 ---solution---
 There are eight joint states. Write $k$ for the number of causes present. The
 likelihood depends only on $k$:
@@ -176,25 +176,25 @@ $$
 P(o=1 \mid k) = 1 - (0.1)^k (0.99),
 $$
 
-giving $0.01, 0.901, 0.9901, 0.99901$ for $k = 0,1,2,3$. The prior for a state
+giving ${{noisy_lik_k0:.2f}}, {{noisy_lik_k1:.3f}}, {{noisy_lik_k2:.4f}}, {{noisy_lik_k3:.5f}}$ for $k = 0,1,2,3$. The prior for a state
 with $k$ causes present is $0.1^k \, 0.9^{3-k}$, and there are $\binom{3}{k}$
 such states. So
 
 $$
 P(o=1) = \sum_{k=0}^{3} \binom{3}{k} 0.1^k 0.9^{3-k} \left[1 - 0.99 \times 0.1^k\right]
-= 0.253\,97 .
+= {{noisy3_ev:.5f}} .
 $$
 
 For the marginal, sum the unnormalised mass over the four states with $s_1 = 1$:
 
 $$
 P(s_1=1, o=1) = 0.1 \sum_{k'=0}^{2} \binom{2}{k'} 0.1^{k'} 0.9^{2-k'}
-\left[1 - 0.99 \times 0.1^{\,k'+1}\right] = 0.091\,80 ,
+\left[1 - 0.99 \times 0.1^{\,k'+1}\right] = {{noisy3_joint_mass:.5f}} ,
 $$
 
-so $P(s_1 = 1 \mid o = 1) = 0.091\,80 / 0.253\,97 = 0.3615$.
+so $P(s_1 = 1 \mid o = 1) = {{noisy3_joint_mass:.5f}} / {{noisy3_ev:.5f}} = {{noisy3_marg:.4f}}$.
 
-The answer *falls* from $0.505$ to $0.361$. With more candidate explanations
+The answer *falls* from ${{noisy_marg_gust:.3f}}$ to ${{noisy3_marg:.3f}}$. With more candidate explanations
 available, the evidence is spread more thinly across them: the observation still
 says "something did this", but there are now three somethings to choose from and
 each individually gets less of the credit. Explaining away gets stronger as the
@@ -221,9 +221,9 @@ $1$, so $\sigma\sqrt{n} \sim 1$ and $n \sim \sigma^{-2}$. There is no other
 length or time scale in the problem: the radius is fixed at one and the only
 parameter is $\sigma$, so the scaling is forced.
 
-(b) The ratio is $(0.09 / 0.035)^{-2} = (0.035/0.09)^2 = 0.151$. Halving the
-noise should quadruple the lifetime, and the roughly 2.6-fold increase in
-$\sigma$ here should cut it by a factor of about $6.6$.
+(b) The ratio is $({{sigma_hi}} / {{sigma_lo}})^{-2} = ({{sigma_lo}}/{{sigma_hi}})^2 = {{lifetime_ratio:.3f}}$. Halving the
+noise should quadruple the lifetime, and the roughly {{sigma_ratio:.1f}}-fold increase in
+$\sigma$ here should cut it by a factor of about ${{lifetime_factor:.1f}}$.
 
 This is worth registering as a piece of intuition about what regulation is
 buying. Without action, lifetime scales as the inverse square of the noise: a

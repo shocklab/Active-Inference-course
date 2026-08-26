@@ -14,6 +14,8 @@ Authoring syntax on top of CommonMark
   $x$ , $$...$$              inline and display maths
   $$...$$ {#vfe}             a *labelled* display equation: gets a number
   [eq:vfe]                   cross-reference, renders as a link "(3)"
+  {{ev_tawny:.4f}}           a COMPUTED number, substituted at build time from
+                             the week's numbers.py. Never type a derived number.
   ::: type Title ... :::     block directives (see BOXES below)
   ::: mn Label ... :::       a margin note, floats into the right column
   ::: widget name | caption  mounts an interactive widget
@@ -60,6 +62,7 @@ class Doc:
         self.sec_no = 0
         self.labels = {}        # label -> equation number
         self.pending_refs = []  # labels referenced before definition
+        self.missing_numbers = []
         self.counters = {}
         self.toc = []           # (level, id, text)
 
@@ -348,6 +351,33 @@ def _wrap_tables(html):
     )
 
 
+# ── computed numbers ─────────────────────────────────────────────────────
+# Every derived number in the prose is substituted from the week's numbers.py at
+# build time, so it cannot drift from the computation that produced it. Typing a
+# number by hand is how four wrong values reached a draft of Week 1.
+NUMBER_TOKEN = re.compile(r"\{\{([A-Za-z_][A-Za-z0-9_]*)(?::([^}]+))?\}\}")
+
+
+def substitute_numbers(text, values, missing):
+    """Replace {{key}} / {{key:fmt}} with computed values. Records unknown keys."""
+    if values is None:
+        values = {}
+
+    def rep(m):
+        key, fmt = m.group(1), m.group(2)
+        if key not in values:
+            missing.append(key)
+            return f"<mark>?{key}?</mark>"
+        v = values[key]
+        try:
+            return format(v, fmt) if fmt else str(v)
+        except (ValueError, TypeError):
+            missing.append(f"{key} (bad format {fmt!r})")
+            return f"<mark>?{key}?</mark>"
+
+    return NUMBER_TOKEN.sub(rep, text)
+
+
 # ── front matter ─────────────────────────────────────────────────────────
 def split_front_matter(raw):
     """Parse a leading `---` block of `key: value` lines. Lists via `[a, b]`."""
@@ -374,10 +404,12 @@ def split_front_matter(raw):
     return meta, body.lstrip("\n")
 
 
-def render(raw, *, number_sections=True):
+def render(raw, *, number_sections=True, numbers=None):
     """Markdown source -> (html, meta, doc). `doc` carries the TOC and counters."""
     meta, body = split_front_matter(raw)
     doc = Doc()
+    doc.missing_numbers = []
+    body = substitute_numbers(body, numbers, doc.missing_numbers)
     if "number_sections" in meta:
         number_sections = bool(meta["number_sections"])
     html = _to_html(body, doc)

@@ -409,9 +409,9 @@ $22:70$, so they are $\tfrac{22}{92}(1-q)$ and $\tfrac{70}{92}(1-q)$. The
 tawny-flash row is $(0.70, 0.15, 0.02)$. The posterior odds of leopard against
 everything else are</p>
 <div class="eqn"><div class="eqbody">$$\frac{0.70\,q}{\left(0.15 \cdot \tfrac{22}{92} + 0.02 \cdot \tfrac{70}{92}\right)(1-q)}
-= \frac{0.70\,q}{0.051\,087\,(1-q)} .$$</div></div>
-<p>Setting this to 1 gives $0.70q = 0.051\,087(1-q)$, so
-$q = 0.051\,087 / 0.751\,087 = 0.0680$.</p>
+= \frac{0.70\,q}{0.051087\,(1-q)} .$$</div></div>
+<p>Setting this to 1 gives $0.70q = 0.051087(1-q)$, so
+$q = 0.051087 / 0.751087 = 0.0680$.</p>
 <p>So a leopard prior of about 6.8% is the tipping point: the model in
 Lesson&nbsp;3 used $q = 0.08$, which is just above it, which is why the
 posterior came out at $0.544$ rather than exactly a half. The observation is
@@ -469,11 +469,11 @@ likelihood depends only on $k$:</p>
 with $k$ causes present is $0.1^k \, 0.9^{3-k}$, and there are $\binom{3}{k}$
 such states. So</p>
 <div class="eqn"><div class="eqbody">$$P(o=1) = \sum_{k=0}^{3} \binom{3}{k} 0.1^k 0.9^{3-k} \left[1 - 0.99 \times 0.1^k\right]
-= 0.253\,97 .$$</div></div>
+= 0.25396 .$$</div></div>
 <p>For the marginal, sum the unnormalised mass over the four states with $s_1 = 1$:</p>
 <div class="eqn"><div class="eqbody">$$P(s_1=1, o=1) = 0.1 \sum_{k'=0}^{2} \binom{2}{k'} 0.1^{k'} 0.9^{2-k'}
-\left[1 - 0.99 \times 0.1^{\,k'+1}\right] = 0.091\,80 ,$$</div></div>
-<p>so $P(s_1 = 1 \mid o = 1) = 0.091\,80 / 0.253\,97 = 0.3615$.</p>
+\left[1 - 0.99 \times 0.1^{\,k'+1}\right] = 0.09180 ,$$</div></div>
+<p>so $P(s_1 = 1 \mid o = 1) = 0.09180 / 0.25396 = 0.3615$.</p>
 <p>The answer <em>falls</em> from $0.505$ to $0.361$. With more candidate explanations
 available, the evidence is spread more thinly across them: the observation still
 says "something did this", but there are now three somethings to choose from and

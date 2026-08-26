@@ -83,39 +83,40 @@ P(o \mid s)P(s) \;=\; \big(\,
 &0.70 \times 0.08,\;\;
 0.15 \times 0.22,\;\;
 0.02 \times 0.70 \,\big) \\[2pt]
-\;=\; \big(\,& 0.056,\;\; 0.033,\;\; 0.014 \,\big).
+\;=\; \big(\,& {{num_tawny_leopard:.3f}},\;\; {{num_tawny_baboon:.3f}},\;\; {{num_tawny_nothing:.3f}} \,\big).
 \end{aligned}
 $$
 
 These are the three numerators in [eq:bayes]. Their sum is the denominator:
 
 $$
-P(o = \text{tawny flash}) \;=\; 0.056 + 0.033 + 0.014 \;=\; 0.103 .
+P(o = \text{tawny flash}) \;=\; {{num_tawny_leopard:.3f}} + {{num_tawny_baboon:.3f}} + {{num_tawny_nothing:.3f}} \;=\; {{ev_tawny:.3f}} .
 $$ {#worked-evidence}
 
 Divide through:
 
 $$
-P(s \mid o) \;=\; \frac{(0.056,\ 0.033,\ 0.014)}{0.103}
-\;=\; (0.5437,\ 0.3204,\ 0.1359).
+P(s \mid o) \;=\; \frac{({{num_tawny_leopard:.3f}},\ {{num_tawny_baboon:.3f}},\ {{num_tawny_nothing:.3f}})}{{{ev_tawny:.3f}}}
+\;=\; ({{post_tawny_leopard:.4f}},\ {{post_tawny_baboon:.4f}},\ {{post_tawny_nothing:.4f}}).
 $$ {#worked-posterior}
 
 ::: mn Sanity check
-$0.5437 + 0.3204 + 0.1359 = 1$. If your posterior does not sum to one you have
+${{post_tawny_leopard:.4f}} + {{post_tawny_baboon:.4f}} + {{post_tawny_nothing:.4f}} = 1$. If your posterior does not sum to one you have
 divided by the wrong thing, which in practice means you forgot a state.
 :::
 
-Read what happened. The leopard hypothesis started at 8% and finished at 54%,
+Read what happened. The leopard hypothesis started at {{prior_leopard_pct:.0f}}% and finished at {{post_tawny_leopard_pct:.0f}}%,
 a factor of nearly seven. It did not get there by being likely; it got there by
 being the only state that predicts tawny flashes well. Meanwhile "nothing"
-started as the overwhelming favourite at 70% and was demoted to 14%, because
+started as the overwhelming favourite at {{prior_nothing_pct:.0f}}% and was demoted to {{post_tawny_nothing_pct:.0f}}%, because
 whatever else is true, empty scrub does not flash tawny.
 
 Two derived quantities are worth computing while the numbers are in front of us.
 
-**Surprise.** From [eq:worked-evidence], $-\ln P(o) = -\ln 0.103 = 2.273$ nats.
-Compare the other two observations: a shaking branch has $P(o) = 0.241$ and
-surprise $1.423$ nats; quiet has $P(o) = 0.656$ and surprise $0.422$ nats.
+**Surprise.** From [eq:worked-evidence], $-\ln P(o) = -\ln {{ev_tawny:.3f}} = {{surprise_tawny:.3f}}$ nats.
+Compare the other two observations: a shaking branch has $P(o) = {{ev_branch:.3f}}$ and
+surprise ${{surprise_branch:.3f}}$ nats; quiet has $P(o) = {{ev_quiet:.3f}}$ and surprise
+${{surprise_quiet:.3f}}$ nats.
 Quiet is what this model expects, and it is duly unsurprised by it.
 
 **Information gained.** How far did the observation move you? The natural
@@ -134,8 +135,8 @@ describe it as measuring how far the prior moved. It is not symmetric,
 $D_{\mathrm{KL}}[Q\,\|\,P] \neq D_{\mathrm{KL}}[P\,\|\,Q]$, so the order is
 never decorative; Week&nbsp;4 turns on getting it right.
 
-For the tawny flash this is $0.940$ nats. For the shaking branch, $0.524$. For
-quiet, $0.225$. The observation that surprised you most also taught you most,
+For the tawny flash this is ${{info_tawny:.3f}}$ nats. For the shaking branch,
+${{info_branch:.3f}}$. For quiet, ${{info_quiet:.3f}}$. The observation that surprised you most also taught you most,
 which is intuitive and, as the exercises will show, not a theorem.
 
 ::: widget bayes-discrete | The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.
@@ -190,26 +191,26 @@ as possible without ever evaluating the posterior.
 ::: exercise Bayes with a hostile prior
 Using the same likelihood matrix, suppose you are a nervous hiker with prior
 $P(s) = (0.40,\ 0.30,\ 0.30)$. You observe **quiet**. Compute the evidence, the
-posterior, and the surprise, and compare the surprise with the $0.422$ nats
+posterior, and the surprise, and compare the surprise with the ${{surprise_quiet:.3f}}$ nats
 obtained under the original prior.
 ---solution---
 The quiet row is $(0.05,\ 0.10,\ 0.90)$. Numerators:
 
 $$
 (0.05 \times 0.40,\ 0.10 \times 0.30,\ 0.90 \times 0.30)
-= (0.020,\ 0.030,\ 0.270).
+= ({{num_quiet_nervous_leopard:.3f}},\ {{num_quiet_nervous_baboon:.3f}},\ {{num_quiet_nervous_nothing:.3f}}).
 $$
 
-Evidence $P(o) = 0.020 + 0.030 + 0.270 = 0.320$, so the surprise is
-$-\ln 0.320 = 1.139$ nats, nearly three times the $0.422$ nats of the calm
+Evidence $P(o) = {{num_quiet_nervous_leopard:.3f}} + {{num_quiet_nervous_baboon:.3f}} + {{num_quiet_nervous_nothing:.3f}} = {{ev_quiet_nervous:.3f}}$, so the surprise is
+$-\ln {{ev_quiet_nervous:.3f}} = {{surprise_quiet_nervous:.3f}}$ nats, nearly three times the ${{surprise_quiet:.3f}}$ nats of the calm
 hiker. Posterior:
 
 $$
-\frac{(0.020,\ 0.030,\ 0.270)}{0.320} = (0.0625,\ 0.09375,\ 0.84375).
+\frac{({{num_quiet_nervous_leopard:.3f}},\ {{num_quiet_nervous_baboon:.3f}},\ {{num_quiet_nervous_nothing:.3f}})}{{{ev_quiet_nervous:.3f}}} = ({{post_quiet_nervous_leopard:.4f}},\ {{post_quiet_nervous_baboon:.5f}},\ {{post_quiet_nervous_nothing:.5f}}).
 $$
 
 Quiet still argues for an empty path, and it does so strongly enough to take
-"nothing" from 30% to 84%. But the nervous hiker is more surprised by quiet than
+"nothing" from {{prior_nervous_nothing_pct:.0f}}% to {{post_quiet_nervous_nothing_pct:.0f}}%. But the nervous hiker is more surprised by quiet than
 the calm one is, because their model expected trouble. Two agents, one
 observation, different surprise. This is the concrete version of the claim in
 Lesson&nbsp;2 that surprise is a property of the model and not of the world.
@@ -235,9 +236,9 @@ Working through [eq:bayes] for each observation:
 
 | observed | $P(o)$ | surprise, nats | posterior | information gain, nats |
 |---|---|---|---|---|
-| $o_1$ | 0.350 | 1.050 | (0.857, 0.143) | 0.283 |
-| $o_2$ | 0.600 | 0.511 | (0.292, 0.708) | 0.089 |
-| $o_3$ | 0.050 | 2.996 | (0.500, 0.500) | 0.000 |
+| $o_1$ | {{ctr_ev_1:.3f}} | {{ctr_surprise_1:.3f}} | ({{ctr_post_1_a:.3f}}, {{ctr_post_1_b:.3f}}) | {{ctr_info_1:.3f}} |
+| $o_2$ | {{ctr_ev_2:.3f}} | {{ctr_surprise_2:.3f}} | ({{ctr_post_2_a:.3f}}, {{ctr_post_2_b:.3f}}) | {{ctr_info_2:.3f}} |
+| $o_3$ | {{ctr_ev_3:.3f}} | {{ctr_surprise_3:.3f}} | ({{ctr_post_3_a:.3f}}, {{ctr_post_3_b:.3f}}) | {{ctr_info_3:.3f}} |
 
 The rarest observation, $o_3$, is by some distance the most surprising, and it
 leaves the posterior exactly where the prior was. The most informative

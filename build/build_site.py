@@ -18,8 +18,21 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
+import importlib.util           # noqa: E402
+
 import mdx      # noqa: E402
 import theme    # noqa: E402
+
+
+def load_numbers(week_dir):
+    """Import content/week-NN/numbers.py and return its VALUES dict, if present."""
+    path = os.path.join(week_dir, "numbers.py")
+    if not os.path.exists(path):
+        return {}
+    spec = importlib.util.spec_from_file_location("numbers_mod", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return dict(mod.VALUES)
 
 CONTENT = os.path.join(ROOT, "content")
 OUT = os.path.join(ROOT, "docs")
@@ -153,7 +166,11 @@ def pagenav(prev, nxt, root):
 # ── page renderers ───────────────────────────────────────────────────────
 def render_lesson(lesson, week, weeks, flat):
     raw = open(lesson.path, encoding="utf-8").read()
-    html, meta, doc = mdx.render(raw)
+    numbers = load_numbers(os.path.dirname(lesson.path))
+    html, meta, doc = mdx.render(raw, numbers=numbers)
+    if doc.missing_numbers:
+        print(f"    ! unresolved {{{{...}}}} in {lesson.slug}: "
+              f"{', '.join(sorted(set(doc.missing_numbers)))}")
     if doc.pending_refs:
         missing = sorted(set(doc.pending_refs) - set(doc.labels))
         if missing:
