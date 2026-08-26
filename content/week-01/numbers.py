@@ -181,6 +181,18 @@ _q_rev = [_q1[0] * _q2[0], _q1[1] * _q2[0], _q1[0] * _q2[1], _q1[1] * _q2[1]]
 V["noisy_gap_reverse"] = kl(_q_rev, _p)
 V["noisy_collapse_ratio"] = V["noisy_prod_marginals"] / V["noisy_post_11"]
 
+# the reverse-KL optimum written out as a joint, and the symmetric product it beats
+_qg, _qb = V["noisy_mf_gust"], V["noisy_mf_bab"]
+for _a in (0, 1):
+    for _b in (0, 1):
+        V[f"noisy_revq_{_a}{_b}"] = (_qg if _a else 1 - _qg) * (_qb if _b else 1 - _qb)
+_sym = V["noisy_marg_gust"]
+_Qsym = {(a, b): (_sym if a else 1 - _sym) * (_sym if b else 1 - _sym)
+         for a in (0, 1) for b in (0, 1)}
+_Pj = {(0, 0): V["noisy_post_00"], (1, 0): V["noisy_post_10"],
+       (0, 1): V["noisy_post_01"], (1, 1): V["noisy_post_11"]}
+V["noisy_gap_reverse_symmetric"] = sum(_Qsym[k] * log(_Qsym[k] / _Pj[k]) for k in _Pj)
+
 # three causes (Lesson 5 exercise)
 _st3, _, _post3, _ev3 = noisy_or_posterior(3)
 V["noisy3_ev"] = _ev3
@@ -229,6 +241,34 @@ V["ent_uniform4"] = log(4)
 V["surprise_common"] = -log(0.94)
 V["surprise_rare"] = -log(0.02)
 V["ent_peaked_check"] = sum(p * -log(p) for p in P_PEAKED)
+
+# ── the lamp behind a frosted screen (Lesson 2) ──────────────────────────
+# Process: theta in {on, off}, P*(on) = 1/2. Sensor: o in {bright, dim}.
+LAMP_PRIOR = 0.5
+LAMP_TRUE = {"on": 0.8, "off": 0.1}          # P*(bright | theta)
+LAMP_B = {"on": 0.99, "off": 0.01}           # agent B thinks its sensor is far better
+
+def _lamp(em):
+    br = LAMP_PRIOR * em["on"] + (1 - LAMP_PRIOR) * em["off"]
+    return {"bright": br, "dim": 1 - br}
+
+_star, _QB = _lamp(LAMP_TRUE), _lamp(LAMP_B)
+V["lamp_prior"] = LAMP_PRIOR
+for k, val in LAMP_TRUE.items():
+    V[f"lamp_true_{k}"] = val
+for k, val in LAMP_B.items():
+    V[f"lamp_b_{k}"] = val
+V["lamp_ev_bright_true"] = _star["bright"]
+V["lamp_ev_dim_true"] = _star["dim"]
+V["lamp_ev_bright_b"] = _QB["bright"]
+V["lamp_surprise_bright_true"] = -log(_star["bright"])
+V["lamp_surprise_bright_b"] = -log(_QB["bright"])
+V["lamp_post_on_true"] = LAMP_PRIOR * LAMP_TRUE["on"] / _star["bright"]
+V["lamp_post_on_b"] = LAMP_PRIOR * LAMP_B["on"] / _QB["bright"]
+V["lamp_entropy_true"] = -sum(_star[o] * log(_star[o]) for o in _star)
+V["lamp_avg_surprise_b"] = sum(_star[o] * -log(_QB[o]) for o in _star)
+V["lamp_excess"] = V["lamp_avg_surprise_b"] - V["lamp_entropy_true"]
+V["lamp_kl"] = sum(_star[o] * log(_star[o] / _QB[o]) for o in _star)
 
 # ── constants quoted in prose ────────────────────────────────────────────
 V["ln2"] = log(2)

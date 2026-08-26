@@ -399,7 +399,7 @@ make a branch shake. Each is uncommon on its own:</p>
 The branch shakes if either cause fires, with each cause working 90% of the
 time, plus a 1% chance the branch shakes for no reason at all:</p>
 <div class="eqn" id="eq-noisy-or"><div class="eqbody">$$P(o = 1 \mid s_{\text{gust}}, s_{\text{bab}}) \;=\;
-1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).$$</div><div class="eqno"><a href="#eq-noisy-or" title="Link to equation 1.4.1">(1.4.1)</a></div></div>
+1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).$$</div><div class="eqno"><a href="#eq-noisy-or" title="Link to equation 1.4.2">(1.4.2)</a></div></div>
 <p>The branch shakes. Multiply prior by likelihood, state by state:</p>
 <div class="tablewrap"><table>
 <thead>
@@ -458,7 +458,7 @@ of 4.6.</p>
 now strongly anticorrelated, and you can read the strength directly:</p>
 <div class="eqn" id="eq-explaining-away"><div class="eqbody">$$P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 1,\, o) = 0.109,
 \qquad
-P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 0,\, o) = 0.909.$$</div><div class="eqno"><a href="#eq-explaining-away" title="Link to equation 1.4.2">(1.4.2)</a></div></div>
+P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 0,\, o) = 0.909.$$</div><div class="eqno"><a href="#eq-explaining-away" title="Link to equation 1.4.3">(1.4.3)</a></div></div>
 <p>Learning that there was a gust drags the baboon's probability from
 $0.505$ all the way back down to $0.109$, a hair above its prior. The gust has <strong>explained
 away</strong> the shaking branch, and the baboon is no longer needed.</p>
@@ -502,32 +502,113 @@ is exactly what gradient descent on a free energy gives you.</p></div>
 <div class="box warning"><div class="boxhd">Careful<span class="bt">What the third option costs</span></div><p>The family of distributions $Q$ has to be one you can compute with, and by far
 the commonest choice is the family that factorises across state factors,
 $Q(s_{\text{gust}}, s_{\text{bab}}) = Q(s_{\text{gust}})\,Q(s_{\text{bab}})$,
-or $Q(s_1, s_2) = Q(s_1)Q(s_2)$ once we stop naming them. Look back at <a class="eqref" href="#eq-explaining-away">(1.4.2)</a>. That family
-cannot represent the true posterior, because the true posterior is correlated
-and no product of marginals is. The best factorised approximation to the
-posterior in the table above sits a measurable distance from it. How far depends
-on what "best" means, and the two obvious answers disagree.</p>
-<p>Match the true marginals and the gap is $0.369$ nats. But
-variational inference does not match marginals. It minimises the divergence the
-other way round, and the best factorised $Q$ by that measure sits
-$0.499$ nats away. Worse, it gets there by abandoning
-symmetry: it settles near $0.76$ for one cause and
-$0.26$ for the other, picking a side rather than splitting the
-difference, when the true posterior puts both at $0.505$.</p>
-<p>Which direction you minimise is therefore not a detail, and Week&nbsp;4 has to
-say which one active inference uses and why. For now: "mean-field" is the name of
-a compromise, and you have just seen what is being compromised.</p></div>
+or $Q(s_1, s_2) = Q(s_1)Q(s_2)$ once we stop naming them. Look back at
+<a class="eqref" href="#eq-explaining-away">(1.4.3)</a>. That family cannot represent the true posterior, because
+the true posterior is correlated and no product of marginals is.</p></div>
+<h2 id="how-far-off-is-the-best-factorised-approximation"><span class="secno">4</span>How far off is the best factorised approximation?</h2>
+<p>That question hides a choice, and the choice decides the answer. It is worth
+making explicit now, because Week&nbsp;4 rests on it.</p>
+<p>The Kullback&ndash;Leibler divergence is not symmetric, so there are two ways to
+ask how far a factorised $Q$ sits from the true posterior $P$:</p>
+<div class="eqn" id="eq-two-kls"><div class="eqbody">$$D_{\mathrm{KL}}\big[P \,\|\, Q\big] = \sum_{s} P(s)\ln\frac{P(s)}{Q(s)},
+\qquad
+D_{\mathrm{KL}}\big[Q \,\|\, P\big] = \sum_{s} Q(s)\ln\frac{Q(s)}{P(s)},$$</div><div class="eqno"><a href="#eq-two-kls" title="Link to equation 1.4.4">(1.4.4)</a></div></div>
+<p>with $s$ running over the four joint states of the table. Call the first the
+<strong>forward</strong> direction and the second the <strong>reverse</strong>. They disagree, and not by a
+little.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The forward direction just matches the marginals</span></div><p>Minimise the left of <a class="eqref" href="#eq-two-kls">(1.4.4)</a> over products, writing $q_1$ and $q_2$ for the
+two factors so that $Q(s) = q_1(s_{\text{gust}})\,q_2(s_{\text{bab}})$. Split the
+logarithm:</p>
+<div class="eqn"><div class="eqbody">$$D_{\mathrm{KL}}[P \,\|\, Q]
+= \underbrace{\sum_s P(s)\ln P(s)}_{-\mathrm{H}[P],\ \text{no } Q \text{ in it}}
+\; -\; \sum_{s} P(s)\big[\ln q_1(s_{\text{gust}}) + \ln q_2(s_{\text{bab}})\big].$$</div></div>
+<p>Only the second term can be optimised. In it, sum out the variable that does not
+appear:</p>
+<div class="eqn"><div class="eqbody">$$\sum_{s} P(s)\,\ln q_1(s_{\text{gust}})
+\;=\; \sum_{s_{\text{gust}}} P_1(s_{\text{gust}})\,\ln q_1(s_{\text{gust}}),$$</div></div>
+<p>where $P_1$ is the true marginal of the first cause, and likewise for the second.
+The problem has separated into two independent ones, each of the form "choose a
+distribution $q$ maximising $\sum_x p(x)\ln q(x)$". By Gibbs' inequality that is
+solved by $q = p$.</p>
+<p>So the forward-optimal $Q$ has <strong>exactly the true marginals</strong>, here
+$0.5050 $ for each cause, and leaves a gap of
+$0.3687$ nats. This is a lemma, not an accident of these
+numbers: forward KL over a product family always returns the marginals.</p></div>
+<p>Variational inference does not use that direction, for a reason worth stating
+now. The forward divergence takes its expectation under $P$, and $P$ is precisely
+what we cannot compute. The reverse takes its expectation under $Q$, which we
+chose and therefore know. The direction is forced on us by tractability, not
+chosen for its properties, and its properties turn out to matter.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The reverse direction picks a side</span></div><p>Minimise the right of <a class="eqref" href="#eq-two-kls">(1.4.4)</a> instead. Vary $q_1$ with $q_2$ held fixed,
+impose normalisation with a Lagrange multiplier, and the stationary condition is</p>
+<div class="eqn" id="eq-cavi"><div class="eqbody">$$\ln q_1(s_{\text{gust}}) \;=\; \mathbb{E}_{q_2}\big[\ln P(s_{\text{gust}}, s_{\text{bab}})\big] + \text{const},$$</div><div class="eqno"><a href="#eq-cavi" title="Link to equation 1.4.1">(1.4.1)</a></div></div>
+<p>with the mirror equation for $q_2$. Alternating them until nothing moves is
+<strong>coordinate ascent</strong>, and <a class="eqref" href="#eq-cavi">(1.4.1)</a> is the update Week&nbsp;4 derives in general.
+Run on the table above it converges to</p>
+<div class="eqn"><div class="eqbody">$$q_1(s_{\text{gust}}\!=\!1) = 0.2579,
+\qquad
+q_2(s_{\text{bab}}\!=\!1) = 0.7627,$$</div></div>
+<p>a gap of $0.4989$ nats. The two causes entered the model
+interchangeably and the answer has stopped treating them that way.</p></div>
+<p>The symmetry breaking is not numerical noise. Score the <em>symmetric</em> product, both
+marginals at $0.5050$, under the reverse divergence and you get
+$0.5130$ nats, genuinely worse than the lopsided
+$0.4989$. Under this objective, committing to one story beats
+splitting the difference.</p>
+<p>The reason is visible in the table. The true posterior puts its mass on the two
+states where exactly one cause fired, and almost none on $(1,1)$ or $(0,0)$. A
+product cannot do that. If $q_1$ and $q_2$ both sit near a half so as to cover
+both modes, then $Q(1,1) = q_1q_2$ is dragged up to about a quarter, into a
+corner where $P$ is nearly empty. The reverse divergence punishes exactly this:
+each state contributes $Q\ln(Q/P)$, which blows up wherever $Q$ is large and $P$
+is small. Reverse KL is <strong>zero-forcing</strong>: it would rather miss some of $P$
+altogether than put mass where $P$ has none. Forward KL has the opposite
+instinct, since there the offending term is $P\ln(P/Q)$, which blows up where
+$P$ is large and $Q$ is small, so it insists on covering everything $P$ covers.</p>
+<figure id="fig-1-4-2"><svg viewBox="0 0 660 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two two-by-two grids comparing the true posterior with the best factorised approximation.">
+  <rect x="1" y="1" width="658" height="248" fill="#fdfcf9" stroke="#e4e1d9"/>
+  <text x="150" y="30" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="12" font-weight="600" fill="#0f5f57">true posterior</text>
+  <text x="470" y="30" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="12" font-weight="600" fill="#9c4d2f">best product, reverse KL</text>
+  <rect x="70" y="45" width="160" height="160" fill="none" stroke="#d3cfc4"/>
+  <rect x="70" y="125" width="80" height="80" fill="#0f5f57" fill-opacity="0.09"/>
+  <rect x="150" y="125" width="80" height="80" fill="#0f5f57" fill-opacity="0.90"/>
+  <rect x="70" y="45" width="80" height="80" fill="#0f5f57" fill-opacity="0.90"/>
+  <rect x="150" y="45" width="80" height="80" fill="#0f5f57" fill-opacity="0.11"/>
+  <text x="110" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">0.045</text>
+  <text x="190" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#ffffff">0.450</text>
+  <text x="110" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#ffffff">0.450</text>
+  <text x="190" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">0.055</text>
+  <rect x="390" y="45" width="160" height="160" fill="none" stroke="#d3cfc4"/>
+  <rect x="390" y="125" width="80" height="80" fill="#9c4d2f" fill-opacity="0.30"/>
+  <rect x="470" y="125" width="80" height="80" fill="#9c4d2f" fill-opacity="0.11"/>
+  <rect x="390" y="45" width="80" height="80" fill="#9c4d2f" fill-opacity="0.95"/>
+  <rect x="470" y="45" width="80" height="80" fill="#9c4d2f" fill-opacity="0.34"/>
+  <text x="430" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">0.176</text>
+  <text x="510" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">0.061</text>
+  <text x="430" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#ffffff">0.566</text>
+  <text x="510" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">0.197</text>
+  <text x="60" y="92" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">baboon 1</text>
+  <text x="60" y="172" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">baboon 0</text>
+  <text x="110" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">gust 0</text>
+  <text x="190" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">gust 1</text>
+  <text x="430" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">gust 0</text>
+  <text x="510" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">gust 1</text>
+</svg><figcaption><span class="fno">Figure 1.4.2.</span> The same posterior, two ways. Area is probability. The true posterior puts its mass on the two states where exactly one cause fired; no product of marginals has that shape, so the best product commits to one of them and inflates the corners.</figcaption></figure>
+<p>Which direction you minimise therefore decides whether your approximation hedges
+or commits. Week&nbsp;4 has to say which one active inference uses and why. For
+now: "mean-field" is the name of a compromise, and you have just seen what is
+being compromised.</p>
 <div class="box exercise"><div class="boxhd">Exercise 1.4.1<span class="bt">Where does explaining away go?</span></div><p>In the two-cause example, make the observation uninformative by setting both cause strengths (the $0.9$
-coefficients in <a class="eqref" href="#eq-noisy-or">(1.4.1)</a>) to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
+coefficients in <a class="eqref" href="#eq-noisy-or">(1.4.2)</a>) to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
 Without computing anything, say what the posterior is and whether the two causes
-remain independent. Then explain what feature of <a class="eqref" href="#eq-noisy-or">(1.4.1)</a> is responsible
+remain independent. Then explain what feature of <a class="eqref" href="#eq-noisy-or">(1.4.2)</a> is responsible
 for the coupling in the original example.</p><details><summary>Solution</summary><p>With $P(o=1\mid s)$ constant across states, the likelihood is a constant factor
 that pulls out of the product. The posterior equals the prior, which was a
 product of independent marginals, so the causes remain independent and no
 explaining away occurs.</p>
 <p>The coupling comes from the likelihood varying across the <em>joint</em> state in a way
 that does not factor into a function of $s_{\text{gust}}$ times a function of
-$s_{\text{bab}}$. In <a class="eqref" href="#eq-noisy-or">(1.4.1)</a>, the state $(1,1)$ has likelihood $0.9901$,
+$s_{\text{bab}}$. In <a class="eqref" href="#eq-noisy-or">(1.4.2)</a>, the state $(1,1)$ has likelihood $0.9901$,
 which is barely more than the $0.9010$ of $(1,0)$ or $(0,1)$: a second cause
 adds almost nothing once the first is present. That diminishing return is the
 source of the competition. If the likelihood were multiplicatively separable, the

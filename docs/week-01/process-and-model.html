@@ -445,7 +445,12 @@ called a <strong>Markov blanket</strong>. The name is borrowed from graphical mo
 carries the usual meaning: conditioned on the blanket, what is inside is
 independent of what is outside. Here that reads</p>
 <div class="eqn" id="eq-blanket"><div class="eqbody">$$P(\vartheta, \mu \mid o, a) \;=\; P(\vartheta \mid o, a)\; P(\mu \mid o, a),$$</div><div class="eqno"><a href="#eq-blanket" title="Link to equation 1.2.2">(1.2.2)</a></div></div>
-<p>writing $\mu$ for the agent's internal states. Knowing the sensory and active
+<p>writing $\mu$ for the agent's <strong>internal states</strong>: the physical variables that
+carry the model, such as the firing rates or synaptic weights that encode
+$P(s)$. So $\mu$ and $s$ are not the same kind of thing. $s$ is a variable <em>in</em>
+the model, a label for a possible state of affairs; $\mu$ is the stuff the model
+is made of. Week&nbsp;5 gives $\mu$ a job of its own; until then $s$ does the
+work and $\mu$ appears only here, to state the blanket. Knowing the sensory and active
 states renders the world and the inside of the agent conditionally independent:
 any influence one has on the other has already passed through the blanket. That
 is the formal version of the claim that you never perceive the world, only your
@@ -488,8 +493,87 @@ some part of a system, of the sort a Kalman filter has. It carries no
 implication of awareness. A Kalman filter has beliefs in exactly this sense; an
 ordinary bimetallic thermostat does not, since it holds no distribution over
 anything, which is worth noticing because it means the word is not vacuous.</p></div>
-<h2 id="notation-to-carry-forward"><span class="secno">4</span>Notation to carry forward</h2>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$\vartheta$</th><td>True states of the world. The generative <em>process</em>. The agent never sees these.</td></tr><tr><th>$s$</th><td>Hidden states in the agent's generative <em>model</em>. Latent variables the agent infers.</td></tr><tr><th>$o$</th><td>Observations, the sensory states on the blanket. Shared by both sides.</td></tr><tr><th>$a$</th><td>Actions, the active states on the blanket. Chosen by the agent, felt by the world.</td></tr><tr><th>$P(o \mid s)$</th><td>The likelihood. What the model says each state predicts.</td></tr><tr><th>$P(s)$</th><td>The prior over states, before any observation.</td></tr><tr><th>$P(o)$</th><td>The model evidence, or marginal likelihood. The quantity whose logarithm is minus the surprise.</td></tr><tr><th>$P(s \mid o)$</th><td>The posterior. What the agent should believe after seeing $o$. The object of the next two lessons.</td></tr></tbody></table></div>
+<h2 id="a-worked-case-two-agents-and-a-lamp"><span class="secno">4</span>A worked case: two agents and a lamp</h2>
+<p>Everything above has been structural. Here is the smallest example that makes it
+concrete, and it will do more work than its size suggests.</p>
+<p>A lamp sits behind a frosted screen. The true state $\vartheta$ is <strong>on</strong> or
+<strong>off</strong>, each equally likely, and a light sensor reports <strong>bright</strong> or <strong>dim</strong>.
+The sensor is imperfect: when the lamp is on it reads bright with probability
+$0.8$, and when the lamp is off it still reads bright with
+probability $0.1$. That is the generative process, and it is a fact
+about the world, not about anybody's beliefs.</p>
+<p>Now two agents watch the same screen.</p>
+<p><strong>Agent A</strong> has a model that matches: states $s \in \{\text{on}, \text{off}\}$,
+prior $P(s) = (0.5, 0.5)$, and a likelihood equal to the
+true one. Its evidence for a bright reading is</p>
+<div class="eqn" id="eq-lamp-evidence"><div class="eqbody">$$P(\text{bright}) = 0.5 \times 0.8 + 0.5 \times 0.1 = 0.45,$$</div><div class="eqno"><a href="#eq-lamp-evidence" title="Link to equation 1.2.3">(1.2.3)</a></div></div>
+<p>so a bright reading carries $0.7985$ nats of surprise,
+and by Bayes the posterior on the lamp being on is
+$0.5 \times 0.8 / 0.45 = 0.8889$.</p>
+<p><strong>Agent B</strong> has the same states and the same prior but believes its sensor is far
+better than it is: $0.99$ and $0.01$ in place of
+$0.8$ and $0.1$. Its evidence for bright is
+$0.50$, its surprise $0.6931$ nats,
+and its posterior $0.9900$.</p>
+<p>Three things follow, and each one makes something earlier on this page checkable.</p>
+<p><strong>Surprise belongs to the model.</strong> The two agents received the same reading from
+the same lamp and were surprised by different amounts,
+$0.7985$ against $0.6931$
+nats. Nothing about the world distinguishes them. This is what it meant to say
+that $P(o)$ is computed from the model.</p>
+<p><strong>A wrong model is still a model.</strong> Agent B's likelihood is false, but nothing
+about it is ill-formed: its columns still sum to one, Bayes still applies, its
+posterior is still a distribution. The machinery does not detect the error. That
+is the answer to the checkpoint question below about a state called "predator"
+with no predator in the world.</p>
+<p><strong>Mismodelling has a price, and the price is exactly a divergence.</strong> Over a long
+run the readings arrive with the <em>true</em> frequencies, bright
+$0.45$ of the time. Agent A's average surprise is then
+$0.688139$ nats, which is precisely the entropy of the true
+observation distribution: the best any agent can do. Agent B averages
+$0.693147$ nats. The excess is
+$0.005008$ nats, and</p>
+<div class="eqn" id="eq-lamp-kl"><div class="eqbody">$$D_{\mathrm{KL}}\big[P^{*}(o) \,\|\, P_B(o)\big] = 0.005008\ \text{nats},$$</div><div class="eqno"><a href="#eq-lamp-kl" title="Link to equation 1.2.4">(1.2.4)</a></div></div>
+<p>the same number. The extra surprise a mismodelling agent pays, per observation
+and on average, <em>is</em> the divergence between the world's statistics and its own.
+That is the precise version of Lesson&nbsp;1's remark that the two meanings of
+$P(o)$ coincide when the model is good and part company when it is not, and it
+is why the framework can get away with using one as a stand-in for the other.</p>
+<div class="box exercise"><div class="boxhd">Exercise 1.2.1<span class="bt">Confirm the price</span></div><p>Verify <a class="eqref" href="#eq-lamp-kl">(1.2.4)</a> by hand: compute $P^{*}(\text{dim})$ and
+$P_B(\text{dim})$, then evaluate
+$\sum_o P^{*}(o)\ln\big[P^{*}(o)/P_B(o)\big]$.</p><details><summary>Solution</summary><p>The true marginals are $0.45$ and
+$0.55$. Agent B's are $0.50$ and
+$0.50$, since its assumed sensor is symmetric and its prior
+is flat. So</p>
+<div class="eqn"><div class="eqbody">$$D_{\mathrm{KL}} = 0.45\ln\frac{ 0.45 }{ 0.50 }
++ 0.55\ln\frac{ 0.55 }{ 0.50 }
+= 0.005008.$$</div></div>
+<p>The first term is negative and the second positive; the sum is positive, as any
+KL divergence must be. Note how small it is. Agent B is badly wrong about its
+sensor, yet pays only about five thousandths of a nat per reading, because the
+error happens to leave its <em>marginal</em> over observations nearly right. Being wrong
+about the world in a way that does not show up in your predictions is cheap, and
+Week&nbsp;12 asks whether that should worry us.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 1.2.2<span class="bt">Break the blanket</span></div><p>Take four binary variables $\vartheta, o, a, \mu$ and build a joint distribution
+in which $\vartheta$ influences $\mu$ only through $o$. Verify <a class="eqref" href="#eq-blanket">(1.2.2)</a>
+numerically. Then add a direct dependence of $\mu$ on $\vartheta$ and show the
+equality fails.</p><details><summary>Solution</summary><p>Let $\vartheta$ be a fair coin, let $o = \vartheta$ with probability $0.9$ and
+$o = 1 - \vartheta$ otherwise, and let $\mu$ depend on $o$ alone, say
+$\mu = o$ with probability $0.8$. Fix $a$ constant so it plays no role. Then for
+each value of $o$,</p>
+<div class="eqn"><div class="eqbody">$$P(\vartheta, \mu \mid o) = P(\vartheta \mid o)\,P(\mu \mid o)$$</div></div>
+<p>holds by construction, because $\mu$ was generated from $o$ without ever
+consulting $\vartheta$: conditioning on $o$ leaves nothing for the two to share.</p>
+<p>Now let $\mu$ peek: with probability $0.3$ set $\mu = \vartheta$ directly,
+ignoring $o$. Condition on $o = 1$ and the two are no longer independent, because
+learning $\mu = 1$ now raises the probability that $\vartheta = 1$ by a route
+that does not pass through $o$. The blanket has a hole in it, and <a class="eqref" href="#eq-blanket">(1.2.2)</a>
+reports the hole.</p>
+<p>The general point: a Markov blanket is not a wall, it is a claim about which
+paths exist. Whether real organisms have one in this sense is the argument
+Week&nbsp;12 takes up.</p></details></div>
+<h2 id="notation-to-carry-forward"><span class="secno">5</span>Notation to carry forward</h2>
+<div class="tablewrap"><table class="notation"><tbody><tr><th>$\vartheta$</th><td>True states of the world. The generative <em>process</em>. The agent never sees these.</td></tr><tr><th>$s$</th><td>Hidden states in the agent's generative <em>model</em>. Latent variables the agent infers.</td></tr><tr><th>$o$</th><td>Observations, the sensory states on the blanket. Shared by both sides.</td></tr><tr><th>$a$</th><td>Actions, the active states on the blanket. Chosen by the agent, felt by the world.</td></tr><tr><th>$\mu$</th><td>Internal states: the physical variables carrying the model. Not the same as $s$, which is a variable inside it. Returns in Week&nbsp;5.</td></tr><tr><th>$P(o \mid s)$</th><td>The likelihood. What the model says each state predicts.</td></tr><tr><th>$P(s)$</th><td>The prior over states, before any observation.</td></tr><tr><th>$P(o)$</th><td>The model evidence, or marginal likelihood. The quantity whose logarithm is minus the surprise.</td></tr><tr><th>$P(s \mid o)$</th><td>The posterior. What the agent should believe after seeing $o$. The object of the next two lessons.</td></tr></tbody></table></div>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
 <li>If an agent's model contains a hidden state called "predator" and there is no predator in the world, is the model's likelihood $P(o \mid s)$ ill-defined? Why not?</li>
 <li>Which of $\vartheta$, $s$, $o$, $a$ appear on both sides of the Markov blanket?</li>
