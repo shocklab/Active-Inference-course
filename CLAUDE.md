@@ -18,19 +18,51 @@ Department of Mathematics & Applied Mathematics, University of Cape Town.
 
 ## Source material — READ THIS FIRST
 
-`source-material/` is **gitignored and must never be published or quoted**.
+`source-material/` is **gitignored and must never be published**.
 
-| File | Status |
-|---|---|
-| `namjoshi-2024-fundamentals-of-active-inference-v3.pdf` | **Private draft** shared with Jonathan personally. Background reading only. Never reproduce, quote, or paraphrase closely. Its *ordering* informs the syllabus; nothing else leaves the folder. |
-| `smith-2022-step-by-step-tutorial.pdf` | Published paper. Cite normally, do not reproduce. |
-| `shock-notes-latex/` | Jonathan's own notes. **Free to use in full** — this is the seed of Weeks 4 and 10. |
-| `shock-active-inference-notebook.nb` | Jonathan's own Mathematica notebook. **Free to use in full.** Best prose in the pile; the opening of Week 1 draws on it. See `notes/mathematica-notebook-diagnosis.md` for the bug in its final example. |
+| File | Licence | What we may do |
+|---|---|---|
+| `namjoshi-2024-...pdf` | **Private draft of a copyrighted MIT Press book.** Strictest. | Orientation only. Do not quote, paraphrase closely, reproduce examples, or mirror its derivation structure. Its broad ordering idea (inference → continuous → discrete) is a general pedagogical choice and is justified on our own grounds in `content/orientation.md`. Nothing else leaves the folder. Recommend it in further reading. |
+| `smith-2022-...pdf` | **CC BY-NC-ND 4.0** (verified in the PDF) | Read, cite, link, brief quotation with attribution under fair dealing. |
+| `shock-notes-latex/` | Jonathan's own | **Free to use in full.** Seeds Weeks 4 and 10. |
+| `shock-active-inference-notebook.nb` | Jonathan's own | **Free to use in full.** See `notes/mathematica-notebook-diagnosis.md`. |
 
-Parr, Pezzulo and Friston (MIT Press, 2022) is open access, so it can be cited,
-linked and referred to by equation number freely.
+Parr, Pezzulo & Friston (MIT Press, 2022) is also **CC BY-NC-ND 4.0**, not permissive.
 
-**Everything published must be our own derivations, our own examples, our own figures.**
+**What NoDerivatives means here.** Citation is not licensing, so citing, linking,
+referring to equation numbers, and brief quotation with attribution are all fine
+and unaffected. Mathematical results are facts and are not copyrightable;
+explaining them in our own words is fine. What is not fine: reproducing figures,
+tables, code or substantial passages, and adapting any of it into this course,
+because a CC BY-NC-ND work cannot be relicensed into our CC BY 4.0.
+
+**Everything published must be our own derivations, examples and figures.** That
+is the premise of the course, not merely a licence constraint.
+
+## Outline discipline — why Week 9 went wrong
+
+Audited 2026-08-26 after one probe ("where is variational message passing?")
+found the topic mislabelled, uncommitted and uncross-linked.
+
+**Root cause: outline quality tracked whether the source was read or only its
+table of contents.** Weeks 4 and 10, seeded by Jonathan's own notes read line by
+line, named 6 and 4 sources and 3 derivation targets each. Weeks 5, 7, 8, 9 and
+11, built from chapter headings, named zero sources and zero derivation targets.
+A bullet made of a heading looks like a plan and commits to nothing.
+
+Three failure modes it produced, all three of which hit message passing:
+1. **Topic named, nothing committed to** — no derivation target, no source, no real widget.
+2. **Term placed by association** — right family of words, wrong member. "Variational
+   message passing" was written into Week 9 because Namjoshi has a section with that
+   title; the scheme that actually belongs there is *marginal* message passing.
+3. **Missing cross-links** — connections real in the mathematics, absent from the plan.
+
+**Rules that follow.** Every week in `OUTLINE.md` must name (i) a source we have
+actually read, (ii) at least one thing to be *derived*, not merely covered,
+(iii) concrete widget specs, (iv) a backward and a forward cross-link.
+`build/check_outline.py` enforces this mechanically, but it is a proxy: it
+measures whether a bullet looks grounded, not whether it is. The real check is
+reading the source.
 
 ## Build
 

@@ -33,8 +33,8 @@ are there to be run and broken, not to be a prerequisite.
 
 ## The shape of the argument
 
-The course follows the order used by Namjoshi rather than the order used by Parr,
-Pezzulo and Friston, and the difference is worth understanding before you start.
+This course takes the discrete formulation last. That is the reverse of the
+commonest presentation, and the reason is worth understanding before you start.
 
 Parr, Pezzulo and Friston introduce the discrete, partially observable Markov
 decision process early, because that is where active inference is most often

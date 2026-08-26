@@ -34,9 +34,10 @@ all. Everything the agent will ever know about the world it must extract from
 $o$, and later from the consequences of its own $a$.
 
 ::: mn On the notation
-Namjoshi and much of the literature write $\vartheta$ or $\eta$ for external
-states of the generative process, reserving $s$ for states *in the model*. We
-follow that. When you meet a paper that writes $s$ for both, read carefully.
+Much of the free energy principle literature writes $\eta$, or sometimes
+$\vartheta$, for external states of the generative process, keeping $s$ for
+states *in the model*. We follow that. When you meet a paper that writes $s$ for
+both, read carefully: the ambiguity is not always harmless.
 :::
 
 ## The generative model
