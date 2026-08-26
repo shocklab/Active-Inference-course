@@ -46,15 +46,60 @@ right-hand panel tracks the entropy of the states visited so far, and the readou
 below reports it.
 :::
 
-Run that with $\kappa = 0$ first. There is nothing pathological in the dynamics.
-It is an unbiased random walk, the most innocuous thing a stochastic process can
-do, and it kills the organism every time. Diffusion does not need to be malicious
-to be fatal. It only needs to be given enough time.
+The figure is running one line of arithmetic. Writing $x_t \in \mathbb{R}^2$ for
+the displacement from the centre of the viable set,
 
-Now turn $\kappa$ up. The physics has not changed and the noise has not changed.
-What has changed is that the system now moves in a way that depends on where it
-is: displacement from the centre produces a push back towards it. That alone is
-enough to keep the walk near the middle indefinitely.
+$$
+x_{t+1} \;=\; \underbrace{(1-\kappa)\,x_t}_{\text{pull back}}
+\;+\; \underbrace{\sigma\,\xi_t}_{\text{noise}},
+\qquad \xi_t \sim \mathcal{N}(0, I_2)
+\ \text{independently at each step},
+$$ {#homeostat}
+
+absorbed the moment $\lVert x_t \rVert > 1$. Two parameters: $\sigma$ sets how hard
+the world pushes, $\kappa$ how hard the organism pushes back.
+
+**Why $\kappa = 0$ is fatal.** With no restoring term the increments are
+independent and mean-zero, so the variances add. After $t$ steps each coordinate
+has variance $t\sigma^2$, and
+
+$$
+\mathbb{E}\big[\lVert x_t \rVert^2\big] \;=\; 2t\sigma^2 ,
+$$ {#diffusion}
+
+which grows without bound. There is no equilibrium to settle into: the walk has
+no preferred location, and the region it typically occupies swells like
+$\sqrt{t}$. Setting [eq:diffusion] equal to $1$ gives a rough crossing time of
+$t \approx 1/(2\sigma^2)$, which at $\sigma = {{hs_sigma}}$ is about
+{{hs_diffusive_steps:.0f}} steps. More carefully: for a driftless walk the
+probability of still being inside any fixed radius tends to zero, so the boundary
+is crossed with probability one and the only question is when. Diffusion does not
+need to be malicious to be fatal. It needs to be given enough time.
+
+**What $\kappa > 0$ buys.** Now the variance stops adding. Write $v$ for the variance of one coordinate once the process has settled,
+the **stationary variance**. Taking variances of both sides of [eq:homeostat]
+and asking for a value that reproduces itself,
+
+$$
+v \;=\; (1-\kappa)^2 v + \sigma^2
+\qquad\Longrightarrow\qquad
+v \;=\; \frac{\sigma^2}{1 - (1-\kappa)^2} \;=\; \frac{\sigma^2}{2\kappa - \kappa^2}.
+$$ {#stationary-var}
+
+The walk has acquired a stationary distribution. At $\sigma = {{hs_sigma}}$ and
+$\kappa = {{hs_kappa}}$ this is $v = {{hs_var_per_coord:.5f}}$, a standard
+deviation of {{hs_sd_per_coord:.4f}} per coordinate, which puts the boundary at
+$\lVert x \rVert = 1$ about {{hs_boundary_in_sd:.0f}} standard deviations away.
+
+::: warning "Indefinitely" is the wrong word
+Note what [eq:stationary-var] does *not* say. The stationary distribution is
+Gaussian, so it has unbounded support: every state remains reachable and the
+boundary is still crossed eventually, with probability one. Regulation does not
+make death impossible. It converts a certainty on a timescale of hundreds of
+steps into a rare event on a timescale so long the organism will have died of
+something else first, and the escape time grows roughly exponentially in the
+ratio of barrier to noise. That is all any organism gets, and it is enough.
+:::
 
 ## Staying alive is a statement about entropy
 
@@ -93,6 +138,22 @@ natural, here and everywhere in this course, which fixes the units as **nats**.
 A nat is the unit you get when the logarithm is natural rather than base two;
 divide by $\ln 2 \approx 0.693$ to convert a figure in nats to bits.
 
+Two numbers make the scale concrete. Take four possible observations. If the
+organism reports the first almost always, $P(o) = (0.94, 0.02, 0.02, 0.02)$, then
+
+$$
+\mathrm{H}[P(o)] = -\big[0.94\ln 0.94 + 3 \times 0.02\ln 0.02\big]
+= {{ent_peaked:.4f}}\ \text{nats}.
+$$
+
+If instead all four are equally likely, every term is $-\tfrac14 \ln \tfrac14$ and
+the entropy is $\ln 4 = {{ent_uniform4:.4f}}$ nats, which is the largest value
+four outcomes admit. The surprise of the common observation in the first case is
+$-\ln 0.94 = {{surprise_common:.4f}}$ nats and of a rare one
+$-\ln 0.02 = {{surprise_rare:.4f}}$ nats; weight those by how often each occurs
+and you recover {{ent_peaked_check:.4f}} nats, the entropy again, as
+[eq:ergodic] requires.
+
 An organism whose observations are spread thinly over everything possible has
 high entropy here. An organism that spends its whole life reporting *warm,
 fed, upright, unbroken* has low entropy. Being alive, measured in nats, is equation [eq:sensory-entropy] being small.
@@ -117,6 +178,42 @@ The quantity in the brackets, $-\ln P(o)$, is called the **surprise** of an
 observation, or sometimes its surprisal, to keep it clear that we are not
 talking about anybody's emotional state. It is large when $o$ is something the
 organism rarely sees and small when $o$ is business as usual.
+
+::: derivation Where [eq:ergodic] comes from
+The page has just called this the step that makes the framework possible, so it
+should not be left as an assertion. Take the easy case first, where the
+observations are independent and identically distributed. Then
+$-\ln P(o_1), -\ln P(o_2), \dots$ are themselves independent and identically
+distributed random variables, and the strong law of large numbers says their
+running average converges almost surely to their expectation:
+
+$$
+\frac{1}{T}\sum_{t=1}^{T}\big[-\ln P(o_t)\big]
+\ \xrightarrow{\ \text{a.s.}\ }\
+\mathbb{E}_{P(o)}\big[-\ln P(o)\big].
+$$
+
+Now look at what that expectation is. Writing it out,
+
+$$
+\mathbb{E}_{P(o)}\big[-\ln P(o)\big]
+\;=\; \sum_{o} P(o)\,\big[-\ln P(o)\big]
+\;=\; -\sum_{o} P(o)\ln P(o)
+\;=\; \mathrm{H}[P(o)],
+$$
+
+which is [eq:sensory-entropy] exactly. So entropy is not merely *related to*
+average surprise; it **is** average surprise, and the middle line is the whole
+proof. Nothing deeper is happening in the independent case.
+
+The organism's observations are of course not independent: what you see now
+depends on what you saw a moment ago. The claim needed is therefore the stronger
+one, that the time average along a single trajectory converges to the average
+over the distribution being sampled. A process for which that holds is called
+**ergodic**. Roughly: one long trajectory eventually visits states in the same
+proportions as the underlying distribution assigns them, so following one
+organism for a long time tells you what the ensemble looks like.
+:::
 
 ::: keyidea
 [eq:ergodic] converts a statement about a whole lifetime into a statement about

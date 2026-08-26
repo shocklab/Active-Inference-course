@@ -212,6 +212,24 @@ V["noisy_marg_gust_pct"] = V["noisy_marg_gust"] * 100
 V["noisy3_marg_pct"] = V["noisy3_marg"] * 100
 V["tip_q_pct"] = V["tip_q"] * 100
 
+# ── the homeostasis process, which the lesson now writes down ────────────
+# x_{t+1} = (1 - kappa) x_t + sigma * xi_t,  xi ~ N(0, I_2), absorbed at |x| > 1
+SIGMA, KAPPA = 0.035, 0.15
+V["hs_sigma"], V["hs_kappa"] = SIGMA, KAPPA
+V["hs_var_per_coord"] = SIGMA ** 2 / (1 - (1 - KAPPA) ** 2)   # stationary variance
+V["hs_sd_per_coord"] = V["hs_var_per_coord"] ** 0.5
+V["hs_rms_radius"] = (2 * V["hs_var_per_coord"]) ** 0.5
+V["hs_boundary_in_sd"] = 1 / V["hs_sd_per_coord"]
+V["hs_diffusive_steps"] = 1 / (2 * SIGMA ** 2)                # E|x|^2 = 2 t sigma^2 = 1
+
+# ── a worked entropy example (Lesson 1) ──────────────────────────────────
+P_PEAKED = [0.94, 0.02, 0.02, 0.02]
+V["ent_peaked"] = -sum(p * log(p) for p in P_PEAKED)
+V["ent_uniform4"] = log(4)
+V["surprise_common"] = -log(0.94)
+V["surprise_rare"] = -log(0.02)
+V["ent_peaked_check"] = sum(p * -log(p) for p in P_PEAKED)
+
 # ── constants quoted in prose ────────────────────────────────────────────
 V["ln2"] = log(2)
 V["nats_to_bits"] = 1 / log(2)

@@ -378,14 +378,43 @@ being nudged out of it constantly by noise, and something inside the system
 pushing back.</p>
 <figure class="widget" id="fig-1-1-1"><div class="wmount" data-widget="homeostasis-drift"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.1.1.</span> A body in a two-dimensional physiological space. The solid circle is the boundary of the viable set; cross it and the organism is no longer an organism. The dashed circle marks the states it prefers. Noise pushes it around; the parameter $\kappa$ sets how hard it pushes back. The<p>right-hand panel tracks the entropy of the states visited so far, and the readout
 below reports it.</p></figcaption></figure>
-<p>Run that with $\kappa = 0$ first. There is nothing pathological in the dynamics.
-It is an unbiased random walk, the most innocuous thing a stochastic process can
-do, and it kills the organism every time. Diffusion does not need to be malicious
-to be fatal. It only needs to be given enough time.</p>
-<p>Now turn $\kappa$ up. The physics has not changed and the noise has not changed.
-What has changed is that the system now moves in a way that depends on where it
-is: displacement from the centre produces a push back towards it. That alone is
-enough to keep the walk near the middle indefinitely.</p>
+<p>The figure is running one line of arithmetic. Writing $x_t \in \mathbb{R}^2$ for
+the displacement from the centre of the viable set,</p>
+<div class="eqn" id="eq-homeostat"><div class="eqbody">$$x_{t+1} \;=\; \underbrace{(1-\kappa)\,x_t}_{\text{pull back}}
+\;+\; \underbrace{\sigma\,\xi_t}_{\text{noise}},
+\qquad \xi_t \sim \mathcal{N}(0, I_2)
+\ \text{independently at each step},$$</div><div class="eqno"><a href="#eq-homeostat" title="Link to equation 1.1.1">(1.1.1)</a></div></div>
+<p>absorbed the moment $\lVert x_t \rVert > 1$. Two parameters: $\sigma$ sets how hard
+the world pushes, $\kappa$ how hard the organism pushes back.</p>
+<p><strong>Why $\kappa = 0$ is fatal.</strong> With no restoring term the increments are
+independent and mean-zero, so the variances add. After $t$ steps each coordinate
+has variance $t\sigma^2$, and</p>
+<div class="eqn" id="eq-diffusion"><div class="eqbody">$$\mathbb{E}\big[\lVert x_t \rVert^2\big] \;=\; 2t\sigma^2 ,$$</div><div class="eqno"><a href="#eq-diffusion" title="Link to equation 1.1.2">(1.1.2)</a></div></div>
+<p>which grows without bound. There is no equilibrium to settle into: the walk has
+no preferred location, and the region it typically occupies swells like
+$\sqrt{t}$. Setting <a class="eqref" href="#eq-diffusion">(1.1.2)</a> equal to $1$ gives a rough crossing time of
+$t \approx 1/(2\sigma^2)$, which at $\sigma = 0.035$ is about
+408 steps. More carefully: for a driftless walk the
+probability of still being inside any fixed radius tends to zero, so the boundary
+is crossed with probability one and the only question is when. Diffusion does not
+need to be malicious to be fatal. It needs to be given enough time.</p>
+<p><strong>What $\kappa > 0$ buys.</strong> Now the variance stops adding. Write $v$ for the variance of one coordinate once the process has settled,
+the <strong>stationary variance</strong>. Taking variances of both sides of <a class="eqref" href="#eq-homeostat">(1.1.1)</a>
+and asking for a value that reproduces itself,</p>
+<div class="eqn" id="eq-stationary-var"><div class="eqbody">$$v \;=\; (1-\kappa)^2 v + \sigma^2
+\qquad\Longrightarrow\qquad
+v \;=\; \frac{\sigma^2}{1 - (1-\kappa)^2} \;=\; \frac{\sigma^2}{2\kappa - \kappa^2}.$$</div><div class="eqno"><a href="#eq-stationary-var" title="Link to equation 1.1.3">(1.1.3)</a></div></div>
+<p>The walk has acquired a stationary distribution. At $\sigma = 0.035$ and
+$\kappa = 0.15$ this is $v = 0.00441$, a standard
+deviation of 0.0664 per coordinate, which puts the boundary at
+$\lVert x \rVert = 1$ about 15 standard deviations away.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">"Indefinitely" is the wrong word</span></div><p>Note what <a class="eqref" href="#eq-stationary-var">(1.1.3)</a> does <em>not</em> say. The stationary distribution is
+Gaussian, so it has unbounded support: every state remains reachable and the
+boundary is still crossed eventually, with probability one. Regulation does not
+make death impossible. It converts a certainty on a timescale of hundreds of
+steps into a rare event on a timescale so long the organism will have died of
+something else first, and the escape time grows roughly exponentially in the
+ratio of barrier to noise. That is all any organism gets, and it is enough.</p></div>
 <h2 id="staying-alive-is-a-statement-about-entropy"><span class="secno">2</span>Staying alive is a statement about entropy</h2>
 <p>Watch the readout in that figure. As the unregulated walk wanders, the entropy
 of the states it has visited climbs steadily. When the walk is regulated, that
@@ -407,16 +436,27 @@ whatever the organism can actually measure.</p>
 <p>Over a long life the organism makes some observations often and others never, and
 that occupancy defines a probability distribution over observations, written
 $P(o)$. Its <strong>entropy</strong> is</p>
-<div class="eqn" id="eq-sensory-entropy"><div class="eqbody">$$\mathrm{H}[P(o)] \;=\; -\sum_{o} P(o) \ln P(o).$$</div><div class="eqno"><a href="#eq-sensory-entropy" title="Link to equation 1.1.1">(1.1.1)</a></div></div>
+<div class="eqn" id="eq-sensory-entropy"><div class="eqbody">$$\mathrm{H}[P(o)] \;=\; -\sum_{o} P(o) \ln P(o).$$</div><div class="eqno"><a href="#eq-sensory-entropy" title="Link to equation 1.1.4">(1.1.4)</a></div></div>
 <p>Two notational points, since both recur for twelve weeks. The square brackets are
 deliberate: $\mathrm{H}$ takes an entire distribution as its argument rather than
 a single value, so it is a functional, not a function. And the logarithm is
 natural, here and everywhere in this course, which fixes the units as <strong>nats</strong>.
 A nat is the unit you get when the logarithm is natural rather than base two;
 divide by $\ln 2 \approx 0.693$ to convert a figure in nats to bits.</p>
+<p>Two numbers make the scale concrete. Take four possible observations. If the
+organism reports the first almost always, $P(o) = (0.94, 0.02, 0.02, 0.02)$, then</p>
+<div class="eqn"><div class="eqbody">$$\mathrm{H}[P(o)] = -\big[0.94\ln 0.94 + 3 \times 0.02\ln 0.02\big]
+= 0.2929\ \text{nats}.$$</div></div>
+<p>If instead all four are equally likely, every term is $-\tfrac14 \ln \tfrac14$ and
+the entropy is $\ln 4 = 1.3863$ nats, which is the largest value
+four outcomes admit. The surprise of the common observation in the first case is
+$-\ln 0.94 = 0.0619$ nats and of a rare one
+$-\ln 0.02 = 3.9120$ nats; weight those by how often each occurs
+and you recover 0.2929 nats, the entropy again, as
+<a class="eqref" href="#eq-ergodic">(1.1.5)</a> requires.</p>
 <p>An organism whose observations are spread thinly over everything possible has
 high entropy here. An organism that spends its whole life reporting <em>warm,
-fed, upright, unbroken</em> has low entropy. Being alive, measured in nats, is equation <a class="eqref" href="#eq-sensory-entropy">(1.1.1)</a> being small.</p>
+fed, upright, unbroken</em> has low entropy. Being alive, measured in nats, is equation <a class="eqref" href="#eq-sensory-entropy">(1.1.4)</a> being small.</p>
 <aside class="mn"><span class="mnl">Why entropy and not variance</span><p>Variance needs a metric on the state space and privileges the mean. Entropy
 needs only a probability. For a creature whose states include "which arm of the
 maze" and "is the predator visible", there is no sensible mean to take.</p></aside>
@@ -425,16 +465,40 @@ made at time step $t$, and let $T$ count the steps of a life. If the organism's
 sensory statistics settle down over time, the long-run average of
 $-\ln P(o_t)$ along its actual trajectory converges to the entropy of the
 distribution it is sampling:</p>
-<div class="eqn" id="eq-ergodic"><div class="eqbody">$$\mathrm{H}[P(o)] \;=\; \lim_{T\to\infty} \frac{1}{T}\sum_{t=1}^{T} \big[-\ln P(o_t)\big].$$</div><div class="eqno"><a href="#eq-ergodic" title="Link to equation 1.1.2">(1.1.2)</a></div></div>
+<div class="eqn" id="eq-ergodic"><div class="eqbody">$$\mathrm{H}[P(o)] \;=\; \lim_{T\to\infty} \frac{1}{T}\sum_{t=1}^{T} \big[-\ln P(o_t)\big].$$</div><div class="eqno"><a href="#eq-ergodic" title="Link to equation 1.1.5">(1.1.5)</a></div></div>
 <p>The quantity in the brackets, $-\ln P(o)$, is called the <strong>surprise</strong> of an
 observation, or sometimes its surprisal, to keep it clear that we are not
 talking about anybody's emotional state. It is large when $o$ is something the
 organism rarely sees and small when $o$ is business as usual.</p>
-<div class="box keyidea"><div class="boxhd">The idea</div><p><a class="eqref" href="#eq-ergodic">(1.1.2)</a> converts a statement about a whole lifetime into a statement about
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Where <a class="eqref" href="#eq-ergodic">(1.1.5)</a> comes from</span></div><p>The page has just called this the step that makes the framework possible, so it
+should not be left as an assertion. Take the easy case first, where the
+observations are independent and identically distributed. Then
+$-\ln P(o_1), -\ln P(o_2), \dots$ are themselves independent and identically
+distributed random variables, and the strong law of large numbers says their
+running average converges almost surely to their expectation:</p>
+<div class="eqn"><div class="eqbody">$$\frac{1}{T}\sum_{t=1}^{T}\big[-\ln P(o_t)\big]
+\ \xrightarrow{\ \text{a.s.}\ }\
+\mathbb{E}_{P(o)}\big[-\ln P(o)\big].$$</div></div>
+<p>Now look at what that expectation is. Writing it out,</p>
+<div class="eqn"><div class="eqbody">$$\mathbb{E}_{P(o)}\big[-\ln P(o)\big]
+\;=\; \sum_{o} P(o)\,\big[-\ln P(o)\big]
+\;=\; -\sum_{o} P(o)\ln P(o)
+\;=\; \mathrm{H}[P(o)],$$</div></div>
+<p>which is <a class="eqref" href="#eq-sensory-entropy">(1.1.4)</a> exactly. So entropy is not merely <em>related to</em>
+average surprise; it <strong>is</strong> average surprise, and the middle line is the whole
+proof. Nothing deeper is happening in the independent case.</p>
+<p>The organism's observations are of course not independent: what you see now
+depends on what you saw a moment ago. The claim needed is therefore the stronger
+one, that the time average along a single trajectory converges to the average
+over the distribution being sampled. A process for which that holds is called
+<strong>ergodic</strong>. Roughly: one long trajectory eventually visits states in the same
+proportions as the underlying distribution assigns them, so following one
+organism for a long time tells you what the ensemble looks like.</p></div>
+<div class="box keyidea"><div class="boxhd">The idea</div><p><a class="eqref" href="#eq-ergodic">(1.1.5)</a> converts a statement about a whole lifetime into a statement about
 this instant. Keeping the entropy of your observations low over a lifetime is
 the same thing as keeping your surprise low at each moment. A goal you could
 never act on becomes a goal you can act on now.</p></div>
-<div class="box warning"><div class="boxhd">Careful<span class="bt">The step that is doing work</span></div><p><a class="eqref" href="#eq-ergodic">(1.1.2)</a> holds if the process is ergodic, and whether living systems are
+<div class="box warning"><div class="boxhd">Careful<span class="bt">The step that is doing work</span></div><p><a class="eqref" href="#eq-ergodic">(1.1.5)</a> holds if the process is ergodic, and whether living systems are
 ergodic in the required sense is exactly the point at which several careful
 critics plant their flag. (The <strong>free energy principle</strong> is the name for the
 whole claim being assembled here, that self-organising systems minimise a bound
@@ -453,7 +517,7 @@ expectations</em>, and those expectations have to live somewhere.</p>
 <p>They live inside the organism. To be able to evaluate its own surprise, a system
 must carry an internal model of what its observations are usually like and what
 produces them.</p>
-<p>This means the $P$ of <a class="eqref" href="#eq-sensory-entropy">(1.1.1)</a> and the $P$ of "minimise
+<p>This means the $P$ of <a class="eqref" href="#eq-sensory-entropy">(1.1.4)</a> and the $P$ of "minimise
 $-\ln P(o)$" are not quite the same object, and it is worth separating them now
 rather than discovering it later. The first is the distribution the organism's
 observations <em>actually</em> follow over a lifetime, which no organism has access to.

@@ -32,6 +32,9 @@ sys.path.insert(0, os.path.join(ROOT, "build"))
 import mdx  # noqa: E402
 
 MATH = re.compile(r"\$\$(.+?)\$\$|(?<!\$)\$([^\$\n]+?)\$", re.S)
+# {{key:.4f}} substitution tokens are not maths; their format specifiers were
+# being scanned as symbols and reporting "f" as an undefined variable.
+NUMBER_TOKEN = re.compile(r"\{\{[A-Za-z_][A-Za-z0-9_]*(?::[^}]+)?\}\}")
 MACRO = re.compile(r"\\([a-zA-Z]+)")
 LETTER = re.compile(r"(?<![\\a-zA-Z])([A-Za-z])(?![a-zA-Z])")
 BOLD = re.compile(r"\*\*([^*\n]{3,45}?)\*\*")
@@ -51,7 +54,9 @@ EXEMPT = {
     "\\mathrm", "\\mathbb", "\\mathcal", "\\mathbf", "\\boldsymbol", "\\begin",
     "\\end", "\\aligned", "\\nonumber", "\\dots", "\\ldots", "\\cdots", "\\vdots",
     "\\hat", "\\tilde", "\\bar", "\\vec", "\\underbrace", "\\overbrace", "\\binom",
-    "\\Leftarrow", "\\Rightarrow", "\\iff", "\\implies", "\\forall", "\\exists",
+    "\\Leftarrow", "\\Rightarrow", "\\Longrightarrow", "\\Longleftarrow",
+    "\\xrightarrow", "\\iff", "\\implies", "\\forall", "\\exists", "\\lVert",
+    "\\rVert", "\\underbrace", "\\qquad", "\\ \\", "\\sim",
     "\\langle", "\\rangle", "\\lVert", "\\rVert", "\\colon", "\\operatorname",
     "e", "i", "j", "k", "n", "m", "c", "x", "y", "z",   # generic dummies and indices
 }
@@ -79,6 +84,7 @@ def main():
 
     for label, path in pages_in_reading_order():
         _, body = mdx.split_front_matter(open(path, encoding="utf-8").read())
+        body = NUMBER_TOKEN.sub(" ", body)
 
         for m in BOLD.finditer(body):
             raw_term = m.group(1).strip()

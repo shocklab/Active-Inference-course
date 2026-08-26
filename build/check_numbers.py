@@ -47,6 +47,7 @@ ALLOW = {
     "0.035", "0.09", "0.02", "0.03", "0.045", "0.06",   # simulation noise settings
     "1.0", "2.0", "0.0198", "0.9802",                    # inline worked fragments
     "26.6",   # shown deliberately as a BAD rounding, to demonstrate what it costs
+    "0.94",   # a chosen probability defining the worked entropy example
 }
 
 DECIMAL = re.compile(r"(?<![\w.])(\d+\.\d+)(?![\w.])")
