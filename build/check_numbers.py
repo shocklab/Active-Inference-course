@@ -109,6 +109,23 @@ def main():
                 ctx = re.sub(r"\s+", " ", stripped[max(0, m.start() - 70):m.end() + 45]).strip()
                 untok.append((label, v, ctx))
 
+    # keys computed but never referenced anywhere
+    unused = []
+    for w in course["weeks"]:
+        wdir = os.path.join(ROOT, "content", f"week-{int(w['n']):02d}")
+        if not os.path.isdir(wdir):
+            continue
+        values = load_values(wdir)
+        if not values:
+            continue
+        cited = set()
+        for fn in os.listdir(wdir):
+            if fn.endswith(".md"):
+                body = open(os.path.join(wdir, fn), encoding="utf-8").read()
+                cited |= {m.group(1) for m in TOKEN.finditer(body)}
+        for k in sorted(set(values) - cited):
+            unused.append(f"week-{int(w['n']):02d}: {k}")
+
     # confirm what actually reached the built pages
     drift = []
     for w in course["weeks"]:
@@ -133,6 +150,14 @@ def main():
             print(f"    {label}  {v}\n      …{ctx}")
         print("\n  Move each into numbers.py and reference it as {{key}}, or add it to")
         print("  ALLOW with a reason if it is an input rather than a result.")
+    if unused:
+        print(f"\n  {len(unused)} computed values are never cited (advisory: some are")
+        print("  legitimately intermediates, but a forgotten citation looks like this):")
+        for u in unused[:15]:
+            print("   ", u)
+        if len(unused) > 15:
+            print(f"    … and {len(unused)-15} more")
+
     ok = not (problems or drift or untok)
     print("\n" + ("every derived number is computed" if ok else "see above"))
     return 0 if ok else 1

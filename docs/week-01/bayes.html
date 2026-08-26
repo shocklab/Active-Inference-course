@@ -557,6 +557,8 @@ averaging information gain over $P(o)$ gives the <strong>mutual information</str
 states and observations,</p>
 <div class="eqn"><div class="eqbody">$$I(s;o) \;=\; \sum_{o} P(o) \, D_{\mathrm{KL}}\big[P(s \mid o) \,\|\, P(s)\big],$$</div></div>
 <p>which measures how much, on average, an observation tells you about the state.
+For the model above it is 0.371 nats: the average of the three
+information gains, weighted by how often each observation actually occurs.
 Nothing links them pointwise. An observation is surprising when the model
 thought it unlikely; it is informative when the states disagree about it. A
 sensory channel can easily be rare and useless at once, and an agent choosing

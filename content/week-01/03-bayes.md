@@ -254,6 +254,8 @@ I(s;o) \;=\; \sum_{o} P(o) \, D_{\mathrm{KL}}\big[P(s \mid o) \,\|\, P(s)\big],
 $$
 
 which measures how much, on average, an observation tells you about the state.
+For the model above it is {{mutual_information:.3f}} nats: the average of the three
+information gains, weighted by how often each observation actually occurs.
 Nothing links them pointwise. An observation is surprising when the model
 thought it unlikely; it is informative when the states disagree about it. A
 sensory channel can easily be rare and useless at once, and an agent choosing
