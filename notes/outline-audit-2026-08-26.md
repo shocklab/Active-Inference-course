@@ -52,15 +52,26 @@ discrete active inference actually uses, and which `pymdp` implements, is the
 
 Gaps landed on Weeks **5, 8, 9 (three of them), 11**. Weeks **4 and 10 were clean**.
 
-Sharper than predicted, and the sharper statement is the useful one:
+Directionally right, though Week 7 was predicted to have a gap and did not.
+Enumerating the whole set rather than the memorable half:
 
-> **Every week with zero derivation targets had a gap. Every week with one or
-> more had none.** Perfect separation across all twelve.
+| | weeks | gaps found |
+|---|---|---|
+| one or more derivation targets | 2, 3, 4, 6, 10 | **none** |
+| zero derivation targets | 5, 7, 8, 9, 11, 12 | 5, 8, 9, 11 |
 
-Weeks 4 and 10 (three derivation targets each) and Weeks 2, 3, 6 (one or two)
-survived the audit untouched. Weeks 5, 7, 8, 9, 11, 12 (zero) did not, except
-Week 7, which has no *missing* topic but remains ungrounded and should not be
-trusted on that basis.
+So the screen has **no false negatives**: every gap sat in a week naming nothing
+to derive. It has **two false positives out of six**: Weeks 7 and 12 named nothing
+to derive and still had no missing topic.
+
+Naming a derivation target was therefore *sufficient* to avoid a gap in this
+sample, and its absence was *necessary but not sufficient*. That is exactly the
+property wanted from an audit trigger: it never misses, and the cost of its
+over-flagging is a second look at two weeks.
+
+(An earlier draft of this note claimed "perfect separation across all twelve".
+That was written without enumerating the set the claim covered, which is the
+same failure mode as the one being audited.)
 
 The count of named derivation targets is therefore a usable predictor of whether
 a week has been thought about or merely named. `build/check_outline.py` enforces
