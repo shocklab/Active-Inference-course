@@ -139,4 +139,4 @@ adapt it, teach from it; attribution is all that is asked.
 
 Corrections are genuinely welcome, particularly to the derivations. If a step
 does not follow, that is a defect in the course, not in the reader. Open an
-issue on [GitHub](https://github.com/shocklab/active-inference-course).
+issue on [GitHub](https://github.com/shocklab/Active-Inference-course).

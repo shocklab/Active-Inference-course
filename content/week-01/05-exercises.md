@@ -21,8 +21,8 @@ JAX version too.
 
 | Notebook | What it does | Run it |
 |---|---|---|
-| `week01_numpy.ipynb` | Bayes with states and observations, the evidence sum, explaining away, and the homeostasis simulation | [Colab](https://colab.research.google.com/github/shocklab/active-inference-course/blob/main/notebooks/week-01/week01_numpy.ipynb) |
-| `week01_jax.ipynb` | The same, vectorised: posteriors over a grid of priors at once, and 10,000 homeostasis runs in parallel to get the survival curve | [Colab](https://colab.research.google.com/github/shocklab/active-inference-course/blob/main/notebooks/week-01/week01_jax.ipynb) |
+| `week01_numpy.ipynb` | Bayes with states and observations, the evidence sum, explaining away, and the homeostasis simulation | [Colab](https://colab.research.google.com/github/shocklab/Active-Inference-course/blob/main/notebooks/week-01/week01_numpy.ipynb) |
+| `week01_jax.ipynb` | The same, vectorised: posteriors over a grid of priors at once, and 10,000 homeostasis runs in parallel to get the survival curve | [Colab](https://colab.research.google.com/github/shocklab/Active-Inference-course/blob/main/notebooks/week-01/week01_jax.ipynb) |
 
 There is no `pymdp` notebook this week. The library operates on the discrete
 generative models we meet in Week&nbsp;9; there is nothing here for it to do yet.

@@ -5,8 +5,8 @@
 A twelve-week open course deriving active inference in full, by Jonathan Shock,
 Department of Mathematics & Applied Mathematics, University of Cape Town.
 
-- **Repo:** https://github.com/shocklab/active-inference-course
-- **Pages:** https://shocklab.github.io/active-inference-course/ (served from `/docs` on `main`)
+- **Repo:** https://github.com/shocklab/Active-Inference-course
+- **Pages:** https://shocklab.github.io/Active-Inference-course/ (served from `/docs` on `main`)
 - **Licence:** CC BY 4.0. Authorised under clauses 8.2 and 9.2.1 of the UCT
   Intellectual Property Policy (2011). Suggested citation:
   `Shock, J. (2026). Active Inference [Open course]. University of Cape Town.`

@@ -127,7 +127,7 @@ FOOT = (
     "Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p>"
     '<p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. '
     "Derivations, figures, code and examples are the author&rsquo;s own. "
-    'Corrections and contributions welcome on <a href="https://github.com/shocklab/active-inference-course">GitHub</a>.</p>'
+    'Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p>'
     "</footer>"
 )
 

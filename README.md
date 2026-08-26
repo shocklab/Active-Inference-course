@@ -3,7 +3,7 @@
 A twelve-week open course that does the algebra the textbooks leave out, and lets
 you turn every knob.
 
-**Read it at [shocklab.github.io/active-inference-course](https://shocklab.github.io/active-inference-course/)**
+**Read it at [shocklab.github.io/Active-Inference-course](https://shocklab.github.io/Active-Inference-course/)**
 
 Active inference is a principled account of how a thing that persists must model
 the world it persists in, and how perception and action turn out to be the same
