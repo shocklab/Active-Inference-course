@@ -233,6 +233,12 @@ V["hs_sd_per_coord"] = V["hs_var_per_coord"] ** 0.5
 V["hs_rms_radius"] = (2 * V["hs_var_per_coord"]) ** 0.5
 V["hs_boundary_in_sd"] = 1 / V["hs_sd_per_coord"]
 V["hs_diffusive_steps"] = 1 / (2 * SIGMA ** 2)                # E|x|^2 = 2 t sigma^2 = 1
+# the gain's full range: stability needs 0 < kappa < 2, and kappa(2-kappa) is
+# maximised at kappa = 1, so the stationary variance is minimised there at sigma^2
+V["hs_var_at_1"] = SIGMA ** 2
+V["hs_sd_at_1"] = SIGMA
+for _k in (0.5, 1.0, 1.5, 1.9):
+    V[f"hs_var_k{str(_k).replace('.','')}"] = SIGMA ** 2 / (_k * (2 - _k))
 
 # ── a worked entropy example (Lesson 1) ──────────────────────────────────
 P_PEAKED = [0.94, 0.02, 0.02, 0.02]

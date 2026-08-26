@@ -20,7 +20,7 @@
     }
 
     var sigma = A.slider({ label: 'Noise &sigma;', min: 0.005, max: 0.09, step: 0.005, value: 0.035, decimals: 3 });
-    var gain = A.slider({ label: 'Action strength &kappa;', min: 0, max: 0.30, step: 0.01, value: 0, decimals: 2 });
+    var gain = A.slider({ label: 'Gain &kappa;', min: 0, max: 2.2, step: 0.05, value: 0, decimals: 2 });
     var out = A.readout();
 
     /* Keep the finished curve so the next run can be compared against it.
@@ -202,12 +202,16 @@
         A.button('Clear', function () { ghosts = []; reset(false); }, true)
       ]),
       out,
-      A.note('Run it once with <b>&kappa; = 0</b> until the boundary is crossed. Then press '
-        + '<b>New run</b>, raise <b>&kappa;</b>, and run again: the previous curve stays on the '
-        + 'right panel as a dashed line so you can compare them directly. Same noise, same physics. '
+      A.note('Run once with <b>&kappa; = 0</b> until the boundary is crossed. Then press '
+        + '<b>New run</b>, raise <b>&kappa;</b>, and go again: the previous curve stays on the '
+        + 'right panel as a dashed line, so the comparison is direct. Same noise, same physics. '
         + 'The unregulated curve climbs towards uniform occupancy and stops only because the '
-        + 'organism does. The regulated one flattens out well below it, and keeps flat. That '
-        + 'plateau is what we are going to spend twelve weeks explaining how to achieve.')
+        + 'organism does; the regulated one flattens out well below it and stays there. '
+        + 'Then try three more settings. At <b>&kappa; = 1</b> the error is erased every step '
+        + 'and the cloud is as tight as it can get. Past <b>&kappa; = 1</b> the trajectory starts '
+        + 'zigzagging across the centre instead of easing towards it, and at <b>&kappa; = 1.5</b> '
+        + 'it is exactly as spread out as it was at 0.5. Past <b>&kappa; = 2</b> the correction '
+        + 'overshoots so badly that it kills the organism on its own, with no help from the noise.')
     ]));
     reset(false);              /* state must exist before anything can draw */
     plot.attach(body);

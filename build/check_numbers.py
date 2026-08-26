@@ -49,6 +49,7 @@ ALLOW = {
     "26.6",   # shown deliberately as a BAD rounding, to demonstrate what it costs
     "0.94",   # a chosen probability defining the worked entropy example
     "0.8", "0.3",   # chosen probabilities in the blanket-breaking exercise
+    "1.5", "0.5",   # illustrative gains either side of the optimum
 }
 
 DECIMAL = re.compile(r"(?<![\w.])(\d+\.\d+)(?![\w.])")

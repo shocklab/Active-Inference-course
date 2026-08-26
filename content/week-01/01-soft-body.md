@@ -56,8 +56,19 @@ x_{t+1} \;=\; \underbrace{(1-\kappa)\,x_t}_{\text{pull back}}
 \ \text{independently at each step},
 $$ {#homeostat}
 
-absorbed the moment $\lVert x_t \rVert > 1$. Two parameters: $\sigma$ sets how hard
-the world pushes, $\kappa$ how hard the organism pushes back.
+absorbed the moment $\lVert x_t \rVert > 1$.
+
+Two parameters, and it pays to be exact about both. $\sigma$ is the size of one
+step of noise, in whatever units $x$ is measured in. $\kappa$ is dimensionless:
+it is the **fraction of the current displacement that the organism removes per
+step**. At $\kappa = 0.15$ the body cancels fifteen per cent of its error each
+step and lets the remaining eighty-five per cent stand. Biologically it is the
+gain of whatever loop does the regulating, whether that is shivering,
+vasoconstriction, or walking into the shade; a large $\kappa$ is a strong, fast
+correction.
+
+Written that way the parameter has a range worth exploring, and the figure's
+slider now covers it.
 
 **Why $\kappa = 0$ is fatal.** With no restoring term the increments are
 independent and mean-zero, so the variances add. After $t$ steps each coordinate
@@ -90,6 +101,61 @@ The walk has acquired a stationary distribution. At $\sigma = {{hs_sigma}}$ and
 $\kappa = {{hs_kappa}}$ this is $v = {{hs_var_per_coord:.5f}}$, a standard
 deviation of {{hs_sd_per_coord:.4f}} per coordinate, which puts the boundary at
 $\lVert x \rVert = 1$ about {{hs_boundary_in_sd:.0f}} standard deviations away.
+
+### How much regulation is the right amount?
+
+Strip the noise from [eq:homeostat] and the displacement is multiplied by
+$1 - \kappa$ each step. Whether the organism returns to the centre therefore
+depends on nothing more than whether that factor is smaller than one in
+magnitude, which requires
+
+$$
+0 < \kappa < 2 .
+$$ {#stability}
+
+Below zero the correction pushes the wrong way. Above two it overcorrects so
+violently that each step lands further out than the last. Between those bounds
+the behaviour changes character twice:
+
+| $\kappa$ | $1-\kappa$ | what the organism does | stationary variance |
+|---|---|---|---|
+| $0$ | $1$ | nothing; the walk diffuses away | unbounded |
+| $0 < \kappa < 1$ | positive | eases back towards the centre from one side | $\sigma^2/\kappa(2-\kappa)$ |
+| $1$ | $0$ | erases the whole error in a single step | $\sigma^2$ |
+| $1 < \kappa < 2$ | negative | overshoots, landing on the far side each time | $\sigma^2/\kappa(2-\kappa)$ |
+| $2$ | $-1$ | oscillates forever without settling | unbounded |
+
+The middle column explains the qualitative change. For $\kappa < 1$ the factor
+$1-\kappa$ is positive, so a body above the setpoint stays above it while
+approaching. For $\kappa > 1$ the factor is negative, so a body above the
+setpoint arrives below it and has to come back: the correction was too large.
+
+That gives the variance in [eq:stationary-var] a shape. Its denominator
+$\kappa(2-\kappa)$ is largest at $\kappa = 1$, so
+
+$$
+v_{\min} \;=\; \sigma^2 ,
+$$ {#best-gain}
+
+attained by correcting the error exactly once, completely. No regulation scheme
+of this form does better. Even a perfect controller carries one step's worth of
+noise, because the noise arrives *after* the correction and there is nothing to
+be done about it until the next step.
+
+::: keyidea
+Two things follow, and the second is easy to miss. **Too little regulation is
+fatal**, which is the point the figure opens with. But **too much regulation is
+also fatal**, and symmetrically so: since $\kappa(2-\kappa)$ is unchanged when
+$\kappa$ is replaced by $2-\kappa$, a gain of $1.5$ leaves a body exactly as
+spread out as a gain of $0.5$. Overcorrection is not a lesser sin than
+underreaction. It is the same sin measured from the other side, and Week&nbsp;5
+meets it again under a different name, when a system with its precisions set too
+high starts chasing its own noise.
+:::
+
+Push the figure's slider past $1$ and the trajectory changes visibly: instead of
+drifting back towards the middle it starts zigzagging across it, and past
+$\kappa = 2$ it leaves for good.
 
 ::: warning "Indefinitely" is the wrong word
 Note what [eq:stationary-var] does *not* say. The stationary distribution is

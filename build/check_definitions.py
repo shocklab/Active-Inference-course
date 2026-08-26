@@ -57,6 +57,7 @@ EXEMPT = {
     "\\Leftarrow", "\\Rightarrow", "\\Longrightarrow", "\\Longleftarrow",
     "\\xrightarrow", "\\iff", "\\implies", "\\forall", "\\exists", "\\lVert",
     "\\rVert", "\\underbrace", "\\qquad", "\\ \\", "\\sim",
+    "\\min", "\\max", "\\inf", "\\sup", "\\arg",
     "\\langle", "\\rangle", "\\lVert", "\\rVert", "\\colon", "\\operatorname",
     "e", "i", "j", "k", "n", "m", "c", "x", "y", "z",   # generic dummies and indices
 }
