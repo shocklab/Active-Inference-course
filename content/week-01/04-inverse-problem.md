@@ -49,8 +49,11 @@ smuggling in enough prior structure to restore well-posedness.
 
 ## Explaining away, and why it ruins the obvious shortcut
 
-Here is the natural idea for beating the cost. If the state has many parts, do
-not reason about the joint state at all. Reason about each part separately. If
+Here is the natural idea for beating the cost. Suppose the state breaks into
+several independent parts, one per thing the agent tracks: position, hunger,
+wind, whether a predator is about. Each such part is a **state factor**, and
+the joint state is one choice from every factor at once. If the state has
+factors, do not reason about the joint state at all. Reason about each part separately. If
 your model has $n$ factors with $k$ values each, that turns $k^n$ into $nk$, and
 the problem evaporates.
 
@@ -58,7 +61,9 @@ It does not work, and understanding exactly why it does not work is the single
 most useful thing in this lesson, because Week&nbsp;4 is going to do it anyway
 and you need to know what is being given up.
 
-Take two independent causes. A **gust** of wind, and a **baboon**. Either can
+Take two independent causes. This is a new and smaller model than the three-
+state one of Lesson 3, chosen because two competing causes are the fewest that
+can compete: a **gust** of wind, and a **baboon**. Either can
 make a branch shake. Each is uncommon on its own:
 
 $$
@@ -92,8 +97,8 @@ $$
 
 up from $0.1$. So far so unremarkable. Now look at the joint. If the posterior
 factorised, the probability of *both* causes being present would be the product
-of the marginals, ${{noisy_marg_gust:.3f}}^2 = {{noisy_prod_marginals:.3f}}$. The actual value in the
-table is ${{noisy_post_11:.3f}}$, smaller by a factor of nearly five.
+of the marginals, ${{noisy_marg_gust:.3f}}^2 = {{noisy_prod_marginals:.3f}}$. The actual value in the table is ${{noisy_post_11:.3f}}$, smaller by a factor
+of {{noisy_collapse_ratio:.1f}}.
 
 The causes started independent and the observation made them dependent. They are
 now strongly anticorrelated, and you can read the strength directly:
@@ -119,8 +124,10 @@ others. The intractable sum does not decompose.
 Explaining away is also, incidentally, why the phenomenon is worth caring about
 outside of a mathematics course. It is a real property of perception, it is what
 makes a plausible alternative explanation reduce your confidence in the first
-one, and it is a standard test of whether a candidate neural circuit is really
-doing Bayesian inference or only imitating it.
+one, and it is one of the sharper tests of whether a candidate neural circuit is
+really doing inference: a circuit that merely accumulates evidence for each
+cause separately cannot produce it, because the effect requires the causes to
+see one another.
 
 ## What can actually be done
 
@@ -157,21 +164,30 @@ is exactly what gradient descent on a free energy gives you.
 
 ::: warning What the third option costs
 The family of distributions $Q$ has to be one you can compute with, and by far
-the commonest choice is the family that factorises across state factors:
-$Q(s_1, s_2) = Q(s_1)Q(s_2)$. Look back at [eq:explaining-away]. That family
+the commonest choice is the family that factorises across state factors,
+$Q(s_{\text{gust}}, s_{\text{bab}}) = Q(s_{\text{gust}})\,Q(s_{\text{bab}})$,
+or $Q(s_1, s_2) = Q(s_1)Q(s_2)$ once we stop naming them. Look back at [eq:explaining-away]. That family
 cannot represent the true posterior, because the true posterior is correlated
 and no product of marginals is. The best factorised approximation to the
-posterior in the table above still sits ${{noisy_meanfield_gap:.3f}}$ nats away from it.
+posterior in the table above sits a measurable distance from it. How far depends
+on what "best" means, and the two obvious answers disagree.
 
-The approximation is not free and it fails in a specific direction: it
-underestimates how much the causes are competing. Week&nbsp;4 will make this
-precise. For now, register that "mean-field" is the name of a compromise, and
-that you have already seen exactly what is being compromised.
+Match the true marginals and the gap is ${{noisy_gap_forward:.3f}}$ nats. But
+variational inference does not match marginals. It minimises the divergence the
+other way round, and the best factorised $Q$ by that measure sits
+${{noisy_gap_reverse:.3f}}$ nats away. Worse, it gets there by abandoning
+symmetry: it settles near ${{noisy_mf_bab:.2f}}$ for one cause and
+${{noisy_mf_gust:.2f}}$ for the other, picking a side rather than splitting the
+difference, when the true posterior puts both at ${{noisy_marg_gust:.3f}}$.
+
+Which direction you minimise is therefore not a detail, and Week&nbsp;4 has to
+say which one active inference uses and why. For now: "mean-field" is the name of
+a compromise, and you have just seen what is being compromised.
 :::
 
 ::: exercise Where does explaining away go?
-In the two-cause example, make the observation uninformative by setting both
-cause strengths to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
+In the two-cause example, make the observation uninformative by setting both cause strengths (the $0.9$
+coefficients in [eq:noisy-or]) to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
 Without computing anything, say what the posterior is and whether the two causes
 remain independent. Then explain what feature of [eq:noisy-or] is responsible
 for the coupling in the original example.
@@ -200,8 +216,11 @@ With $k = 2$ and $n = 15$ the sum has $2^{15} = {{terms_15_binary:,}}$ terms, wh
 nothing: a modern processor does this in microseconds.
 
 For the second part, $2^n > 4.4\times10^{26}$ requires
-$n > \log_2(4.4\times10^{26}) = {{log10_universe:.1f}}/\log_{10} 2 \approx {{log2_universe:.1f}}$, so $n = {{factors_to_exceed_universe:d}}$
-factors. Adding {{factors_to_add:d}} binary variables to a tractable problem makes it impossible
+$n > \log_2(4.4\times10^{26}) = {{log2_universe:.2f}}$, so
+$n = {{factors_to_exceed_universe:d}}$ factors. Working in base ten instead,
+$\log_{10}(4.4\times10^{26}) = {{log10_universe:.3f}}$, and dividing by
+$\log_{10}2$ gives the same answer. Keep the third decimal: rounding that to
+$26.6$ before dividing costs you more than a tenth of a factor. Adding {{factors_to_add:d}} binary variables to a tractable problem makes it impossible
 for any physical computer, ever. This is what is meant by saying the difficulty
 is structural rather than an engineering matter, and it is why the response has
 to be a different algorithm rather than a bigger machine.

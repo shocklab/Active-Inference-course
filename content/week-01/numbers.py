@@ -91,10 +91,17 @@ for _k in range(4):
 # lifetime scaling, stated as a multiple (Lesson 5 exercise)
 # (sigma_ratio defined below, after the sigmas)
 
-# mutual information of the running model (Lesson 3)
-V["mutual_information"] = sum(
+# mutual information, per model. The names carry the model deliberately: a bare
+# "mutual_information" was quoted in the wrong example's solution and shipped a
+# value that was right for a different matrix.
+V["mi_leopard_model"] = sum(
     posterior(A, PRIOR, o)[1] * kl(posterior(A, PRIOR, o)[0], PRIOR) for o in range(3)
 )
+V["mi_counterexample"] = sum(
+    posterior(A_CTR, PRIOR_CTR, o)[1] * kl(posterior(A_CTR, PRIOR_CTR, o)[0], PRIOR_CTR)
+    for o in range(3)
+)
+V["ctr_prob_ratio"] = V["ctr_ev_1"] / V["ctr_ev_3"]
 
 # ── explaining away (Lesson 4) ───────────────────────────────────────────
 P_CAUSE, STRENGTH, LEAK = 0.1, 0.9, 0.01
@@ -137,9 +144,42 @@ V["noisy_prod_marginals"] = _m1 * _m2
 V["noisy_bab_given_gust1"] = V["noisy_post_11"] / _m1
 V["noisy_bab_given_gust0"] = V["noisy_post_01"] / (1 - _m1)
 
+# Two different "best factorised approximations", and they disagree. The forward
+# direction uses the true marginals; variational inference minimises the REVERSE
+# direction, which is what the course actually goes on to do.
 _p = [V["noisy_post_00"], V["noisy_post_10"], V["noisy_post_01"], V["noisy_post_11"]]
-_q = [(1 - _m1) * (1 - _m2), _m1 * (1 - _m2), (1 - _m1) * _m2, _m1 * _m2]
-V["noisy_meanfield_gap"] = kl(_p, _q)
+_q_marg = [(1 - _m1) * (1 - _m2), _m1 * (1 - _m2), (1 - _m1) * _m2, _m1 * _m2]
+V["noisy_gap_forward"] = kl(_p, _q_marg)
+
+
+def _cavi(P, iters=400):
+    """Coordinate ascent mean-field: the reverse-KL optimum over q(s1)q(s2).
+
+    P is indexed [s1][s2]. This is the Week 4 algorithm, run here so the number
+    quoted in Lesson 4 is the one that algorithm actually reaches. Started off
+    the symmetric point, because the symmetric solution is a saddle here and a
+    symmetric start would sit on it and report the wrong answer.
+    """
+    from math import exp, log
+    q1, q2 = [0.55, 0.45], [0.45, 0.55]
+    for _ in range(iters):
+        for a in (0, 1):
+            pass
+        new1 = [exp(sum(q2[b] * log(max(P[a][b], 1e-300)) for b in (0, 1))) for a in (0, 1)]
+        z = sum(new1); q1 = [x / z for x in new1]
+        new2 = [exp(sum(q1[a] * log(max(P[a][b], 1e-300)) for a in (0, 1))) for b in (0, 1)]
+        z = sum(new2); q2 = [x / z for x in new2]
+    return q1, q2
+
+
+_P = [[V["noisy_post_00"], V["noisy_post_01"]],
+      [V["noisy_post_10"], V["noisy_post_11"]]]
+_q1, _q2 = _cavi(_P)
+V["noisy_mf_gust"] = _q1[1]
+V["noisy_mf_bab"] = _q2[1]
+_q_rev = [_q1[0] * _q2[0], _q1[1] * _q2[0], _q1[0] * _q2[1], _q1[1] * _q2[1]]
+V["noisy_gap_reverse"] = kl(_q_rev, _p)
+V["noisy_collapse_ratio"] = V["noisy_prod_marginals"] / V["noisy_post_11"]
 
 # three causes (Lesson 5 exercise)
 _st3, _, _post3, _ev3 = noisy_or_posterior(3)

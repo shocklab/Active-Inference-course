@@ -25,9 +25,10 @@ surface.
 
 Write $\vartheta$ for the true state of the world and $o$ for what arrives at the
 sensory surface. The generative process specifies how $\vartheta$ evolves, and how
-$\vartheta$ gives rise to $o$. It also specifies how the agent's actions $a$ feed
-back into $\vartheta$, because an agent that could not change the world would not
-be much of an agent.
+$\vartheta$ gives rise to $o$. Write $a$ for the agent's **actions**. The process also specifies how $a$ feeds
+back into $\vartheta$, and it has to: an agent that could only watch would have no
+way of staying in the small region of Lesson&nbsp;1, since staying there is
+something a body does rather than something that happens to it.
 
 The agent does not have access to $\vartheta$. Not partially, not noisily: not at
 all. Everything the agent will ever know about the world it must extract from
@@ -57,10 +58,12 @@ head. It is not $\vartheta$, it need not correspond to anything in $\vartheta$,
 and there is no requirement that the two even have the same dimension or the
 same type.
 
-The likelihood $P(o \mid s)$ says what observations the agent expects if the
-world is in model-state $s$. The prior $P(s)$ says which model-states the agent
+The likelihood $P(o \mid s)$ says what observations the agent expects when the
+model-state is $s$. Note the phrasing: not *when the world is in state $s$*,
+because the world is not in any model-state at all. The model-state is a variable
+inside the agent. The prior $P(s)$ says which model-states the agent
 expects before looking. Together they specify a joint distribution, and from a
-joint distribution you can in principle compute anything.
+joint distribution every marginal and every conditional follows in principle.
 
 ::: fig The two structures and the surface between them. Everything to the left of the sensory and active states belongs to the world. Everything to the right belongs to the agent. The two never touch directly.
 <svg viewBox="0 0 720 268" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: the generative process on the left, the agent's generative model on the right, coupled only through sensory states o and active states a.">
@@ -113,8 +116,22 @@ variables sitting on them have names. The **sensory states** are the observation
 $o$ of Lesson&nbsp;1, seen now as one half of an interface rather than as a bare
 measurement; they carry information inward. The **active states** $a$ carry
 influence outward. Nothing crosses except through the two. That interface is
-called a **Markov blanket**, and it is the formal statement of the idea that you
-never perceive the world, only your own surface.
+called a **Markov blanket**. The name is borrowed from graphical models, and it
+carries the usual meaning: conditioned on the blanket, what is inside is
+independent of what is outside. Here that reads
+
+$$
+P(\vartheta, \mu \mid o, a) \;=\; P(\vartheta \mid o, a)\; P(\mu \mid o, a),
+$$ {#blanket}
+
+writing $\mu$ for the agent's internal states. Knowing the sensory and active
+states renders the world and the inside of the agent conditionally independent:
+any influence one has on the other has already passed through the blanket. That
+is the formal version of the claim that you never perceive the world, only your
+own surface.
+
+Whether real organisms have blankets in this sense, and whether the ones drawn in
+the literature are found or imposed, is a live argument. Week&nbsp;12 takes it up.
 
 The four-way partition into external, sensory, active and internal states is
 standard in this literature, and you will meet all four names again in
@@ -123,20 +140,23 @@ Week&nbsp;5, where the internal states acquire a letter of their own.
 ::: warning A model can be wrong and still be a model
 Nothing above requires $P(o \mid s)$ to be the true likelihood, or $P(s)$ to be
 the true distribution over anything. The agent's model is a hypothesis. Much of
-what makes active inference interesting, and all of what makes it useful for
-modelling psychopathology, comes from watching what happens when the model and
-the process disagree in structured ways.
+what makes active inference interesting comes from watching what happens when the
+model and the process disagree in structured ways, which is also the route by
+which the framework has been applied to psychiatric conditions.
 :::
 
 ## What follows from keeping them apart
 
 Three things become clear once you keep the two apart, and stay muddy if you do not.
 
-**Where the intractability lives.** The sum we will spend the next three weeks
-trying to avoid is over the agent's $s$, not the world's $\vartheta$. The world
+**Where the intractability lives.** To use the model you need the probability of
+an observation on its own, $P(o) = \sum_s P(o \mid s) P(s)$, and that sum runs
+over the agent's $s$, not the world's $\vartheta$. Avoiding it occupies the next
+three weeks. The world
 does not compute anything. It has no marginalisation problem. The difficulty is
-entirely on the agent's side of the blanket, which is why it can be solved by
-building a better agent.
+entirely on the agent's side of the blanket. That is a useful place for it to be:
+it makes the problem one of algorithm rather than physics, so it can be attacked
+by choosing a better approximation scheme, which is what Week&nbsp;4 does.
 
 **What "surprise" refers to.** An observation is surprising relative to
 $P(o)$ computed from the agent's model. The world does not find anything
@@ -147,15 +167,18 @@ models.
 **What action does.** Action does not change $P(o \mid s)$ or $P(s)$; those are
 the agent's own commitments. Action changes $\vartheta$, and therefore changes
 which $o$ shows up next. Perception moves the model towards the data; action
-moves the data towards the model. They act on opposite sides of the blanket, and
-this is why one quantity can govern both without the whole thing collapsing into
-wishful thinking.
+moves the data towards the model. They act on opposite sides of the blanket. That is what lets a single quantity,
+the free energy of Week&nbsp;4, govern both: perception cannot cheat by simply
+deciding the data are whatever the model wanted, because the data are on the far
+side of the interface and only action can reach them.
 
 ::: remark A last confusion worth heading off
 The agent's states $s$ are usually described as its "beliefs". This is a
 technical use of the word. A belief here is a probability distribution held by
 some part of a system, of the sort a Kalman filter has. It carries no
-implication of awareness, and thermostats have them.
+implication of awareness. A Kalman filter has beliefs in exactly this sense; an
+ordinary bimetallic thermostat does not, since it holds no distribution over
+anything, which is worth noticing because it means the word is not vacuous.
 :::
 
 ## Notation to carry forward

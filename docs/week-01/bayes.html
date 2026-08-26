@@ -362,7 +362,7 @@ denominator. It is worth spending a page on why that is, because if you leave
 this lesson thinking Bayes' theorem is hard, you have taken away the wrong
 lesson. Bayes' theorem is trivial. The sum underneath it is not.</p>
 <h2 id="the-four-quantities-named"><span class="secno">1</span>The four quantities, named</h2>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$P(s)$, the prior</th><td>What the agent expects before it looks. Not a statement about the world's frequencies; a statement about the agent's commitments.</td></tr><tr><th>$P(o \mid s)$, the likelihood</th><td>Read as a function of $s$ for fixed $o$, this scores how well each state would account for the data you actually got. It is not a distribution over $s$ and does not sum to one over $s$.</td></tr><tr><th>$P(o)$, the evidence</th><td>The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from Lesson&nbsp;1.</td></tr><tr><th>$P(s \mid o)$, the posterior</th><td>The updated belief. Prior reweighted by how well each state explains the data, then renormalised.</td></tr></tbody></table></div>
+<div class="tablewrap"><table class="notation"><tbody><tr><th>$P(s)$, the prior</th><td>What the agent expects before it looks. In this framework a prior is read as the agent's own commitment rather than as a measured frequency in the world. That reading is a choice, and Week&nbsp;12 returns to what it costs.</td></tr><tr><th>$P(o \mid s)$, the likelihood</th><td>Read as a function of $s$ for fixed $o$, this scores how well each state would account for the data you actually got. It is not a distribution over $s$ and does not sum to one over $s$.</td></tr><tr><th>$P(o)$, the evidence</th><td>The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from Lesson&nbsp;1.</td></tr><tr><th>$P(s \mid o)$, the posterior</th><td>The updated belief. Prior reweighted by how well each state explains the data, then renormalised.</td></tr></tbody></table></div>
 <p>Two of these deserve a moment.</p>
 <p>The likelihood is a <strong>column</strong> of a matrix, not a row. If you tabulate
 $P(o \mid s)$ with observations down the side and states across the top, then
@@ -371,8 +371,9 @@ When an observation arrives you pick out the corresponding row and read it
 across the states. That row is not a distribution and there is no reason at all
 for it to sum to one. Students trip over this constantly; the matrix does not
 care which way you read it, but the normalisation does.</p>
-<aside class="mn"><span class="mnl">Rows and columns</span><p>We will write this matrix $\mathbf{A}$ from Week&nbsp;9 onwards, with
-$A_{ij} = P(o = i \mid s = j)$. Columns sum to one. Remember it now and the
+<aside class="mn"><span class="mnl">Rows and columns</span><p>From Week&nbsp;9 this matrix is written $\mathbf{A}$, with
+$A_{ij} = P(o = i \mid s = j)$, and the problems at the end of this week already
+use that name. Columns sum to one. Remember it now and the
 discrete half of the course will cost you much less pain.</p></aside>
 <p>The evidence is the odd one out, because it is the only term that requires you
 to know about states you did not observe and are not asking about. To evaluate
@@ -555,14 +556,14 @@ state, $o_3$ turns up 5% of the time.</p>
 </table></div>
 <p>The rarest observation, $o_3$, is by some distance the most surprising, and it
 leaves the posterior exactly where the prior was. The most informative
-observation, $o_1$, is six times more probable.</p>
+observation, $o_1$, is 7 times more probable.</p>
 <p>The structural reason is that the two quantities are averages of different
 things. Averaging surprise over $P(o)$ gives the entropy $\mathrm{H}[P(o)]$;
 averaging information gain over $P(o)$ gives the <strong>mutual information</strong> between
 states and observations,</p>
 <div class="eqn"><div class="eqbody">$$I(s;o) \;=\; \sum_{o} P(o) \, D_{\mathrm{KL}}\big[P(s \mid o) \,\|\, P(s)\big],$$</div></div>
 <p>which measures how much, on average, an observation tells you about the state.
-For the model above it is 0.371 nats: the average of the three
+For the three-observation model above it is 0.153 nats: the average of the three
 information gains, weighted by how often each observation actually occurs.
 Nothing links them pointwise. An observation is surprising when the model
 thought it unlikely; it is informative when the states disagree about it. A

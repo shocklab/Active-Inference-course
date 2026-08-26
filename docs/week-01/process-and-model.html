@@ -365,9 +365,10 @@ agents dictate, and some of what they do impinges on the agent's sensory
 surface.</p>
 <p>Write $\vartheta$ for the true state of the world and $o$ for what arrives at the
 sensory surface. The generative process specifies how $\vartheta$ evolves, and how
-$\vartheta$ gives rise to $o$. It also specifies how the agent's actions $a$ feed
-back into $\vartheta$, because an agent that could not change the world would not
-be much of an agent.</p>
+$\vartheta$ gives rise to $o$. Write $a$ for the agent's <strong>actions</strong>. The process also specifies how $a$ feeds
+back into $\vartheta$, and it has to: an agent that could only watch would have no
+way of staying in the small region of Lesson&nbsp;1, since staying there is
+something a body does rather than something that happens to it.</p>
 <p>The agent does not have access to $\vartheta$. Not partially, not noisily: not at
 all. Everything the agent will ever know about the world it must extract from
 $o$, and later from the consequences of its own $a$.</p>
@@ -386,10 +387,12 @@ quantities the agent treats as their causes:</p>
 head. It is not $\vartheta$, it need not correspond to anything in $\vartheta$,
 and there is no requirement that the two even have the same dimension or the
 same type.</p>
-<p>The likelihood $P(o \mid s)$ says what observations the agent expects if the
-world is in model-state $s$. The prior $P(s)$ says which model-states the agent
+<p>The likelihood $P(o \mid s)$ says what observations the agent expects when the
+model-state is $s$. Note the phrasing: not <em>when the world is in state $s$</em>,
+because the world is not in any model-state at all. The model-state is a variable
+inside the agent. The prior $P(s)$ says which model-states the agent
 expects before looking. Together they specify a joint distribution, and from a
-joint distribution you can in principle compute anything.</p>
+joint distribution every marginal and every conditional follows in principle.</p>
 <figure id="fig-1-2-1"><svg viewBox="0 0 720 268" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: the generative process on the left, the agent's generative model on the right, coupled only through sensory states o and active states a.">
   <defs>
     <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -438,23 +441,35 @@ variables sitting on them have names. The <strong>sensory states</strong> are th
 $o$ of Lesson&nbsp;1, seen now as one half of an interface rather than as a bare
 measurement; they carry information inward. The <strong>active states</strong> $a$ carry
 influence outward. Nothing crosses except through the two. That interface is
-called a <strong>Markov blanket</strong>, and it is the formal statement of the idea that you
-never perceive the world, only your own surface.</p>
+called a <strong>Markov blanket</strong>. The name is borrowed from graphical models, and it
+carries the usual meaning: conditioned on the blanket, what is inside is
+independent of what is outside. Here that reads</p>
+<div class="eqn" id="eq-blanket"><div class="eqbody">$$P(\vartheta, \mu \mid o, a) \;=\; P(\vartheta \mid o, a)\; P(\mu \mid o, a),$$</div><div class="eqno"><a href="#eq-blanket" title="Link to equation 1.2.2">(1.2.2)</a></div></div>
+<p>writing $\mu$ for the agent's internal states. Knowing the sensory and active
+states renders the world and the inside of the agent conditionally independent:
+any influence one has on the other has already passed through the blanket. That
+is the formal version of the claim that you never perceive the world, only your
+own surface.</p>
+<p>Whether real organisms have blankets in this sense, and whether the ones drawn in
+the literature are found or imposed, is a live argument. Week&nbsp;12 takes it up.</p>
 <p>The four-way partition into external, sensory, active and internal states is
 standard in this literature, and you will meet all four names again in
 Week&nbsp;5, where the internal states acquire a letter of their own.</p>
 <div class="box warning"><div class="boxhd">Careful<span class="bt">A model can be wrong and still be a model</span></div><p>Nothing above requires $P(o \mid s)$ to be the true likelihood, or $P(s)$ to be
 the true distribution over anything. The agent's model is a hypothesis. Much of
-what makes active inference interesting, and all of what makes it useful for
-modelling psychopathology, comes from watching what happens when the model and
-the process disagree in structured ways.</p></div>
+what makes active inference interesting comes from watching what happens when the
+model and the process disagree in structured ways, which is also the route by
+which the framework has been applied to psychiatric conditions.</p></div>
 <h2 id="what-follows-from-keeping-them-apart"><span class="secno">3</span>What follows from keeping them apart</h2>
 <p>Three things become clear once you keep the two apart, and stay muddy if you do not.</p>
-<p><strong>Where the intractability lives.</strong> The sum we will spend the next three weeks
-trying to avoid is over the agent's $s$, not the world's $\vartheta$. The world
+<p><strong>Where the intractability lives.</strong> To use the model you need the probability of
+an observation on its own, $P(o) = \sum_s P(o \mid s) P(s)$, and that sum runs
+over the agent's $s$, not the world's $\vartheta$. Avoiding it occupies the next
+three weeks. The world
 does not compute anything. It has no marginalisation problem. The difficulty is
-entirely on the agent's side of the blanket, which is why it can be solved by
-building a better agent.</p>
+entirely on the agent's side of the blanket. That is a useful place for it to be:
+it makes the problem one of algorithm rather than physics, so it can be attacked
+by choosing a better approximation scheme, which is what Week&nbsp;4 does.</p>
 <p><strong>What "surprise" refers to.</strong> An observation is surprising relative to
 $P(o)$ computed from the agent's model. The world does not find anything
 surprising. Two agents receiving identical sense data can be surprised to
@@ -463,13 +478,16 @@ models.</p>
 <p><strong>What action does.</strong> Action does not change $P(o \mid s)$ or $P(s)$; those are
 the agent's own commitments. Action changes $\vartheta$, and therefore changes
 which $o$ shows up next. Perception moves the model towards the data; action
-moves the data towards the model. They act on opposite sides of the blanket, and
-this is why one quantity can govern both without the whole thing collapsing into
-wishful thinking.</p>
+moves the data towards the model. They act on opposite sides of the blanket. That is what lets a single quantity,
+the free energy of Week&nbsp;4, govern both: perception cannot cheat by simply
+deciding the data are whatever the model wanted, because the data are on the far
+side of the interface and only action can reach them.</p>
 <div class="box remark"><div class="boxhd">Remark<span class="bt">A last confusion worth heading off</span></div><p>The agent's states $s$ are usually described as its "beliefs". This is a
 technical use of the word. A belief here is a probability distribution held by
 some part of a system, of the sort a Kalman filter has. It carries no
-implication of awareness, and thermostats have them.</p></div>
+implication of awareness. A Kalman filter has beliefs in exactly this sense; an
+ordinary bimetallic thermostat does not, since it holds no distribution over
+anything, which is worth noticing because it means the word is not vacuous.</p></div>
 <h2 id="notation-to-carry-forward"><span class="secno">4</span>Notation to carry forward</h2>
 <div class="tablewrap"><table class="notation"><tbody><tr><th>$\vartheta$</th><td>True states of the world. The generative <em>process</em>. The agent never sees these.</td></tr><tr><th>$s$</th><td>Hidden states in the agent's generative <em>model</em>. Latent variables the agent infers.</td></tr><tr><th>$o$</th><td>Observations, the sensory states on the blanket. Shared by both sides.</td></tr><tr><th>$a$</th><td>Actions, the active states on the blanket. Chosen by the agent, felt by the world.</td></tr><tr><th>$P(o \mid s)$</th><td>The likelihood. What the model says each state predicts.</td></tr><tr><th>$P(s)$</th><td>The prior over states, before any observation.</td></tr><tr><th>$P(o)$</th><td>The model evidence, or marginal likelihood. The quantity whose logarithm is minus the surprise.</td></tr><tr><th>$P(s \mid o)$</th><td>The posterior. What the agent should believe after seeing $o$. The object of the next two lessons.</td></tr></tbody></table></div>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>

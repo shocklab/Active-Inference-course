@@ -380,14 +380,19 @@ depends continuously on the data. Model inversion routinely fails the second
 and third. Every practical method for solving it is, at bottom, a way of
 smuggling in enough prior structure to restore well-posedness.</p></aside>
 <h2 id="explaining-away-and-why-it-ruins-the-obvious-shortcut"><span class="secno">2</span>Explaining away, and why it ruins the obvious shortcut</h2>
-<p>Here is the natural idea for beating the cost. If the state has many parts, do
-not reason about the joint state at all. Reason about each part separately. If
+<p>Here is the natural idea for beating the cost. Suppose the state breaks into
+several independent parts, one per thing the agent tracks: position, hunger,
+wind, whether a predator is about. Each such part is a <strong>state factor</strong>, and
+the joint state is one choice from every factor at once. If the state has
+factors, do not reason about the joint state at all. Reason about each part separately. If
 your model has $n$ factors with $k$ values each, that turns $k^n$ into $nk$, and
 the problem evaporates.</p>
 <p>It does not work, and understanding exactly why it does not work is the single
 most useful thing in this lesson, because Week&nbsp;4 is going to do it anyway
 and you need to know what is being given up.</p>
-<p>Take two independent causes. A <strong>gust</strong> of wind, and a <strong>baboon</strong>. Either can
+<p>Take two independent causes. This is a new and smaller model than the three-
+state one of Lesson 3, chosen because two competing causes are the fewest that
+can compete: a <strong>gust</strong> of wind, and a <strong>baboon</strong>. Either can
 make a branch shake. Each is uncommon on its own:</p>
 <div class="eqn"><div class="eqbody">$$P(s_{\text{gust}} = 1) = P(s_{\text{bab}} = 1) = 0.1,$$</div></div>
 <p>and, importantly, they are independent <em>a priori</em>: wind does not summon baboons.
@@ -447,8 +452,8 @@ $1.714$ nats of surprise. Both marginals move the same way and by a lot:</p>
 <div class="eqn"><div class="eqbody">$$P(s_{\text{gust}} = 1 \mid o) \;=\; P(s_{\text{bab}} = 1 \mid o) \;=\; 0.505,$$</div></div>
 <p>up from $0.1$. So far so unremarkable. Now look at the joint. If the posterior
 factorised, the probability of <em>both</em> causes being present would be the product
-of the marginals, $0.505^2 = 0.255$. The actual value in the
-table is $0.055$, smaller by a factor of nearly five.</p>
+of the marginals, $0.505^2 = 0.255$. The actual value in the table is $0.055$, smaller by a factor
+of 4.6.</p>
 <p>The causes started independent and the observation made them dependent. They are
 now strongly anticorrelated, and you can read the strength directly:</p>
 <div class="eqn" id="eq-explaining-away"><div class="eqbody">$$P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 1,\, o) = 0.109,
@@ -465,8 +470,10 @@ others. The intractable sum does not decompose.</p></div>
 <p>Explaining away is also, incidentally, why the phenomenon is worth caring about
 outside of a mathematics course. It is a real property of perception, it is what
 makes a plausible alternative explanation reduce your confidence in the first
-one, and it is a standard test of whether a candidate neural circuit is really
-doing Bayesian inference or only imitating it.</p>
+one, and it is one of the sharper tests of whether a candidate neural circuit is
+really doing inference: a circuit that merely accumulates evidence for each
+cause separately cannot produce it, because the effect requires the causes to
+see one another.</p>
 <h2 id="what-can-actually-be-done"><span class="secno">3</span>What can actually be done</h2>
 <p>There are three families of response, and the entire structure of Part&nbsp;I is
 a tour of them.</p>
@@ -493,17 +500,25 @@ a dynamical system. An animal does not get to say "my chain has not mixed yet".
 It gets to have a current best guess that is being continuously corrected, which
 is exactly what gradient descent on a free energy gives you.</p></div>
 <div class="box warning"><div class="boxhd">Careful<span class="bt">What the third option costs</span></div><p>The family of distributions $Q$ has to be one you can compute with, and by far
-the commonest choice is the family that factorises across state factors:
-$Q(s_1, s_2) = Q(s_1)Q(s_2)$. Look back at <a class="eqref" href="#eq-explaining-away">(1.4.2)</a>. That family
+the commonest choice is the family that factorises across state factors,
+$Q(s_{\text{gust}}, s_{\text{bab}}) = Q(s_{\text{gust}})\,Q(s_{\text{bab}})$,
+or $Q(s_1, s_2) = Q(s_1)Q(s_2)$ once we stop naming them. Look back at <a class="eqref" href="#eq-explaining-away">(1.4.2)</a>. That family
 cannot represent the true posterior, because the true posterior is correlated
 and no product of marginals is. The best factorised approximation to the
-posterior in the table above still sits $0.369$ nats away from it.</p>
-<p>The approximation is not free and it fails in a specific direction: it
-underestimates how much the causes are competing. Week&nbsp;4 will make this
-precise. For now, register that "mean-field" is the name of a compromise, and
-that you have already seen exactly what is being compromised.</p></div>
-<div class="box exercise"><div class="boxhd">Exercise 1<span class="bt">Where does explaining away go?</span></div><p>In the two-cause example, make the observation uninformative by setting both
-cause strengths to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
+posterior in the table above sits a measurable distance from it. How far depends
+on what "best" means, and the two obvious answers disagree.</p>
+<p>Match the true marginals and the gap is $0.369$ nats. But
+variational inference does not match marginals. It minimises the divergence the
+other way round, and the best factorised $Q$ by that measure sits
+$0.499$ nats away. Worse, it gets there by abandoning
+symmetry: it settles near $0.76$ for one cause and
+$0.26$ for the other, picking a side rather than splitting the
+difference, when the true posterior puts both at $0.505$.</p>
+<p>Which direction you minimise is therefore not a detail, and Week&nbsp;4 has to
+say which one active inference uses and why. For now: "mean-field" is the name of
+a compromise, and you have just seen what is being compromised.</p></div>
+<div class="box exercise"><div class="boxhd">Exercise 1<span class="bt">Where does explaining away go?</span></div><p>In the two-cause example, make the observation uninformative by setting both cause strengths (the $0.9$
+coefficients in <a class="eqref" href="#eq-noisy-or">(1.4.1)</a>) to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
 Without computing anything, say what the posterior is and whether the two causes
 remain independent. Then explain what feature of <a class="eqref" href="#eq-noisy-or">(1.4.1)</a> is responsible
 for the coupling in the original example.</p><details><summary>Solution</summary><p>With $P(o=1\mid s)$ constant across states, the likelihood is a constant factor
@@ -523,8 +538,11 @@ evidence sum, and state how many factors could be added before the sum exceeds
 the number of nanoseconds since the Big Bang, roughly $4.4 \times 10^{26}$.</p><details><summary>Solution</summary><p>With $k = 2$ and $n = 15$ the sum has $2^{15} = 32,768$ terms, which is
 nothing: a modern processor does this in microseconds.</p>
 <p>For the second part, $2^n > 4.4\times10^{26}$ requires
-$n > \log_2(4.4\times10^{26}) = 26.6/\log_{10} 2 \approx 88.5$, so $n = 89$
-factors. Adding 74 binary variables to a tractable problem makes it impossible
+$n > \log_2(4.4\times10^{26}) = 88.51$, so
+$n = 89$ factors. Working in base ten instead,
+$\log_{10}(4.4\times10^{26}) = 26.643$, and dividing by
+$\log_{10}2$ gives the same answer. Keep the third decimal: rounding that to
+$26.6$ before dividing costs you more than a tenth of a factor. Adding 74 binary variables to a tractable problem makes it impossible
 for any physical computer, ever. This is what is meant by saying the difficulty
 is structural rather than an engineering matter, and it is why the response has
 to be a different algorithm rather than a bigger machine.</p></details></div>

@@ -67,23 +67,23 @@ mistake hard to find. Check the column sums.
 
 ::: exercise The prior does the work
 Using the leopard, baboon and nothing model from Lesson&nbsp;3, find the value
-of the leopard prior $q$ at which observing a tawny flash leaves you exactly
+of the leopard prior $\rho$ at which observing a tawny flash leaves you exactly
 undecided between leopard and not-leopard, that is,
 $P(s = \text{leopard} \mid o) = 1/2$. Keep the baboon and nothing priors in the
-ratio $22 : 70$ as $q$ varies.
+ratio $22 : 70$ as $\rho$ varies.
 ---solution---
-Let the leopard prior be $q$. The other two share $1 - q$ in the ratio
-$22:70$, so they are $\tfrac{22}{92}(1-q)$ and $\tfrac{70}{92}(1-q)$. The
+Let the leopard prior be $\rho$. The other two share $1 - \rho$ in the ratio
+$22:70$, so they are $\tfrac{22}{92}(1-\rho)$ and $\tfrac{70}{92}(1-\rho)$. The
 tawny-flash row is $(0.70, 0.15, 0.02)$. The posterior odds of leopard against
 everything else are
 
 $$
-\frac{0.70\,q}{\left(0.15 \cdot \tfrac{22}{92} + 0.02 \cdot \tfrac{70}{92}\right)(1-q)}
-= \frac{0.70\,q}{{{tip_coef:.6f}}\,(1-q)} .
+\frac{0.70\,\rho}{\left(0.15 \cdot \tfrac{22}{92} + 0.02 \cdot \tfrac{70}{92}\right)(1-\rho)}
+= \frac{0.70\,\rho}{{{tip_coef:.6f}}\,(1-\rho)} .
 $$
 
-Setting this to 1 gives $0.70q = {{tip_coef:.6f}}(1-q)$, so
-$q = {{tip_coef:.6f}} / {{tip_denominator:.6f}} = {{tip_q:.4f}}$.
+Setting this to 1 gives $0.70\rho = {{tip_coef:.6f}}(1-\rho)$, so
+$\rho = {{tip_coef:.6f}} / {{tip_denominator:.6f}} = {{tip_q:.4f}}$.
 
 So a leopard prior of about {{tip_q_pct:.1f}}% is the tipping point: the model in
 Lesson&nbsp;3 used $q = 0.08$, which is just above it, which is why the
@@ -203,8 +203,8 @@ approximation gets worse in exactly the regime where you most want to use it.
 :::
 
 ::: exercise The survival curve &dagger;
-Consider the homeostasis model from Lesson&nbsp;1 with no action: a
-two-dimensional random walk with independent increments of standard deviation
+Consider the homeostasis model from Lesson&nbsp;1 with the action strength set
+to zero, $\kappa = 0$. It is then a two-dimensional random walk with independent increments of standard deviation
 $\sigma$ per step in each coordinate, starting at the origin, absorbed when
 $\|x\| > 1$.
 

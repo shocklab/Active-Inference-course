@@ -209,7 +209,9 @@ Doing both at once, with one quantity governing both, is what puts the
 Both reduce the mismatch between model and world. They are the same operation
 applied to the two different halves of the coupling, and in the mathematics they
 will turn out to be gradient descent on the same scalar quantity. That quantity
-is variational free energy, and we will construct it properly in Week&nbsp;4.
+is the **variational free energy**, shortened to just "the free energy" once
+there is no risk of confusing it with the thermodynamic quantity of the same
+name. Week&nbsp;4 constructs it properly.
 
 ## An aside on brains, told correctly
 

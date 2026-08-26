@@ -26,7 +26,7 @@ lesson. Bayes' theorem is trivial. The sum underneath it is not.
 ## The four quantities, named
 
 ::: notation
-$P(s)$, the prior :: What the agent expects before it looks. Not a statement about the world's frequencies; a statement about the agent's commitments.
+$P(s)$, the prior :: What the agent expects before it looks. In this framework a prior is read as the agent's own commitment rather than as a measured frequency in the world. That reading is a choice, and Week&nbsp;12 returns to what it costs.
 $P(o \mid s)$, the likelihood :: Read as a function of $s$ for fixed $o$, this scores how well each state would account for the data you actually got. It is not a distribution over $s$ and does not sum to one over $s$.
 $P(o)$, the evidence :: The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from Lesson&nbsp;1.
 $P(s \mid o)$, the posterior :: The updated belief. Prior reweighted by how well each state explains the data, then renormalised.
@@ -43,8 +43,9 @@ for it to sum to one. Students trip over this constantly; the matrix does not
 care which way you read it, but the normalisation does.
 
 ::: mn Rows and columns
-We will write this matrix $\mathbf{A}$ from Week&nbsp;9 onwards, with
-$A_{ij} = P(o = i \mid s = j)$. Columns sum to one. Remember it now and the
+From Week&nbsp;9 this matrix is written $\mathbf{A}$, with
+$A_{ij} = P(o = i \mid s = j)$, and the problems at the end of this week already
+use that name. Columns sum to one. Remember it now and the
 discrete half of the course will cost you much less pain.
 :::
 
@@ -242,7 +243,7 @@ Working through [eq:bayes] for each observation:
 
 The rarest observation, $o_3$, is by some distance the most surprising, and it
 leaves the posterior exactly where the prior was. The most informative
-observation, $o_1$, is six times more probable.
+observation, $o_1$, is {{ctr_prob_ratio:.0f}} times more probable.
 
 The structural reason is that the two quantities are averages of different
 things. Averaging surprise over $P(o)$ gives the entropy $\mathrm{H}[P(o)]$;
@@ -254,7 +255,7 @@ I(s;o) \;=\; \sum_{o} P(o) \, D_{\mathrm{KL}}\big[P(s \mid o) \,\|\, P(s)\big],
 $$
 
 which measures how much, on average, an observation tells you about the state.
-For the model above it is {{mutual_information:.3f}} nats: the average of the three
+For the three-observation model above it is {{mi_counterexample:.3f}} nats: the average of the three
 information gains, weighted by how often each observation actually occurs.
 Nothing links them pointwise. An observation is surprising when the model
 thought it unlikely; it is informative when the states disagree about it. A
