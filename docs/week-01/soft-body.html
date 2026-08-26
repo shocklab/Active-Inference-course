@@ -228,12 +228,17 @@ figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:
 .wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
 canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
 
-/* ── notation list ───────────────────────────────────────────────────── */
-dl.notation{margin:1.6rem 0;max-width:var(--measure)}
-dl.notation dt{font-family:var(--sans);font-weight:600;font-size:.82rem;color:var(--accent);
-               margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--rule)}
-dl.notation dt:first-child{border-top:0;margin-top:0;padding-top:0}
-dl.notation dd{margin:.25rem 0 0;color:var(--ink2);font-size:1.03rem}
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
 
 /* ── footer nav ──────────────────────────────────────────────────────── */
 .pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
@@ -371,14 +376,16 @@ inside.</p>
 set</strong>. The picture to hold is a small region of a large space, with the system
 being nudged out of it constantly by noise, and something inside the system
 pushing back.</p>
-<figure class="widget" id="fig-1"><div class="wmount" data-widget="homeostasis-drift"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.</span> A body in a two-dimensional physiological space. The solid circle is the boundary of the viable set; cross it and the organism is no longer an organism. The dashed circle marks the states it prefers. Noise pushes it around; the parameter $\kappa$ sets how hard it pushes back.</figcaption></figure>
+<figure class="widget" id="fig-1-1-1"><div class="wmount" data-widget="homeostasis-drift"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.1.1.</span> A body in a two-dimensional physiological space. The solid circle is the boundary of the viable set; cross it and the organism is no longer an organism. The dashed circle marks the states it prefers. Noise pushes it around; the parameter $\kappa$ sets how hard it pushes back. The<p>right-hand panel tracks the entropy of the states visited so far, and the readout
+below reports it.</p></figcaption></figure>
 <p>Run that with $\kappa = 0$ first. There is nothing pathological in the dynamics.
 It is an unbiased random walk, the most innocuous thing a stochastic process can
 do, and it kills the organism every time. Diffusion does not need to be malicious
 to be fatal. It only needs to be given enough time.</p>
 <p>Now turn $\kappa$ up. The physics has not changed and the noise has not changed.
 What has changed is that the system now moves in a way that depends on where it
-is, and that is enough.</p>
+is: displacement from the centre produces a push back towards it. That alone is
+enough to keep the walk near the middle indefinitely.</p>
 <h2 id="staying-alive-is-a-statement-about-entropy"><span class="secno">2</span>Staying alive is a statement about entropy</h2>
 <p>Watch the readout in that figure. As the unregulated walk wanders, the entropy
 of the states it has visited climbs steadily. When the walk is regulated, that
@@ -386,27 +393,30 @@ number rises for a while and then flattens out, well below the maximum. This is
 not decoration. It is the quantity we are going to build the entire framework
 on, so it is worth being precise about what it is.</p>
 <p>Everything an organism can register about itself and its surroundings arrives at
-a surface: the retina, the skin, the stretch receptors in the gut. Call the state
-of that surface at one moment an <strong>observation</strong>, and write it $o$. The letter
-stands for <em>observation</em>, and the word is doing real work. An organism has no
-access to the world; it has access only to what its senses report of the world,
-which is not the same thing. Lesson&nbsp;2 makes that distinction precise and
+a surface: the retina, the skin, the stretch receptors in the gut. Note that the
+list runs inward as well as outward. A body senses its own temperature, its own
+blood chemistry, the tension in its own muscles; that inward-facing sensing is
+called <strong>interoception</strong>, and it is what connects this section to the last one.
+The physiological variables of the figure above are not some separate category of
+thing: they are among the quantities the organism measures.</p>
+<p>Call the state of that surface at one moment an <strong>observation</strong>, and write it $o$. The letter
+stands for <em>observation</em>. An organism has no access to the world; it has access
+only to what its senses report of the world, and those are not the same thing. Lesson&nbsp;2 makes that distinction precise and
 gives the world's own states a different letter. Until then, $o$ is simply
 whatever the organism can actually measure.</p>
 <p>Over a long life the organism makes some observations often and others never, and
 that occupancy defines a probability distribution over observations, written
 $P(o)$. Its <strong>entropy</strong> is</p>
-<div class="eqn" id="eq-sensory-entropy"><div class="eqbody">$$\mathrm{H}[P(o)] \;=\; -\sum_{o} P(o) \ln P(o).$$</div><div class="eqno"><a href="#eq-sensory-entropy" title="Link to equation 1">(1)</a></div></div>
+<div class="eqn" id="eq-sensory-entropy"><div class="eqbody">$$\mathrm{H}[P(o)] \;=\; -\sum_{o} P(o) \ln P(o).$$</div><div class="eqno"><a href="#eq-sensory-entropy" title="Link to equation 1.1.1">(1.1.1)</a></div></div>
 <p>Two notational points, since both recur for twelve weeks. The square brackets are
 deliberate: $\mathrm{H}$ takes an entire distribution as its argument rather than
 a single value, so it is a functional, not a function. And the logarithm is
 natural, here and everywhere in this course, which fixes the units as <strong>nats</strong>.
-One nat is the information carried by an event of probability $1/e$; divide by
-$\ln 2 \approx 0.693$ to convert to bits.</p>
+A nat is the unit you get when the logarithm is natural rather than base two;
+divide by $\ln 2 \approx 0.693$ to convert a figure in nats to bits.</p>
 <p>An organism whose observations are spread thinly over everything possible has
 high entropy here. An organism that spends its whole life reporting <em>warm,
-fed, upright, unbroken</em> has low entropy. Being alive, measured in nats, is
-<a class="eqref" href="#eq-sensory-entropy">(1)</a> being small.</p>
+fed, upright, unbroken</em> has low entropy. Being alive, measured in nats, is equation <a class="eqref" href="#eq-sensory-entropy">(1.1.1)</a> being small.</p>
 <aside class="mn"><span class="mnl">Why entropy and not variance</span><p>Variance needs a metric on the state space and privileges the mean. Entropy
 needs only a probability. For a creature whose states include "which arm of the
 maze" and "is the predator visible", there is no sensible mean to take.</p></aside>
@@ -415,18 +425,22 @@ made at time step $t$, and let $T$ count the steps of a life. If the organism's
 sensory statistics settle down over time, the long-run average of
 $-\ln P(o_t)$ along its actual trajectory converges to the entropy of the
 distribution it is sampling:</p>
-<div class="eqn" id="eq-ergodic"><div class="eqbody">$$\mathrm{H}[P(o)] \;=\; \lim_{T\to\infty} \frac{1}{T}\sum_{t=1}^{T} \big[-\ln P(o_t)\big].$$</div><div class="eqno"><a href="#eq-ergodic" title="Link to equation 2">(2)</a></div></div>
+<div class="eqn" id="eq-ergodic"><div class="eqbody">$$\mathrm{H}[P(o)] \;=\; \lim_{T\to\infty} \frac{1}{T}\sum_{t=1}^{T} \big[-\ln P(o_t)\big].$$</div><div class="eqno"><a href="#eq-ergodic" title="Link to equation 1.1.2">(1.1.2)</a></div></div>
 <p>The quantity in the brackets, $-\ln P(o)$, is called the <strong>surprise</strong> of an
 observation, or sometimes its surprisal, to keep it clear that we are not
 talking about anybody's emotional state. It is large when $o$ is something the
 organism rarely sees and small when $o$ is business as usual.</p>
-<div class="box keyidea"><div class="boxhd">The idea</div><p><a class="eqref" href="#eq-ergodic">(2)</a> converts a statement about a whole lifetime into a statement about
+<div class="box keyidea"><div class="boxhd">The idea</div><p><a class="eqref" href="#eq-ergodic">(1.1.2)</a> converts a statement about a whole lifetime into a statement about
 this instant. Keeping the entropy of your observations low over a lifetime is
 the same thing as keeping your surprise low at each moment. A goal you could
 never act on becomes a goal you can act on now.</p></div>
-<div class="box warning"><div class="boxhd">Careful<span class="bt">The step that is doing work</span></div><p><a class="eqref" href="#eq-ergodic">(2)</a> holds if the process is ergodic, and whether living systems are
+<div class="box warning"><div class="boxhd">Careful<span class="bt">The step that is doing work</span></div><p><a class="eqref" href="#eq-ergodic">(1.1.2)</a> holds if the process is ergodic, and whether living systems are
 ergodic in the required sense is exactly the point at which several careful
-critics of the free energy principle plant their flag. We will take the
+critics plant their flag. (The <strong>free energy principle</strong> is the name for the
+whole claim being assembled here, that self-organising systems minimise a bound
+on their surprise. Active inference is what you get when you take that principle
+and ask how an agent should act. Week&nbsp;4 constructs the bound; Week&nbsp;12
+weighs the objections.) We will take the
 identification as given for eleven weeks because it is the assumption the
 framework is built on, and then in Week&nbsp;12 we will come back and ask what
 it costs.</p></div>
@@ -438,24 +452,42 @@ surprise-meter. An observation is surprising only <em>relative to some set of
 expectations</em>, and those expectations have to live somewhere.</p>
 <p>They live inside the organism. To be able to evaluate its own surprise, a system
 must carry an internal model of what its observations are usually like and what
-produces them. Such a model is called a <em>generative model</em>; Lesson&nbsp;2 defines
+produces them.</p>
+<p>This means the $P$ of <a class="eqref" href="#eq-sensory-entropy">(1.1.1)</a> and the $P$ of "minimise
+$-\ln P(o)$" are not quite the same object, and it is worth separating them now
+rather than discovering it later. The first is the distribution the organism's
+observations <em>actually</em> follow over a lifetime, which no organism has access to.
+The second is the distribution its model <em>says</em> they follow, which is the only
+one it can evaluate. The framework proceeds by using the second as a stand-in for
+the first. Where the model is good, the two are close and minimising one
+minimises the other. Where the model is bad, an organism can be serenely
+unsurprised while its actual sensory statistics wander off, which is one of the
+more interesting ways for a thing to die. We will keep writing $P$ for both, as
+the literature does, and say which is meant whenever it matters. Such a model is called a <em>generative model</em>; Lesson&nbsp;2 defines
 it properly and says what it is generative of. Building one, running it, and
 correcting it is what the rest of this course is about.</p>
 <p>So the argument so far runs:</p>
 <ol>
-<li>To persist is to occupy a small set of states.</li>
-<li>Occupying a small set of states means low entropy over observations.</li>
+<li>To persist is to occupy a small set of physiological states.</li>
+<li>Those states are sensed, so occupying few of them means the organism's
+   observations are also confined to a small set: low entropy over observations.</li>
 <li>Low entropy over a lifetime means low surprise at each moment.</li>
 <li>Surprise is only defined relative to a model.</li>
 <li>Therefore anything that persists must carry a model of the world it persists in.</li>
 </ol>
+<p>Step 2 is the one to watch. It runs in only one direction. Narrow physiology
+forces narrow interoceptive observations, but the converse fails: an organism
+could in principle keep its observations narrow by sensing very little, which is
+not the same as staying alive. That gap has a name, the dark-room problem, and
+Week&nbsp;12 asks whether the standard reply to it works.</p>
 <p>That is a strong claim and it deserves the scrutiny we will give it in
 Week&nbsp;12. But notice what it does not claim. It says nothing about the model
 being conscious, accurate, or even any good. A thermostat has one. The claim is
 only that having one is what persistence looks like from the inside.</p>
 <h2 id="two-ways-to-be-less-surprised"><span class="secno">4</span>Two ways to be less surprised</h2>
 <p>Suppose you have such a model, and an observation arrives that it did not
-expect. There are exactly two things you can do about it.</p>
+expect. The mismatch is between two things, the model and the world, so there are
+two places to intervene.</p>
 <p>You can <strong>change the model</strong> so that the observation is no longer surprising.
 This is perception: the world is telling you something and you update
 accordingly. What you thought was a shadow was a leopard, and now you believe it
@@ -477,8 +509,8 @@ finds a rock, cements itself to it, and then, having no further use for the
 thing, digests its own brain.</p>
 <p>It is a good story and it is not true. The larval tunicate does resorb its
 larval nervous system at metamorphosis, but what the adult builds afterwards is
-a cerebral ganglion roughly an order of magnitude <em>larger</em> than the one the
-larva had, wired for a completely different problem: filtering, siphon control,
+a cerebral ganglion <em>larger</em> than the one the larva had, wired for a completely
+different problem: filtering, siphon control,
 and responding to things that touch you when you cannot run away.</p>
 <p>Which is the better lesson anyway. Nervous systems are not a luxury that
 movement pays for. They are shaped by the control problem the animal actually
@@ -492,8 +524,8 @@ the ones that look like us. The mathematics does not care.</p>
 <li>What is the difference between the entropy of $P(o)$ and the surprise of a
   particular observation $o$?</li>
 <li>Why can surprise not be measured directly from the environment?</li>
-<li>Name the two routes to reducing surprise, and say which one changes $P$ and
-  which changes $o$.</li>
+<li>Name the two places you can intervene when model and world disagree. Which of
+  them changes the model, and which changes the observations that arrive next?</li>
 </ul></div></article><nav class="pagenav"><a class="nx" href="../week-01/process-and-model.html"><span class="dir">Next</span><span class="ttl">Two models, not one</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>
 </body>

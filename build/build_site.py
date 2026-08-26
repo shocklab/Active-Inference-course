@@ -167,7 +167,8 @@ def pagenav(prev, nxt, root):
 def render_lesson(lesson, week, weeks, flat):
     raw = open(lesson.path, encoding="utf-8").read()
     numbers = load_numbers(os.path.dirname(lesson.path))
-    html, meta, doc = mdx.render(raw, numbers=numbers)
+    html, meta, doc = mdx.render(raw, numbers=numbers,
+                                 prefix=f"{week.n}.{lesson.order}")
     if doc.missing_numbers:
         print(f"    ! unresolved {{{{...}}}} in {lesson.slug}: "
               f"{', '.join(sorted(set(doc.missing_numbers)))}")

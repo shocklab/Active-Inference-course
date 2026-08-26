@@ -228,12 +228,17 @@ figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:
 .wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
 canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
 
-/* ── notation list ───────────────────────────────────────────────────── */
-dl.notation{margin:1.6rem 0;max-width:var(--measure)}
-dl.notation dt{font-family:var(--sans);font-weight:600;font-size:.82rem;color:var(--accent);
-               margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--rule)}
-dl.notation dt:first-child{border-top:0;margin-top:0;padding-top:0}
-dl.notation dd{margin:.25rem 0 0;color:var(--ink2);font-size:1.03rem}
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
 
 /* ── footer nav ──────────────────────────────────────────────────────── */
 .pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
@@ -351,7 +356,7 @@ it is what the model is <em>for</em>, and the answer is sitting in a column of a
 <p>Perception needs the other direction. Given the consequence, what was the cause?
 This is called <strong>model inversion</strong>, and the asymmetry between the two directions
 is not a matter of degree.</p>
-<figure class="widget" id="fig-1"><div class="wmount" data-widget="forward-inverse"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.</span> One likelihood matrix, read two ways. Click any cell to change the selection. In forward mode you read a column and stop. In inverse mode you read a row, weight it by the prior, and then owe a sum over every state in the model.</figcaption></figure>
+<figure class="widget" id="fig-1-4-1"><div class="wmount" data-widget="forward-inverse"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.4.1.</span> One likelihood matrix, read two ways. Click any cell to change the selection. In forward mode you read a column and stop. In inverse mode you read a row, weight it by the prior, and then owe a sum over every state in the model.</figcaption></figure>
 <h2 id="why-the-inverse-direction-is-structurally-harder"><span class="secno">1</span>Why the inverse direction is structurally harder</h2>
 <p>Three separate things go wrong at once, and it is worth keeping them apart
 because different techniques attack different ones.</p>
@@ -389,7 +394,7 @@ make a branch shake. Each is uncommon on its own:</p>
 The branch shakes if either cause fires, with each cause working 90% of the
 time, plus a 1% chance the branch shakes for no reason at all:</p>
 <div class="eqn" id="eq-noisy-or"><div class="eqbody">$$P(o = 1 \mid s_{\text{gust}}, s_{\text{bab}}) \;=\;
-1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).$$</div><div class="eqno"><a href="#eq-noisy-or" title="Link to equation 1">(1)</a></div></div>
+1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).$$</div><div class="eqno"><a href="#eq-noisy-or" title="Link to equation 1.4.1">(1.4.1)</a></div></div>
 <p>The branch shakes. Multiply prior by likelihood, state by state:</p>
 <div class="tablewrap"><table>
 <thead>
@@ -448,7 +453,7 @@ table is $0.055$, smaller by a factor of nearly five.</p>
 now strongly anticorrelated, and you can read the strength directly:</p>
 <div class="eqn" id="eq-explaining-away"><div class="eqbody">$$P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 1,\, o) = 0.109,
 \qquad
-P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 0,\, o) = 0.909.$$</div><div class="eqno"><a href="#eq-explaining-away" title="Link to equation 2">(2)</a></div></div>
+P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 0,\, o) = 0.909.$$</div><div class="eqno"><a href="#eq-explaining-away" title="Link to equation 1.4.2">(1.4.2)</a></div></div>
 <p>Learning that there was a gust drags the baboon's probability from
 $0.505$ all the way back down to $0.109$, a hair above its prior. The gust has <strong>explained
 away</strong> the shaking branch, and the baboon is no longer needed.</p>
@@ -489,7 +494,7 @@ It gets to have a current best guess that is being continuously corrected, which
 is exactly what gradient descent on a free energy gives you.</p></div>
 <div class="box warning"><div class="boxhd">Careful<span class="bt">What the third option costs</span></div><p>The family of distributions $Q$ has to be one you can compute with, and by far
 the commonest choice is the family that factorises across state factors:
-$Q(s_1, s_2) = Q(s_1)Q(s_2)$. Look back at <a class="eqref" href="#eq-explaining-away">(2)</a>. That family
+$Q(s_1, s_2) = Q(s_1)Q(s_2)$. Look back at <a class="eqref" href="#eq-explaining-away">(1.4.2)</a>. That family
 cannot represent the true posterior, because the true posterior is correlated
 and no product of marginals is. The best factorised approximation to the
 posterior in the table above still sits $0.369$ nats away from it.</p>
@@ -500,14 +505,14 @@ that you have already seen exactly what is being compromised.</p></div>
 <div class="box exercise"><div class="boxhd">Exercise 1<span class="bt">Where does explaining away go?</span></div><p>In the two-cause example, make the observation uninformative by setting both
 cause strengths to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
 Without computing anything, say what the posterior is and whether the two causes
-remain independent. Then explain what feature of <a class="eqref" href="#eq-noisy-or">(1)</a> is responsible
+remain independent. Then explain what feature of <a class="eqref" href="#eq-noisy-or">(1.4.1)</a> is responsible
 for the coupling in the original example.</p><details><summary>Solution</summary><p>With $P(o=1\mid s)$ constant across states, the likelihood is a constant factor
 that pulls out of the product. The posterior equals the prior, which was a
 product of independent marginals, so the causes remain independent and no
 explaining away occurs.</p>
 <p>The coupling comes from the likelihood varying across the <em>joint</em> state in a way
 that does not factor into a function of $s_{\text{gust}}$ times a function of
-$s_{\text{bab}}$. In <a class="eqref" href="#eq-noisy-or">(1)</a>, the state $(1,1)$ has likelihood $0.9901$,
+$s_{\text{bab}}$. In <a class="eqref" href="#eq-noisy-or">(1.4.1)</a>, the state $(1,1)$ has likelihood $0.9901$,
 which is barely more than the $0.9010$ of $(1,0)$ or $(0,1)$: a second cause
 adds almost nothing once the first is present. That diminishing return is the
 source of the competition. If the likelihood were multiplicatively separable, the

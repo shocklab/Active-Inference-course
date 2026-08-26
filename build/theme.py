@@ -253,12 +253,17 @@ figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:
 .wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
 canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
 
-/* ── notation list ───────────────────────────────────────────────────── */
-dl.notation{margin:1.6rem 0;max-width:var(--measure)}
-dl.notation dt{font-family:var(--sans);font-weight:600;font-size:.82rem;color:var(--accent);
-               margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--rule)}
-dl.notation dt:first-child{border-top:0;margin-top:0;padding-top:0}
-dl.notation dd{margin:.25rem 0 0;color:var(--ink2);font-size:1.03rem}
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
 
 /* ── footer nav ──────────────────────────────────────────────────────── */
 .pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;

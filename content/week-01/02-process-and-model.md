@@ -128,7 +128,7 @@ modelling psychopathology, comes from watching what happens when the model and
 the process disagree in structured ways.
 :::
 
-## Why the distinction earns its keep
+## What follows from keeping them apart
 
 Three things become clear once you keep the two apart, and stay muddy if you do not.
 

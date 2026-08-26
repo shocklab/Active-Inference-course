@@ -30,6 +30,9 @@ BANNED = [
     "in today's", "it's worth noting", "worth noting", "at its core",
     "in essence", "fundamentally,", "simply put", "the short version",
     "bottom line", "needless to say",
+    # flagged in review: self-labelling a thing's own value instead of showing it
+    "earns its keep", "earn its keep", "pays for itself", "does a lot of work",
+    "doing a lot of work", "load-bearing", "the real question", "that matters",
 ]
 # Hard rules: these are never right in this course's prose.
 HARD = [

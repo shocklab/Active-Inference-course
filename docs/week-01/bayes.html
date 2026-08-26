@@ -228,12 +228,17 @@ figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:
 .wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
 canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
 
-/* ── notation list ───────────────────────────────────────────────────── */
-dl.notation{margin:1.6rem 0;max-width:var(--measure)}
-dl.notation dt{font-family:var(--sans);font-weight:600;font-size:.82rem;color:var(--accent);
-               margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--rule)}
-dl.notation dt:first-child{border-top:0;margin-top:0;padding-top:0}
-dl.notation dd{margin:.25rem 0 0;color:var(--ink2);font-size:1.03rem}
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
 
 /* ── footer nav ──────────────────────────────────────────────────────── */
 .pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
@@ -351,13 +356,13 @@ arrives. What should it now believe about $s$?</p>
 the same one you have seen since your first statistics course, dressed for this
 particular occasion:</p>
 <div class="eqn" id="eq-bayes"><div class="eqbody">$$P(s \mid o) \;=\; \frac{P(o \mid s)\,P(s)}{P(o)}, \qquad
-P(o) \;=\; \sum_{s} P(o \mid s)\,P(s).$$</div><div class="eqno"><a href="#eq-bayes" title="Link to equation 1">(1)</a></div></div>
+P(o) \;=\; \sum_{s} P(o \mid s)\,P(s).$$</div><div class="eqno"><a href="#eq-bayes" title="Link to equation 1.3.1">(1.3.1)</a></div></div>
 <p>Everything in this course is a consequence of not being able to compute the
 denominator. It is worth spending a page on why that is, because if you leave
 this lesson thinking Bayes' theorem is hard, you have taken away the wrong
 lesson. Bayes' theorem is trivial. The sum underneath it is not.</p>
 <h2 id="the-four-quantities-named"><span class="secno">1</span>The four quantities, named</h2>
-<dl class="notation"><dt>$P(s)$, the prior</dt><dd>What the agent expects before it looks. Not a statement about the world's frequencies; a statement about the agent's commitments.</dd><dt>$P(o \mid s)$, the likelihood</dt><dd>Read as a function of $s$ for fixed $o$, this scores how well each state would account for the data you actually got. It is not a distribution over $s$ and does not sum to one over $s$.</dd><dt>$P(o)$, the evidence</dt><dd>The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from Lesson&nbsp;1.</dd><dt>$P(s \mid o)$, the posterior</dt><dd>The updated belief. Prior reweighted by how well each state explains the data, then renormalised.</dd></dl>
+<div class="tablewrap"><table class="notation"><tbody><tr><th>$P(s)$, the prior</th><td>What the agent expects before it looks. Not a statement about the world's frequencies; a statement about the agent's commitments.</td></tr><tr><th>$P(o \mid s)$, the likelihood</th><td>Read as a function of $s$ for fixed $o$, this scores how well each state would account for the data you actually got. It is not a distribution over $s$ and does not sum to one over $s$.</td></tr><tr><th>$P(o)$, the evidence</th><td>The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from Lesson&nbsp;1.</td></tr><tr><th>$P(s \mid o)$, the posterior</th><td>The updated belief. Prior reweighted by how well each state explains the data, then renormalised.</td></tr></tbody></table></div>
 <p>Two of these deserve a moment.</p>
 <p>The likelihood is a <strong>column</strong> of a matrix, not a row. If you tabulate
 $P(o \mid s)$ with observations down the side and states across the top, then
@@ -423,11 +428,11 @@ P(o \mid s)P(s) \;=\; \big(\,
 0.02 \times 0.70 \,\big) \\[2pt]
 \;=\; \big(\,& 0.056,\;\; 0.033,\;\; 0.014 \,\big).
 \end{aligned}$$</div></div>
-<p>These are the three numerators in <a class="eqref" href="#eq-bayes">(1)</a>. Their sum is the denominator:</p>
-<div class="eqn" id="eq-worked-evidence"><div class="eqbody">$$P(o = \text{tawny flash}) \;=\; 0.056 + 0.033 + 0.014 \;=\; 0.103 .$$</div><div class="eqno"><a href="#eq-worked-evidence" title="Link to equation 2">(2)</a></div></div>
+<p>These are the three numerators in <a class="eqref" href="#eq-bayes">(1.3.1)</a>. Their sum is the denominator:</p>
+<div class="eqn" id="eq-worked-evidence"><div class="eqbody">$$P(o = \text{tawny flash}) \;=\; 0.056 + 0.033 + 0.014 \;=\; 0.103 .$$</div><div class="eqno"><a href="#eq-worked-evidence" title="Link to equation 1.3.2">(1.3.2)</a></div></div>
 <p>Divide through:</p>
 <div class="eqn" id="eq-worked-posterior"><div class="eqbody">$$P(s \mid o) \;=\; \frac{(0.056,\ 0.033,\ 0.014)}{0.103}
-\;=\; (0.5437,\ 0.3204,\ 0.1359).$$</div><div class="eqno"><a href="#eq-worked-posterior" title="Link to equation 3">(3)</a></div></div>
+\;=\; (0.5437,\ 0.3204,\ 0.1359).$$</div><div class="eqno"><a href="#eq-worked-posterior" title="Link to equation 1.3.3">(1.3.3)</a></div></div>
 <aside class="mn"><span class="mnl">Sanity check</span><p>$0.5437 + 0.3204 + 0.1359 = 1$. If your posterior does not sum to one you have
 divided by the wrong thing, which in practice means you forgot a state.</p></aside>
 <p>Read what happened. The leopard hypothesis started at 8% and finished at 54%,
@@ -436,7 +441,7 @@ being the only state that predicts tawny flashes well. Meanwhile "nothing"
 started as the overwhelming favourite at 70% and was demoted to 14%, because
 whatever else is true, empty scrub does not flash tawny.</p>
 <p>Two derived quantities are worth computing while the numbers are in front of us.</p>
-<p><strong>Surprise.</strong> From <a class="eqref" href="#eq-worked-evidence">(2)</a>, $-\ln P(o) = -\ln 0.103 = 2.273$ nats.
+<p><strong>Surprise.</strong> From <a class="eqref" href="#eq-worked-evidence">(1.3.2)</a>, $-\ln P(o) = -\ln 0.103 = 2.273$ nats.
 Compare the other two observations: a shaking branch has $P(o) = 0.241$ and
 surprise $1.423$ nats; quiet has $P(o) = 0.656$ and surprise
 $0.422$ nats.
@@ -444,7 +449,7 @@ Quiet is what this model expects, and it is duly unsurprised by it.</p>
 <p><strong>Information gained.</strong> How far did the observation move you? The natural
 measure is the Kullback&ndash;Leibler divergence from the prior to the posterior,</p>
 <div class="eqn" id="eq-info-gain"><div class="eqbody">$$D_{\mathrm{KL}}\big[P(s\mid o)\,\|\,P(s)\big]
-\;=\; \sum_{s} P(s \mid o)\,\ln \frac{P(s\mid o)}{P(s)} .$$</div><div class="eqno"><a href="#eq-info-gain" title="Link to equation 4">(4)</a></div></div>
+\;=\; \sum_{s} P(s \mid o)\,\ln \frac{P(s\mid o)}{P(s)} .$$</div><div class="eqno"><a href="#eq-info-gain" title="Link to equation 1.3.4">(1.3.4)</a></div></div>
 <p>Read the notation carefully, because it runs backwards from the name. In
 $D_{\mathrm{KL}}[Q\,\|\,P]$ the distribution written <em>first</em> is the one the
 expectation is taken under, and the convention is to say this out loud as "the
@@ -455,7 +460,7 @@ never decorative; Week&nbsp;4 turns on getting it right.</p>
 <p>For the tawny flash this is $0.940$ nats. For the shaking branch,
 $0.524$. For quiet, $0.225$. The observation that surprised you most also taught you most,
 which is intuitive and, as the exercises will show, not a theorem.</p>
-<figure class="widget" id="fig-1"><div class="wmount" data-widget="bayes-discrete"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.</span> The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.</figcaption></figure>
+<figure class="widget" id="fig-1-3-1"><div class="wmount" data-widget="bayes-discrete"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.1.</span> The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.</figcaption></figure>
 <h2 id="what-the-ambiguity-slider-is-showing-you"><span class="secno">3</span>What the ambiguity slider is showing you</h2>
 <p>The figure's third slider is a parameter we will write $\lambda$, running from
 $0$ to $1$, which blends the likelihood towards a uniform one: at $\lambda = 0$
@@ -479,8 +484,8 @@ your head. Now count the terms for something less contrived.</p>
 it last saw a predator, the wind direction, whether each of several patches has
 been depleted, and what its companions are doing. Each of these is a state
 <em>factor</em>. The joint state space is the product of all of them, so if there are
-$n$ factors with $k$ values each, the sum in <a class="eqref" href="#eq-bayes">(1)</a> has $k^n$ terms.</p>
-<figure class="widget" id="fig-2"><div class="wmount" data-widget="evidence-blowup"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 2.</span> The number of terms in the evidence sum, on a logarithmic vertical axis. The point is not that the numbers are large. The point is which way the exponent sits.</figcaption></figure>
+$n$ factors with $k$ values each, the sum in <a class="eqref" href="#eq-bayes">(1.3.1)</a> has $k^n$ terms.</p>
+<figure class="widget" id="fig-1-3-2"><div class="wmount" data-widget="evidence-blowup"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.2.</span> The number of terms in the evidence sum, on a logarithmic vertical axis. The point is not that the numbers are large. The point is which way the exponent sits.</figcaption></figure>
 <p>Nothing about this is fixable by better hardware. Adding one more thing to keep
 track of multiplies the work by $k$, and brains manage this in a few tens of
 milliseconds using about twenty watts.</p>
@@ -513,7 +518,7 @@ with likelihood</p>
 <p>rows indexed $o_1, o_2, o_3$ and columns by state. Both columns sum to one, so
 this is a legitimate likelihood. The third row is deliberately flat: whatever the
 state, $o_3$ turns up 5% of the time.</p>
-<p>Working through <a class="eqref" href="#eq-bayes">(1)</a> for each observation:</p>
+<p>Working through <a class="eqref" href="#eq-bayes">(1.3.1)</a> for each observation:</p>
 <div class="tablewrap"><table>
 <thead>
 <tr>

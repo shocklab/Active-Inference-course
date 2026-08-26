@@ -114,6 +114,24 @@ def check_tags():
                      f"on {os.path.relpath(path, ROOT)}")
 
 
+# ── 4b. figure integrity ─────────────────────────────────────────────────
+def check_svg():
+    """Markdown ends a raw-HTML block at a blank line, injecting </p><p> into an
+    SVG. Every element survives, so the tag-balance check passes while the figure
+    is visibly broken. Caught in review, not by a script; now by a script."""
+    for path in html_files():
+        h = open(path, encoding="utf-8").read()
+        for m in re.finditer(r"<svg\b.*?</svg>", h, re.S | re.I):
+            svg = m.group(0)
+            for bad in ("<p>", "</p>", "<br", "<h2", "<h3"):
+                if bad in svg:
+                    fail(f"'{bad}' injected inside an <svg> on "
+                         f"{os.path.relpath(path, ROOT)}: the figure will not render")
+                    break
+            if svg.count("<text") and "</text>" not in svg:
+                fail(f"unterminated <text> in an <svg> on {os.path.relpath(path, ROOT)}")
+
+
 # ── 5. stray maths delimiters ────────────────────────────────────────────
 def check_math():
     for path in html_files():
@@ -133,7 +151,8 @@ def main():
     if not os.path.isdir(DOCS):
         print("docs/ does not exist; run build_site.py first")
         return 1
-    check_eqrefs(); check_widgets(); check_links(); check_tags(); check_math()
+    check_eqrefs(); check_widgets(); check_links(); check_tags()
+    check_svg(); check_math()
 
     pages = len(list(html_files()))
     for w in warns:

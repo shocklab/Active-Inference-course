@@ -41,7 +41,9 @@ set**. The picture to hold is a small region of a large space, with the system
 being nudged out of it constantly by noise, and something inside the system
 pushing back.
 
-::: widget homeostasis-drift | A body in a two-dimensional physiological space. The solid circle is the boundary of the viable set; cross it and the organism is no longer an organism. The dashed circle marks the states it prefers. Noise pushes it around; the parameter $\kappa$ sets how hard it pushes back.
+::: widget homeostasis-drift | A body in a two-dimensional physiological space. The solid circle is the boundary of the viable set; cross it and the organism is no longer an organism. The dashed circle marks the states it prefers. Noise pushes it around; the parameter $\kappa$ sets how hard it pushes back. The
+right-hand panel tracks the entropy of the states visited so far, and the readout
+below reports it.
 :::
 
 Run that with $\kappa = 0$ first. There is nothing pathological in the dynamics.
@@ -51,7 +53,8 @@ to be fatal. It only needs to be given enough time.
 
 Now turn $\kappa$ up. The physics has not changed and the noise has not changed.
 What has changed is that the system now moves in a way that depends on where it
-is, and that is enough.
+is: displacement from the centre produces a push back towards it. That alone is
+enough to keep the walk near the middle indefinitely.
 
 ## Staying alive is a statement about entropy
 
@@ -62,11 +65,16 @@ not decoration. It is the quantity we are going to build the entire framework
 on, so it is worth being precise about what it is.
 
 Everything an organism can register about itself and its surroundings arrives at
-a surface: the retina, the skin, the stretch receptors in the gut. Call the state
-of that surface at one moment an **observation**, and write it $o$. The letter
-stands for *observation*, and the word is doing real work. An organism has no
-access to the world; it has access only to what its senses report of the world,
-which is not the same thing. Lesson&nbsp;2 makes that distinction precise and
+a surface: the retina, the skin, the stretch receptors in the gut. Note that the
+list runs inward as well as outward. A body senses its own temperature, its own
+blood chemistry, the tension in its own muscles; that inward-facing sensing is
+called **interoception**, and it is what connects this section to the last one.
+The physiological variables of the figure above are not some separate category of
+thing: they are among the quantities the organism measures.
+
+Call the state of that surface at one moment an **observation**, and write it $o$. The letter
+stands for *observation*. An organism has no access to the world; it has access
+only to what its senses report of the world, and those are not the same thing. Lesson&nbsp;2 makes that distinction precise and
 gives the world's own states a different letter. Until then, $o$ is simply
 whatever the organism can actually measure.
 
@@ -82,13 +90,12 @@ Two notational points, since both recur for twelve weeks. The square brackets ar
 deliberate: $\mathrm{H}$ takes an entire distribution as its argument rather than
 a single value, so it is a functional, not a function. And the logarithm is
 natural, here and everywhere in this course, which fixes the units as **nats**.
-One nat is the information carried by an event of probability $1/e$; divide by
-$\ln 2 \approx 0.693$ to convert to bits.
+A nat is the unit you get when the logarithm is natural rather than base two;
+divide by $\ln 2 \approx 0.693$ to convert a figure in nats to bits.
 
 An organism whose observations are spread thinly over everything possible has
 high entropy here. An organism that spends its whole life reporting *warm,
-fed, upright, unbroken* has low entropy. Being alive, measured in nats, is
-[eq:sensory-entropy] being small.
+fed, upright, unbroken* has low entropy. Being alive, measured in nats, is equation [eq:sensory-entropy] being small.
 
 ::: mn Why entropy and not variance
 Variance needs a metric on the state space and privileges the mean. Entropy
@@ -121,7 +128,11 @@ never act on becomes a goal you can act on now.
 ::: warning The step that is doing work
 [eq:ergodic] holds if the process is ergodic, and whether living systems are
 ergodic in the required sense is exactly the point at which several careful
-critics of the free energy principle plant their flag. We will take the
+critics plant their flag. (The **free energy principle** is the name for the
+whole claim being assembled here, that self-organising systems minimise a bound
+on their surprise. Active inference is what you get when you take that principle
+and ask how an agent should act. Week&nbsp;4 constructs the bound; Week&nbsp;12
+weighs the objections.) We will take the
 identification as given for eleven weeks because it is the assumption the
 framework is built on, and then in Week&nbsp;12 we will come back and ask what
 it costs.
@@ -138,17 +149,36 @@ expectations*, and those expectations have to live somewhere.
 
 They live inside the organism. To be able to evaluate its own surprise, a system
 must carry an internal model of what its observations are usually like and what
-produces them. Such a model is called a *generative model*; Lesson&nbsp;2 defines
+produces them.
+
+This means the $P$ of [eq:sensory-entropy] and the $P$ of "minimise
+$-\ln P(o)$" are not quite the same object, and it is worth separating them now
+rather than discovering it later. The first is the distribution the organism's
+observations *actually* follow over a lifetime, which no organism has access to.
+The second is the distribution its model *says* they follow, which is the only
+one it can evaluate. The framework proceeds by using the second as a stand-in for
+the first. Where the model is good, the two are close and minimising one
+minimises the other. Where the model is bad, an organism can be serenely
+unsurprised while its actual sensory statistics wander off, which is one of the
+more interesting ways for a thing to die. We will keep writing $P$ for both, as
+the literature does, and say which is meant whenever it matters. Such a model is called a *generative model*; Lesson&nbsp;2 defines
 it properly and says what it is generative of. Building one, running it, and
 correcting it is what the rest of this course is about.
 
 So the argument so far runs:
 
-1. To persist is to occupy a small set of states.
-2. Occupying a small set of states means low entropy over observations.
+1. To persist is to occupy a small set of physiological states.
+2. Those states are sensed, so occupying few of them means the organism's
+   observations are also confined to a small set: low entropy over observations.
 3. Low entropy over a lifetime means low surprise at each moment.
 4. Surprise is only defined relative to a model.
 5. Therefore anything that persists must carry a model of the world it persists in.
+
+Step 2 is the one to watch. It runs in only one direction. Narrow physiology
+forces narrow interoceptive observations, but the converse fails: an organism
+could in principle keep its observations narrow by sensing very little, which is
+not the same as staying alive. That gap has a name, the dark-room problem, and
+Week&nbsp;12 asks whether the standard reply to it works.
 
 That is a strong claim and it deserves the scrutiny we will give it in
 Week&nbsp;12. But notice what it does not claim. It says nothing about the model
@@ -158,7 +188,8 @@ only that having one is what persistence looks like from the inside.
 ## Two ways to be less surprised
 
 Suppose you have such a model, and an observation arrives that it did not
-expect. There are exactly two things you can do about it.
+expect. The mismatch is between two things, the model and the world, so there are
+two places to intervene.
 
 You can **change the model** so that the observation is no longer surprising.
 This is perception: the world is telling you something and you update
@@ -189,8 +220,8 @@ thing, digests its own brain.
 
 It is a good story and it is not true. The larval tunicate does resorb its
 larval nervous system at metamorphosis, but what the adult builds afterwards is
-a cerebral ganglion roughly an order of magnitude *larger* than the one the
-larva had, wired for a completely different problem: filtering, siphon control,
+a cerebral ganglion *larger* than the one the larva had, wired for a completely
+different problem: filtering, siphon control,
 and responding to things that touch you when you cannot run away.
 
 Which is the better lesson anyway. Nervous systems are not a luxury that
@@ -207,6 +238,6 @@ Before going on, make sure you could answer these without looking back.
 - What is the difference between the entropy of $P(o)$ and the surprise of a
   particular observation $o$?
 - Why can surprise not be measured directly from the environment?
-- Name the two routes to reducing surprise, and say which one changes $P$ and
-  which changes $o$.
+- Name the two places you can intervene when model and world disagree. Which of
+  them changes the model, and which changes the observations that arrive next?
 :::

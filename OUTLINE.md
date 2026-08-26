@@ -4,8 +4,8 @@ Status key: **built** = written and published · *drafted* = outline only · (bl
 
 Ordering: classical inference, then continuous time, then the discrete POMDP
 formulation last. This is the reverse of the commonest presentation. The argument
-for it is our own and is set out in `content/orientation.md`; it is load-bearing,
-so do not reorder weeks without revisiting it.
+for it is our own and is set out in `content/orientation.md`. The whole sequence
+depends on it, so do not reorder weeks without revisiting that argument.
 
 Sources named below are set out in full in `REFERENCES.md`, where every DOI has been
 resolved against Crossref. See `CLAUDE.md` for what may and may not be taken from each.
@@ -111,7 +111,7 @@ reading finds. Update this table as sources are read, and do not delete it.
 - **Derive the Laplace-encoded energy.** Assume the approximate posterior is Gaussian
   and that its mode is sharply peaked, and free energy collapses to an expression in
   the generative model alone. This is the named bridge from Week 4's general bound to
-  prediction errors, and it is where the Gaussian assumption earns its keep.
+  prediction errors, and it is the step the Gaussian assumption exists for.
   → back to Week 4 (fixed-form mean-field).
 - **Derive** the single-unit update from that, then multivariate. Univariate first
   throughout, with the multivariate expression stated at the end of each section:
@@ -143,7 +143,7 @@ reading finds. Update this table as sources are read, and do not delete it.
   of $\varphi = g(\mu) + z$ and the Langevin equation.
 - **The local linearity assumption** *(found by reading, absent from the first draft)*.
   The recursion drops nonlinear derivative terms such as $(\mu')^2$ and $\mu'\mu''$.
-  This is load-bearing and almost always unstated. Say what it costs.
+  The derivation depends on it and almost nobody states it. Say what it costs.
 - **Two conventions for the noise** across dynamic orders: independent, which is the
   standard state-space choice and the one to teach first, versus correlated, which is
   what most FEP treatments actually assume. Be explicit about which is in force and why.
@@ -190,7 +190,7 @@ reading finds. Update this table as sources are read, and do not delete it.
   of this outline said "forward model", which is the wrong way round.
 - **What that requirement costs, and the biological dodge.** The standard move is to
   delegate $\mathrm{d}\varphi/\mathrm{d}a$ to reflex arcs so the brain never has to
-  learn it. Say plainly that this is an assumption doing real work.
+  learn it. Say plainly what that assumption is assuming.
 - The action-perception cycle, and why one quantity can govern both without collapsing
   into wishful thinking (they act on opposite sides of the blanket).
   → back to Week 1 §2.

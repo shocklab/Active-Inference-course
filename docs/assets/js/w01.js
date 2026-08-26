@@ -335,14 +335,16 @@
       return t;
     });
 
-    var plot = new A.Plot({ aspect: 0.5, pad: { l: 96, r: 14, t: 34, b: 40 } });
+    var plot = new A.Plot({ aspect: 0.32, pad: { l: 96, r: 14, t: 34, b: 42 } });
     var out = A.readout();
 
     plot.onDraw(function (p) {
       p.clear();
       var c = p.ctx;
       var nS = STATES.length, nO = OBS.length;
-      var gw = Math.min(p.plotW() * 0.56, 250), gh = Math.min(p.plotH(), 150);
+      // Fill the canvas rather than sitting in the top-left of it: a fixed
+      // 150px cap left most of a wide figure empty.
+      var gw = Math.min(p.plotW() * 0.5, 300), gh = p.plotH();
       var cw = gw / nS, ch = gh / nO;
       var gx = p.o.pad.l, gy = p.o.pad.t + 6;
 
@@ -394,7 +396,7 @@
                   ['P(o)', ev.toFixed(4)]]);
       }
       lines.forEach(function (L, i) {
-        p.text(bx, gy + 6 + i * 19, L[0],
+        p.text(bx, gy + Math.max(6, (gh - lines.length * 21) / 2) + i * 21, L[0],
           { pixel: true, align: 'left', size: 10.8, colour: L[1], weight: L[2] });
       });
 

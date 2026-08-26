@@ -12,8 +12,9 @@ browser, where KaTeX renders it.
 Authoring syntax on top of CommonMark
 -------------------------------------
   $x$ , $$...$$              inline and display maths
-  $$...$$ {#vfe}             a *labelled* display equation: gets a number
-  [eq:vfe]                   cross-reference, renders as a link "(3)"
+  $$...$$ {#vfe}             a *labelled* display equation: numbered by section,
+                             so Week 3 lesson 2 gives (3.2.1), (3.2.2), ...
+  [eq:vfe]                   cross-reference, renders as a link "(3.2.1)"
   {{ev_tawny:.4f}}           a COMPUTED number, substituted at build time from
                              the week's numbers.py. Never type a derived number.
   ::: type Title ... :::     block directives (see BOXES below)
@@ -31,6 +32,7 @@ import markdown as _md
 # ── placeholder tokens ───────────────────────────────────────────────────
 # Alphanumeric so no Markdown rule (emphasis, escaping, autolinks) can touch them.
 CODE_T = "zqCODEqz{}zqz"
+RAW_T  = "zqRAWqz{}zqz"
 MATH_T = "zqMATHqz{}zqz"
 BLOK_T = "zqBLOKqz{}zqz"
 
@@ -53,10 +55,17 @@ BOXES = {
 
 
 class Doc:
-    """Per-page rendering state: counters, stashes, and the collected TOC."""
+    """Per-page rendering state: counters, stashes, and the collected TOC.
 
-    def __init__(self):
-        self.code, self.math, self.blok = [], [], []
+    `prefix` is the section number this page sits at, e.g. "3.2" for Week 3
+    lesson 2, so its figures number 3.2.1, 3.2.2 and its equations (3.2.1)...
+    Numbering that carries the section survives being quoted somewhere else in
+    the course; a bare "(1)" does not.
+    """
+
+    def __init__(self, prefix=""):
+        self.prefix = prefix
+        self.code, self.math, self.blok, self.raw = [], [], [], []
         self.eqn_no = 0
         self.fig_no = 0
         self.sec_no = 0
@@ -70,6 +79,10 @@ class Doc:
     def put_code(self, s):
         self.code.append(s)
         return CODE_T.format(len(self.code) - 1)
+
+    def put_raw(self, s):
+        self.raw.append(s)
+        return RAW_T.format(len(self.raw) - 1)
 
     def put_math(self, s):
         self.math.append(s)
@@ -101,6 +114,26 @@ def _restore_code(text, doc):
     return text
 
 
+# ── 1b. verbatim block HTML ──────────────────────────────────────────────
+# Markdown ends a raw-HTML block at the first blank line, so an <svg> written
+# with blank lines between its logical groups gets </p><p> injected into the
+# middle of it and stops rendering. Every element survives, so a tag-balance
+# check passes while the figure is broken on the page. Stash the whole block.
+_RAW_BLOCK = re.compile(r"^<(svg|table|figure)\b.*?^</\1>\s*$", re.S | re.M | re.I)
+
+
+def _stash_raw(text, doc):
+    return _RAW_BLOCK.sub(lambda m: doc.put_raw(m.group(0)), text)
+
+
+def _restore_raw(html, doc):
+    for i, s in enumerate(doc.raw):
+        tok = RAW_T.format(i)
+        html = re.sub(r"<p>\s*" + re.escape(tok) + r"\s*</p>", lambda _m, s=s: s, html)
+        html = html.replace(tok, s)
+    return html
+
+
 # ── 2. maths stashing ────────────────────────────────────────────────────
 # Display first (longest match wins), then inline. A labelled display equation
 # is  $$ ... $$ {#label}  with the label on the closing line.
@@ -116,7 +149,7 @@ def _display_html(body, label, doc):
     body = body.strip()
     if label:
         doc.eqn_no += 1
-        n = doc.eqn_no
+        n = f"{doc.prefix}.{doc.eqn_no}" if doc.prefix else str(doc.eqn_no)
         doc.labels[label] = n
         eid = f"eq-{label}"
         no = f'<div class="eqno"><a href="#{eid}" title="Link to equation {n}">({n})</a></div>'
@@ -213,25 +246,27 @@ def _render_directive(dtype, dargs, inner, doc):
         name, _, cap = dargs.partition("|")
         name, cap = name.strip(), cap.strip()
         doc.fig_no += 1
+        fno = f"{doc.prefix}.{doc.fig_no}" if doc.prefix else str(doc.fig_no)
         capm = _render_inner(cap, doc) if cap else ""
         capm = re.sub(r"^<p>|</p>$", "", capm.strip())
         body = _render_inner(inner, doc) if inner.strip() else ""
         return (
-            f'<figure class="widget" id="fig-{doc.fig_no}">'
+            f'<figure class="widget" id="fig-{fno.replace(".", "-")}">'
             f'<div class="wmount" data-widget="{name}">'
             f'<div class="wfallback">This figure is interactive and needs JavaScript.</div></div>'
-            f'<figcaption><span class="fno">Figure {doc.fig_no}.</span> {capm}{body}</figcaption>'
+            f'<figcaption><span class="fno">Figure {fno}.</span> {capm}{body}</figcaption>'
             f"</figure>"
         )
 
     # static figure ------------------------------------------------------
     if dtype in ("fig", "figure"):
         doc.fig_no += 1
+        fno = f"{doc.prefix}.{doc.fig_no}" if doc.prefix else str(doc.fig_no)
         cap = _render_inner(dargs, doc) if dargs else ""
         cap = re.sub(r"^<p>|</p>$", "", cap.strip())
         return (
-            f'<figure id="fig-{doc.fig_no}">{_render_inner(inner, doc)}'
-            f'<figcaption><span class="fno">Figure {doc.fig_no}.</span> {cap}</figcaption></figure>'
+            f'<figure id="fig-{fno.replace(".", "-")}">{_render_inner(inner, doc)}'
+            f'<figcaption><span class="fno">Figure {fno}.</span> {cap}</figcaption></figure>'
         )
 
     # notation table -----------------------------------------------------
@@ -245,8 +280,9 @@ def _render_directive(dtype, dargs, inner, doc):
                 continue
             t = _inline_only(term.strip(), doc)
             d = _inline_only(desc.strip(), doc)
-            rows.append(f"<dt>{t}</dt><dd>{d}</dd>")
-        return '<dl class="notation">' + "".join(rows) + "</dl>"
+            rows.append(f"<tr><th>{t}</th><td>{d}</td></tr>")
+        return ('<table class="notation"><tbody>' + "".join(rows)
+                + "</tbody></table>")
 
     # standard boxes -----------------------------------------------------
     if dtype in BOXES:
@@ -331,6 +367,7 @@ def _to_html(text, doc):
             chunks.append("\n\n" + doc.put_blok(html) + "\n\n")
     text = "".join(chunks)
 
+    text = _stash_raw(text, doc)
     text = _stash_code(text, doc)
     text = _stash_math(text, doc)
     text = _restore_code(text, doc)
@@ -346,9 +383,10 @@ def _to_html(text, doc):
 
 
 def _wrap_tables(html):
-    return re.sub(r"<table>", '<div class="tablewrap"><table>', html).replace(
-        "</table>", "</table></div>"
-    )
+    """Give every table a horizontal-scroll wrapper, exactly once."""
+    def rep(m):
+        return '<div class="tablewrap">' + m.group(0) + "</div>"
+    return re.sub(r"<table\b[^>]*>.*?</table>", rep, html, flags=re.S)
 
 
 # ── computed numbers ─────────────────────────────────────────────────────
@@ -404,15 +442,16 @@ def split_front_matter(raw):
     return meta, body.lstrip("\n")
 
 
-def render(raw, *, number_sections=True, numbers=None):
+def render(raw, *, number_sections=True, numbers=None, prefix=""):
     """Markdown source -> (html, meta, doc). `doc` carries the TOC and counters."""
     meta, body = split_front_matter(raw)
-    doc = Doc()
+    doc = Doc(prefix=prefix)
     doc.missing_numbers = []
     body = substitute_numbers(body, numbers, doc.missing_numbers)
     if "number_sections" in meta:
         number_sections = bool(meta["number_sections"])
     html = _to_html(body, doc)
+    html = _restore_raw(html, doc)
     html = _restore_math(html, doc)
     html = _resolve_refs(html, doc)
     html = _number_headings(html, doc, number_sections)

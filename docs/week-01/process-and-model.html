@@ -228,12 +228,17 @@ figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:
 .wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
 canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
 
-/* ── notation list ───────────────────────────────────────────────────── */
-dl.notation{margin:1.6rem 0;max-width:var(--measure)}
-dl.notation dt{font-family:var(--sans);font-weight:600;font-size:.82rem;color:var(--accent);
-               margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--rule)}
-dl.notation dt:first-child{border-top:0;margin-top:0;padding-top:0}
-dl.notation dd{margin:.25rem 0 0;color:var(--ink2);font-size:1.03rem}
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
 
 /* ── footer nav ──────────────────────────────────────────────────────── */
 .pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
@@ -376,7 +381,7 @@ the ambiguity is not always harmless.</p></aside>
 from. It is a joint probability distribution over observations and a set of
 quantities the agent treats as their causes:</p>
 <div class="eqn" id="eq-gen-model"><div class="eqbody">$$P(o, s) \;=\; \underbrace{P(o \mid s)}_{\text{likelihood}} \;
-             \underbrace{P(s)}_{\text{prior}} .$$</div><div class="eqno"><a href="#eq-gen-model" title="Link to equation 1">(1)</a></div></div>
+             \underbrace{P(s)}_{\text{prior}} .$$</div><div class="eqno"><a href="#eq-gen-model" title="Link to equation 1.2.1">(1.2.1)</a></div></div>
 <p>Here $s$ is a <strong>hidden state</strong> <em>of the model</em>. It is a variable in the agent's
 head. It is not $\vartheta$, it need not correspond to anything in $\vartheta$,
 and there is no requirement that the two even have the same dimension or the
@@ -385,7 +390,7 @@ same type.</p>
 world is in model-state $s$. The prior $P(s)$ says which model-states the agent
 expects before looking. Together they specify a joint distribution, and from a
 joint distribution you can in principle compute anything.</p>
-<figure id="fig-1"><p><svg viewBox="0 0 720 268" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: the generative process on the left, the agent's generative model on the right, coupled only through sensory states o and active states a.">
+<figure id="fig-1-2-1"><svg viewBox="0 0 720 268" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: the generative process on the left, the agent's generative model on the right, coupled only through sensory states o and active states a.">
   <defs>
     <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M1 1 L9 5 L1 9" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -397,30 +402,37 @@ joint distribution you can in principle compute anything.</p>
   <text x="137" y="47" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#6d6d75">THE WORLD</text>
   <text x="583" y="47" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#0f5f57">THE AGENT</text>
   <text x="137" y="64" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="12.5" font-style="italic" fill="#90909a">generative process</text>
-  <text x="583" y="64" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="12.5" font-style="italic" fill="#14837a">generative model</text></p>
-<p><circle cx="137" cy="134" r="35" fill="#ffffff" stroke="#6d6d75" stroke-width="1.5"/>
+  <text x="583" y="64" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="12.5" font-style="italic" fill="#14837a">generative model</text>
+
+  <circle cx="137" cy="134" r="35" fill="#ffffff" stroke="#6d6d75" stroke-width="1.5"/>
   <text x="137" y="140" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="21" fill="#3c3c42">&#977;</text>
-  <text x="137" y="188" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#90909a">true external state</text></p>
-<p><circle cx="583" cy="134" r="35" fill="#ffffff" stroke="#0f5f57" stroke-width="1.5"/>
+  <text x="137" y="188" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#90909a">true external state</text>
+
+  <circle cx="583" cy="134" r="35" fill="#ffffff" stroke="#0f5f57" stroke-width="1.5"/>
   <text x="583" y="140" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="21" fill="#0f5f57">s</text>
-  <text x="583" y="188" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#14837a">believed state</text></p>
-<p><rect x="322" y="60" width="76" height="42" fill="#ffffff" stroke="#8a6d1f" stroke-width="1.5"/>
+  <text x="583" y="188" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#14837a">believed state</text>
+
+  <rect x="322" y="60" width="76" height="42" fill="#ffffff" stroke="#8a6d1f" stroke-width="1.5"/>
   <text x="360" y="87" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="19" fill="#8a6d1f">o</text>
-  <text x="360" y="118" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#8a6d1f">sensory states</text></p>
-<p><rect x="322" y="166" width="76" height="42" fill="#ffffff" stroke="#9c4d2f" stroke-width="1.5"/>
+  <text x="360" y="118" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#8a6d1f">sensory states</text>
+
+  <rect x="322" y="166" width="76" height="42" fill="#ffffff" stroke="#9c4d2f" stroke-width="1.5"/>
   <text x="360" y="193" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="19" fill="#9c4d2f">a</text>
-  <text x="360" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#9c4d2f">active states</text></p>
-<p><path d="M170 118 C 240 92, 270 84, 318 81" fill="none" stroke="#8a6d1f" stroke-width="1.8" marker-end="url(#ar)"/>
+  <text x="360" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#9c4d2f">active states</text>
+
+  <path d="M170 118 C 240 92, 270 84, 318 81" fill="none" stroke="#8a6d1f" stroke-width="1.8" marker-end="url(#ar)"/>
   <path d="M402 81 C 452 84, 486 96, 552 116" fill="none" stroke="#8a6d1f" stroke-width="1.8" marker-end="url(#ar)"/>
   <path d="M552 152 C 486 172, 452 184, 402 187" fill="none" stroke="#9c4d2f" stroke-width="1.8" marker-end="url(#ar)"/>
-  <path d="M318 187 C 270 184, 240 176, 170 150" fill="none" stroke="#9c4d2f" stroke-width="1.8" marker-end="url(#ar)"/></p>
-<p><text x="245" y="72" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#8a6d1f">causes</text>
+  <path d="M318 187 C 270 184, 240 176, 170 150" fill="none" stroke="#9c4d2f" stroke-width="1.8" marker-end="url(#ar)"/>
+
+  <text x="245" y="72" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#8a6d1f">causes</text>
   <text x="478" y="80" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#8a6d1f">informs</text>
   <text x="478" y="196" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#9c4d2f">selects</text>
-  <text x="245" y="200" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#9c4d2f">changes</text></p>
-<p><line x1="300" y1="26" x2="300" y2="242" stroke="#d3cfc4" stroke-dasharray="3 4"/>
+  <text x="245" y="200" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#9c4d2f">changes</text>
+
+  <line x1="300" y1="26" x2="300" y2="242" stroke="#d3cfc4" stroke-dasharray="3 4"/>
   <line x1="420" y1="26" x2="420" y2="242" stroke="#d3cfc4" stroke-dasharray="3 4"/>
-</svg></p><figcaption><span class="fno">Figure 1.</span> The two structures and the surface between them. Everything to the left of the sensory and active states belongs to the world. Everything to the right belongs to the agent. The two never touch directly.</figcaption></figure>
+</svg><figcaption><span class="fno">Figure 1.2.1.</span> The two structures and the surface between them. Everything to the left of the sensory and active states belongs to the world. Everything to the right belongs to the agent. The two never touch directly.</figcaption></figure>
 <p>The two dashed lines mark the only place the world and the agent meet. The
 variables sitting on them have names. The <strong>sensory states</strong> are the observations
 $o$ of Lesson&nbsp;1, seen now as one half of an interface rather than as a bare
@@ -436,7 +448,7 @@ the true distribution over anything. The agent's model is a hypothesis. Much of
 what makes active inference interesting, and all of what makes it useful for
 modelling psychopathology, comes from watching what happens when the model and
 the process disagree in structured ways.</p></div>
-<h2 id="why-the-distinction-earns-its-keep"><span class="secno">3</span>Why the distinction earns its keep</h2>
+<h2 id="what-follows-from-keeping-them-apart"><span class="secno">3</span>What follows from keeping them apart</h2>
 <p>Three things become clear once you keep the two apart, and stay muddy if you do not.</p>
 <p><strong>Where the intractability lives.</strong> The sum we will spend the next three weeks
 trying to avoid is over the agent's $s$, not the world's $\vartheta$. The world
@@ -459,7 +471,7 @@ technical use of the word. A belief here is a probability distribution held by
 some part of a system, of the sort a Kalman filter has. It carries no
 implication of awareness, and thermostats have them.</p></div>
 <h2 id="notation-to-carry-forward"><span class="secno">4</span>Notation to carry forward</h2>
-<dl class="notation"><dt>$\vartheta$</dt><dd>True states of the world. The generative <em>process</em>. The agent never sees these.</dd><dt>$s$</dt><dd>Hidden states in the agent's generative <em>model</em>. Latent variables the agent infers.</dd><dt>$o$</dt><dd>Observations, the sensory states on the blanket. Shared by both sides.</dd><dt>$a$</dt><dd>Actions, the active states on the blanket. Chosen by the agent, felt by the world.</dd><dt>$P(o \mid s)$</dt><dd>The likelihood. What the model says each state predicts.</dd><dt>$P(s)$</dt><dd>The prior over states, before any observation.</dd><dt>$P(o)$</dt><dd>The model evidence, or marginal likelihood. The quantity whose logarithm is minus the surprise.</dd><dt>$P(s \mid o)$</dt><dd>The posterior. What the agent should believe after seeing $o$. The object of the next two lessons.</dd></dl>
+<div class="tablewrap"><table class="notation"><tbody><tr><th>$\vartheta$</th><td>True states of the world. The generative <em>process</em>. The agent never sees these.</td></tr><tr><th>$s$</th><td>Hidden states in the agent's generative <em>model</em>. Latent variables the agent infers.</td></tr><tr><th>$o$</th><td>Observations, the sensory states on the blanket. Shared by both sides.</td></tr><tr><th>$a$</th><td>Actions, the active states on the blanket. Chosen by the agent, felt by the world.</td></tr><tr><th>$P(o \mid s)$</th><td>The likelihood. What the model says each state predicts.</td></tr><tr><th>$P(s)$</th><td>The prior over states, before any observation.</td></tr><tr><th>$P(o)$</th><td>The model evidence, or marginal likelihood. The quantity whose logarithm is minus the surprise.</td></tr><tr><th>$P(s \mid o)$</th><td>The posterior. What the agent should believe after seeing $o$. The object of the next two lessons.</td></tr></tbody></table></div>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
 <li>If an agent's model contains a hidden state called "predator" and there is no predator in the world, is the model's likelihood $P(o \mid s)$ ill-defined? Why not?</li>
 <li>Which of $\vartheta$, $s$, $o$, $a$ appear on both sides of the Markov blanket?</li>
