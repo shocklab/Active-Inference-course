@@ -7,8 +7,38 @@ formulation last. This is the reverse of the commonest presentation. The argumen
 for it is our own and is set out in `content/orientation.md`; it is load-bearing,
 so do not reorder weeks without revisiting it.
 
-Sources named below are the two open-access references, which a reader can go and
-check. See `CLAUDE.md` for what may and may not be taken from each.
+Sources named below are set out in full in `REFERENCES.md`, where every DOI has been
+resolved against Crossref. See `CLAUDE.md` for what may and may not be taken from each.
+
+
+## Reading status — read this before trusting the sources above
+
+`build/check_outline.py` now reports all twelve weeks as carrying a source, a
+derivation target, widget specs and a cross-link. **That is a proxy result and
+should not be read as "all twelve weeks are planned."**
+
+The audit's own finding was that outline quality tracks whether the source was
+*read* or merely *named*. Wiring in a citation satisfies the checker without
+satisfying the thing the checker stands for. Current state, honestly:
+
+| Source | Status | Weeks resting on it |
+|---|---|---|
+| Jonathan's `main.tex` and notebook | **read in full** | 1, 4, 10 |
+| Smith, Friston & Whyte (2022) | section structure extracted; body **not read** | 9, 11 |
+| Parr, Pezzulo & Friston (2022) | chapter structure only; body **not read** | 5, 9, 11 |
+| Buckley et al. (2017) | **existence verified only** | 2, 3, 6, 7, 8 |
+| Bogacz (2017) | **existence verified only** | 2, 3, 5 |
+| Da Costa et al. (2020) | **existence verified only** | 9, 10, 11 |
+| everything else in `REFERENCES.md` | **existence verified only** | 5, 9, 10, 12 |
+
+So Weeks 1, 4 and 10 are genuinely grounded. Weeks 5, 9 and 11 are grounded in
+structure but not in content. Weeks 2, 3, 6, 7, 8 and 12 currently rest on papers
+nobody in this project has opened.
+
+**Before drafting any week, read its sources and revise its bullets against what
+is actually in them.** The gaps found on 2026-08-26 were all of the form "the
+source treats this substantially and the outline does not mention it", which only
+reading finds. Update this table as sources are read, and do not delete it.
 
 ---
 
@@ -28,6 +58,8 @@ check. See `CLAUDE.md` for what may and may not be taken from each.
 - Multiple observations and posterior contraction; why the posterior precision adds.
 - Widgets: likelihood surface with live gradient ascent; posterior contraction as samples accumulate; conjugate updating.
 - Notebooks: NumPy, JAX (vectorised posteriors over a grid of priors).
+- Sources: Bogacz (2017) §1–2 for the simplest worked case; Buckley et al. (2017) §2.
+  → forward to Week 4, where the point estimate becomes a distribution.
 
 ### Week 3 · Learning the model
 - Parameters as another kind of hidden state; the difference between inference and learning is a timescale, not a kind.
@@ -36,6 +68,8 @@ check. See `CLAUDE.md` for what may and may not be taken from each.
 - Factor analysis as the worked case.
 - Widgets: EM iterations on a factor-analysis toy, with the responsibility assignment visible; the E-step/M-step alternation as a descent on one objective.
 - Notebooks: NumPy, JAX.
+- Sources: Bogacz (2017) on learning; Buckley et al. (2017).
+  → back to Week 2; forward to Week 11, where the same parameters are fitted to real behaviour.
 
 ### Week 4 · Variational free energy — **the pivot of the course**
 - Jensen's inequality and the bound on surprise, in full.
@@ -84,12 +118,20 @@ check. See `CLAUDE.md` for what may and may not be taken from each.
 - Generalised measurements; the covariance of derivatives; embedding order.
 - The shift operator `D`.
 - Widgets: embedding-order explorer; noise smoothness against useful embedding order.
+- **Derive** the covariance of the generalised measurement vector, and show why the
+  useful embedding order is set by the smoothness of the noise rather than chosen freely.
+- Sources: Buckley et al. (2017), the careful treatment of generalised coordinates.
+  → back to Week 5; forward to Week 7.
 
 ### Week 7 · Generalised filtering
 - Assembling the generalised state-space model.
 - Recognition dynamics: tracking a trajectory rather than a point.
 - Correlated embedding orders.
 - Widgets: the filter tracking a trajectory with tunable precisions; deliberately mis-set precisions and watch it chase noise.
+- **Derive** the recognition dynamics from the free energy gradient in generalised
+  coordinates, and show what the $\mathcal{D}$ operator contributes to the flow.
+- Sources: Buckley et al. (2017) §3–4.
+  → back to Week 6; forward to Week 8, where action closes the loop.
 
 ### Week 8 · Action, learning and attention
 - Autonomous states; action changes sensations rather than beliefs.
@@ -101,6 +143,7 @@ check. See `CLAUDE.md` for what may and may not be taken from each.
   through the continuous hierarchy, written out. → forward to Week 9, where the same
   structure reappears on a discrete graph.
 - Widgets: an agent holding a setpoint by acting; break the forward model and watch it fail.
+- Sources: Buckley et al. (2017) on action; Friston (2005) for the neuronal reading.
 
 ---
 
@@ -140,6 +183,12 @@ check. See `CLAUDE.md` for what may and may not be taken from each.
   where τ goes. Jonathan's ch. "Thoughts on the vectorised expected free energy"
   resolves the A vs A-transpose question the book leaves ambiguous.
 - Why F and G are different functionals with different arguments.
+  → back to Week 4 (F, given data in hand); forward to Week 11 (G, driving choice).
+- **The case against the standard story.** Millidge et al. (2021) argue the EFE is not
+  simply "free energy in the future" and that exploration does not fall out of free
+  energy minimisation as usually claimed. Engage it here, not in Week 12.
+- Sources: Jonathan's `main.tex`; Da Costa et al. (2020); Parr & Friston (2019);
+  Millidge et al. (2021).
 - Widgets: per-policy decomposition of G into its two terms; an explore/exploit dial.
 
 ### Week 11 · Policy selection, learning, and contact with data
@@ -168,6 +217,14 @@ check. See `CLAUDE.md` for what may and may not be taken from each.
   Bruineberg et al. on Markov blankets; the falsifiability question;
   the dark-room problem and whether the standard reply works.
 - Every `::: warning` flagged in Weeks 1–11 gets collected and answered here.
+- **Derive** the sophisticated-inference recursion, at least to depth two, so the
+  cost of planning over beliefs about beliefs is visible rather than asserted.
+- Widgets: a shallow agent and a sophisticated one on the same task, side by side;
+  the dark-room objection made concrete, with preferences the agent can satisfy by
+  hiding, and what has to be added to stop it.
+- Sources: Sajid et al. (2021) for the RL comparison; Da Costa et al. (2023) on reward
+  maximisation; Friston et al. (2021) on sophisticated inference; Bruineberg et al.
+  (2022) and Millidge et al. (2021) for the objections. Full details in `REFERENCES.md`.
 
 ---
 
