@@ -66,8 +66,8 @@ mistake hard to find. Check the column sums.
 :::
 
 ::: exercise What the prior decides
-Using the leopard, baboon and nothing model from Lesson&nbsp;3, find the value
-of the leopard prior $\rho$ at which observing a tawny flash leaves you exactly
+Using the leopard, baboon and nothing model from Lesson&nbsp;3, write $\rho$ for the prior
+probability that a leopard is present, and find the value of $\rho$ at which observing a tawny flash leaves you exactly
 undecided between leopard and not-leopard, that is,
 $P(s = \text{leopard} \mid o) = 1/2$. Keep the baboon and nothing priors in the
 ratio $22 : 70$ as $\rho$ varies.

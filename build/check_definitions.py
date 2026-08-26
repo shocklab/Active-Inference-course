@@ -39,11 +39,19 @@ MACRO = re.compile(r"\\([a-zA-Z]+)")
 LETTER = re.compile(r"(?<![\\a-zA-Z])([A-Za-z])(?![a-zA-Z])")
 BOLD = re.compile(r"\*\*([^*\n]{3,45}?)\*\*")
 
+# Cues that a definition is being given. Deliberately NARROW.
+#
+# This list once contained "parameter" and "slider". They were added to silence a
+# false positive on lambda, and they promptly created a false negative: "the
+# parameter kappa sets how hard it pushes back" passed for weeks while telling a
+# reader nothing about kappa's kind, range or units. Loosening a check to quiet a
+# false positive is how you manufacture a false negative. If a cue is too broad,
+# fix the prose, not the cue.
 CUES = ("write", "writing", "written", "call", "calling", "called", "denote",
         "denoting", "let ", "stands for", "defined", "define", "is the", "are the",
-        "for the", "where", "with ", "meaning", "that is", "read as", "count",
-        "here ", "we use", "given by", "measures", "which is",
-        "the mutual", "the kullback", "parameter", "slider")
+        "meaning", "read as", "given by", "we use",
+        "with probability", "for some function", "for some", "function",
+        "the mutual", "the kullback")
 
 # Universal notation nobody needs told, plus structural LaTeX.
 EXEMPT = {
@@ -57,7 +65,8 @@ EXEMPT = {
     "\\Leftarrow", "\\Rightarrow", "\\Longrightarrow", "\\Longleftarrow",
     "\\xrightarrow", "\\iff", "\\implies", "\\forall", "\\exists", "\\lVert",
     "\\rVert", "\\underbrace", "\\qquad", "\\ \\", "\\sim",
-    "\\min", "\\max", "\\inf", "\\sup", "\\arg",
+    "\\min", "\\max", "\\inf", "\\sup", "\\arg", "\\propto", "\\mathbb",
+    "E",   # expectation, standard for this audience and listed in notation.md
     "\\langle", "\\rangle", "\\lVert", "\\rVert", "\\colon", "\\operatorname",
     "e", "i", "j", "k", "n", "m", "c", "x", "y", "z",   # generic dummies and indices
 }
