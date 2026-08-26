@@ -119,12 +119,20 @@ surprise $1.423$ nats; quiet has $P(o) = 0.656$ and surprise $0.422$ nats.
 Quiet is what this model expects, and it is duly unsurprised by it.
 
 **Information gained.** How far did the observation move you? The natural
-measure is the Kullback&ndash;Leibler divergence from prior to posterior,
+measure is the Kullback&ndash;Leibler divergence from the prior to the posterior,
 
 $$
 D_{\mathrm{KL}}\big[P(s\mid o)\,\|\,P(s)\big]
 \;=\; \sum_{s} P(s \mid o)\,\ln \frac{P(s\mid o)}{P(s)} .
 $$ {#info-gain}
+
+Read the notation carefully, because it runs backwards from the name. In
+$D_{\mathrm{KL}}[Q\,\|\,P]$ the distribution written *first* is the one the
+expectation is taken under, and the convention is to say this out loud as "the
+divergence from $P$ to $Q$". So the posterior appears first above even though we
+describe it as measuring how far the prior moved. It is not symmetric,
+$D_{\mathrm{KL}}[Q\,\|\,P] \neq D_{\mathrm{KL}}[P\,\|\,Q]$, so the order is
+never decorative; Week&nbsp;4 turns on getting it right.
 
 For the tawny flash this is $0.940$ nats. For the shaking branch, $0.524$. For
 quiet, $0.225$. The observation that surprised you most also taught you most,
@@ -134,6 +142,12 @@ which is intuitive and, as the exercises will show, not a theorem.
 :::
 
 ## What the ambiguity slider is showing you
+
+The figure's third slider is a parameter we will write $\lambda$, running from
+$0$ to $1$, which blends the likelihood towards a uniform one: at $\lambda = 0$
+the matrix is as printed above, and at $\lambda = 1$ every state predicts every
+observation with equal probability. It is a dial for how informative the senses
+are.
 
 Push $\lambda$ towards 1 in that figure. The likelihood bars flatten until every
 state predicts every observation equally well. Watch the posterior: it slides
@@ -231,7 +245,14 @@ observation, $o_1$, is six times more probable.
 
 The structural reason is that the two quantities are averages of different
 things. Averaging surprise over $P(o)$ gives the entropy $\mathrm{H}[P(o)]$;
-averaging information gain over $P(o)$ gives the mutual information $I(s;o)$.
+averaging information gain over $P(o)$ gives the **mutual information** between
+states and observations,
+
+$$
+I(s;o) \;=\; \sum_{o} P(o) \, D_{\mathrm{KL}}\big[P(s \mid o) \,\|\, P(s)\big],
+$$
+
+which measures how much, on average, an observation tells you about the state.
 Nothing links them pointwise. An observation is surprising when the model
 thought it unlikely; it is informative when the states disagree about it. A
 sensory channel can easily be rare and useless at once, and an agent choosing

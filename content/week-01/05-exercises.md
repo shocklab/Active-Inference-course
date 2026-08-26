@@ -67,26 +67,26 @@ mistake hard to find. Check the column sums.
 
 ::: exercise The prior does the work
 Using the leopard, baboon and nothing model from Lesson&nbsp;3, find the value
-of the leopard prior $\pi$ at which observing a tawny flash leaves you exactly
+of the leopard prior $q$ at which observing a tawny flash leaves you exactly
 undecided between leopard and not-leopard, that is,
 $P(s = \text{leopard} \mid o) = 1/2$. Keep the baboon and nothing priors in the
-ratio $22 : 70$ as $\pi$ varies.
+ratio $22 : 70$ as $q$ varies.
 ---solution---
-Let the leopard prior be $\pi$. The other two share $1 - \pi$ in the ratio
-$22:70$, so they are $\tfrac{22}{92}(1-\pi)$ and $\tfrac{70}{92}(1-\pi)$. The
+Let the leopard prior be $q$. The other two share $1 - q$ in the ratio
+$22:70$, so they are $\tfrac{22}{92}(1-q)$ and $\tfrac{70}{92}(1-q)$. The
 tawny-flash row is $(0.70, 0.15, 0.02)$. The posterior odds of leopard against
 everything else are
 
 $$
-\frac{0.70\,\pi}{\left(0.15 \cdot \tfrac{22}{92} + 0.02 \cdot \tfrac{70}{92}\right)(1-\pi)}
-= \frac{0.70\,\pi}{0.051\,087\,(1-\pi)} .
+\frac{0.70\,q}{\left(0.15 \cdot \tfrac{22}{92} + 0.02 \cdot \tfrac{70}{92}\right)(1-q)}
+= \frac{0.70\,q}{0.051\,087\,(1-q)} .
 $$
 
-Setting this to 1 gives $0.70\pi = 0.051\,087(1-\pi)$, so
-$\pi = 0.051\,087 / 0.751\,087 = 0.0680$.
+Setting this to 1 gives $0.70q = 0.051\,087(1-q)$, so
+$q = 0.051\,087 / 0.751\,087 = 0.0680$.
 
 So a leopard prior of about 6.8% is the tipping point: the model in
-Lesson&nbsp;3 used $\pi = 0.08$, which is just above it, which is why the
+Lesson&nbsp;3 used $q = 0.08$, which is just above it, which is why the
 posterior came out at $0.544$ rather than exactly a half. The observation is
 strong, but it is only just strong enough to overturn a prior of that size, and
 a slightly more sceptical hiker would have remained unconvinced by the same

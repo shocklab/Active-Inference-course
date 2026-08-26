@@ -99,6 +99,40 @@ Four wrong values reached a draft of Week 1 by being worked out by hand. Before
 writing any number, run it. Before writing "always", "never" or "only", enumerate
 the set the claim covers.
 
+### Define everything at first use, in reading order
+
+A reader caught Lesson 1 writing "sensory states" while naming them $o$, one
+lesson before the states/observations distinction existed. Auditing for the class
+rather than the instance found five more: "nats" used from Lesson 1 and never
+defined anywhere, $t$ and $T$ unnamed, the square brackets in $\mathrm{H}[\cdot]$
+unexplained, $s$ used in a margin note before its definition, and $\pi$ spent on
+a prior when it is the policy symbol from Week 9.
+
+Rules:
+- **Introduce the symbol with the word.** If a letter is chosen for a reason, give
+  the reason ($o$ for observation). A reader who cannot see why the letter is that
+  letter has to memorise instead of understand.
+- **One name per thing per stretch of the course.** "Sensory states" and
+  "observations" are both standard; using both before saying they are the same is
+  not. Where a second name is genuinely needed (the Markov blanket partition in
+  Lesson 2), introduce it explicitly as a second name.
+- **Nothing is defined only in `notation.md`.** That page is a reference, not part
+  of the reading path. Units, conventions and symbols must be defined where they
+  are first read.
+- **Nothing is defined only in a widget.** Slider labels live in JavaScript and a
+  reader of the prose never sees them.
+- **Do not spend a reserved symbol early.** `notation.md` reserves $\pi$, $\gamma$,
+  $\tau$, $\mathbf{A}$–$\mathbf{E}$, $\mathcal{D}$ and $\Pi$ for later weeks.
+- **Bold means first definition**, plus table labels and run-in headings. A term
+  bolded on two pages is defined twice, so one of them is wrong.
+
+`build/check_definitions.py` reports every symbol's first use in reading order and
+flags double-bolded terms. It is fuzzy in both directions and says so; read the
+report rather than the exit code. It has already produced one false positive of
+its own (worked-example entity names) and contained the same class of bug it
+exists to catch (it stripped a trailing full stop before testing for one, so the
+run-in-heading exemption never fired).
+
 ### Widgets
 A widget referenced in content must be registered in a JS file that lesson loads,
 or the reader sees a "not loaded" box. Two failure modes already found and fixed,

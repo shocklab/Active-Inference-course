@@ -367,9 +367,10 @@ be much of an agent.</p>
 all. Everything the agent will ever know about the world it must extract from
 $o$, and later from the consequences of its own $a$.</p>
 <aside class="mn"><span class="mnl">On the notation</span><p>Much of the free energy principle literature writes $\eta$, or sometimes
-$\vartheta$, for external states of the generative process, keeping $s$ for
-states <em>in the model</em>. We follow that. When you meet a paper that writes $s$ for
-both, read carefully: the ambiguity is not always harmless.</p></aside>
+$\vartheta$, for external states of the generative process, keeping the letter
+$s$ for states inside the agent's model. We follow that; $s$ is defined in the
+next section. When you meet a paper that writes $s$ for both, read carefully:
+the ambiguity is not always harmless.</p></aside>
 <h2 id="the-generative-model"><span class="secno">2</span>The generative model</h2>
 <p>The <strong>generative model</strong> is the agent's account of where its observations come
 from. It is a joint probability distribution over observations and a set of
@@ -420,11 +421,16 @@ joint distribution you can in principle compute anything.</p>
 <p><line x1="300" y1="26" x2="300" y2="242" stroke="#d3cfc4" stroke-dasharray="3 4"/>
   <line x1="420" y1="26" x2="420" y2="242" stroke="#d3cfc4" stroke-dasharray="3 4"/>
 </svg></p><figcaption><span class="fno">Figure 1.</span> The two structures and the surface between them. Everything to the left of the sensory and active states belongs to the world. Everything to the right belongs to the agent. The two never touch directly.</figcaption></figure>
-<p>The two dashed lines mark the only place the world and the agent meet. Sensory
-states carry information inward; active states carry influence outward. Nothing
-crosses except through them. That interface is called a <strong>Markov blanket</strong>, and
-it is the formal statement of the idea that you never perceive the world, only
-your own surface.</p>
+<p>The two dashed lines mark the only place the world and the agent meet. The
+variables sitting on them have names. The <strong>sensory states</strong> are the observations
+$o$ of Lesson&nbsp;1, seen now as one half of an interface rather than as a bare
+measurement; they carry information inward. The <strong>active states</strong> $a$ carry
+influence outward. Nothing crosses except through the two. That interface is
+called a <strong>Markov blanket</strong>, and it is the formal statement of the idea that you
+never perceive the world, only your own surface.</p>
+<p>The four-way partition into external, sensory, active and internal states is
+standard in this literature, and you will meet all four names again in
+Week&nbsp;5, where the internal states acquire a letter of their own.</p>
 <div class="box warning"><div class="boxhd">Careful<span class="bt">A model can be wrong and still be a model</span></div><p>Nothing above requires $P(o \mid s)$ to be the true likelihood, or $P(s)$ to be
 the true distribution over anything. The agent's model is a hypothesis. Much of
 what makes active inference interesting, and all of what makes it useful for

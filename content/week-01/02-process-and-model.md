@@ -35,9 +35,10 @@ $o$, and later from the consequences of its own $a$.
 
 ::: mn On the notation
 Much of the free energy principle literature writes $\eta$, or sometimes
-$\vartheta$, for external states of the generative process, keeping $s$ for
-states *in the model*. We follow that. When you meet a paper that writes $s$ for
-both, read carefully: the ambiguity is not always harmless.
+$\vartheta$, for external states of the generative process, keeping the letter
+$s$ for states inside the agent's model. We follow that; $s$ is defined in the
+next section. When you meet a paper that writes $s$ for both, read carefully:
+the ambiguity is not always harmless.
 :::
 
 ## The generative model
@@ -107,11 +108,17 @@ joint distribution you can in principle compute anything.
 </svg>
 :::
 
-The two dashed lines mark the only place the world and the agent meet. Sensory
-states carry information inward; active states carry influence outward. Nothing
-crosses except through them. That interface is called a **Markov blanket**, and
-it is the formal statement of the idea that you never perceive the world, only
-your own surface.
+The two dashed lines mark the only place the world and the agent meet. The
+variables sitting on them have names. The **sensory states** are the observations
+$o$ of Lesson&nbsp;1, seen now as one half of an interface rather than as a bare
+measurement; they carry information inward. The **active states** $a$ carry
+influence outward. Nothing crosses except through the two. That interface is
+called a **Markov blanket**, and it is the formal statement of the idea that you
+never perceive the world, only your own surface.
+
+The four-way partition into external, sensory, active and internal states is
+standard in this literature, and you will meet all four names again in
+Week&nbsp;5, where the internal states acquire a letter of their own.
 
 ::: warning A model can be wrong and still be a model
 Nothing above requires $P(o \mid s)$ to be the true likelihood, or $P(s)$ to be

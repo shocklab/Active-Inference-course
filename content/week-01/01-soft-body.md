@@ -61,18 +61,33 @@ number rises for a while and then flattens out, well below the maximum. This is
 not decoration. It is the quantity we are going to build the entire framework
 on, so it is worth being precise about what it is.
 
-Write $o$ for the states of the organism's sensory surface: everything it can
-measure about itself and its surroundings. Over a long life, the organism visits
-some sensory states often and others never, and that occupancy defines a
-distribution $P(o)$. Its entropy is
+Everything an organism can register about itself and its surroundings arrives at
+a surface: the retina, the skin, the stretch receptors in the gut. Call the state
+of that surface at one moment an **observation**, and write it $o$. The letter
+stands for *observation*, and the word is doing real work. An organism has no
+access to the world; it has access only to what its senses report of the world,
+which is not the same thing. Lesson&nbsp;2 makes that distinction precise and
+gives the world's own states a different letter. Until then, $o$ is simply
+whatever the organism can actually measure.
+
+Over a long life the organism makes some observations often and others never, and
+that occupancy defines a probability distribution over observations, written
+$P(o)$. Its **entropy** is
 
 $$
 \mathrm{H}[P(o)] \;=\; -\sum_{o} P(o) \ln P(o).
 $$ {#sensory-entropy}
 
-An organism whose sensory states are spread thinly over everything possible has
+Two notational points, since both recur for twelve weeks. The square brackets are
+deliberate: $\mathrm{H}$ takes an entire distribution as its argument rather than
+a single value, so it is a functional, not a function. And the logarithm is
+natural, here and everywhere in this course, which fixes the units as **nats**.
+One nat is the information carried by an event of probability $1/e$; divide by
+$\ln 2 \approx 0.693$ to convert to bits.
+
+An organism whose observations are spread thinly over everything possible has
 high entropy here. An organism that spends its whole life reporting *warm,
-fed, upright, unbroken* has low entropy. Being alive, expressed in nats, is
+fed, upright, unbroken* has low entropy. Being alive, measured in nats, is
 [eq:sensory-entropy] being small.
 
 ::: mn Why entropy and not variance
@@ -81,8 +96,9 @@ needs only a probability. For a creature whose states include "which arm of the
 maze" and "is the predator visible", there is no sensible mean to take.
 :::
 
-Now the step that makes the framework possible. If the organism's sensory
-statistics settle down over time, the long-run average of the quantity
+Now the step that makes the framework possible. Write $o_t$ for the observation
+made at time step $t$, and let $T$ count the steps of a life. If the organism's
+sensory statistics settle down over time, the long-run average of
 $-\ln P(o_t)$ along its actual trajectory converges to the entropy of the
 distribution it is sampling:
 
@@ -97,7 +113,7 @@ organism rarely sees and small when $o$ is business as usual.
 
 ::: keyidea
 [eq:ergodic] converts a statement about a whole lifetime into a statement about
-this instant. Keeping the entropy of your sensory states low over a lifetime is
+this instant. Keeping the entropy of your observations low over a lifetime is
 the same thing as keeping your surprise low at each moment. A goal you could
 never act on becomes a goal you can act on now.
 :::
@@ -122,14 +138,14 @@ expectations*, and those expectations have to live somewhere.
 
 They live inside the organism. To be able to evaluate its own surprise, a system
 must carry an internal model of what its observations are usually like and what
-produces them. That model is what we will call a **generative model**, and
-building one, running it, and correcting it is what the rest of this course is
-about.
+produces them. Such a model is called a *generative model*; Lesson&nbsp;2 defines
+it properly and says what it is generative of. Building one, running it, and
+correcting it is what the rest of this course is about.
 
 So the argument so far runs:
 
 1. To persist is to occupy a small set of states.
-2. Occupying a small set of states means low entropy over sensory states.
+2. Occupying a small set of states means low entropy over observations.
 3. Low entropy over a lifetime means low surprise at each moment.
 4. Surprise is only defined relative to a model.
 5. Therefore anything that persists must carry a model of the world it persists in.
