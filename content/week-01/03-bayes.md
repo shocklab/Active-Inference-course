@@ -125,6 +125,8 @@ Two derived quantities, while the numbers are in front of us.
 The section promised all the arithmetic, so here are the other two observations
 worked the same way. Multiply the relevant row elementwise by the prior, add:
 
+Surprise is measured in nats throughout, the unit that comes with natural logarithms; divide by $\ln 2$ for bits.
+
 | observed | numerators $P(o\mid s)P(s)$ | $P(o)$ | surprise, nats |
 |---|---|---|---|
 | tawny flash | {{num_tawny_leopard:.3f}}, {{num_tawny_baboon:.3f}}, {{num_tawny_nothing:.3f}} | {{ev_tawny:.3f}} | {{surprise_tawny:.3f}} |
@@ -177,13 +179,25 @@ which is intuitive and, as the exercises will show, not a theorem.
 
 ## What the ambiguity slider is showing you
 
-The figure's third slider is a parameter we will write $\lambda$, running from
-$0$ to $1$, which blends the likelihood towards a uniform one: at $\lambda = 0$
-the matrix is as printed above, and at $\lambda = 1$ every state predicts every
-observation with equal probability. It is a dial for how informative the senses
-are.
+The figure's third slider is a dimensionless parameter $\alpha \in [0,1]$ that
+blends the likelihood towards a uniform one. Writing $U$ for the matrix every one
+of whose entries is $1/3$, the displayed likelihood is
 
-Push $\lambda$ towards 1 in that figure. The likelihood bars flatten until every
+$$
+\mathbf{A}(\alpha) \;=\; (1-\alpha)\,\mathbf{A} \;+\; \alpha\,U ,
+$$ {#ambiguity}
+
+so $\alpha = 0$ leaves the matrix as printed above and $\alpha = 1$ replaces it
+with one in which every state predicts every observation equally. At
+$\alpha = 0.3$ the leopard column, for instance, becomes
+$0.7 \times (0.70, 0.25, 0.05) + 0.3 \times (\tfrac13,\tfrac13,\tfrac13)$. Each
+column still sums to one, because both $\mathbf{A}$'s columns and $U$'s do, and a
+convex combination of two distributions is a distribution.
+
+Call $\alpha$ the **ambiguity** of the channel: it is the single number this
+figure uses to dial how informative the senses are, from perfectly to not at all.
+
+Push $\alpha$ towards 1 in that figure. The likelihood bars flatten until every
 state predicts every observation equally well. Watch the posterior: it slides
 back onto the prior and stays there. The information-gain readout goes to zero.
 
@@ -207,7 +221,7 @@ been depleted, and what its companions are doing. Each of these is a state
 *factor*. The joint state space is the product of all of them, so if there are
 $n$ factors with $k$ values each, the sum in [eq:bayes] has $k^n$ terms.
 
-::: widget evidence-blowup | The number of terms in the evidence sum, on a logarithmic vertical axis. The vertical axis is logarithmic. The number of factors sits in the exponent.
+::: widget evidence-blowup | The number of terms in the evidence sum, $k^n$, against the number of state factors $n$. The three fixed curves are $k = 2, 4$ and $8$ values per factor; the sliders set your own $n$ and $k$. The vertical axis is logarithmic, so a straight line is exponential growth, and its slope is $\log_{10} k$.
 :::
 
 Nothing about this is fixable by better hardware, and here is why rather than on faith. Hardware buys you a constant factor: twice the
@@ -235,10 +249,7 @@ milliseconds using about twenty watts.
 
 So the exact posterior is not available. This is not a temporary engineering
 inconvenience; it is a structural feature of being a finite thing embedded in a
-large world. Everything from Week&nbsp;4 onwards is a response to it: rather
-than computing $P(s \mid o)$, we will posit an approximation $Q(s)$ that we
-*can* compute with, and then work out how to make it as close to the posterior
-as possible without ever evaluating the posterior.
+large world. Everything from Week&nbsp;4 onwards is a response to it: rather than computing $P(s \mid o)$, we will posit an approximation $Q(s)$ and work out how to make it as close to the posterior as possible without ever evaluating the posterior. $Q$ is a probability distribution over the same states as $P(s\mid o)$, so its values are non-negative and sum to one; what makes it useful is that we get to *choose* its shape, picking one we can compute with.
 
 ::: exercise Bayes with a hostile prior
 Using the same likelihood matrix, suppose you are a nervous hiker with prior
@@ -280,7 +291,7 @@ $$
 P(o \mid s) \;=\; \begin{pmatrix} 0.60 & 0.10 \\ 0.35 & 0.85 \\ 0.05 & 0.05 \end{pmatrix},
 $$
 
-rows indexed $o_1, o_2, o_3$ and columns by state. Both columns sum to one, so
+rows indexed $o_1, o_2, o_3$ and columns by $s_1, s_2$ in that order, matching the entries of the prior. Both columns sum to one, so
 this is a legitimate likelihood. The third row is deliberately flat: whatever the
 state, $o_3$ turns up 5% of the time.
 
@@ -297,7 +308,7 @@ leaves the posterior exactly where the prior was. The most informative
 observation, $o_1$, is {{ctr_prob_ratio:.0f}} times more probable.
 
 The structural reason is that the two quantities are averages of different
-things. Averaging surprise over $P(o)$ gives the entropy $\mathrm{H}[P(o)]$;
+things. Averaging surprise over $P(o)$ gives the entropy of Lesson&nbsp;1, $\mathrm{H}[P(o)] = -\sum_o P(o)\ln P(o)$;
 averaging information gain over $P(o)$ gives the **mutual information** between
 states and observations,
 

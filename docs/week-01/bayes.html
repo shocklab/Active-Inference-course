@@ -448,6 +448,7 @@ whatever else is true, empty scrub does not flash tawny.</p>
 <p>Two derived quantities, while the numbers are in front of us.</p>
 <p>The section promised all the arithmetic, so here are the other two observations
 worked the same way. Multiply the relevant row elementwise by the prior, add:</p>
+<p>Surprise is measured in nats throughout, the unit that comes with natural logarithms; divide by $\ln 2$ for bits.</p>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -539,12 +540,19 @@ for quiet $0.225$. The observation that surprised you most also taught you most,
 which is intuitive and, as the exercises will show, not a theorem.</p>
 <figure class="widget" id="fig-1-3-1"><div class="wmount" data-widget="bayes-discrete"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.1.</span> The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.</figcaption></figure>
 <h2 id="what-the-ambiguity-slider-is-showing-you"><span class="secno">3</span>What the ambiguity slider is showing you</h2>
-<p>The figure's third slider is a parameter we will write $\lambda$, running from
-$0$ to $1$, which blends the likelihood towards a uniform one: at $\lambda = 0$
-the matrix is as printed above, and at $\lambda = 1$ every state predicts every
-observation with equal probability. It is a dial for how informative the senses
-are.</p>
-<p>Push $\lambda$ towards 1 in that figure. The likelihood bars flatten until every
+<p>The figure's third slider is a dimensionless parameter $\alpha \in [0,1]$ that
+blends the likelihood towards a uniform one. Writing $U$ for the matrix every one
+of whose entries is $1/3$, the displayed likelihood is</p>
+<div class="eqn" id="eq-ambiguity"><div class="eqbody">$$\mathbf{A}(\alpha) \;=\; (1-\alpha)\,\mathbf{A} \;+\; \alpha\,U ,$$</div><div class="eqno"><a href="#eq-ambiguity" title="Link to equation 1.3.6">(1.3.6)</a></div></div>
+<p>so $\alpha = 0$ leaves the matrix as printed above and $\alpha = 1$ replaces it
+with one in which every state predicts every observation equally. At
+$\alpha = 0.3$ the leopard column, for instance, becomes
+$0.7 \times (0.70, 0.25, 0.05) + 0.3 \times (\tfrac13,\tfrac13,\tfrac13)$. Each
+column still sums to one, because both $\mathbf{A}$'s columns and $U$'s do, and a
+convex combination of two distributions is a distribution.</p>
+<p>Call $\alpha$ the <strong>ambiguity</strong> of the channel: it is the single number this
+figure uses to dial how informative the senses are, from perfectly to not at all.</p>
+<p>Push $\alpha$ towards 1 in that figure. The likelihood bars flatten until every
 state predicts every observation equally well. Watch the posterior: it slides
 back onto the prior and stays there. The information-gain readout goes to zero.</p>
 <p>Name it, because it returns as a term in an equation in
@@ -562,7 +570,7 @@ it last saw a predator, the wind direction, whether each of several patches has
 been depleted, and what its companions are doing. Each of these is a state
 <em>factor</em>. The joint state space is the product of all of them, so if there are
 $n$ factors with $k$ values each, the sum in <a class="eqref" href="#eq-bayes">(1.3.2)</a> has $k^n$ terms.</p>
-<figure class="widget" id="fig-1-3-2"><div class="wmount" data-widget="evidence-blowup"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.2.</span> The number of terms in the evidence sum, on a logarithmic vertical axis. The vertical axis is logarithmic. The number of factors sits in the exponent.</figcaption></figure>
+<figure class="widget" id="fig-1-3-2"><div class="wmount" data-widget="evidence-blowup"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.2.</span> The number of terms in the evidence sum, $k^n$, against the number of state factors $n$. The three fixed curves are $k = 2, 4$ and $8$ values per factor; the sliders set your own $n$ and $k$. The vertical axis is logarithmic, so a straight line is exponential growth, and its slope is $\log_{10} k$.</figcaption></figure>
 <p>Nothing about this is fixable by better hardware, and here is why rather than on faith. Hardware buys you a constant factor: twice the
 speed, twice the sums per second. The cost here is $k^n$, so a doubling of speed
 buys exactly one more state factor before you are back where you started. The
@@ -584,10 +592,7 @@ track of multiplies the work by $k$, and brains manage this in a few tens of
 milliseconds using about twenty watts.</p>
 <p>So the exact posterior is not available. This is not a temporary engineering
 inconvenience; it is a structural feature of being a finite thing embedded in a
-large world. Everything from Week&nbsp;4 onwards is a response to it: rather
-than computing $P(s \mid o)$, we will posit an approximation $Q(s)$ that we
-<em>can</em> compute with, and then work out how to make it as close to the posterior
-as possible without ever evaluating the posterior.</p>
+large world. Everything from Week&nbsp;4 onwards is a response to it: rather than computing $P(s \mid o)$, we will posit an approximation $Q(s)$ and work out how to make it as close to the posterior as possible without ever evaluating the posterior. $Q$ is a probability distribution over the same states as $P(s\mid o)$, so its values are non-negative and sum to one; what makes it useful is that we get to <em>choose</em> its shape, picking one we can compute with.</p>
 <div class="box exercise"><div class="boxhd">Exercise 1.3.1<span class="bt">Bayes with a hostile prior</span></div><p>Using the same likelihood matrix, suppose you are a nervous hiker with prior
 $P(s) = (0.40,\ 0.30,\ 0.30)$. You observe <strong>quiet</strong>. Compute the evidence, the
 posterior, and the surprise, and compare the surprise with the $0.422$ nats
@@ -608,7 +613,7 @@ informative. Show that this cannot be a general law, by constructing a model in
 which the <em>rarest</em> observation carries <em>no</em> information at all.</p><details><summary>Solution</summary><p>Take two states with a flat prior $P(s) = (0.5,\ 0.5)$, and three observations
 with likelihood</p>
 <div class="eqn"><div class="eqbody">$$P(o \mid s) \;=\; \begin{pmatrix} 0.60 & 0.10 \\ 0.35 & 0.85 \\ 0.05 & 0.05 \end{pmatrix},$$</div></div>
-<p>rows indexed $o_1, o_2, o_3$ and columns by state. Both columns sum to one, so
+<p>rows indexed $o_1, o_2, o_3$ and columns by $s_1, s_2$ in that order, matching the entries of the prior. Both columns sum to one, so
 this is a legitimate likelihood. The third row is deliberately flat: whatever the
 state, $o_3$ turns up 5% of the time.</p>
 <p>Working through <a class="eqref" href="#eq-bayes">(1.3.2)</a> for each observation:</p>
@@ -650,7 +655,7 @@ state, $o_3$ turns up 5% of the time.</p>
 leaves the posterior exactly where the prior was. The most informative
 observation, $o_1$, is 7 times more probable.</p>
 <p>The structural reason is that the two quantities are averages of different
-things. Averaging surprise over $P(o)$ gives the entropy $\mathrm{H}[P(o)]$;
+things. Averaging surprise over $P(o)$ gives the entropy of Lesson&nbsp;1, $\mathrm{H}[P(o)] = -\sum_o P(o)\ln P(o)$;
 averaging information gain over $P(o)$ gives the <strong>mutual information</strong> between
 states and observations,</p>
 <div class="eqn"><div class="eqbody">$$I(s;o) \;=\; \sum_{o} P(o) \, D_{\mathrm{KL}}\big[P(s \mid o) \,\|\, P(s)\big],$$</div></div>

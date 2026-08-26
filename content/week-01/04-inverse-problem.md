@@ -142,11 +142,11 @@ The numbers show that it happens. Here is why, and the argument is short enough
 that it belongs in the main text.
 
 Independence survives conditioning on an event whose probability **factorises**
-across the variables. If $P(E \mid s_1, s_2) = f(s_1)\,g(s_2)$ for some functions
-$f$ and $g$, then the posterior is
+across the variables. If $P(E \mid s_1, s_2) = h_1(s_1)\,h_2(s_2)$ for some functions
+$h_1$ and $h_2$, then the posterior is
 
 $$
-P(s_1, s_2 \mid E) \;\propto\; \underbrace{P(s_1)f(s_1)}_{\text{depends on } s_1 \text{ alone}} \;\cdot\; \underbrace{P(s_2)g(s_2)}_{s_2 \text{ alone}},
+P(s_1, s_2 \mid E) \;\propto\; \underbrace{P(s_1)h_1(s_1)}_{\text{depends on } s_1 \text{ alone}} \;\cdot\; \underbrace{P(s_2)h_2(s_2)}_{s_2 \text{ alone}},
 $$
 
 which is again a product, so the two stay independent. Conditioning on a

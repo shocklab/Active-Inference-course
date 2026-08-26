@@ -24,6 +24,8 @@ Read the report; do not just check the exit code.
 """
 import json
 import os
+import json
+import os
 import re
 import sys
 
@@ -89,6 +91,51 @@ def pages_in_reading_order():
     return out
 
 
+# ── symbol collisions against the notation page ──────────────────────────
+NOTE_ROW = re.compile(r"^\s*(\$[^:]+?\$)\s*::\s*(.+?)\s*$", re.M)
+WEEK_TAG = re.compile(r"Week&nbsp;(\d+)|Week (\d+)")
+
+
+def check_collisions():
+    """A symbol used in one week that notation.md assigns to a later one.
+
+    This is how sigma went unnoticed: the notation page reserved it for the
+    softmax in Week 9 while Lesson 1 used it for a noise standard deviation, and
+    nothing compared the two. A reader looking sigma up mid-course would have
+    found only the wrong meaning.
+    """
+    note = os.path.join(ROOT, "content", "notation.md")
+    if not os.path.exists(note):
+        return []
+    owner = {}
+    for m in NOTE_ROW.finditer(open(note, encoding="utf-8").read()):
+        sym, desc = m.group(1), m.group(2)
+        w = WEEK_TAG.search(desc)
+        for tok in re.findall(r"\\[a-zA-Z]+", sym):
+            if tok in EXEMPT or tok in ("\\mathrm","\\mathbf","\\bar","\\cdot","\\mathbb"):
+                continue
+            owner.setdefault(tok, []).append((int(w.group(1) or w.group(2)) if w else None, desc))
+
+    out = []
+    course = json.load(open(os.path.join(ROOT, "content/course.json"), encoding="utf-8"))
+    for wk in course["weeks"]:
+        d = os.path.join(ROOT, "content", f"week-{int(wk['n']):02d}")
+        if not os.path.isdir(d):
+            continue
+        used = set()
+        for fn in os.listdir(d):
+            if fn.endswith(".md"):
+                body = NUMBER_TOKEN.sub(" ", open(os.path.join(d, fn), encoding="utf-8").read())
+                for mm in MATH.finditer(body):
+                    used |= {"\\" + t for t in MACRO.findall(mm.group(1) or mm.group(2))}
+        for tok in sorted(used):
+            for home, desc in owner.get(tok, []):
+                if home and home > int(wk["n"]):
+                    out.append(f"{tok} is used in Week {wk['n']} but notation.md files it "
+                               f"under Week {home}: \"{desc[:70]}...\"")
+    return out
+
+
 def main():
     first, bolds, problems = {}, {}, []
 
@@ -123,6 +170,10 @@ def main():
         print(f"{'   ' if ok else ' ! '}{t:<12} {label}")
         if not ok:
             print(f"      …{ctx[-150:]}")
+
+    for c in check_collisions():
+        problems.append(c)
+        print(f"\n COLLISION: {c}")
 
     dupes = {t: p for t, p in bolds.items()
              if len(set(p)) > 1 and t not in EXAMPLE_NAMES}

@@ -259,7 +259,7 @@
   A.register('bayes-discrete', function (mount) {
     var pLeo = A.slider({ label: 'Prior on leopard', min: 0.01, max: 0.60, step: 0.01, value: 0.08 });
     var pBab = A.slider({ label: 'Prior on baboon', min: 0.01, max: 0.60, step: 0.01, value: 0.22 });
-    var amb = A.slider({ label: 'Ambiguity &lambda;', min: 0, max: 0.95, step: 0.05, value: 0 });
+    var amb = A.slider({ label: 'Ambiguity &alpha;', min: 0, max: 0.95, step: 0.05, value: 0 });
     var obsIdx = 0;
 
     var tabs = el('div', { class: 'wtabs' });
@@ -319,7 +319,7 @@
       out,
       A.note('The likelihood bars are one <em>column</em> of the matrix: what each state predicts '
         + 'about the observation you actually got. The posterior is prior times likelihood, divided by '
-        + 'the number in the readout. Push <b>&lambda;</b> up and the three likelihood bars level out: '
+        + 'the number in the readout. Push <b>&alpha;</b> up and the three likelihood bars level out: '
         + 'every state explains the data equally well, so the posterior collapses back onto the prior '
         + 'and the observation has told you nothing. That last readout is exactly how much it told you.')
     ]));
