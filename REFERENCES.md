@@ -26,7 +26,7 @@ cite them by equation number and fill the gaps ourselves.
 
 | Work | Why | Where |
 |---|---|---|
-| Buckley, C. L., Kim, C. S., McGregor, S. & Seth, A. K. (2017). The free energy principle for action and perception: A mathematical review. *J. Math. Psych.* **81**, 55–79. | The mathematical review of the continuous case. Does much of the algebra the books skip, and is the closest existing work to this course's purpose. Read it before drafting Weeks 5–8. | doi:[10.1016/j.jmp.2017.09.004](https://doi.org/10.1016/j.jmp.2017.09.004) · [arXiv:1705.09156](https://arxiv.org/abs/1705.09156) |
+| Buckley, C. L., Kim, C. S., McGregor, S. & Seth, A. K. (2017). The free energy principle for action and perception: A mathematical review. *J. Math. Psych.* **81**, 55–79. | **Read in full 2026-08-26**; Weeks 5–8 rewritten against it. The mathematical review of the continuous case, and the closest existing work to this course's purpose. Source of the moving-frame gradient descent result that is now Week 7's centrepiece. | doi:[10.1016/j.jmp.2017.09.004](https://doi.org/10.1016/j.jmp.2017.09.004) · [arXiv:1705.09156](https://arxiv.org/abs/1705.09156) |
 | Bogacz, R. (2017). A tutorial on the free-energy framework for modelling perception and learning. *J. Math. Psych.* **76**, 198–211. | Step-by-step derivations from very simple examples, plus how the model sits in neural circuits. The register this course is aiming for. | doi:[10.1016/j.jmp.2015.11.003](https://doi.org/10.1016/j.jmp.2015.11.003) |
 
 ### Weeks 5–8 · Continuous time
@@ -54,6 +54,13 @@ cite them by equation number and fill the gaps ourselves.
 |---|---|---|
 | Millidge, B., Tschantz, A. & Buckley, C. L. (2021). Whence the expected free energy? *Neural Computation* **33**(2), 447–482. | Argues the EFE is **not** simply "free energy in the future", and that exploration does not fall out of free energy minimisation as usually claimed. Week 10 should engage this rather than assert the standard story. | doi:[10.1162/neco_a_01354](https://doi.org/10.1162/neco_a_01354) |
 
+### Continuous time, further
+
+| Work | Why | Where |
+|---|---|---|
+| Friston, K., Trujillo-Barreto, N. & Daunizeau, J. (2008). DEM: A variational treatment of dynamic systems. *NeuroImage* **41**, 849–885. | Dynamic expectation maximisation: the machinery behind Weeks 6–7 beyond what Buckley et al. cover. | doi:[10.1016/j.neuroimage.2008.02.054](https://doi.org/10.1016/j.neuroimage.2008.02.054) |
+| Friston, K., Daunizeau, J., Kilner, J. & Kiebel, S. J. (2010). Action and behavior: a free-energy formulation. *Biological Cybernetics* **102**, 227–260. | The action side of Week 8, including the reflex-arc delegation of the inverse model. | doi:[10.1007/s00422-010-0364-z](https://doi.org/10.1007/s00422-010-0364-z) |
+
 ### Week 12 · Perspective and objections
 
 | Work | Why | Where |
@@ -61,10 +68,13 @@ cite them by equation number and fill the gaps ourselves.
 | Sajid, N., Ball, P. J., Parr, T. & Friston, K. J. (2021). Active inference: Demystified and compared. *Neural Computation* **33**, 674–712. | The careful comparison with reinforcement learning: what active inference adds and what it renames. | doi:[10.1162/neco_a_01357](https://doi.org/10.1162/neco_a_01357) |
 | Da Costa, L., Sajid, N., Parr, T., Friston, K. & Smith, R. (2023). Reward maximization through discrete active inference. *Neural Computation* **35**, 807–852. | When active inference and reward maximisation coincide, and when they do not. | doi:[10.1162/neco_a_01574](https://doi.org/10.1162/neco_a_01574) |
 | Friston, K., Da Costa, L., Hafner, D., Hesp, C. & Parr, T. (2021). Sophisticated inference. *Neural Computation* **33**, 713–763. | Planning over beliefs about beliefs. The main extension named in Week 12. | doi:[10.1162/neco_a_01351](https://doi.org/10.1162/neco_a_01351) |
+| Friston, K., Thornton, C. & Clark, A. (2012). Free-energy minimization and the dark-room problem. *Frontiers in Psychology* **3**, 130. | The published statement of the dark-room objection and the standard reply. Week 12 should assess whether the reply works. | doi:[10.3389/fpsyg.2012.00130](https://doi.org/10.3389/fpsyg.2012.00130) · CC BY |
 | Bruineberg, J., Dołęga, K., Dewhurst, J. & Baltieri, M. (2022). The emperor's new Markov blankets. *Behav. Brain Sci.* **45**, e183. | The strongest published objection to the Markov blanket picture drawn in Week 1. Cited there already. | doi:[10.1017/S0140525X21002351](https://doi.org/10.1017/S0140525X21002351) · [preprint](https://philsci-archive.pitt.edu/19726/) |
 
 ## Still to find
 
+- ~~A published source for the **dark-room objection**~~ — found: Friston, Thornton
+  & Clark (2012), above.
 - A solid reference for the **ergodicity assumption** behind Week 1's
   `H = lim (1/T) Σ surprise`, and the published criticism of it. Currently flagged
   as a `::: warning` with no citation behind it.
@@ -73,6 +83,14 @@ cite them by equation number and fill the gaps ourselves.
 - **Structure learning**, named in Week 12 with nothing behind it.
 - A **computational psychiatry** application for Week 11's data-fitting section,
   to make the model-fitting concrete on a real dataset.
+
+## A note on using preprint sources
+
+The arXiv source of Buckley et al. (1705.09156) contains an abandoned subsection on
+the dark-room problem, inside an `\iffalse` block, carrying a co-author's note saying
+"we can leave it for a later paper". It is not in the published article. Draft material
+the authors chose not to publish is not a citable source, however interesting, and it
+is not used here. The published dark-room reference above is used instead.
 
 ## Verifying this file
 

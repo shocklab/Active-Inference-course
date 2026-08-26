@@ -26,14 +26,23 @@ satisfying the thing the checker stands for. Current state, honestly:
 | Jonathan's `main.tex` and notebook | **read in full** | 1, 4, 10 |
 | Smith, Friston & Whyte (2022) | section structure extracted; body **not read** | 9, 11 |
 | Parr, Pezzulo & Friston (2022) | chapter structure only; body **not read** | 5, 9, 11 |
-| Buckley et al. (2017) | **existence verified only** | 2, 3, 6, 7, 8 |
+| Buckley et al. (2017) | **read in full** (2026-08-26) | 2, 3, 5, 6, 7, 8 |
 | Bogacz (2017) | **existence verified only** | 2, 3, 5 |
 | Da Costa et al. (2020) | **existence verified only** | 9, 10, 11 |
 | everything else in `REFERENCES.md` | **existence verified only** | 5, 9, 10, 12 |
 
-So Weeks 1, 4 and 10 are genuinely grounded. Weeks 5, 9 and 11 are grounded in
-structure but not in content. Weeks 2, 3, 6, 7, 8 and 12 currently rest on papers
-nobody in this project has opened.
+So Weeks 1, 4, 5, 6, 7, 8 and 10 are genuinely grounded: Buckley et al. was read
+in full on 2026-08-26 and Weeks 5 to 8 were rewritten against it, which changed
+them substantially rather than cosmetically. Weeks 9 and 11 are grounded in
+structure but not content. Weeks 2, 3 and 12 still rest on papers nobody here has
+opened.
+
+What reading one paper changed, as a calibration of how much the unread weeks are
+worth: it added the Laplace-encoded energy to Week 5, replaced Week 6's postulated
+derivatives with a motivated derivation plus the unstated local-linearity
+assumption, gave Week 7 a central result it entirely lacked (that plain gradient
+descent has no stationary point in generalised coordinates), and corrected Week 8
+from "forward model" to "inverse model", which was simply wrong.
 
 **Before drafting any week, read its sources and revise its bullets against what
 is actually in them.** The gaps found on 2026-08-26 were all of the form "the
@@ -98,52 +107,101 @@ reading finds. Update this table as sources are read, and do not delete it.
 ## Part II — Continuous time
 
 ### Week 5 · Predictive coding
-- Free energy under a Laplace approximation becomes precision-weighted prediction error.
-- **Derive** the single-unit update from Week 4's fixed-form result; then multivariate; then hierarchical.
-- **Predictive coding IS message passing.** Prediction errors travelling up, predictions
-  travelling down, on a hierarchical graph. Same fixed-point iteration as Week 9 will use
-  on a different graph. Saying so is what makes the two halves of the course one course.
+*Revised 2026-08-26 after reading Buckley et al. (2017) in full.*
+- **Derive the Laplace-encoded energy.** Assume the approximate posterior is Gaussian
+  and that its mode is sharply peaked, and free energy collapses to an expression in
+  the generative model alone. This is the named bridge from Week 4's general bound to
+  prediction errors, and it is where the Gaussian assumption earns its keep.
+  → back to Week 4 (fixed-form mean-field).
+- **Derive** the single-unit update from that, then multivariate. Univariate first
+  throughout, with the multivariate expression stated at the end of each section:
+  Buckley et al. use this pattern and it works.
+- Free energy becomes a sum of squared prediction errors weighted by inverse variances.
+  Precision as the weight, and the psychiatric reading of getting it wrong.
+- Hierarchical predictive coding; empirical priors.
+- **Neural process theory.** Which populations carry predictions and which carry errors,
+  why the scheme predicts distinct superficial and deep pyramidal roles, and precision
+  as neuromodulatory gain. Missed in the first draft of this outline.
+- **Predictive coding IS message passing** — errors up, predictions down, on a hierarchical
+  graph; the same fixed-point iteration Week 9 runs on a discrete graph.
   → back to Week 4; forward to Weeks 8 and 9.
-- **Neural process theory** *(audit gap 3)*. What the update equations claim about
-  brains: which populations carry predictions and which carry errors, why the scheme
-  predicts distinct superficial and deep pyramidal roles, and precision as
-  neuromodulatory gain. This is a large part of why anyone outside mathematics cares,
-  and it was missing entirely.
-  Sources: Parr, Pezzulo & Friston ch. 5; Smith, Friston & Whyte §5.
+- Terminology note: Buckley et al. write R-density and G-density for the approximate
+  posterior and the generative model. Worth naming once so their paper is readable.
 - Widgets: a PC unit relaxing to its fixed point; a hierarchy with precision sliders;
-  what happens when precision is set wrong (and the psychiatric reading of that).
+  what happens when precision is set wrong.
+- Sources: Buckley et al. (2017) §4–6 **[read]**; Bogacz (2017); Rao & Ballard (1999);
+  Friston (2005); Parr, Pezzulo & Friston ch. 5.
 
 ### Week 6 · Generalised coordinates of motion
-- Why a state is not enough: smooth noise means derivatives carry information.
-- Generalised measurements; the covariance of derivatives; embedding order.
-- The shift operator `D`.
-- Widgets: embedding-order explorer; noise smoothness against useful embedding order.
-- **Derive** the covariance of the generalised measurement vector, and show why the
-  useful embedding order is set by the smoothness of the noise rather than chosen freely.
-- Sources: Buckley et al. (2017), the careful treatment of generalised coordinates.
-  → back to Week 5; forward to Week 7.
+*Revised 2026-08-26 after reading Buckley et al. (2017) in full.*
+- **Motivate the derivatives, do not postulate them.** Generalised coordinates should
+  arrive as what happens when you extend a *static* generative model to a dynamic
+  environment, by adding a Langevin equation $\dot\mu = f(\mu) + w$ and then
+  differentiating repeatedly. Introducing $(\mu, \mu', \mu'', \dots)$ as a formalism
+  first is how the books lose people.
+- **Derive** the generalised observation and state equations by recursive differentiation
+  of $\varphi = g(\mu) + z$ and the Langevin equation.
+- **The local linearity assumption** *(found by reading, absent from the first draft)*.
+  The recursion drops nonlinear derivative terms such as $(\mu')^2$ and $\mu'\mu''$.
+  This is load-bearing and almost always unstated. Say what it costs.
+- **Two conventions for the noise** across dynamic orders: independent, which is the
+  standard state-space choice and the one to teach first, versus correlated, which is
+  what most FEP treatments actually assume. Be explicit about which is in force and why.
+  → forward to Week 7.
+- The shift operator $\mathcal{D}$, defined here, used in anger next week.
+- **Derive** the covariance of the generalised measurement vector, and show the useful
+  embedding order is set by the smoothness of the noise rather than chosen freely.
+- Widgets: embedding-order explorer; noise smoothness against useful embedding order;
+  the local linearity assumption breaking as a trajectory curves harder.
+- Sources: Buckley et al. (2017) §5.2 **[read]**; Friston et al. (2008), DEM.
 
 ### Week 7 · Generalised filtering
-- Assembling the generalised state-space model.
+*Revised 2026-08-26. This week now has a real centrepiece it did not have before.*
+- **Derive the week's main result: plain gradient descent cannot work here, and why.**
+  In generalised coordinates the time derivative of the $n$th order is *already* the
+  $(n+1)$th order, $\dot\mu_{[n]} = \mu_{[n+1]}$, by the definition of the coordinates.
+  So $\dot\mu_{[n]}$ cannot vanish at any order, and ordinary gradient descent has no
+  stationary point to converge to. The scheme is broken as usually written.
+  The repair is to separate the **motion of the mode** $\dot{\tilde\mu}$ from the
+  **mode of the motion** $\mathcal{D}\tilde\mu$, giving
+  $\dot{\tilde\mu} - \mathcal{D}\tilde\mu = -\kappa\,\nabla_{\tilde\mu}E$,
+  which is stationary when $\dot{\tilde\mu} = \mathcal{D}\tilde\mu$: the path of the
+  mode equals the mode of the path. Setting $\mathcal{D} = 0$ recovers Week 5.
+  This is the step everyone trips on, it is the reason the $\mathcal{D}$ term appears
+  in every continuous-time active inference paper, and the first draft of this outline
+  did not mention it at all. It alone justifies the week.
+  → back to Week 6 ($\mathcal{D}$); back to Week 5 (the static case).
+- Assembling the full generalised state-space model.
 - Recognition dynamics: tracking a trajectory rather than a point.
-- Correlated embedding orders.
-- Widgets: the filter tracking a trajectory with tunable precisions; deliberately mis-set precisions and watch it chase noise.
-- **Derive** the recognition dynamics from the free energy gradient in generalised
-  coordinates, and show what the $\mathcal{D}$ operator contributes to the flow.
-- Sources: Buckley et al. (2017) §3–4.
-  → back to Week 6; forward to Week 8, where action closes the loop.
+- Correlated embedding orders, now that Week 6 has set up the choice.
+- Widgets: the filter tracking a trajectory with tunable precisions; the same filter with
+  the $\mathcal{D}$ term removed, failing to settle, so the necessity is visible rather
+  than asserted; mis-set precisions and the filter chasing its own noise.
+- Sources: Buckley et al. (2017) §6 **[read]**; Friston et al. (2008), DEM.
 
 ### Week 8 · Action, learning and attention
+*Revised 2026-08-26 after reading Buckley et al. (2017) in full.*
 - Autonomous states; action changes sensations rather than beliefs.
-- **Derive** the action update: why the gradient is taken with respect to sensory
-  consequences, and what the forward model has to supply for that to be possible.
-- The action-perception cycle.
-- Learning first and second-order parameters; attention as precision optimisation.
-- **Hierarchical message passing** *(audit gap 6)*: the forward and backward passes
-  through the continuous hierarchy, written out. → forward to Week 9, where the same
-  structure reappears on a discrete graph.
-- Widgets: an agent holding a setpoint by acting; break the forward model and watch it fail.
-- Sources: Buckley et al. (2017) on action; Friston (2005) for the neuronal reading.
+- **Derive the action update.** Action does not appear in the free energy at all; it
+  enters only through the sensations it causes, so the chain rule gives
+  $\dot a = -\kappa_a \,(\mathrm{d}\varphi/\mathrm{d}a)\,(\partial E/\partial\varphi)$.
+  The agent therefore needs $\mathrm{d}\varphi/\mathrm{d}a$: how its sensations change
+  with what it does. Buckley et al. call this an **inverse model**, and the first draft
+  of this outline said "forward model", which is the wrong way round.
+- **What that requirement costs, and the biological dodge.** The standard move is to
+  delegate $\mathrm{d}\varphi/\mathrm{d}a$ to reflex arcs so the brain never has to
+  learn it. Say plainly that this is an assumption doing real work.
+- The action-perception cycle, and why one quantity can govern both without collapsing
+  into wishful thinking (they act on opposite sides of the blanket).
+  → back to Week 1 §2.
+- Learning first and second-order parameters; attention as precision optimisation, which
+  Buckley et al. tie to synaptic efficacy and gain respectively.
+- **Hierarchical message passing**: forward and backward passes through the continuous
+  hierarchy, written out. → forward to Week 9, same structure on a discrete graph.
+- Widgets: an agent holding a setpoint by acting; break the inverse model and watch it
+  fail; a thermostat-style agent as the worked continuous example, built from scratch.
+- Sources: Buckley et al. (2017) §7–8 **[read]**; Friston et al. (2010), action and
+  behaviour; Friston (2005).
 
 ---
 

@@ -14,9 +14,17 @@ So this checks, per planned week:
   widget   concrete widget specs
   xlink    at least one pointer to another week
 
-THIS IS A PROXY. It detects a bullet that *looks* committed, not one that *is*;
-a fabricated source name would pass. The real check is reading the source. It
-exists to stop the specific failure of turning chapter headings into bullets.
+THIS IS A PROXY, and it has now failed in both directions:
+
+  false positive  wiring a citation into a week satisfied `source` without anyone
+                  having read the paper. See the reading-status table in OUTLINE.md.
+  false negative  Week 7 was flagged as missing `derive` while containing the best
+                  derivation in the outline, because the bullet opened "The week's
+                  main result" rather than the word "Derive". Matching vocabulary
+                  is not reading substance.
+
+Use it to catch a week nobody has thought about. Do not use it to conclude that a
+week is ready. The real check is reading the source.
 """
 import os
 import re
