@@ -365,7 +365,7 @@ agents dictate, and some of what they do impinges on the agent's sensory
 surface.</p>
 <p>Write $\vartheta$ for the true state of the world and $o$ for what arrives at the
 sensory surface. The generative process specifies how $\vartheta$ evolves, and how
-$\vartheta$ gives rise to $o$. Write $a$ for the agent's <strong>actions</strong>. The process also specifies how $a$ feeds
+$\vartheta$ gives rise to $o$. Write $a$ for the agent's <strong>actions</strong>, drawn from whatever set of things the agent can do: for a thermostat $a \in \{\text{heat}, \text{idle}\}$, for an animal a continuous space of muscle commands. Week&nbsp;9 makes the discrete case concrete; the lamp example below has no actions at all, being about perception alone. The process also specifies how $a$ feeds
 back into $\vartheta$, and it has to: an agent that could only watch would have no
 way of staying in the small region of Lesson&nbsp;1, since staying there is
 something a body does rather than something that happens to it.</p>
@@ -487,9 +487,7 @@ moves the data towards the model. They act on opposite sides of the blanket. Tha
 the free energy of Week&nbsp;4, govern both: perception cannot cheat by simply
 deciding the data are whatever the model wanted, because the data are on the far
 side of the interface and only action can reach them.</p>
-<div class="box remark"><div class="boxhd">Remark<span class="bt">One more confusion</span></div><p>The agent's states $s$ are usually described as its "beliefs". This is a
-technical use of the word. A belief here is a probability distribution held by
-some part of a system, of the sort a Kalman filter has. It carries no
+<div class="box remark"><div class="boxhd">Remark<span class="bt">One more confusion</span></div><p>The agent is often said to hold "beliefs", and the word is technical here. The belief is the <em>distribution</em>, $P(s)$ or later $Q(s)$, not the state $s$ itself: $s$ is a possible state of affairs, and the belief is how much weight the agent puts on it. Calling $s$ a belief, as people often do and as the diagram's label does, is shorthand for that. A Kalman filter holds beliefs in exactly this sense, its mean and covariance being a Gaussian over states. It carries no
 implication of awareness. A Kalman filter has beliefs in exactly this sense; an
 ordinary bimetallic thermostat does not, since it holds no distribution over
 anything, which means the word is not vacuous.</p></div>
@@ -507,7 +505,8 @@ about the world, not about anybody's beliefs.</p>
 prior $P(s) = (0.5, 0.5)$, and a likelihood equal to the
 true one. Its evidence for a bright reading is</p>
 <div class="eqn" id="eq-lamp-evidence"><div class="eqbody">$$P(\text{bright}) = 0.5 \times 0.8 + 0.5 \times 0.1 = 0.45,$$</div><div class="eqno"><a href="#eq-lamp-evidence" title="Link to equation 1.2.3">(1.2.3)</a></div></div>
-<p>so a bright reading carries $0.7985$ nats of surprise,
+<p>so a bright reading carries $-\ln 0.45 = 0.7985$
+nats of surprise, in the natural-log units of Lesson&nbsp;1,
 and by Bayes the posterior on the lamp being on is
 $0.5 \times 0.8 / 0.45 = 0.8889$.</p>
 <p><strong>Agent B</strong> has the same states and the same prior but believes its sensor is far
@@ -526,20 +525,29 @@ about it is ill-formed: its columns still sum to one, Bayes still applies, its
 posterior is still a distribution. The machinery does not detect the error. That
 is the answer to the checkpoint question below about a state called "predator"
 with no predator in the world.</p>
-<p><strong>Mismodelling has a price, and the price is exactly a divergence.</strong> Over a long
-run the readings arrive with the <em>true</em> frequencies, bright
-$0.45$ of the time. Agent A's average surprise is then
-$0.688139$ nats, which is precisely the entropy of the true
-observation distribution: the best any agent can do. Agent B averages
+<p><strong>Mismodelling has a price, and the price is exactly a divergence.</strong> Two pieces
+of notation first. Write $P^{*}$ with a star for a distribution belonging to the
+<em>process</em>, the frequencies the world actually produces, and $P_A$, $P_B$ with an
+agent's letter for the same distribution computed under that agent's <em>model</em>. The
+star is the world; the subscript is whose head it is in.</p>
+<p>Over a long run the readings arrive with the true frequencies, bright
+$0.45$ of the time. Write $\bar{S}_X$ for the <strong>average surprise</strong> of an
+agent $X$: its per-observation surprise, weighted by how often each observation
+really turns up,</p>
+<div class="eqn" id="eq-avg-surprise"><div class="eqbody">$$\bar{S}_X \;=\; \sum_{o} P^{*}(o)\,\big[-\ln P_X(o)\big].$$</div><div class="eqno"><a href="#eq-avg-surprise" title="Link to equation 1.2.4">(1.2.4)</a></div></div>
+<p>For agent A this is $0.688139$ nats, which is exactly
+$\mathrm{H}[P^{*}(o)]$: the entropy of Lesson&nbsp;1 applied to the world's own
+frequencies. That is the floor, because an agent whose $P_X$ already equals
+$P^{*}$ has nothing left to get wrong. Agent B averages
 $0.693147$ nats. The excess is
 $0.005008$ nats, and</p>
-<div class="eqn" id="eq-lamp-kl"><div class="eqbody">$$D_{\mathrm{KL}}\big[P^{*}(o) \,\|\, P_B(o)\big] = 0.005008\ \text{nats},$$</div><div class="eqno"><a href="#eq-lamp-kl" title="Link to equation 1.2.4">(1.2.4)</a></div></div>
+<div class="eqn" id="eq-lamp-kl"><div class="eqbody">$$D_{\mathrm{KL}}\big[P^{*}(o) \,\|\, P_B(o)\big] = 0.005008\ \text{nats},$$</div><div class="eqno"><a href="#eq-lamp-kl" title="Link to equation 1.2.5">(1.2.5)</a></div></div>
 <p>the same number. The extra surprise a mismodelling agent pays, per observation
 and on average, <em>is</em> the divergence between the world's statistics and its own.
 That is the precise version of Lesson&nbsp;1's remark that the two meanings of
 $P(o)$ coincide when the model is good and part company when it is not, and it
 is why the framework can get away with using one as a stand-in for the other.</p>
-<div class="box exercise"><div class="boxhd">Exercise 1.2.1<span class="bt">Confirm the price</span></div><p>Verify <a class="eqref" href="#eq-lamp-kl">(1.2.4)</a> by hand: compute $P^{*}(\text{dim})$ and
+<div class="box exercise"><div class="boxhd">Exercise 1.2.1<span class="bt">Confirm the price</span></div><p>Verify <a class="eqref" href="#eq-lamp-kl">(1.2.5)</a> by hand: compute $P^{*}(\text{dim})$ and
 $P_B(\text{dim})$, then evaluate
 $\sum_o P^{*}(o)\ln\big[P^{*}(o)/P_B(o)\big]$.</p><details><summary>Solution</summary><p>The true marginals are $0.45$ and
 $0.55$. Agent B's are $0.50$ and
@@ -573,7 +581,7 @@ reports the hole.</p>
 paths exist. Whether real organisms have one in this sense is the argument
 Week&nbsp;12 takes up.</p></details></div>
 <h2 id="notation-to-carry-forward"><span class="secno">5</span>Notation to carry forward</h2>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$\vartheta$</th><td>True states of the world. The generative <em>process</em>. The agent never sees these.</td></tr><tr><th>$s$</th><td>Hidden states in the agent's generative <em>model</em>. Latent variables the agent infers.</td></tr><tr><th>$o$</th><td>Observations, the sensory states on the blanket. Shared by both sides.</td></tr><tr><th>$a$</th><td>Actions, the active states on the blanket. Chosen by the agent, felt by the world.</td></tr><tr><th>$\mu$</th><td>Internal states: the physical variables carrying the model. Not the same as $s$, which is a variable inside it. Returns in Week&nbsp;5.</td></tr><tr><th>$P(o \mid s)$</th><td>The likelihood. What the model says each state predicts.</td></tr><tr><th>$P(s)$</th><td>The prior over states, before any observation.</td></tr><tr><th>$P(o)$</th><td>The model evidence, or marginal likelihood. The quantity whose logarithm is minus the surprise.</td></tr><tr><th>$P(s \mid o)$</th><td>The posterior. What the agent should believe after seeing $o$. The object of the next two lessons.</td></tr></tbody></table></div>
+<div class="tablewrap"><table class="notation"><tbody><tr><th>$\vartheta$</th><td>True states of the world. The generative <em>process</em>. The agent never sees these.</td></tr><tr><th>$s$</th><td>Hidden states in the agent's generative <em>model</em>. Latent variables the agent infers.</td></tr><tr><th>$o$</th><td>Observations, the sensory states on the blanket. Shared by both sides.</td></tr><tr><th>$a$</th><td>Actions, the active states on the blanket. Chosen by the agent, felt by the world.</td></tr><tr><th>$\mu$</th><td>Internal states: the physical variables carrying the model. Not the same as $s$, which is a variable inside it. Returns in Week&nbsp;5.</td></tr><tr><th>$P(o \mid s)$</th><td>The likelihood. What the model says each state predicts.</td></tr><tr><th>$P(s)$</th><td>The prior over states, before any observation.</td></tr><tr><th>$P(o)$</th><td>The model evidence, or marginal likelihood. The quantity whose logarithm is minus the surprise.</td></tr><tr><th>$P(s \mid o)$</th><td>The posterior. What the agent should believe after seeing $o$. The object of the next two lessons.</td></tr><tr><th>$P(o, s)$</th><td>The joint distribution over observations and model states. The generative model itself, <a class="eqref" href="#eq-gen-model">(1.2.1)</a>.</td></tr><tr><th>$P^{*}(\cdot)$</th><td>A star marks a distribution belonging to the <em>process</em>: the frequencies the world actually produces. No agent can evaluate it.</td></tr><tr><th>$P_A(\cdot),\ P_B(\cdot)$</th><td>A subscript marks the same distribution computed under a named agent's <em>model</em>.</td></tr><tr><th>$D_{\mathrm{KL}}[Q \,\|\, P]$</th><td>Kullback&ndash;Leibler divergence, $\sum_x Q(x)\ln[Q(x)/P(x)]$. Non-negative, zero only when $Q = P$, and not symmetric. Lesson&nbsp;3.</td></tr><tr><th>$\mathrm{H}[P]$</th><td>Shannon entropy, $-\sum_x P(x)\ln P(x)$, in nats. Lesson&nbsp;1.</td></tr></tbody></table></div>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
 <li>If an agent's model contains a hidden state called "predator" and there is no predator in the world, is the model's likelihood $P(o \mid s)$ ill-defined? Why not?</li>
 <li>Which of $\vartheta$, $s$, $o$, $a$ appear on both sides of the Markov blanket?</li>

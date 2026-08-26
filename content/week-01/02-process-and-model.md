@@ -25,7 +25,7 @@ surface.
 
 Write $\vartheta$ for the true state of the world and $o$ for what arrives at the
 sensory surface. The generative process specifies how $\vartheta$ evolves, and how
-$\vartheta$ gives rise to $o$. Write $a$ for the agent's **actions**. The process also specifies how $a$ feeds
+$\vartheta$ gives rise to $o$. Write $a$ for the agent's **actions**, drawn from whatever set of things the agent can do: for a thermostat $a \in \{\text{heat}, \text{idle}\}$, for an animal a continuous space of muscle commands. Week&nbsp;9 makes the discrete case concrete; the lamp example below has no actions at all, being about perception alone. The process also specifies how $a$ feeds
 back into $\vartheta$, and it has to: an agent that could only watch would have no
 way of staying in the small region of Lesson&nbsp;1, since staying there is
 something a body does rather than something that happens to it.
@@ -178,9 +178,7 @@ deciding the data are whatever the model wanted, because the data are on the far
 side of the interface and only action can reach them.
 
 ::: remark One more confusion
-The agent's states $s$ are usually described as its "beliefs". This is a
-technical use of the word. A belief here is a probability distribution held by
-some part of a system, of the sort a Kalman filter has. It carries no
+The agent is often said to hold "beliefs", and the word is technical here. The belief is the *distribution*, $P(s)$ or later $Q(s)$, not the state $s$ itself: $s$ is a possible state of affairs, and the belief is how much weight the agent puts on it. Calling $s$ a belief, as people often do and as the diagram's label does, is shorthand for that. A Kalman filter holds beliefs in exactly this sense, its mean and covariance being a Gaussian over states. It carries no
 implication of awareness. A Kalman filter has beliefs in exactly this sense; an
 ordinary bimetallic thermostat does not, since it holds no distribution over
 anything, which means the word is not vacuous.
@@ -208,7 +206,8 @@ $$
 P(\text{bright}) = {{lamp_prior}} \times {{lamp_true_on}} + {{lamp_prior}} \times {{lamp_true_off}} = {{lamp_ev_bright_true:.2f}},
 $$ {#lamp-evidence}
 
-so a bright reading carries ${{lamp_surprise_bright_true:.4f}}$ nats of surprise,
+so a bright reading carries $-\ln {{lamp_ev_bright_true:.2f}} = {{lamp_surprise_bright_true:.4f}}$
+nats of surprise, in the natural-log units of Lesson&nbsp;1,
 and by Bayes the posterior on the lamp being on is
 ${{lamp_prior}} \times {{lamp_true_on}} / {{lamp_ev_bright_true:.2f}} = {{lamp_post_on_true:.4f}}$.
 
@@ -232,11 +231,25 @@ posterior is still a distribution. The machinery does not detect the error. That
 is the answer to the checkpoint question below about a state called "predator"
 with no predator in the world.
 
-**Mismodelling has a price, and the price is exactly a divergence.** Over a long
-run the readings arrive with the *true* frequencies, bright
-${{lamp_ev_bright_true:.2f}}$ of the time. Agent A's average surprise is then
-${{lamp_entropy_true:.6f}}$ nats, which is precisely the entropy of the true
-observation distribution: the best any agent can do. Agent B averages
+**Mismodelling has a price, and the price is exactly a divergence.** Two pieces
+of notation first. Write $P^{*}$ with a star for a distribution belonging to the
+*process*, the frequencies the world actually produces, and $P_A$, $P_B$ with an
+agent's letter for the same distribution computed under that agent's *model*. The
+star is the world; the subscript is whose head it is in.
+
+Over a long run the readings arrive with the true frequencies, bright
+${{lamp_ev_bright_true:.2f}}$ of the time. Write $\bar{S}_X$ for the **average surprise** of an
+agent $X$: its per-observation surprise, weighted by how often each observation
+really turns up,
+
+$$
+\bar{S}_X \;=\; \sum_{o} P^{*}(o)\,\big[-\ln P_X(o)\big].
+$$ {#avg-surprise}
+
+For agent A this is ${{lamp_entropy_true:.6f}}$ nats, which is exactly
+$\mathrm{H}[P^{*}(o)]$: the entropy of Lesson&nbsp;1 applied to the world's own
+frequencies. That is the floor, because an agent whose $P_X$ already equals
+$P^{*}$ has nothing left to get wrong. Agent B averages
 ${{lamp_avg_surprise_b:.6f}}$ nats. The excess is
 ${{lamp_excess:.6f}}$ nats, and
 
@@ -315,6 +328,11 @@ $P(o \mid s)$ :: The likelihood. What the model says each state predicts.
 $P(s)$ :: The prior over states, before any observation.
 $P(o)$ :: The model evidence, or marginal likelihood. The quantity whose logarithm is minus the surprise.
 $P(s \mid o)$ :: The posterior. What the agent should believe after seeing $o$. The object of the next two lessons.
+$P(o, s)$ :: The joint distribution over observations and model states. The generative model itself, [eq:gen-model].
+$P^{*}(\cdot)$ :: A star marks a distribution belonging to the *process*: the frequencies the world actually produces. No agent can evaluate it.
+$P_A(\cdot),\ P_B(\cdot)$ :: A subscript marks the same distribution computed under a named agent's *model*.
+$D_{\mathrm{KL}}[Q \,\|\, P]$ :: Kullback&ndash;Leibler divergence, $\sum_x Q(x)\ln[Q(x)/P(x)]$. Non-negative, zero only when $Q = P$, and not symmetric. Lesson&nbsp;3.
+$\mathrm{H}[P]$ :: Shannon entropy, $-\sum_x P(x)\ln P(x)$, in nats. Lesson&nbsp;1.
 :::
 
 ::: checkpoint

@@ -104,8 +104,7 @@ The branch shakes. Multiply prior by likelihood, state by state:
 | 1 | 0 | {{noisy_prior_10:.2f}} | {{noisy_lik_10:.4f}} | {{noisy_prod_10:.6f}} | {{noisy_post_10:.4f}} |
 | 1 | 1 | {{noisy_prior_11:.2f}} | {{noisy_lik_11:.4f}} | {{noisy_prod_11:.6f}} | {{noisy_post_11:.4f}} |
 
-The evidence is $P(o=1) = {{noisy_ev:.4f}}$, so the shake carries
-${{noisy_surprise:.3f}}$ nats of surprise. Both marginals move the same way and by a lot:
+The evidence is $P(o=1) = {{noisy_ev:.4f}}$, so by the definition from Lesson&nbsp;1 the shake carries $-\ln {{noisy_ev:.4f}} = {{noisy_surprise:.3f}}$ nats of surprise, natural-log units throughout. Both marginals move the same way and by a lot:
 
 $$
 P(s_{\text{gust}} = 1 \mid o) \;=\; P(s_{\text{bab}} = 1 \mid o) \;=\; {{noisy_marg_gust:.3f}},
@@ -188,9 +187,7 @@ a tour of them.
 **Solve it exactly, where the model lets you.** Some pairings of prior and
 likelihood have posteriors in closed form. If the likelihood is Gaussian with
 known variance and the prior over the mean is Gaussian, the posterior is
-Gaussian and you can write down its parameters in two lines. This is
-conjugacy, it is the backbone of Week&nbsp;2, and it works right up until your
-model has any structure you actually wanted.
+Gaussian and you can write down its parameters in two lines. This is **conjugacy**: a prior family and a likelihood family are conjugate when the posterior always lands back in the prior's family, so updating changes the parameters and never the form. That is stronger than merely having a closed form, and it is what lets the update be applied over and over without the expression growing. It is the backbone of Week&nbsp;2, and it works right up until your model has any structure you actually wanted.
 
 **Sample from it.** Do not compute $P(s\mid o)$; draw from it. Markov chain
 Monte Carlo needs only ratios of posterior values, and the intractable $P(o)$
@@ -202,8 +199,7 @@ it converges in the limit and offers few guarantees before then.
 of distributions $Q(s)$ you can compute with, define a measure of how far $Q$ is
 from the true posterior, and descend it. Because the measure can be arranged so
 that the intractable term drops out, you can minimise a distance to something
-you cannot evaluate. That trick is variational inference, the quantity you
-descend is the free energy, and it occupies Week&nbsp;4 and everything after.
+you cannot evaluate. That trick is variational inference, and the quantity you descend is the **free energy**. Week&nbsp;4 builds it, but the shape is already visible from [eq:two-kls]: it is the reverse divergence with the intractable $\ln P(o)$ added back, which makes it computable from $Q$ and the generative model alone, and an upper bound on the surprise. It occupies Week&nbsp;4 and everything after.
 
 ::: remark Why optimisation suits an embodied agent
 The optimisation route is the only one of the three that offers a partial answer
@@ -246,7 +242,7 @@ logarithm:
 
 $$
 D_{\mathrm{KL}}[P \,\|\, Q]
-= \underbrace{\sum_s P(s)\ln P(s)}_{-\mathrm{H}[P],\ \text{no } Q \text{ in it}}
+= \underbrace{\sum_s P(s)\ln P(s)}_{\text{minus the entropy of } P,\ \text{no } Q \text{ in it}}
 \; -\; \sum_{s} P(s)\big[\ln q_1(s_{\text{gust}}) + \ln q_2(s_{\text{bab}})\big].
 $$
 
@@ -260,8 +256,7 @@ $$
 
 where $P_1$ is the true marginal of the first cause, and likewise for the second.
 The problem has separated into two independent ones, each of the form "choose a
-distribution $q$ maximising $\sum_x p(x)\ln q(x)$". By Gibbs' inequality that is
-solved by $q = p$.
+distribution $q$ maximising $\sum_x p(x)\ln q(x)$". By **Gibbs' inequality**, which says that for any two distributions on the same set $\sum_x p(x)\ln q(x) \le \sum_x p(x)\ln p(x)$, with equality only when $q = p$, that is solved by $q = p$. (The inequality is itself just the non-negativity of $D_{\mathrm{KL}}[p\,\|\,q]$, rearranged.)
 
 So the forward-optimal $Q$ has **exactly the true marginals**, here
 ${{noisy_marg_gust:.4f}} $ for each cause, and leaves a gap of
@@ -346,9 +341,7 @@ $P$ is large and $Q$ is small, so it insists on covering everything $P$ covers.
 :::
 
 Which direction you minimise therefore decides whether your approximation hedges
-or commits. Week&nbsp;4 has to say which one active inference uses and why. For
-now: "mean-field" is the name of a compromise, and you have just seen what is
-being compromised.
+or commits. Week&nbsp;4 has to say which one active inference uses and why. One word of terminology, since it is easy to attach it to the wrong thing. **Mean-field** names the *factorisation*, the restriction of $Q$ to products of independent factors. It does not name the choice of divergence direction; those are two separate decisions, and this section has now shown that both of them cost something. Mean-field is the name of the first compromise, and you have just seen what it compromises.
 
 ::: exercise Where does explaining away go?
 In the two-cause example, make the observation uninformative by setting both cause strengths (the $0.9$

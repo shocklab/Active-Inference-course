@@ -457,8 +457,7 @@ special to two causes or to equal strengths.</p>
 </tr>
 </tbody>
 </table></div>
-<p>The evidence is $P(o=1) = 0.1802$, so the shake carries
-$1.714$ nats of surprise. Both marginals move the same way and by a lot:</p>
+<p>The evidence is $P(o=1) = 0.1802$, so by the definition from Lesson&nbsp;1 the shake carries $-\ln 0.1802 = 1.714$ nats of surprise, natural-log units throughout. Both marginals move the same way and by a lot:</p>
 <div class="eqn"><div class="eqbody">$$P(s_{\text{gust}} = 1 \mid o) \;=\; P(s_{\text{bab}} = 1 \mid o) \;=\; 0.505,$$</div></div>
 <p>up from $0.1$. So far so unremarkable. Now look at the joint. If the posterior
 factorised, the probability of <em>both</em> causes being present would be the product
@@ -515,9 +514,7 @@ a tour of them.</p>
 <p><strong>Solve it exactly, where the model lets you.</strong> Some pairings of prior and
 likelihood have posteriors in closed form. If the likelihood is Gaussian with
 known variance and the prior over the mean is Gaussian, the posterior is
-Gaussian and you can write down its parameters in two lines. This is
-conjugacy, it is the backbone of Week&nbsp;2, and it works right up until your
-model has any structure you actually wanted.</p>
+Gaussian and you can write down its parameters in two lines. This is <strong>conjugacy</strong>: a prior family and a likelihood family are conjugate when the posterior always lands back in the prior's family, so updating changes the parameters and never the form. That is stronger than merely having a closed form, and it is what lets the update be applied over and over without the expression growing. It is the backbone of Week&nbsp;2, and it works right up until your model has any structure you actually wanted.</p>
 <p><strong>Sample from it.</strong> Do not compute $P(s\mid o)$; draw from it. Markov chain
 Monte Carlo needs only ratios of posterior values, and the intractable $P(o)$
 cancels in every ratio. This is the correct method for a statistician with a
@@ -527,8 +524,7 @@ it converges in the limit and offers few guarantees before then.</p>
 of distributions $Q(s)$ you can compute with, define a measure of how far $Q$ is
 from the true posterior, and descend it. Because the measure can be arranged so
 that the intractable term drops out, you can minimise a distance to something
-you cannot evaluate. That trick is variational inference, the quantity you
-descend is the free energy, and it occupies Week&nbsp;4 and everything after.</p>
+you cannot evaluate. That trick is variational inference, and the quantity you descend is the <strong>free energy</strong>. Week&nbsp;4 builds it, but the shape is already visible from <a class="eqref" href="#eq-two-kls">(1.4.5)</a>: it is the reverse divergence with the intractable $\ln P(o)$ added back, which makes it computable from $Q$ and the generative model alone, and an upper bound on the surprise. It occupies Week&nbsp;4 and everything after.</p>
 <div class="box remark"><div class="boxhd">Remark<span class="bt">Why optimisation suits an embodied agent</span></div><p>The optimisation route is the only one of the three that offers a partial answer
 at every instant, improves continuously with more time, and turns inference into
 a dynamical system. An animal does not get to say "my chain has not mixed yet".
@@ -554,7 +550,7 @@ little.</p>
 two factors so that $Q(s) = q_1(s_{\text{gust}})\,q_2(s_{\text{bab}})$. Split the
 logarithm:</p>
 <div class="eqn"><div class="eqbody">$$D_{\mathrm{KL}}[P \,\|\, Q]
-= \underbrace{\sum_s P(s)\ln P(s)}_{-\mathrm{H}[P],\ \text{no } Q \text{ in it}}
+= \underbrace{\sum_s P(s)\ln P(s)}_{\text{minus the entropy of } P,\ \text{no } Q \text{ in it}}
 \; -\; \sum_{s} P(s)\big[\ln q_1(s_{\text{gust}}) + \ln q_2(s_{\text{bab}})\big].$$</div></div>
 <p>Only the second term can be optimised. In it, sum out the variable that does not
 appear:</p>
@@ -562,8 +558,7 @@ appear:</p>
 \;=\; \sum_{s_{\text{gust}}} P_1(s_{\text{gust}})\,\ln q_1(s_{\text{gust}}),$$</div></div>
 <p>where $P_1$ is the true marginal of the first cause, and likewise for the second.
 The problem has separated into two independent ones, each of the form "choose a
-distribution $q$ maximising $\sum_x p(x)\ln q(x)$". By Gibbs' inequality that is
-solved by $q = p$.</p>
+distribution $q$ maximising $\sum_x p(x)\ln q(x)$". By <strong>Gibbs' inequality</strong>, which says that for any two distributions on the same set $\sum_x p(x)\ln q(x) \le \sum_x p(x)\ln p(x)$, with equality only when $q = p$, that is solved by $q = p$. (The inequality is itself just the non-negativity of $D_{\mathrm{KL}}[p\,\|\,q]$, rearranged.)</p>
 <p>So the forward-optimal $Q$ has <strong>exactly the true marginals</strong>, here
 $0.5050 $ for each cause, and leaves a gap of
 $0.3687$ nats. This is a lemma, not an accident of these
@@ -628,9 +623,7 @@ $P$ is large and $Q$ is small, so it insists on covering everything $P$ covers.<
   <text x="510" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">gust 1</text>
 </svg><figcaption><span class="fno">Figure 1.4.2.</span> The same posterior, two ways. Area is probability. The true posterior puts its mass on the two states where exactly one cause fired; no product of marginals has that shape, so the best product commits to one of them and inflates the corners.</figcaption></figure>
 <p>Which direction you minimise therefore decides whether your approximation hedges
-or commits. Week&nbsp;4 has to say which one active inference uses and why. For
-now: "mean-field" is the name of a compromise, and you have just seen what is
-being compromised.</p>
+or commits. Week&nbsp;4 has to say which one active inference uses and why. One word of terminology, since it is easy to attach it to the wrong thing. <strong>Mean-field</strong> names the <em>factorisation</em>, the restriction of $Q$ to products of independent factors. It does not name the choice of divergence direction; those are two separate decisions, and this section has now shown that both of them cost something. Mean-field is the name of the first compromise, and you have just seen what it compromises.</p>
 <div class="box exercise"><div class="boxhd">Exercise 1.4.1<span class="bt">Where does explaining away go?</span></div><p>In the two-cause example, make the observation uninformative by setting both cause strengths (the $0.9$
 coefficients in <a class="eqref" href="#eq-noisy-or">(1.4.3)</a>) to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
 Without computing anything, say what the posterior is and whether the two causes
