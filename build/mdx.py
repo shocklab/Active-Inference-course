@@ -289,7 +289,8 @@ def _render_directive(dtype, dargs, inner, doc):
         css, label, numbered = BOXES[dtype]
         head = label
         if numbered:
-            head = f"{label} {doc.bump(dtype)}"
+            n = doc.bump(dtype)
+            head = f"{label} {doc.prefix}.{n}" if doc.prefix else f"{label} {n}"
         title = f'<span class="bt">{_inline_only(dargs, doc)}</span>' if dargs else ""
         if dtype == "exercise" and _SOLUTION_SPLIT.search(inner):
             prob, sol = _SOLUTION_SPLIT.split(inner, 1)

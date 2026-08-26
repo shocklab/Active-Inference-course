@@ -496,7 +496,7 @@ large world. Everything from Week&nbsp;4 onwards is a response to it: rather
 than computing $P(s \mid o)$, we will posit an approximation $Q(s)$ that we
 <em>can</em> compute with, and then work out how to make it as close to the posterior
 as possible without ever evaluating the posterior.</p>
-<div class="box exercise"><div class="boxhd">Exercise 1<span class="bt">Bayes with a hostile prior</span></div><p>Using the same likelihood matrix, suppose you are a nervous hiker with prior
+<div class="box exercise"><div class="boxhd">Exercise 1.3.1<span class="bt">Bayes with a hostile prior</span></div><p>Using the same likelihood matrix, suppose you are a nervous hiker with prior
 $P(s) = (0.40,\ 0.30,\ 0.30)$. You observe <strong>quiet</strong>. Compute the evidence, the
 posterior, and the surprise, and compare the surprise with the $0.422$ nats
 obtained under the original prior.</p><details><summary>Solution</summary><p>The quiet row is $(0.05,\ 0.10,\ 0.90)$. Numerators:</p>
@@ -511,7 +511,7 @@ hiker. Posterior:</p>
 the calm one is, because their model expected trouble. Two agents, one
 observation, different surprise. This is the concrete version of the claim in
 Lesson&nbsp;2 that surprise is a property of the model and not of the world.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 2<span class="bt">Surprise and information are not the same quantity</span></div><p>In the worked example the most surprising observation was also the most
+<div class="box exercise"><div class="boxhd">Exercise 1.3.2<span class="bt">Surprise and information are not the same quantity</span></div><p>In the worked example the most surprising observation was also the most
 informative. Show that this cannot be a general law, by constructing a model in
 which the <em>rarest</em> observation carries <em>no</em> information at all.</p><details><summary>Solution</summary><p>Take two states with a flat prior $P(s) = (0.5,\ 0.5)$, and three observations
 with likelihood</p>

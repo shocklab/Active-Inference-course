@@ -158,6 +158,46 @@ Four wrong values reached a draft of Week 1 by being worked out by hand. Before
 writing any number, run it. Before writing "always", "never" or "only", enumerate
 the set the claim covers.
 
+### Show the working: this is the whole point of the course
+
+Audited 2026-08-26. Week 1 contained **zero `::: derivation` blocks and zero
+`::: definition` blocks** across five lessons. A course whose stated premise is
+that the textbooks compress a page of algebra into "it can be shown that" had, in
+its first week, not one worked derivation and not one numbered definition. The
+machinery existed and had never been used.
+
+Rules:
+- **If a claim is not obvious, show it.** Not a sketch, not "one can check that":
+  the intermediate lines, with a sentence after any step whose justification is not
+  visible from the line itself. This is the product, not the packaging.
+- **Length is not a cost here.** A lesson that doubles in length because it now
+  derives what it previously asserted has improved. Do not compress to hit a
+  reading-time estimate; change the estimate.
+- **Number the definitions.** A term defined only in running prose cannot be
+  referred back to. `::: definition` numbers by section, as figures and equations do.
+- **Do not hide a derivation behind a disclosure widget.** Making the reader click
+  for the algebra is a softer version of the sin the course exists to correct. The
+  `::: derivation` block marks it visually; that is enough.
+
+### Two kinds of audit, and they need different briefs
+
+A reader agent returns what its brief asks for. Briefing one to find *errors*
+produced a list of errors, and none of the pedagogical thinness that was actually
+wanted. Run both, and keep them separate:
+
+**Correctness audit.** "What is wrong, undefined, contradictory or unsupported?"
+Catches wrong numbers, symbols used before definition, contradictions between
+pages. Found the mutual-information value quoted against the wrong model and the
+forward/reverse KL mix-up.
+
+**Depth audit.** "Where could you not close the page and reproduce this from the
+definitions, and why not?" Categories: compressed step, asserted not shown,
+missing intuition, needs a worked example, needs a second example, needs a
+picture, needs a counterexample or limit, wants a check, too fast. Tell the agent
+explicitly that **length is not a constraint** and that recommending three more
+paragraphs is a good recommendation, or it will default to being economical and
+report nothing.
+
 ### Define everything at first use, in reading order
 
 A reader caught Lesson 1 writing "sensory states" while naming them $o$, one
