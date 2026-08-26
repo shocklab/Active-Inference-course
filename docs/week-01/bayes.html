@@ -352,11 +352,15 @@ document.addEventListener('DOMContentLoaded',function(){
 <body>
 <div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">A soft body in a hard world</a><a class="" href="../week-01/process-and-model.html">Two models, not one</a><a class="cur" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>Bayes with states and observations</h1><p class="deck">The posterior is the belief an ideal agent would hold. Writing it down is easy; the trouble is entirely in one denominator.</p><div class="meta"><span>Week 1</span><span>&#167;3</span><span>30 min</span></div></header><article class="abody"><p>The agent has a generative model $P(o,s) = P(o \mid s)P(s)$. An observation
 arrives. What should it now believe about $s$?</p>
-<p>There is only one answer consistent with the axioms of probability, and it is
-the same one you have seen since your first statistics course, dressed for this
-particular occasion:</p>
+<p>There is only one answer consistent with the axioms of probability, and it takes
+two lines to get. The joint probability of a state and an observation can be
+factored either way round,</p>
+<div class="eqn" id="eq-product-rule"><div class="eqbody">$$P(s \mid o)\,P(o) \;=\; P(o, s) \;=\; P(o \mid s)\,P(s),$$</div><div class="eqno"><a href="#eq-product-rule" title="Link to equation 1.3.1">(1.3.1)</a></div></div>
+<p>since both sides are just the definition of conditional probability applied in
+the two possible orders. Divide <a class="eqref" href="#eq-product-rule">(1.3.1)</a> by $P(o)$, which is legitimate
+whenever the observation was possible at all, and the answer falls out:</p>
 <div class="eqn" id="eq-bayes"><div class="eqbody">$$P(s \mid o) \;=\; \frac{P(o \mid s)\,P(s)}{P(o)}, \qquad
-P(o) \;=\; \sum_{s} P(o \mid s)\,P(s).$$</div><div class="eqno"><a href="#eq-bayes" title="Link to equation 1.3.1">(1.3.1)</a></div></div>
+P(o) \;=\; \sum_{s} P(o \mid s)\,P(s).$$</div><div class="eqno"><a href="#eq-bayes" title="Link to equation 1.3.2">(1.3.2)</a></div></div>
 <p>Everything in this course is a consequence of not being able to compute the
 denominator. It is worth spending a page on why that is, because if you leave
 this lesson thinking Bayes' theorem is hard, you have taken away the wrong
@@ -429,11 +433,11 @@ P(o \mid s)P(s) \;=\; \big(\,
 0.02 \times 0.70 \,\big) \\[2pt]
 \;=\; \big(\,& 0.056,\;\; 0.033,\;\; 0.014 \,\big).
 \end{aligned}$$</div></div>
-<p>These are the three numerators in <a class="eqref" href="#eq-bayes">(1.3.1)</a>. Their sum is the denominator:</p>
-<div class="eqn" id="eq-worked-evidence"><div class="eqbody">$$P(o = \text{tawny flash}) \;=\; 0.056 + 0.033 + 0.014 \;=\; 0.103 .$$</div><div class="eqno"><a href="#eq-worked-evidence" title="Link to equation 1.3.2">(1.3.2)</a></div></div>
+<p>These are the three numerators in <a class="eqref" href="#eq-bayes">(1.3.2)</a>. Their sum is the denominator:</p>
+<div class="eqn" id="eq-worked-evidence"><div class="eqbody">$$P(o = \text{tawny flash}) \;=\; 0.056 + 0.033 + 0.014 \;=\; 0.103 .$$</div><div class="eqno"><a href="#eq-worked-evidence" title="Link to equation 1.3.3">(1.3.3)</a></div></div>
 <p>Divide through:</p>
 <div class="eqn" id="eq-worked-posterior"><div class="eqbody">$$P(s \mid o) \;=\; \frac{(0.056,\ 0.033,\ 0.014)}{0.103}
-\;=\; (0.5437,\ 0.3204,\ 0.1359).$$</div><div class="eqno"><a href="#eq-worked-posterior" title="Link to equation 1.3.3">(1.3.3)</a></div></div>
+\;=\; (0.5437,\ 0.3204,\ 0.1359).$$</div><div class="eqno"><a href="#eq-worked-posterior" title="Link to equation 1.3.4">(1.3.4)</a></div></div>
 <aside class="mn"><span class="mnl">Sanity check</span><p>$0.5437 + 0.3204 + 0.1359 = 1$. If your posterior does not sum to one you have
 divided by the wrong thing, which in practice means you forgot a state.</p></aside>
 <p>Read what happened. The leopard hypothesis started at 8% and finished at 54%,
@@ -442,15 +446,46 @@ being the only state that predicts tawny flashes well. Meanwhile "nothing"
 started as the overwhelming favourite at 70% and was demoted to 14%, because
 whatever else is true, empty scrub does not flash tawny.</p>
 <p>Two derived quantities are worth computing while the numbers are in front of us.</p>
-<p><strong>Surprise.</strong> From <a class="eqref" href="#eq-worked-evidence">(1.3.2)</a>, $-\ln P(o) = -\ln 0.103 = 2.273$ nats.
-Compare the other two observations: a shaking branch has $P(o) = 0.241$ and
-surprise $1.423$ nats; quiet has $P(o) = 0.656$ and surprise
-$0.422$ nats.
+<p>The section promised all the arithmetic, so here are the other two observations
+worked the same way. Multiply the relevant row elementwise by the prior, add:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>observed</th>
+<th>numerators $P(o\mid s)P(s)$</th>
+<th>$P(o)$</th>
+<th>surprise, nats</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tawny flash</td>
+<td>0.056, 0.033, 0.014</td>
+<td>0.103</td>
+<td>2.273</td>
+</tr>
+<tr>
+<td>branch shakes</td>
+<td>0.020, 0.165, 0.056</td>
+<td>0.241</td>
+<td>1.423</td>
+</tr>
+<tr>
+<td>quiet</td>
+<td>0.004, 0.022, 0.630</td>
+<td>0.656</td>
+<td>0.422</td>
+</tr>
+</tbody>
+</table></div>
+<p>The three evidence values sum to one, as they must: every observation has to be
+one of the three.</p>
+<p><strong>Surprise.</strong> From <a class="eqref" href="#eq-worked-evidence">(1.3.3)</a>, $-\ln P(o) = -\ln 0.103 = 2.273$ nats.
 Quiet is what this model expects, and it is duly unsurprised by it.</p>
 <p><strong>Information gained.</strong> How far did the observation move you? The natural
 measure is the Kullback&ndash;Leibler divergence from the prior to the posterior,</p>
 <div class="eqn" id="eq-info-gain"><div class="eqbody">$$D_{\mathrm{KL}}\big[P(s\mid o)\,\|\,P(s)\big]
-\;=\; \sum_{s} P(s \mid o)\,\ln \frac{P(s\mid o)}{P(s)} .$$</div><div class="eqno"><a href="#eq-info-gain" title="Link to equation 1.3.4">(1.3.4)</a></div></div>
+\;=\; \sum_{s} P(s \mid o)\,\ln \frac{P(s\mid o)}{P(s)} .$$</div><div class="eqno"><a href="#eq-info-gain" title="Link to equation 1.3.5">(1.3.5)</a></div></div>
 <p>Read the notation carefully, because it runs backwards from the name. In
 $D_{\mathrm{KL}}[Q\,\|\,P]$ the distribution written <em>first</em> is the one the
 expectation is taken under, and the convention is to say this out loud as "the
@@ -458,8 +493,49 @@ divergence from $P$ to $Q$". So the posterior appears first above even though we
 describe it as measuring how far the prior moved. It is not symmetric,
 $D_{\mathrm{KL}}[Q\,\|\,P] \neq D_{\mathrm{KL}}[P\,\|\,Q]$, so the order is
 never decorative; Week&nbsp;4 turns on getting it right.</p>
-<p>For the tawny flash this is $0.940$ nats. For the shaking branch,
-$0.524$. For quiet, $0.225$. The observation that surprised you most also taught you most,
+<p>Worked out term by term for the tawny flash, using the posterior
+<a class="eqref" href="#eq-worked-posterior">(1.3.4)</a> and the prior:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>state</th>
+<th>$P(s\mid o)$</th>
+<th>$P(s)$</th>
+<th>ratio</th>
+<th>$P(s\mid o)\ln(\text{ratio})$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>leopard</td>
+<td>0.5437</td>
+<td>0.08</td>
+<td>6.796</td>
+<td>$+$1.0419</td>
+</tr>
+<tr>
+<td>baboon</td>
+<td>0.3204</td>
+<td>0.22</td>
+<td>1.456</td>
+<td>$+$0.1204</td>
+</tr>
+<tr>
+<td>nothing</td>
+<td>0.1359</td>
+<td>0.70</td>
+<td>0.194</td>
+<td>-0.2228</td>
+</tr>
+</tbody>
+</table></div>
+<p>summing to $0.940$ nats. Notice that the last term is <strong>negative</strong>:
+the observation pushed probability mass <em>off</em> the "nothing" hypothesis, and a
+state whose probability falls contributes negatively. Individual terms of a KL
+divergence carry either sign. Only the total is guaranteed non-negative, and that
+guarantee is a theorem about the sum, not about its parts.</p>
+<p>For the shaking branch the same computation gives $0.524$ nats, and
+for quiet $0.225$. The observation that surprised you most also taught you most,
 which is intuitive and, as the exercises will show, not a theorem.</p>
 <figure class="widget" id="fig-1-3-1"><div class="wmount" data-widget="bayes-discrete"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.1.</span> The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.</figcaption></figure>
 <h2 id="what-the-ambiguity-slider-is-showing-you"><span class="secno">3</span>What the ambiguity slider is showing you</h2>
@@ -485,9 +561,26 @@ your head. Now count the terms for something less contrived.</p>
 it last saw a predator, the wind direction, whether each of several patches has
 been depleted, and what its companions are doing. Each of these is a state
 <em>factor</em>. The joint state space is the product of all of them, so if there are
-$n$ factors with $k$ values each, the sum in <a class="eqref" href="#eq-bayes">(1.3.1)</a> has $k^n$ terms.</p>
+$n$ factors with $k$ values each, the sum in <a class="eqref" href="#eq-bayes">(1.3.2)</a> has $k^n$ terms.</p>
 <figure class="widget" id="fig-1-3-2"><div class="wmount" data-widget="evidence-blowup"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.2.</span> The number of terms in the evidence sum, on a logarithmic vertical axis. The point is not that the numbers are large. The point is which way the exponent sits.</figcaption></figure>
-<p>Nothing about this is fixable by better hardware. Adding one more thing to keep
+<p>Nothing about this is fixable by better hardware, and it is worth seeing why
+rather than taking it on faith. Hardware buys you a constant factor: twice the
+speed, twice the sums per second. The cost here is $k^n$, so a doubling of speed
+buys exactly one more state factor before you are back where you started. The
+gap between what improves multiplicatively and what grows exponentially does not
+close.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">Where this argument does not apply</span></div><p>A mathematician will already have objected, and correctly. Exact inference is
+perfectly tractable in several important cases: conjugate models, where the
+posterior stays in a family closed under updating; linear Gaussian systems, where
+the Kalman filter gives exact answers in closed form; and graphical models whose
+dependency structure is a tree or close to one, where belief propagation is
+exact and cheap. The blow-up above is the <em>generic</em> case, densely coupled and
+without exploitable structure.</p>
+<p>So the honest claim is narrower than "exact inference is impossible". It is that
+the structure which rescues those special cases cannot be assumed for an agent
+modelling an open-ended world, and that a framework claiming to describe such
+agents cannot rest on it. Week&nbsp;2 uses conjugacy where it is available and
+says exactly where it runs out. Adding one more thing to keep
 track of multiplies the work by $k$, and brains manage this in a few tens of
 milliseconds using about twenty watts.</p>
 <p>So the exact posterior is not available. This is not a temporary engineering
@@ -519,7 +612,7 @@ with likelihood</p>
 <p>rows indexed $o_1, o_2, o_3$ and columns by state. Both columns sum to one, so
 this is a legitimate likelihood. The third row is deliberately flat: whatever the
 state, $o_3$ turns up 5% of the time.</p>
-<p>Working through <a class="eqref" href="#eq-bayes">(1.3.1)</a> for each observation:</p>
+<p>Working through <a class="eqref" href="#eq-bayes">(1.3.2)</a> for each observation:</p>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -574,7 +667,7 @@ distinction becomes the two terms of expected free energy in Week&nbsp;10.</p></
 <li>Why does a row of the likelihood matrix not sum to one, while a column does?</li>
 <li>Which single term in Bayes' theorem is responsible for the intractability, and why does the intractability grow multiplicatively rather than additively?</li>
 <li>If the likelihood is uniform in $o$ for every $s$, what is the posterior, and what is the information gain?</li>
-</ul></div></article><nav class="pagenav"><a class="pv" href="../week-01/process-and-model.html"><span class="dir">Previous</span><span class="ttl">Two models, not one</span></a><a class="nx" href="../week-01/inverse-problem.html"><span class="dir">Next</span><span class="ttl">The inverse problem</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+</ul></div></div></article><nav class="pagenav"><a class="pv" href="../week-01/process-and-model.html"><span class="dir">Previous</span><span class="ttl">Two models, not one</span></a><a class="nx" href="../week-01/inverse-problem.html"><span class="dir">Next</span><span class="ttl">The inverse problem</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>
 </body>
 </html>

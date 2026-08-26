@@ -9,9 +9,17 @@ scripts: [w01.js]
 The agent has a generative model $P(o,s) = P(o \mid s)P(s)$. An observation
 arrives. What should it now believe about $s$?
 
-There is only one answer consistent with the axioms of probability, and it is
-the same one you have seen since your first statistics course, dressed for this
-particular occasion:
+There is only one answer consistent with the axioms of probability, and it takes
+two lines to get. The joint probability of a state and an observation can be
+factored either way round,
+
+$$
+P(s \mid o)\,P(o) \;=\; P(o, s) \;=\; P(o \mid s)\,P(s),
+$$ {#product-rule}
+
+since both sides are just the definition of conditional probability applied in
+the two possible orders. Divide [eq:product-rule] by $P(o)$, which is legitimate
+whenever the observation was possible at all, and the answer falls out:
 
 $$
 P(s \mid o) \;=\; \frac{P(o \mid s)\,P(s)}{P(o)}, \qquad
@@ -114,10 +122,19 @@ whatever else is true, empty scrub does not flash tawny.
 
 Two derived quantities are worth computing while the numbers are in front of us.
 
+The section promised all the arithmetic, so here are the other two observations
+worked the same way. Multiply the relevant row elementwise by the prior, add:
+
+| observed | numerators $P(o\mid s)P(s)$ | $P(o)$ | surprise, nats |
+|---|---|---|---|
+| tawny flash | {{num_tawny_leopard:.3f}}, {{num_tawny_baboon:.3f}}, {{num_tawny_nothing:.3f}} | {{ev_tawny:.3f}} | {{surprise_tawny:.3f}} |
+| branch shakes | {{num_branch_leopard:.3f}}, {{num_branch_baboon:.3f}}, {{num_branch_nothing:.3f}} | {{ev_branch:.3f}} | {{surprise_branch:.3f}} |
+| quiet | {{num_quiet_leopard:.3f}}, {{num_quiet_baboon:.3f}}, {{num_quiet_nothing:.3f}} | {{ev_quiet:.3f}} | {{surprise_quiet:.3f}} |
+
+The three evidence values sum to one, as they must: every observation has to be
+one of the three.
+
 **Surprise.** From [eq:worked-evidence], $-\ln P(o) = -\ln {{ev_tawny:.3f}} = {{surprise_tawny:.3f}}$ nats.
-Compare the other two observations: a shaking branch has $P(o) = {{ev_branch:.3f}}$ and
-surprise ${{surprise_branch:.3f}}$ nats; quiet has $P(o) = {{ev_quiet:.3f}}$ and surprise
-${{surprise_quiet:.3f}}$ nats.
 Quiet is what this model expects, and it is duly unsurprised by it.
 
 **Information gained.** How far did the observation move you? The natural
@@ -136,8 +153,23 @@ describe it as measuring how far the prior moved. It is not symmetric,
 $D_{\mathrm{KL}}[Q\,\|\,P] \neq D_{\mathrm{KL}}[P\,\|\,Q]$, so the order is
 never decorative; Week&nbsp;4 turns on getting it right.
 
-For the tawny flash this is ${{info_tawny:.3f}}$ nats. For the shaking branch,
-${{info_branch:.3f}}$. For quiet, ${{info_quiet:.3f}}$. The observation that surprised you most also taught you most,
+Worked out term by term for the tawny flash, using the posterior
+[eq:worked-posterior] and the prior:
+
+| state | $P(s\mid o)$ | $P(s)$ | ratio | $P(s\mid o)\ln(\text{ratio})$ |
+|---|---|---|---|---|
+| leopard | {{post_tawny_leopard:.4f}} | 0.08 | {{ratio_tawny_leopard:.3f}} | $+${{klterm_tawny_leopard:.4f}} |
+| baboon | {{post_tawny_baboon:.4f}} | 0.22 | {{ratio_tawny_baboon:.3f}} | $+${{klterm_tawny_baboon:.4f}} |
+| nothing | {{post_tawny_nothing:.4f}} | 0.70 | {{ratio_tawny_nothing:.3f}} | {{klterm_tawny_nothing:.4f}} |
+
+summing to ${{info_tawny:.3f}}$ nats. Notice that the last term is **negative**:
+the observation pushed probability mass *off* the "nothing" hypothesis, and a
+state whose probability falls contributes negatively. Individual terms of a KL
+divergence carry either sign. Only the total is guaranteed non-negative, and that
+guarantee is a theorem about the sum, not about its parts.
+
+For the shaking branch the same computation gives ${{info_branch:.3f}}$ nats, and
+for quiet ${{info_quiet:.3f}}$. The observation that surprised you most also taught you most,
 which is intuitive and, as the exercises will show, not a theorem.
 
 ::: widget bayes-discrete | The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.
@@ -178,7 +210,27 @@ $n$ factors with $k$ values each, the sum in [eq:bayes] has $k^n$ terms.
 ::: widget evidence-blowup | The number of terms in the evidence sum, on a logarithmic vertical axis. The point is not that the numbers are large. The point is which way the exponent sits.
 :::
 
-Nothing about this is fixable by better hardware. Adding one more thing to keep
+Nothing about this is fixable by better hardware, and it is worth seeing why
+rather than taking it on faith. Hardware buys you a constant factor: twice the
+speed, twice the sums per second. The cost here is $k^n$, so a doubling of speed
+buys exactly one more state factor before you are back where you started. The
+gap between what improves multiplicatively and what grows exponentially does not
+close.
+
+::: warning Where this argument does not apply
+A mathematician will already have objected, and correctly. Exact inference is
+perfectly tractable in several important cases: conjugate models, where the
+posterior stays in a family closed under updating; linear Gaussian systems, where
+the Kalman filter gives exact answers in closed form; and graphical models whose
+dependency structure is a tree or close to one, where belief propagation is
+exact and cheap. The blow-up above is the *generic* case, densely coupled and
+without exploitable structure.
+
+So the honest claim is narrower than "exact inference is impossible". It is that
+the structure which rescues those special cases cannot be assumed for an agent
+modelling an open-ended world, and that a framework claiming to describe such
+agents cannot rest on it. Week&nbsp;2 uses conjugacy where it is available and
+says exactly where it runs out. Adding one more thing to keep
 track of multiplies the work by $k$, and brains manage this in a few tens of
 milliseconds using about twenty watts.
 

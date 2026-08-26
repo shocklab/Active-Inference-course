@@ -71,13 +71,31 @@ P(s_{\text{gust}} = 1) = P(s_{\text{bab}} = 1) = 0.1,
 $$
 
 and, importantly, they are independent *a priori*: wind does not summon baboons.
-The branch shakes if either cause fires, with each cause working 90% of the
-time, plus a 1% chance the branch shakes for no reason at all:
+Now the likelihood. Rather than write a formula down and check it works, build
+it from the causal story, because the shape then explains itself.
+
+Suppose each cause, when present, makes its own independent attempt to shake the
+branch, and succeeds with probability $w$. Suppose also the branch sometimes
+shakes for no reason at all, with probability $\lambda$; treat that as a third,
+always-present cause. Then the branch fails to shake only if **every** attempt
+fails, and those failures are independent, so their probabilities multiply:
 
 $$
-P(o = 1 \mid s_{\text{gust}}, s_{\text{bab}}) \;=\;
-1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).
+P(o = 0 \mid s) \;=\; (1 - w\,s_{\text{gust}})(1 - w\,s_{\text{bab}})(1 - \lambda).
+$$ {#noisy-and}
+
+A cause that is absent has $s = 0$ and contributes a factor of $1$, which is
+right: it makes no attempt and so cannot fail. Subtracting from one gives the
+probability that the branch does shake, and with $w = 0.9$ and $\lambda = 0.01$:
+
+$$
+P(o = 1 \mid s) \;=\; 1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).
 $$ {#noisy-or}
+
+This construction is called a **noisy-OR**, and it generalises without effort: for
+$m$ causes with strengths $w_i$, the same argument gives
+$P(o=1\mid s) = 1 - (1-\lambda)\prod_{i}(1 - w_i s_i)$. Nothing about it is
+special to two causes or to equal strengths.
 
 The branch shakes. Multiply prior by likelihood, state by state:
 
@@ -120,6 +138,42 @@ the same data. The consequence is blunt: you cannot invert a model factor by
 factor, because the posterior over one factor depends on the posterior over the
 others. The intractable sum does not decompose.
 :::
+
+### Why it happens
+
+The numbers show that it happens. Here is why, and the argument is short enough
+that there is no excuse for leaving it in an exercise.
+
+Independence survives conditioning on an event whose probability **factorises**
+across the variables. If $P(E \mid s_1, s_2) = f(s_1)\,g(s_2)$ for some functions
+$f$ and $g$, then the posterior is
+
+$$
+P(s_1, s_2 \mid E) \;\propto\; \underbrace{P(s_1)f(s_1)}_{\text{depends on } s_1 \text{ alone}} \;\cdot\; \underbrace{P(s_2)g(s_2)}_{s_2 \text{ alone}},
+$$
+
+which is again a product, so the two stay independent. Conditioning on a
+factorising event reweights each variable separately and never introduces a link.
+
+Now look at [eq:noisy-and]. The event $o = 0$, the branch *not* shaking, has
+exactly that form: it is a product of one factor per cause. So learning the
+branch stayed still would leave the causes independent. But we conditioned on the
+complement, $o = 1$, and one minus a product is not a product. That single
+algebraic fact is the whole mechanism.
+
+Read causally it is the diminishing return in [eq:noisy-or]: the state $(1,1)$
+has likelihood ${{noisy_lik_11:.4f}}$, barely more than the ${{noisy_lik_10:.4f}}$
+of a single cause, because one cause already does nearly all the work available.
+A second cause adds almost nothing, so the evidence has almost nothing extra to
+buy with it, and the two causes end up competing for the same credit.
+
+The sign is worth noting too, because it is not universal. Explaining away
+depends on the causes being **sufficient**: either alone can produce the effect.
+Reverse that, so both are jointly *necessary* and neither alone suffices, and the
+correlation flips: learning one cause is present makes the other **more** likely,
+since the effect still needs explaining and only the second cause can supply it.
+Competition and collaboration are both available; which you get is set by the
+structure of the likelihood, not by anything about priors.
 
 Explaining away is also, incidentally, why the phenomenon is worth caring about
 outside of a mathematics course. It is a real property of perception, it is what
@@ -314,8 +368,7 @@ product of independent marginals, so the causes remain independent and no
 explaining away occurs.
 
 The coupling comes from the likelihood varying across the *joint* state in a way
-that does not factor into a function of $s_{\text{gust}}$ times a function of
-$s_{\text{bab}}$. In [eq:noisy-or], the state $(1,1)$ has likelihood ${{noisy_lik_11:.4f}}$,
+that does not factorise, as the section above sets out. In [eq:noisy-or], the state $(1,1)$ has likelihood ${{noisy_lik_11:.4f}}$,
 which is barely more than the ${{noisy_lik_10:.4f}}$ of $(1,0)$ or $(0,1)$: a second cause
 adds almost nothing once the first is present. That diminishing return is the
 source of the competition. If the likelihood were multiplicatively separable, the

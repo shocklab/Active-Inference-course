@@ -396,10 +396,22 @@ can compete: a <strong>gust</strong> of wind, and a <strong>baboon</strong>. Eit
 make a branch shake. Each is uncommon on its own:</p>
 <div class="eqn"><div class="eqbody">$$P(s_{\text{gust}} = 1) = P(s_{\text{bab}} = 1) = 0.1,$$</div></div>
 <p>and, importantly, they are independent <em>a priori</em>: wind does not summon baboons.
-The branch shakes if either cause fires, with each cause working 90% of the
-time, plus a 1% chance the branch shakes for no reason at all:</p>
-<div class="eqn" id="eq-noisy-or"><div class="eqbody">$$P(o = 1 \mid s_{\text{gust}}, s_{\text{bab}}) \;=\;
-1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).$$</div><div class="eqno"><a href="#eq-noisy-or" title="Link to equation 1.4.2">(1.4.2)</a></div></div>
+Now the likelihood. Rather than write a formula down and check it works, build
+it from the causal story, because the shape then explains itself.</p>
+<p>Suppose each cause, when present, makes its own independent attempt to shake the
+branch, and succeeds with probability $w$. Suppose also the branch sometimes
+shakes for no reason at all, with probability $\lambda$; treat that as a third,
+always-present cause. Then the branch fails to shake only if <strong>every</strong> attempt
+fails, and those failures are independent, so their probabilities multiply:</p>
+<div class="eqn" id="eq-noisy-and"><div class="eqbody">$$P(o = 0 \mid s) \;=\; (1 - w\,s_{\text{gust}})(1 - w\,s_{\text{bab}})(1 - \lambda).$$</div><div class="eqno"><a href="#eq-noisy-and" title="Link to equation 1.4.2">(1.4.2)</a></div></div>
+<p>A cause that is absent has $s = 0$ and contributes a factor of $1$, which is
+right: it makes no attempt and so cannot fail. Subtracting from one gives the
+probability that the branch does shake, and with $w = 0.9$ and $\lambda = 0.01$:</p>
+<div class="eqn" id="eq-noisy-or"><div class="eqbody">$$P(o = 1 \mid s) \;=\; 1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).$$</div><div class="eqno"><a href="#eq-noisy-or" title="Link to equation 1.4.3">(1.4.3)</a></div></div>
+<p>This construction is called a <strong>noisy-OR</strong>, and it generalises without effort: for
+$m$ causes with strengths $w_i$, the same argument gives
+$P(o=1\mid s) = 1 - (1-\lambda)\prod_{i}(1 - w_i s_i)$. Nothing about it is
+special to two causes or to equal strengths.</p>
 <p>The branch shakes. Multiply prior by likelihood, state by state:</p>
 <div class="tablewrap"><table>
 <thead>
@@ -458,7 +470,7 @@ of 4.6.</p>
 now strongly anticorrelated, and you can read the strength directly:</p>
 <div class="eqn" id="eq-explaining-away"><div class="eqbody">$$P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 1,\, o) = 0.109,
 \qquad
-P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 0,\, o) = 0.909.$$</div><div class="eqno"><a href="#eq-explaining-away" title="Link to equation 1.4.3">(1.4.3)</a></div></div>
+P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 0,\, o) = 0.909.$$</div><div class="eqno"><a href="#eq-explaining-away" title="Link to equation 1.4.4">(1.4.4)</a></div></div>
 <p>Learning that there was a gust drags the baboon's probability from
 $0.505$ all the way back down to $0.109$, a hair above its prior. The gust has <strong>explained
 away</strong> the shaking branch, and the baboon is no longer needed.</p>
@@ -467,6 +479,32 @@ not a quirk of noisy-OR; it happens whenever two causes compete to account for
 the same data. The consequence is blunt: you cannot invert a model factor by
 factor, because the posterior over one factor depends on the posterior over the
 others. The intractable sum does not decompose.</p></div>
+<h3 id="why-it-happens">Why it happens</h3>
+<p>The numbers show that it happens. Here is why, and the argument is short enough
+that there is no excuse for leaving it in an exercise.</p>
+<p>Independence survives conditioning on an event whose probability <strong>factorises</strong>
+across the variables. If $P(E \mid s_1, s_2) = f(s_1)\,g(s_2)$ for some functions
+$f$ and $g$, then the posterior is</p>
+<div class="eqn"><div class="eqbody">$$P(s_1, s_2 \mid E) \;\propto\; \underbrace{P(s_1)f(s_1)}_{\text{depends on } s_1 \text{ alone}} \;\cdot\; \underbrace{P(s_2)g(s_2)}_{s_2 \text{ alone}},$$</div></div>
+<p>which is again a product, so the two stay independent. Conditioning on a
+factorising event reweights each variable separately and never introduces a link.</p>
+<p>Now look at <a class="eqref" href="#eq-noisy-and">(1.4.2)</a>. The event $o = 0$, the branch <em>not</em> shaking, has
+exactly that form: it is a product of one factor per cause. So learning the
+branch stayed still would leave the causes independent. But we conditioned on the
+complement, $o = 1$, and one minus a product is not a product. That single
+algebraic fact is the whole mechanism.</p>
+<p>Read causally it is the diminishing return in <a class="eqref" href="#eq-noisy-or">(1.4.3)</a>: the state $(1,1)$
+has likelihood $0.9901$, barely more than the $0.9010$
+of a single cause, because one cause already does nearly all the work available.
+A second cause adds almost nothing, so the evidence has almost nothing extra to
+buy with it, and the two causes end up competing for the same credit.</p>
+<p>The sign is worth noting too, because it is not universal. Explaining away
+depends on the causes being <strong>sufficient</strong>: either alone can produce the effect.
+Reverse that, so both are jointly <em>necessary</em> and neither alone suffices, and the
+correlation flips: learning one cause is present makes the other <strong>more</strong> likely,
+since the effect still needs explaining and only the second cause can supply it.
+Competition and collaboration are both available; which you get is set by the
+structure of the likelihood, not by anything about priors.</p>
 <p>Explaining away is also, incidentally, why the phenomenon is worth caring about
 outside of a mathematics course. It is a real property of perception, it is what
 makes a plausible alternative explanation reduce your confidence in the first
@@ -503,7 +541,7 @@ is exactly what gradient descent on a free energy gives you.</p></div>
 the commonest choice is the family that factorises across state factors,
 $Q(s_{\text{gust}}, s_{\text{bab}}) = Q(s_{\text{gust}})\,Q(s_{\text{bab}})$,
 or $Q(s_1, s_2) = Q(s_1)Q(s_2)$ once we stop naming them. Look back at
-<a class="eqref" href="#eq-explaining-away">(1.4.3)</a>. That family cannot represent the true posterior, because
+<a class="eqref" href="#eq-explaining-away">(1.4.4)</a>. That family cannot represent the true posterior, because
 the true posterior is correlated and no product of marginals is.</p></div>
 <h2 id="how-far-off-is-the-best-factorised-approximation"><span class="secno">4</span>How far off is the best factorised approximation?</h2>
 <p>That question hides a choice, and the choice decides the answer. It is worth
@@ -512,11 +550,11 @@ making explicit now, because Week&nbsp;4 rests on it.</p>
 ask how far a factorised $Q$ sits from the true posterior $P$:</p>
 <div class="eqn" id="eq-two-kls"><div class="eqbody">$$D_{\mathrm{KL}}\big[P \,\|\, Q\big] = \sum_{s} P(s)\ln\frac{P(s)}{Q(s)},
 \qquad
-D_{\mathrm{KL}}\big[Q \,\|\, P\big] = \sum_{s} Q(s)\ln\frac{Q(s)}{P(s)},$$</div><div class="eqno"><a href="#eq-two-kls" title="Link to equation 1.4.4">(1.4.4)</a></div></div>
+D_{\mathrm{KL}}\big[Q \,\|\, P\big] = \sum_{s} Q(s)\ln\frac{Q(s)}{P(s)},$$</div><div class="eqno"><a href="#eq-two-kls" title="Link to equation 1.4.5">(1.4.5)</a></div></div>
 <p>with $s$ running over the four joint states of the table. Call the first the
 <strong>forward</strong> direction and the second the <strong>reverse</strong>. They disagree, and not by a
 little.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The forward direction just matches the marginals</span></div><p>Minimise the left of <a class="eqref" href="#eq-two-kls">(1.4.4)</a> over products, writing $q_1$ and $q_2$ for the
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The forward direction just matches the marginals</span></div><p>Minimise the left of <a class="eqref" href="#eq-two-kls">(1.4.5)</a> over products, writing $q_1$ and $q_2$ for the
 two factors so that $Q(s) = q_1(s_{\text{gust}})\,q_2(s_{\text{bab}})$. Split the
 logarithm:</p>
 <div class="eqn"><div class="eqbody">$$D_{\mathrm{KL}}[P \,\|\, Q]
@@ -539,7 +577,7 @@ now. The forward divergence takes its expectation under $P$, and $P$ is precisel
 what we cannot compute. The reverse takes its expectation under $Q$, which we
 chose and therefore know. The direction is forced on us by tractability, not
 chosen for its properties, and its properties turn out to matter.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The reverse direction picks a side</span></div><p>Minimise the right of <a class="eqref" href="#eq-two-kls">(1.4.4)</a> instead. Vary $q_1$ with $q_2$ held fixed,
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The reverse direction picks a side</span></div><p>Minimise the right of <a class="eqref" href="#eq-two-kls">(1.4.5)</a> instead. Vary $q_1$ with $q_2$ held fixed,
 impose normalisation with a Lagrange multiplier, and the stationary condition is</p>
 <div class="eqn" id="eq-cavi"><div class="eqbody">$$\ln q_1(s_{\text{gust}}) \;=\; \mathbb{E}_{q_2}\big[\ln P(s_{\text{gust}}, s_{\text{bab}})\big] + \text{const},$$</div><div class="eqno"><a href="#eq-cavi" title="Link to equation 1.4.1">(1.4.1)</a></div></div>
 <p>with the mirror equation for $q_2$. Alternating them until nothing moves is
@@ -599,16 +637,15 @@ or commits. Week&nbsp;4 has to say which one active inference uses and why. For
 now: "mean-field" is the name of a compromise, and you have just seen what is
 being compromised.</p>
 <div class="box exercise"><div class="boxhd">Exercise 1.4.1<span class="bt">Where does explaining away go?</span></div><p>In the two-cause example, make the observation uninformative by setting both cause strengths (the $0.9$
-coefficients in <a class="eqref" href="#eq-noisy-or">(1.4.2)</a>) to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
+coefficients in <a class="eqref" href="#eq-noisy-or">(1.4.3)</a>) to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
 Without computing anything, say what the posterior is and whether the two causes
-remain independent. Then explain what feature of <a class="eqref" href="#eq-noisy-or">(1.4.2)</a> is responsible
+remain independent. Then explain what feature of <a class="eqref" href="#eq-noisy-or">(1.4.3)</a> is responsible
 for the coupling in the original example.</p><details><summary>Solution</summary><p>With $P(o=1\mid s)$ constant across states, the likelihood is a constant factor
 that pulls out of the product. The posterior equals the prior, which was a
 product of independent marginals, so the causes remain independent and no
 explaining away occurs.</p>
 <p>The coupling comes from the likelihood varying across the <em>joint</em> state in a way
-that does not factor into a function of $s_{\text{gust}}$ times a function of
-$s_{\text{bab}}$. In <a class="eqref" href="#eq-noisy-or">(1.4.2)</a>, the state $(1,1)$ has likelihood $0.9901$,
+that does not factorise, as the section above sets out. In <a class="eqref" href="#eq-noisy-or">(1.4.3)</a>, the state $(1,1)$ has likelihood $0.9901$,
 which is barely more than the $0.9010$ of $(1,0)$ or $(0,1)$: a second cause
 adds almost nothing once the first is present. That diminishing return is the
 source of the competition. If the likelihood were multiplicatively separable, the

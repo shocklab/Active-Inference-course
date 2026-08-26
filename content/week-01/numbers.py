@@ -242,6 +242,12 @@ V["surprise_common"] = -log(0.94)
 V["surprise_rare"] = -log(0.02)
 V["ent_peaked_check"] = sum(p * -log(p) for p in P_PEAKED)
 
+# term-by-term KL contributions for the tawny flash, so the sum can be shown
+for _si, _sn in enumerate(STATES):
+    _q = V[f"post_tawny_{_sn}"]
+    V[f"klterm_tawny_{_sn}"] = _q * log(_q / PRIOR[_si])
+    V[f"ratio_tawny_{_sn}"] = _q / PRIOR[_si]
+
 # ── the lamp behind a frosted screen (Lesson 2) ──────────────────────────
 # Process: theta in {on, off}, P*(on) = 1/2. Sensor: o in {bright, dim}.
 LAMP_PRIOR = 0.5
