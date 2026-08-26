@@ -376,8 +376,7 @@ inside.</p>
 set</strong>. The picture to hold is a small region of a large space, with the system
 being nudged out of it constantly by noise, and something inside the system
 pushing back.</p>
-<figure class="widget" id="fig-1-1-1"><div class="wmount" data-widget="homeostasis-drift"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.1.1.</span> A body in a two-dimensional physiological space. The solid circle is the boundary of the viable set; cross it and the organism is no longer an organism. The dashed circle marks the states it prefers. Noise pushes it around; the parameter $\kappa$ sets how hard it pushes back. The<p>right-hand panel tracks the entropy of the states visited so far, and the readout
-below reports it.</p></figcaption></figure>
+<figure class="widget" id="fig-1-1-1"><div class="wmount" data-widget="homeostasis-drift"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.1.1.</span> A body in a two-dimensional physiological space, each axis one regulated variable measured as a deviation from its setpoint. The solid circle at radius $1$ is the boundary of the viable set; cross it and the organism is no longer an organism. $\sigma$ is the size of one step of noise; $\kappa$ is the fraction of the current displacement the body removes per step, defined properly below. The dashed circle is the spread the algebra predicts, $\sqrt{2v}$ with $v$ from <a class="eqref" href="#eq-stationary-var">(1.1.3)</a>; it is absent at $\kappa = 0$ and $\kappa \ge 2$, where no stationary spread exists. The right-hand panel tracks the entropy of the visited states: the position is binned onto a $26 \times 26$ grid, the visit counts are normalised into a distribution, and its entropy is reported in nats, against a maximum of $\ln 676 = 6.516$ for a body found equally often everywhere.</figcaption></figure>
 <p>The figure is running one line of arithmetic. Writing $x_t \in \mathbb{R}^2$ for
 the displacement from the centre of the viable set,</p>
 <div class="eqn" id="eq-homeostat"><div class="eqbody">$$x_{t+1} \;=\; \underbrace{(1-\kappa)\,x_t}_{\text{pull back}}
@@ -485,8 +484,10 @@ also fatal</strong>, and symmetrically so: since $\kappa(2-\kappa)$ is unchanged
 $\kappa$ is replaced by $2-\kappa$, a gain of $1.5$ leaves a body exactly as
 spread out as a gain of $0.5$. Overcorrection is not a lesser sin than
 underreaction. It is the same sin measured from the other side, and Week&nbsp;5
-meets it again under a different name, when a system with its precisions set too
-high starts chasing its own noise.</p></div>
+meets it again under a different name. There the gain is set by a <strong>precision</strong>,
+meaning the inverse of a variance, so a large precision is a claim that a signal
+is reliable; a system that believes its measurements are better than they are
+overcorrects to each of them and ends up chasing its own noise.</p></div>
 <p>Push the figure's slider past $1$ and the trajectory changes visibly: instead of
 drifting back towards the middle it starts zigzagging across it, and past
 $\kappa = 2$ it leaves for good.</p>
@@ -495,10 +496,16 @@ Gaussian, so it has unbounded support: every state remains reachable and the
 boundary is still crossed eventually, with probability one. Regulation does not
 make death impossible. It converts a certainty on a timescale of hundreds of
 steps into a rare event on a timescale so long the organism will have died of
-something else first, and the escape time grows roughly exponentially in the
-ratio of barrier to noise. That is all any organism gets, and it is enough.</p></div>
+something else first. How rare depends on how many standard deviations of the
+stationary distribution fit inside the boundary, which is $1/\sqrt{v}$ per
+coordinate: about 15 at the figure's default settings, and
+the expected time to cross grows faster than exponentially in that number. That is all any organism gets, and it is enough.</p></div>
 <h2 id="staying-alive-is-a-statement-about-entropy"><span class="secno">2</span>Staying alive is a statement about entropy</h2>
-<p>Watch the readout in that figure. As the unregulated walk wanders, the entropy
+<p>Watch the readout in that figure. It measures the entropy of the <em>physiological</em>
+states the body has occupied, whereas the quantity defined below is the entropy
+of the <em>observations</em> it makes. Section&nbsp;2 explains why the first bounds the
+second: an organism senses its own condition, so a body confined to few
+physiological states cannot report many different interoceptive observations. As the unregulated walk wanders, the entropy
 of the states it has visited climbs steadily. When the walk is regulated, that
 number rises for a while and then flattens out, well below the maximum. This is
 not decoration. It is the quantity we are going to build the entire framework

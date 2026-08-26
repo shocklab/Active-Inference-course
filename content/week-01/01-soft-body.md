@@ -41,9 +41,7 @@ set**. The picture to hold is a small region of a large space, with the system
 being nudged out of it constantly by noise, and something inside the system
 pushing back.
 
-::: widget homeostasis-drift | A body in a two-dimensional physiological space. The solid circle is the boundary of the viable set; cross it and the organism is no longer an organism. The dashed circle marks the states it prefers. Noise pushes it around; the parameter $\kappa$ sets how hard it pushes back. The
-right-hand panel tracks the entropy of the states visited so far, and the readout
-below reports it.
+::: widget homeostasis-drift | A body in a two-dimensional physiological space, each axis one regulated variable measured as a deviation from its setpoint. The solid circle at radius $1$ is the boundary of the viable set; cross it and the organism is no longer an organism. $\sigma$ is the size of one step of noise; $\kappa$ is the fraction of the current displacement the body removes per step, defined properly below. The dashed circle is the spread the algebra predicts, $\sqrt{2v}$ with $v$ from [eq:stationary-var]; it is absent at $\kappa = 0$ and $\kappa \ge 2$, where no stationary spread exists. The right-hand panel tracks the entropy of the visited states: the position is binned onto a ${{hs_bins:d}} \times {{hs_bins:d}}$ grid, the visit counts are normalised into a distribution, and its entropy is reported in nats, against a maximum of $\ln {{hs_bin_cells:d}} = {{hs_max_entropy:.3f}}$ for a body found equally often everywhere.
 :::
 
 The figure is running one line of arithmetic. Writing $x_t \in \mathbb{R}^2$ for
@@ -149,8 +147,10 @@ also fatal**, and symmetrically so: since $\kappa(2-\kappa)$ is unchanged when
 $\kappa$ is replaced by $2-\kappa$, a gain of $1.5$ leaves a body exactly as
 spread out as a gain of $0.5$. Overcorrection is not a lesser sin than
 underreaction. It is the same sin measured from the other side, and Week&nbsp;5
-meets it again under a different name, when a system with its precisions set too
-high starts chasing its own noise.
+meets it again under a different name. There the gain is set by a **precision**,
+meaning the inverse of a variance, so a large precision is a claim that a signal
+is reliable; a system that believes its measurements are better than they are
+overcorrects to each of them and ends up chasing its own noise.
 :::
 
 Push the figure's slider past $1$ and the trajectory changes visibly: instead of
@@ -163,13 +163,19 @@ Gaussian, so it has unbounded support: every state remains reachable and the
 boundary is still crossed eventually, with probability one. Regulation does not
 make death impossible. It converts a certainty on a timescale of hundreds of
 steps into a rare event on a timescale so long the organism will have died of
-something else first, and the escape time grows roughly exponentially in the
-ratio of barrier to noise. That is all any organism gets, and it is enough.
+something else first. How rare depends on how many standard deviations of the
+stationary distribution fit inside the boundary, which is $1/\sqrt{v}$ per
+coordinate: about {{hs_boundary_in_sd:.0f}} at the figure's default settings, and
+the expected time to cross grows faster than exponentially in that number. That is all any organism gets, and it is enough.
 :::
 
 ## Staying alive is a statement about entropy
 
-Watch the readout in that figure. As the unregulated walk wanders, the entropy
+Watch the readout in that figure. It measures the entropy of the *physiological*
+states the body has occupied, whereas the quantity defined below is the entropy
+of the *observations* it makes. Section&nbsp;2 explains why the first bounds the
+second: an organism senses its own condition, so a body confined to few
+physiological states cannot report many different interoceptive observations. As the unregulated walk wanders, the entropy
 of the states it has visited climbs steadily. When the walk is regulated, that
 number rises for a while and then flattens out, well below the maximum. This is
 not decoration. It is the quantity we are going to build the entire framework

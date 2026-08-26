@@ -235,6 +235,14 @@ V["hs_boundary_in_sd"] = 1 / V["hs_sd_per_coord"]
 V["hs_diffusive_steps"] = 1 / (2 * SIGMA ** 2)                # E|x|^2 = 2 t sigma^2 = 1
 # the gain's full range: stability needs 0 < kappa < 2, and kappa(2-kappa) is
 # maximised at kappa = 1, so the stationary variance is minimised there at sigma^2
+# The widget bins position onto an NB x NB grid; keep this in step with NB in
+# assets/js/w01.js, or the caption's maximum entropy silently stops matching the
+# readout it describes.
+HS_BINS = 26
+V["hs_bins"] = HS_BINS
+V["hs_bin_cells"] = HS_BINS ** 2
+V["hs_max_entropy"] = log(HS_BINS ** 2)
+
 V["hs_var_at_1"] = SIGMA ** 2
 V["hs_sd_at_1"] = SIGMA
 for _k in (0.5, 1.0, 1.5, 1.9):

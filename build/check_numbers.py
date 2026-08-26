@@ -74,6 +74,26 @@ def load_values(week_dir):
     return dict(mod.VALUES)
 
 
+def check_widget_constants():
+    """Constants shared between a widget and the prose describing it.
+
+    The caption for the homeostasis figure quotes the grid size the widget bins
+    onto and the maximum entropy that implies. Those live in two files, so they
+    can drift apart silently and the caption would go on describing a readout it
+    no longer matches.
+    """
+    out = []
+    js = os.path.join(ROOT, "assets", "js", "w01.js")
+    if not os.path.exists(js):
+        return out
+    m = re.search(r"var NB = (\d+)", open(js, encoding="utf-8").read())
+    vals = load_values(os.path.join(ROOT, "content", "week-01"))
+    if m and vals and "hs_bins" in vals and int(m.group(1)) != int(vals["hs_bins"]):
+        out.append(f"widget w01.js bins onto {m.group(1)}x{m.group(1)} but "
+                   f"numbers.py says HS_BINS = {vals['hs_bins']}")
+    return out
+
+
 def main():
     course = json.load(open(os.path.join(ROOT, "content/course.json"), encoding="utf-8"))
     problems, untok, n_tok, n_pages = [], [], 0, 0
@@ -146,6 +166,7 @@ def main():
             drift.append(f"week-{int(w['n']):02d}: unresolved token markup reached docs/")
 
     print(f"{n_pages} pages · {n_tok} computed numbers substituted")
+    problems.extend(check_widget_constants())
     for p in problems + drift:
         print("  FAIL:", p)
     if untok:

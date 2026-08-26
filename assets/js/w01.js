@@ -91,9 +91,18 @@
       c.save();
       c.strokeStyle = st.dead ? C.clay : C.ink2; c.lineWidth = 1.6;
       c.beginPath(); c.arc(cx, cy, R, 0, 2 * Math.PI); c.stroke();
-      c.setLineDash([3, 4]); c.strokeStyle = C.accent; c.lineWidth = 1.2;
-      c.beginPath(); c.arc(cx, cy, R * 0.35, 0, 2 * Math.PI); c.stroke();
+      /* predicted spread: rms radius sqrt(2v) with v = sigma^2 / (k(2-k)).
+       * Undefined outside 0 < k < 2, where there is no stationary distribution. */
+      var kk = gain.get(), ss = sigma.get(), den = kk * (2 - kk), rms = null;
+      if (den > 0) {
+        rms = Math.sqrt(2 * ss * ss / den);
+        if (rms < 1) {
+          c.setLineDash([3, 4]); c.strokeStyle = C.accent; c.lineWidth = 1.2;
+          c.beginPath(); c.arc(cx, cy, R * rms, 0, 2 * Math.PI); c.stroke();
+        }
+      }
       c.restore();
+      st._rms = rms;
 
       if (st.trail.length > 1) {
         c.save();
@@ -112,7 +121,10 @@
 
       p.text(cx, Y(1) - 13, st.dead ? 'boundary crossed' : 'viable set',
         { pixel: true, size: 10.5, weight: '600', colour: st.dead ? C.clay : C.muted });
-      p.text(cx, cy - R * 0.35 - 8, 'preferred', { pixel: true, size: 9.5, colour: C.accent });
+      if (st._rms !== null && st._rms < 1) {
+        p.text(cx, cy - R * st._rms - 8, 'predicted spread', 
+               { pixel: true, size: 9.5, colour: C.accent });
+      }
       p.text(cx, Y(-1) + 15, 'two physiological variables',
         { pixel: true, size: 9.5, colour: C.faint });
 
@@ -167,7 +179,9 @@
       out.show([
         ['steps', String(st.t)],
         ['status', st.dead ? 'boundary crossed' : 'within bounds'],
-        ['H[visited states]', H.toFixed(3) + ' / ' + HMAX.toFixed(3) + ' nats']
+        ['H[visited states]', H.toFixed(3) + ' / ' + HMAX.toFixed(3) + ' nats'],
+        ['predicted rms radius', st._rms === null ? 'none (no stationary state)'
+                                                 : st._rms.toFixed(3)]
       ]);
     });
 
