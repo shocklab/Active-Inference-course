@@ -107,7 +107,7 @@ Watch the readout in that figure. As the unregulated walk wanders, the entropy
 of the states it has visited climbs steadily. When the walk is regulated, that
 number rises for a while and then flattens out, well below the maximum. This is
 not decoration. It is the quantity we are going to build the entire framework
-on, so it is worth being precise about what it is.
+on, so it needs stating precisely.
 
 Everything an organism can register about itself and its surroundings arrives at
 a surface: the retina, the skin, the stretch receptors in the gut. Note that the
@@ -249,8 +249,7 @@ must carry an internal model of what its observations are usually like and what
 produces them.
 
 This means the $P$ of [eq:sensory-entropy] and the $P$ of "minimise
-$-\ln P(o)$" are not quite the same object, and it is worth separating them now
-rather than discovering it later. The first is the distribution the organism's
+$-\ln P(o)$" are not quite the same object, and they need separating now rather than later. The first is the distribution the organism's
 observations *actually* follow over a lifetime, which no organism has access to.
 The second is the distribution its model *says* they follow, which is the only
 one it can evaluate. The framework proceeds by using the second as a stand-in for

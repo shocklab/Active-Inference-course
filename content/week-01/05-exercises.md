@@ -65,7 +65,7 @@ because the division by $P(o)$ hides the error, which is exactly what makes this
 mistake hard to find. Check the column sums.
 :::
 
-::: exercise The prior does the work
+::: exercise What the prior decides
 Using the leopard, baboon and nothing model from Lesson&nbsp;3, find the value
 of the leopard prior $\rho$ at which observing a tawny flash leaves you exactly
 undecided between leopard and not-leopard, that is,
@@ -225,7 +225,7 @@ parameter is $\sigma$, so the scaling is forced.
 noise should quadruple the lifetime, and the roughly {{sigma_ratio:.1f}}-fold increase in
 $\sigma$ here should cut it by a factor of about ${{lifetime_factor:.1f}}$.
 
-This is worth registering as a piece of intuition about what regulation is
+Register this as intuition about what regulation is
 buying. Without action, lifetime scales as the inverse square of the noise: a
 punishing dependence. With action, as the figure in Lesson&nbsp;1 shows, the
 walk does not diffuse at all, and lifetime is no longer set by $\sigma$ in the
@@ -246,5 +246,4 @@ Everything here is freely accessible.
   MATLAB code.
 - Bruineberg, Dolega, Dewhurst and Baltieri, "The Emperor's New Markov Blankets",
   *Behavioral and Brain Sciences* (2022). A careful criticism of exactly the
-  interface picture drawn in Lesson&nbsp;2. Worth reading now and again after
-  Week&nbsp;12.
+  interface picture drawn in Lesson&nbsp;2. Read it now, and again after Week&nbsp;12.

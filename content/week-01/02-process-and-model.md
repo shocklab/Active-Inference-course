@@ -12,8 +12,8 @@ predictions about what those data are going to be. These are two different
 generative structures, they live in two different places, and they are written
 with two different letters for a reason.
 
-Getting this distinction wrong is the single most common way to become confused
-about active inference, so we will fix it now and then keep the notation honest
+Getting this distinction wrong is the commonest way to become confused
+about active inference, so we will fix it now and then hold to that notation
 for twelve weeks.
 
 ## The generative process
@@ -177,13 +177,13 @@ the free energy of Week&nbsp;4, govern both: perception cannot cheat by simply
 deciding the data are whatever the model wanted, because the data are on the far
 side of the interface and only action can reach them.
 
-::: remark A last confusion worth heading off
+::: remark One more confusion
 The agent's states $s$ are usually described as its "beliefs". This is a
 technical use of the word. A belief here is a probability distribution held by
 some part of a system, of the sort a Kalman filter has. It carries no
 implication of awareness. A Kalman filter has beliefs in exactly this sense; an
 ordinary bimetallic thermostat does not, since it holds no distribution over
-anything, which is worth noticing because it means the word is not vacuous.
+anything, which means the word is not vacuous.
 :::
 
 ## A worked case: two agents and a lamp

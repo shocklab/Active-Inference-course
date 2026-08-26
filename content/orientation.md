@@ -33,8 +33,7 @@ are there to be run and broken, not to be a prerequisite.
 
 ## The shape of the argument
 
-This course takes the discrete formulation last. That is the reverse of the
-commonest presentation, and the reason is worth understanding before you start.
+This course takes the discrete formulation last. That is the reverse of the commonest presentation, and the reason matters enough to give before you start.
 
 Parr, Pezzulo and Friston introduce the discrete, partially observable Markov
 decision process early, because that is where active inference is most often
@@ -106,9 +105,7 @@ from primitives, and nothing is hidden inside a library call. This is the one to
 work through if you are only going to do one.
 
 **pymdp** appears from Week&nbsp;9. It is the standard Python library for
-discrete active inference, and once we have built the discrete machinery
-ourselves it is worth seeing what the community actually uses, and worth
-checking our implementation against it. It has nothing to say about
+discrete active inference, and once we have built the discrete machinery ourselves, seeing what the community actually uses is a way of checking our own implementation. It has nothing to say about
 Weeks&nbsp;5 to 8, so it does not appear there.
 
 **JAX** is an advanced stream, present where vectorisation buys something real:

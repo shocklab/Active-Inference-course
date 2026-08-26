@@ -19,8 +19,7 @@ is not a matter of degree.
 
 ## Why the inverse direction is structurally harder
 
-Three separate things go wrong at once, and it is worth keeping them apart
-because different techniques attack different ones.
+Three separate things go wrong at once. Keep them apart, because different techniques attack different ones.
 
 **It is many-to-one.** Several states can produce the same observation. In the
 matrix above, a shaking branch is consistent with a leopard, a baboon, and
@@ -57,8 +56,7 @@ factors, do not reason about the joint state at all. Reason about each part sepa
 your model has $n$ factors with $k$ values each, that turns $k^n$ into $nk$, and
 the problem evaporates.
 
-It does not work, and understanding exactly why it does not work is the single
-most useful thing in this lesson, because Week&nbsp;4 is going to do it anyway
+It does not work, and why it does not work is what the rest of this lesson is about, because Week&nbsp;4 is going to do it anyway
 and you need to know what is being given up.
 
 Take two independent causes. This is a new and smaller model than the three-
@@ -142,7 +140,7 @@ others. The intractable sum does not decompose.
 ### Why it happens
 
 The numbers show that it happens. Here is why, and the argument is short enough
-that there is no excuse for leaving it in an exercise.
+that it belongs in the main text.
 
 Independence survives conditioning on an event whose probability **factorises**
 across the variables. If $P(E \mid s_1, s_2) = f(s_1)\,g(s_2)$ for some functions
@@ -167,7 +165,7 @@ of a single cause, because one cause already does nearly all the work available.
 A second cause adds almost nothing, so the evidence has almost nothing extra to
 buy with it, and the two causes end up competing for the same credit.
 
-The sign is worth noting too, because it is not universal. Explaining away
+The sign is not universal either. Explaining away
 depends on the causes being **sufficient**: either alone can produce the effect.
 Reverse that, so both are jointly *necessary* and neither alone suffices, and the
 correlation flips: learning one cause is present makes the other **more** likely,
@@ -175,8 +173,7 @@ since the effect still needs explaining and only the second cause can supply it.
 Competition and collaboration are both available; which you get is set by the
 structure of the likelihood, not by anything about priors.
 
-Explaining away is also, incidentally, why the phenomenon is worth caring about
-outside of a mathematics course. It is a real property of perception, it is what
+Explaining away also has a life outside mathematics. It is a real property of perception, it is what
 makes a plausible alternative explanation reduce your confidence in the first
 one, and it is one of the sharper tests of whether a candidate neural circuit is
 really doing inference: a circuit that merely accumulates evidence for each
@@ -227,8 +224,7 @@ the true posterior is correlated and no product of marginals is.
 
 ## How far off is the best factorised approximation?
 
-That question hides a choice, and the choice decides the answer. It is worth
-making explicit now, because Week&nbsp;4 rests on it.
+That question hides a choice, and the choice decides the answer. Make it explicit now, because Week&nbsp;4 rests on it.
 
 The Kullback&ndash;Leibler divergence is not symmetric, so there are two ways to
 ask how far a factorised $Q$ sits from the true posterior $P$:
@@ -243,7 +239,7 @@ with $s$ running over the four joint states of the table. Call the first the
 **forward** direction and the second the **reverse**. They disagree, and not by a
 little.
 
-::: derivation The forward direction just matches the marginals
+::: derivation The forward direction matches the marginals
 Minimise the left of [eq:two-kls] over products, writing $q_1$ and $q_2$ for the
 two factors so that $Q(s) = q_1(s_{\text{gust}})\,q_2(s_{\text{bab}})$. Split the
 logarithm:
@@ -273,8 +269,7 @@ ${{noisy_gap_forward:.4f}}$ nats. This is a lemma, not an accident of these
 numbers: forward KL over a product family always returns the marginals.
 :::
 
-Variational inference does not use that direction, for a reason worth stating
-now. The forward divergence takes its expectation under $P$, and $P$ is precisely
+Variational inference does not use that direction, and the reason is not aesthetic. The forward divergence takes its expectation under $P$, and $P$ is precisely
 what we cannot compute. The reverse takes its expectation under $Q$, which we
 chose and therefore know. The direction is forced on us by tractability, not
 chosen for its properties, and its properties turn out to matter.
@@ -376,7 +371,7 @@ posterior would inherit the prior's independence exactly and the shortcut would
 be valid.
 :::
 
-::: exercise Counting the cost honestly
+::: exercise Counting the cost
 An agent tracks $n = 15$ binary state factors. Give the number of terms in the
 evidence sum, and state how many factors could be added before the sum exceeds
 the number of nanoseconds since the Big Bang, roughly $4.4 \times 10^{26}$.

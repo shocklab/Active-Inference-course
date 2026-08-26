@@ -356,13 +356,13 @@ arrives. What should it now believe about $s$?</p>
 two lines to get. The joint probability of a state and an observation can be
 factored either way round,</p>
 <div class="eqn" id="eq-product-rule"><div class="eqbody">$$P(s \mid o)\,P(o) \;=\; P(o, s) \;=\; P(o \mid s)\,P(s),$$</div><div class="eqno"><a href="#eq-product-rule" title="Link to equation 1.3.1">(1.3.1)</a></div></div>
-<p>since both sides are just the definition of conditional probability applied in
-the two possible orders. Divide <a class="eqref" href="#eq-product-rule">(1.3.1)</a> by $P(o)$, which is legitimate
+<p>since both sides are the definition of conditional probability applied in the
+two possible orders. Divide <a class="eqref" href="#eq-product-rule">(1.3.1)</a> by $P(o)$, which is legitimate
 whenever the observation was possible at all, and the answer falls out:</p>
 <div class="eqn" id="eq-bayes"><div class="eqbody">$$P(s \mid o) \;=\; \frac{P(o \mid s)\,P(s)}{P(o)}, \qquad
 P(o) \;=\; \sum_{s} P(o \mid s)\,P(s).$$</div><div class="eqno"><a href="#eq-bayes" title="Link to equation 1.3.2">(1.3.2)</a></div></div>
 <p>Everything in this course is a consequence of not being able to compute the
-denominator. It is worth spending a page on why that is, because if you leave
+denominator. This page is mostly about why, because if you leave
 this lesson thinking Bayes' theorem is hard, you have taken away the wrong
 lesson. Bayes' theorem is trivial. The sum underneath it is not.</p>
 <h2 id="the-four-quantities-named"><span class="secno">1</span>The four quantities, named</h2>
@@ -445,7 +445,7 @@ a factor of nearly seven. It did not get there by being likely; it got there by
 being the only state that predicts tawny flashes well. Meanwhile "nothing"
 started as the overwhelming favourite at 70% and was demoted to 14%, because
 whatever else is true, empty scrub does not flash tawny.</p>
-<p>Two derived quantities are worth computing while the numbers are in front of us.</p>
+<p>Two derived quantities, while the numbers are in front of us.</p>
 <p>The section promised all the arithmetic, so here are the other two observations
 worked the same way. Multiply the relevant row elementwise by the prior, add:</p>
 <div class="tablewrap"><table>
@@ -547,7 +547,7 @@ are.</p>
 <p>Push $\lambda$ towards 1 in that figure. The likelihood bars flatten until every
 state predicts every observation equally well. Watch the posterior: it slides
 back onto the prior and stays there. The information-gain readout goes to zero.</p>
-<p>This is worth naming, because it will return as a term in an equation in
+<p>Name it, because it returns as a term in an equation in
 Week&nbsp;10. When $P(o \mid s)$ is close to uniform in $o$ for every $s$, the
 sensory channel is <strong>ambiguous</strong>: observations do not discriminate between
 states, so observing costs you effort and buys you nothing. When $P(o \mid s)$ is
@@ -562,9 +562,8 @@ it last saw a predator, the wind direction, whether each of several patches has
 been depleted, and what its companions are doing. Each of these is a state
 <em>factor</em>. The joint state space is the product of all of them, so if there are
 $n$ factors with $k$ values each, the sum in <a class="eqref" href="#eq-bayes">(1.3.2)</a> has $k^n$ terms.</p>
-<figure class="widget" id="fig-1-3-2"><div class="wmount" data-widget="evidence-blowup"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.2.</span> The number of terms in the evidence sum, on a logarithmic vertical axis. The point is not that the numbers are large. The point is which way the exponent sits.</figcaption></figure>
-<p>Nothing about this is fixable by better hardware, and it is worth seeing why
-rather than taking it on faith. Hardware buys you a constant factor: twice the
+<figure class="widget" id="fig-1-3-2"><div class="wmount" data-widget="evidence-blowup"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.2.</span> The number of terms in the evidence sum, on a logarithmic vertical axis. The vertical axis is logarithmic. The number of factors sits in the exponent.</figcaption></figure>
+<p>Nothing about this is fixable by better hardware, and here is why rather than on faith. Hardware buys you a constant factor: twice the
 speed, twice the sums per second. The cost here is $k^n$, so a doubling of speed
 buys exactly one more state factor before you are back where you started. The
 gap between what improves multiplicatively and what grows exponentially does not
@@ -576,7 +575,7 @@ the Kalman filter gives exact answers in closed form; and graphical models whose
 dependency structure is a tree or close to one, where belief propagation is
 exact and cheap. The blow-up above is the <em>generic</em> case, densely coupled and
 without exploitable structure.</p>
-<p>So the honest claim is narrower than "exact inference is impossible". It is that
+<p>So the claim has to be narrower than "exact inference is impossible". It is that
 the structure which rescues those special cases cannot be assumed for an agent
 modelling an open-ended world, and that a framework claiming to describe such
 agents cannot rest on it. Week&nbsp;2 uses conjugacy where it is available and

@@ -33,6 +33,17 @@ BANNED = [
     # flagged in review: self-labelling a thing's own value instead of showing it
     "earns its keep", "earn its keep", "pays for itself", "does a lot of work",
     "doing a lot of work", "load-bearing", "the real question", "that matters",
+    # the "worth" family. 14 of these were in Week 1 and the census saw one,
+    # because the canonical "worth noting" is only the commonest member.
+    "worth noting", "worth seeing", "worth naming", "worth saying",
+    "worth computing", "worth registering", "worth keeping", "worth stating",
+    "worth caring", "worth reading", "worth doing", "worth flagging",
+    "worth mentioning", "worth remembering", "worth a look", "it is worth",
+    "is worth", "are worth",
+    # badging your own analysis as honest, rather than being honest
+    "the honest claim", "the honest answer", "the honest version",
+    "honestly,", "to be honest", "the honest truth", "counting the cost honestly",
+    "the single most", "no excuse",
 ]
 # Hard rules: these are never right in this course's prose.
 HARD = [

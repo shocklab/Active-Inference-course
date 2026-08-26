@@ -17,8 +17,8 @@ $$
 P(s \mid o)\,P(o) \;=\; P(o, s) \;=\; P(o \mid s)\,P(s),
 $$ {#product-rule}
 
-since both sides are just the definition of conditional probability applied in
-the two possible orders. Divide [eq:product-rule] by $P(o)$, which is legitimate
+since both sides are the definition of conditional probability applied in the
+two possible orders. Divide [eq:product-rule] by $P(o)$, which is legitimate
 whenever the observation was possible at all, and the answer falls out:
 
 $$
@@ -27,7 +27,7 @@ P(o) \;=\; \sum_{s} P(o \mid s)\,P(s).
 $$ {#bayes}
 
 Everything in this course is a consequence of not being able to compute the
-denominator. It is worth spending a page on why that is, because if you leave
+denominator. This page is mostly about why, because if you leave
 this lesson thinking Bayes' theorem is hard, you have taken away the wrong
 lesson. Bayes' theorem is trivial. The sum underneath it is not.
 
@@ -120,7 +120,7 @@ being the only state that predicts tawny flashes well. Meanwhile "nothing"
 started as the overwhelming favourite at {{prior_nothing_pct:.0f}}% and was demoted to {{post_tawny_nothing_pct:.0f}}%, because
 whatever else is true, empty scrub does not flash tawny.
 
-Two derived quantities are worth computing while the numbers are in front of us.
+Two derived quantities, while the numbers are in front of us.
 
 The section promised all the arithmetic, so here are the other two observations
 worked the same way. Multiply the relevant row elementwise by the prior, add:
@@ -187,7 +187,7 @@ Push $\lambda$ towards 1 in that figure. The likelihood bars flatten until every
 state predicts every observation equally well. Watch the posterior: it slides
 back onto the prior and stays there. The information-gain readout goes to zero.
 
-This is worth naming, because it will return as a term in an equation in
+Name it, because it returns as a term in an equation in
 Week&nbsp;10. When $P(o \mid s)$ is close to uniform in $o$ for every $s$, the
 sensory channel is **ambiguous**: observations do not discriminate between
 states, so observing costs you effort and buys you nothing. When $P(o \mid s)$ is
@@ -207,11 +207,10 @@ been depleted, and what its companions are doing. Each of these is a state
 *factor*. The joint state space is the product of all of them, so if there are
 $n$ factors with $k$ values each, the sum in [eq:bayes] has $k^n$ terms.
 
-::: widget evidence-blowup | The number of terms in the evidence sum, on a logarithmic vertical axis. The point is not that the numbers are large. The point is which way the exponent sits.
+::: widget evidence-blowup | The number of terms in the evidence sum, on a logarithmic vertical axis. The vertical axis is logarithmic. The number of factors sits in the exponent.
 :::
 
-Nothing about this is fixable by better hardware, and it is worth seeing why
-rather than taking it on faith. Hardware buys you a constant factor: twice the
+Nothing about this is fixable by better hardware, and here is why rather than on faith. Hardware buys you a constant factor: twice the
 speed, twice the sums per second. The cost here is $k^n$, so a doubling of speed
 buys exactly one more state factor before you are back where you started. The
 gap between what improves multiplicatively and what grows exponentially does not
@@ -226,7 +225,7 @@ dependency structure is a tree or close to one, where belief propagation is
 exact and cheap. The blow-up above is the *generic* case, densely coupled and
 without exploitable structure.
 
-So the honest claim is narrower than "exact inference is impossible". It is that
+So the claim has to be narrower than "exact inference is impossible". It is that
 the structure which rescues those special cases cannot be assumed for an agent
 modelling an open-ended world, and that a framework claiming to describe such
 agents cannot rest on it. Week&nbsp;2 uses conjugacy where it is available and

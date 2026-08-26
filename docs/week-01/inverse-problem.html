@@ -358,8 +358,7 @@ This is called <strong>model inversion</strong>, and the asymmetry between the t
 is not a matter of degree.</p>
 <figure class="widget" id="fig-1-4-1"><div class="wmount" data-widget="forward-inverse"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.4.1.</span> One likelihood matrix, read two ways. Click any cell to change the selection. In forward mode you read a column and stop. In inverse mode you read a row, weight it by the prior, and then owe a sum over every state in the model.</figcaption></figure>
 <h2 id="why-the-inverse-direction-is-structurally-harder"><span class="secno">1</span>Why the inverse direction is structurally harder</h2>
-<p>Three separate things go wrong at once, and it is worth keeping them apart
-because different techniques attack different ones.</p>
+<p>Three separate things go wrong at once. Keep them apart, because different techniques attack different ones.</p>
 <p><strong>It is many-to-one.</strong> Several states can produce the same observation. In the
 matrix above, a shaking branch is consistent with a leopard, a baboon, and
 sometimes with nothing at all. There is no function from observations back to
@@ -387,8 +386,7 @@ the joint state is one choice from every factor at once. If the state has
 factors, do not reason about the joint state at all. Reason about each part separately. If
 your model has $n$ factors with $k$ values each, that turns $k^n$ into $nk$, and
 the problem evaporates.</p>
-<p>It does not work, and understanding exactly why it does not work is the single
-most useful thing in this lesson, because Week&nbsp;4 is going to do it anyway
+<p>It does not work, and why it does not work is what the rest of this lesson is about, because Week&nbsp;4 is going to do it anyway
 and you need to know what is being given up.</p>
 <p>Take two independent causes. This is a new and smaller model than the three-
 state one of Lesson 3, chosen because two competing causes are the fewest that
@@ -481,7 +479,7 @@ factor, because the posterior over one factor depends on the posterior over the
 others. The intractable sum does not decompose.</p></div>
 <h3 id="why-it-happens">Why it happens</h3>
 <p>The numbers show that it happens. Here is why, and the argument is short enough
-that there is no excuse for leaving it in an exercise.</p>
+that it belongs in the main text.</p>
 <p>Independence survives conditioning on an event whose probability <strong>factorises</strong>
 across the variables. If $P(E \mid s_1, s_2) = f(s_1)\,g(s_2)$ for some functions
 $f$ and $g$, then the posterior is</p>
@@ -498,15 +496,14 @@ has likelihood $0.9901$, barely more than the $0.9010$
 of a single cause, because one cause already does nearly all the work available.
 A second cause adds almost nothing, so the evidence has almost nothing extra to
 buy with it, and the two causes end up competing for the same credit.</p>
-<p>The sign is worth noting too, because it is not universal. Explaining away
+<p>The sign is not universal either. Explaining away
 depends on the causes being <strong>sufficient</strong>: either alone can produce the effect.
 Reverse that, so both are jointly <em>necessary</em> and neither alone suffices, and the
 correlation flips: learning one cause is present makes the other <strong>more</strong> likely,
 since the effect still needs explaining and only the second cause can supply it.
 Competition and collaboration are both available; which you get is set by the
 structure of the likelihood, not by anything about priors.</p>
-<p>Explaining away is also, incidentally, why the phenomenon is worth caring about
-outside of a mathematics course. It is a real property of perception, it is what
+<p>Explaining away also has a life outside mathematics. It is a real property of perception, it is what
 makes a plausible alternative explanation reduce your confidence in the first
 one, and it is one of the sharper tests of whether a candidate neural circuit is
 really doing inference: a circuit that merely accumulates evidence for each
@@ -544,8 +541,7 @@ or $Q(s_1, s_2) = Q(s_1)Q(s_2)$ once we stop naming them. Look back at
 <a class="eqref" href="#eq-explaining-away">(1.4.4)</a>. That family cannot represent the true posterior, because
 the true posterior is correlated and no product of marginals is.</p></div>
 <h2 id="how-far-off-is-the-best-factorised-approximation"><span class="secno">4</span>How far off is the best factorised approximation?</h2>
-<p>That question hides a choice, and the choice decides the answer. It is worth
-making explicit now, because Week&nbsp;4 rests on it.</p>
+<p>That question hides a choice, and the choice decides the answer. Make it explicit now, because Week&nbsp;4 rests on it.</p>
 <p>The Kullback&ndash;Leibler divergence is not symmetric, so there are two ways to
 ask how far a factorised $Q$ sits from the true posterior $P$:</p>
 <div class="eqn" id="eq-two-kls"><div class="eqbody">$$D_{\mathrm{KL}}\big[P \,\|\, Q\big] = \sum_{s} P(s)\ln\frac{P(s)}{Q(s)},
@@ -554,7 +550,7 @@ D_{\mathrm{KL}}\big[Q \,\|\, P\big] = \sum_{s} Q(s)\ln\frac{Q(s)}{P(s)},$$</div>
 <p>with $s$ running over the four joint states of the table. Call the first the
 <strong>forward</strong> direction and the second the <strong>reverse</strong>. They disagree, and not by a
 little.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The forward direction just matches the marginals</span></div><p>Minimise the left of <a class="eqref" href="#eq-two-kls">(1.4.5)</a> over products, writing $q_1$ and $q_2$ for the
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The forward direction matches the marginals</span></div><p>Minimise the left of <a class="eqref" href="#eq-two-kls">(1.4.5)</a> over products, writing $q_1$ and $q_2$ for the
 two factors so that $Q(s) = q_1(s_{\text{gust}})\,q_2(s_{\text{bab}})$. Split the
 logarithm:</p>
 <div class="eqn"><div class="eqbody">$$D_{\mathrm{KL}}[P \,\|\, Q]
@@ -572,8 +568,7 @@ solved by $q = p$.</p>
 $0.5050 $ for each cause, and leaves a gap of
 $0.3687$ nats. This is a lemma, not an accident of these
 numbers: forward KL over a product family always returns the marginals.</p></div>
-<p>Variational inference does not use that direction, for a reason worth stating
-now. The forward divergence takes its expectation under $P$, and $P$ is precisely
+<p>Variational inference does not use that direction, and the reason is not aesthetic. The forward divergence takes its expectation under $P$, and $P$ is precisely
 what we cannot compute. The reverse takes its expectation under $Q$, which we
 chose and therefore know. The direction is forced on us by tractability, not
 chosen for its properties, and its properties turn out to matter.</p>
@@ -651,7 +646,7 @@ adds almost nothing once the first is present. That diminishing return is the
 source of the competition. If the likelihood were multiplicatively separable, the
 posterior would inherit the prior's independence exactly and the shortcut would
 be valid.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.4.2<span class="bt">Counting the cost honestly</span></div><p>An agent tracks $n = 15$ binary state factors. Give the number of terms in the
+<div class="box exercise"><div class="boxhd">Exercise 1.4.2<span class="bt">Counting the cost</span></div><p>An agent tracks $n = 15$ binary state factors. Give the number of terms in the
 evidence sum, and state how many factors could be added before the sum exceeds
 the number of nanoseconds since the Big Bang, roughly $4.4 \times 10^{26}$.</p><details><summary>Solution</summary><p>With $k = 2$ and $n = 15$ the sum has $2^{15} = 32,768$ terms, which is
 nothing: a modern processor does this in microseconds.</p>
