@@ -172,9 +172,16 @@ sits from what was expected before any data arrived. $\varepsilon_u$ is the
 **sensory prediction error**: how far the intensity actually heard sits from the
 intensity the current estimate predicts.
 
-Each is divided by a variance, which is the same as multiplying by a
-**precision**, the reciprocal of a variance. A precise channel is one whose
-errors count for a lot.
+Each is divided by a variance. The next definition names what that division is
+doing, and Lesson&nbsp;4 is largely about it.
+:::
+
+::: definition Precision
+The **precision** of a Gaussian channel is the reciprocal of its variance. A
+precise channel is one whose predictions are tight, so dividing an error by a
+variance is the same as multiplying it by a precision: a gain saying how
+seriously to take that error. The symbol $\Pi$ is reserved for it from
+Lesson&nbsp;4 onwards.
 :::
 
 ::: mn Where the subscripts come from

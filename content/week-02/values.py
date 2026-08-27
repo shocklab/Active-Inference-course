@@ -208,6 +208,66 @@ V["curv_gaussnewton"] = -(1 / VAR_PRIOR + g_prime(V["post_mode"]) ** 2 / VAR_OBS
 V["curv_gpp_term"] = V["err_obs"] * g_second(V["post_mode"])
 V["sensory_prec_on_state"] = g_prime(V["post_mode"]) ** 2 / VAR_OBS
 
+# ── two things that go wrong with the mode, used in the problems ─────────
+# 1. The MAP is not invariant under reparameterisation. Working in rho = ln d
+#    instead of d changes the density by the Jacobian |dd/drho| = d, which adds
+#    ln d to the log posterior and moves the peak. The posterior MEAN is
+#    unaffected, being an expectation rather than a location on a density.
+_logpost_d = (-(_grid - D_PRIOR) ** 2 / (2 * VAR_PRIOR)
+              - (U_OBS - g(_grid)) ** 2 / (2 * VAR_OBS))
+_logpost_rho = _logpost_d + np.log(_grid)
+V["map_in_d"] = float(_grid[np.argmax(_logpost_d)])
+V["map_via_logd"] = float(_grid[np.argmax(_logpost_rho)])
+V["map_reparam_pct"] = 100 * (V["map_via_logd"] - V["map_in_d"]) / V["map_in_d"]
+
+# 2. The log joint need not be unimodal. These settings give two peaks, and
+#    ascent from the prior mean climbs the LOWER one and stops there.
+BI = dict(dp=4.0, vp=0.5, u=1.5, vu=0.1)
+_bg = np.linspace(0.05, 10.0, 400000)
+_bq = (-(_bg - BI["dp"]) ** 2 / (2 * BI["vp"])
+       - (BI["u"] - g(_bg)) ** 2 / (2 * BI["vu"]))
+_bq = np.exp(_bq - _bq.max())
+_pk = np.where((_bq[1:-1] > _bq[:-2]) & (_bq[1:-1] > _bq[2:]))[0] + 1
+_pk = [i for i in _pk if _bq[i] > 1e-6]
+V["bi_dp"], V["bi_vp"], V["bi_u"], V["bi_vu"] = BI["dp"], BI["vp"], BI["u"], BI["vu"]
+V["bi_peak_lo"] = float(_bg[_pk[0]])
+V["bi_peak_hi"] = float(_bg[_pk[1]])
+V["bi_height_ratio"] = float(_bq[_pk[1]] / _bq[_pk[0]])
+
+
+BI_ETA = 0.02          # one definition; the prose cites V["bi_eta"]
+V["bi_eta"] = BI_ETA
+
+
+def _bi_ascend(start, eta=BI_ETA, steps=6000):
+    d = start
+    for _ in range(steps):
+        d += eta * ((BI["dp"] - d) / BI["vp"]
+                    + (BI["u"] - g(d)) / BI["vu"] * g_prime(d))
+        d = min(max(d, 0.05), 10.0)
+    return d
+
+
+V["bi_from_prior"] = _bi_ascend(BI["dp"])
+V["bi_from_one"] = _bi_ascend(1.0)
+# Started below the global peak, the step lands beyond BOTH: near d = 0.6 the
+# predicted intensity is far above what was heard and the gradient is enormous,
+# so a rate that is mild elsewhere throws the estimate clear across the range.
+V["bi_from_low"] = _bi_ascend(0.6)
+BI_START_LOW = 0.6
+V["bi_start_low"] = BI_START_LOW
+V["bi_g_at_low"] = g(BI_START_LOW)
+V["bi_grad_at_low"] = ((BI["dp"] - BI_START_LOW) / BI["vp"]
+                       + (BI["u"] - g(BI_START_LOW)) / BI["vu"] * g_prime(BI_START_LOW))
+V["bi_step_at_low"] = BI_ETA * V["bi_grad_at_low"]
+
+# ── the sensory channel's precision about the state, at three distances ──
+for _d in (1.0, 4.0):
+    _tag = str(int(_d))
+    V[f"gprime_at_{_tag}"] = g_prime(_d)
+    V[f"sensprec_at_{_tag}"] = g_prime(_d) ** 2 / VAR_OBS
+V["sensprec_ratio_1_to_4"] = V["sensprec_at_1"] / V["sensprec_at_4"]
+
 VALUES = V
 
 if __name__ == "__main__":

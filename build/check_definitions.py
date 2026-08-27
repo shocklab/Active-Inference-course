@@ -106,9 +106,14 @@ WEEK_TAG = re.compile(r"Week&nbsp;(\d+)|Week (\d+)")
 
 # Single Latin letters carry reservations too, and until Week 2 nothing checked
 # them: the collision scan read only `\macro` tokens, so `g` reserved for the
-# observation function in Week 5 could be spent in Week 2 in silence. Same class
-# of miss the scan exists to catch, one letter shorter.
-STRIP_MACRO = re.compile(r"\\[a-zA-Z]+\s*(?:\{[^{}]*\})?")
+# observation function in Week 5 could be spent in Week 2 in silence.
+#
+# Decoration is part of the symbol. Stripping it made $\mathbf{D}$, $\mathcal{D}$
+# and $D_{\mathrm{KL}}$ all read as "D" and report collisions between three
+# things a reader would never confuse.
+DECOR = r"mathbf|mathcal|mathbb|mathrm|boldsymbol|tilde|bar|hat|dot|vec"
+DECORATED = re.compile(r"\\(" + DECOR + r")\s*\{\s*([A-Za-z])\s*\}")
+PLAIN_MACRO = re.compile(r"\\[a-zA-Z]+")
 BARE_LETTER = re.compile(r"(?<![A-Za-z])([A-Za-z])(?![A-Za-z])")
 
 # Letters so common in generic algebra that reserving them course-wide would be
@@ -116,16 +121,25 @@ BARE_LETTER = re.compile(r"(?<![A-Za-z])([A-Za-z])(?![A-Za-z])")
 GENERIC_LETTERS = set("ijklmnpqre")
 
 
-def _bare_letters(src):
-    """Single Latin letters used as symbols, with macro names removed first."""
-    return {c for c in BARE_LETTER.findall(STRIP_MACRO.sub(" ", src))
-            if c not in GENERIC_LETTERS}
+def _symbol_keys(src):
+    """Every symbol a stretch of maths uses, decoration included.
+
+    Returns keys like `\mathbf{A}`, `\alpha`, `g`. Decorated forms are pulled
+    out first and removed, so the letter inside one is not also counted bare.
+    """
+    keys, rest = set(), src
+    for m in DECORATED.finditer(src):
+        keys.add("\\" + m.group(1) + "{" + m.group(2) + "}")
+    rest = DECORATED.sub(" ", rest)
+    keys |= {t for t in PLAIN_MACRO.findall(rest)}
+    rest = PLAIN_MACRO.sub(" ", rest)
+    keys |= {c for c in BARE_LETTER.findall(rest) if c not in GENERIC_LETTERS}
+    return {k for k in keys if k not in EXEMPT
+            and k not in ("\\mathrm", "\\mathbf", "\\bar", "\\cdot", "\\mathbb")}
 
 
 # Operators and decorations that can sit in front of the symbol a row is about.
-ROW_PREFIX = re.compile(
-    r"^[\s$\-+]*(?:\\(?:ln|log|exp|left|mathrm|mathbf|mathbb|mathcal|bar|hat|dot|tilde)\b\s*)*")
-ROW_HEAD = re.compile(r"\\[a-zA-Z]+|[A-Za-z]")
+ROW_PREFIX = re.compile(r"^[\s$\-+]*(?:\\(?:ln|log|exp|left)\b\s*)*")
 
 
 def _row_symbols(sym):
@@ -137,12 +151,14 @@ def _row_symbols(sym):
     learned to see bare letters at all.
     """
     core = ROW_PREFIX.sub("", sym.strip())
-    core = re.sub(r"^\{+", "", core)
-    m = ROW_HEAD.search(core)
+    m = DECORATED.match(core)
+    if m:
+        head = "\\" + m.group(1) + "{" + m.group(2) + "}"
+        return set() if head in EXEMPT else {head}
+    m = re.match(r"\\[a-zA-Z]+|[A-Za-z]", core)
     if not m:
         return set()
-    head = m.group(0)
-    return set() if head in EXEMPT else {head}
+    return set() if m.group(0) in EXEMPT else {m.group(0)}
 
 
 def check_collisions():
@@ -156,15 +172,58 @@ def check_collisions():
     note = os.path.join(ROOT, "content", "notation.md")
     if not os.path.exists(note):
         return []
+    # A row inherits the week of the section it sits under. The page is
+    # organised by week ("## Week 1: ...", "## Discrete models, from Week 9"),
+    # so most rows say "Lesson 1" and never repeat the week. Reading rows in
+    # isolation made 33 of them invisible to this check.
+    text = open(note, encoding="utf-8").read()
+    # character offset of each line -> the week of the heading above it
+    heads = []
+    pos = 0
+    cur = None
+    for line in text.splitlines(keepends=True):
+        if line.startswith("#"):
+            w = WEEK_TAG.findall(line)
+            cur = min(int(a or b) for a, b in w) if w else None
+        heads.append((pos, cur))
+        pos += len(line)
+
+    def week_of_offset(off):
+        found = None
+        for start, wk in heads:
+            if start > off:
+                break
+            found = wk
+        return found
+
     owner = {}
-    for m in NOTE_ROW.finditer(open(note, encoding="utf-8").read()):
+    for m in NOTE_ROW.finditer(text):
         sym, desc = m.group(1), m.group(2)
         w = WEEK_TAG.search(desc)
-        home = int(w.group(1) or w.group(2)) if w else None
+        # The EARLIEST week a row names, not the first one the regex happens to
+        # find. A row reading "first used in Week 2, general from Week 5" has
+        # its home in Week 2, and reading it left to right would file it under
+        # whichever number the sentence put first.
+        weeks = [int(a or b) for a, b in WEEK_TAG.findall(desc)]
+        if not weeks:
+            inherited = week_of_offset(m.start())
+            weeks = [inherited] if inherited is not None else []
+        home = min(weeks) if weeks else None
         for tok in _row_symbols(sym):
             owner.setdefault(tok, []).append((home, desc))
 
+    # A row with no "Week N" in its description is never compared against
+    # anything, so a symbol reserved there can be spent anywhere in silence.
+    # That is how Pi, reserved on the notation page for the precision matrix,
+    # was taken for a scalar precision in Week 2 with nothing to say so. An
+    # untagged row is not a pass; it is a row the check cannot see.
+    untagged = sorted({sym for sym, rows in owner.items()
+                       if all(home is None for home, _ in rows)})
+
     out = []
+    if untagged:
+        out.append("notation.md rows with no week tag, so nothing checks them: "
+                   + ", ".join(untagged))
     course = json.load(open(os.path.join(ROOT, "content/course.json"), encoding="utf-8"))
     for wk in course["weeks"]:
         d = os.path.join(ROOT, "content", f"week-{int(wk['n']):02d}")
@@ -176,9 +235,7 @@ def check_collisions():
                 body = NUMBER_TOKEN.sub(" ", open(os.path.join(d, fn), encoding="utf-8").read())
                 body = CONSTANT_PI.sub("2", body)
                 for mm in MATH.finditer(body):
-                    src = mm.group(1) or mm.group(2)
-                    used |= {"\\" + t for t in MACRO.findall(src)}
-                    used |= _bare_letters(src)
+                    used |= _symbol_keys(mm.group(1) or mm.group(2))
         for tok in sorted(used):
             for home, desc in owner.get(tok, []):
                 if home and home > int(wk["n"]):

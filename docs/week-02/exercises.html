@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Notation · Active Inference</title><meta name="description" content="One page for every symbol the course uses, with the convention it follows and the chapter where it first appears."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Problems and code · Active Inference</title><meta name="description" content="Seven problems with full solutions, two of which show the method of this week failing, and the notebook that rebuilds every figure."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
 :root{
   --paper:#fdfcf9; --card:#ffffff;
   --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
@@ -350,53 +350,266 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk" href="week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Reference</div><h1>Notation</h1><p class="deck">One page for every symbol the course uses, with the convention it follows and the chapter where it first appears.</p></header><article class="abody"><p>Notation in the active inference literature is not consistent. Different papers
-use $s$ for both the world's states and the model's, write $\mathbf{A}$
-transposed relative to each other, and disagree about whether $\pi$ is a policy
-or a distribution over policies. This page fixes the choices used throughout
-this course. Where a common alternative exists, it is named.</p>
-<h2 id="week-1-inference-and-the-homeostat">Week 1: inference and the homeostat</h2>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$x_t$</th><td>Displacement from the centre of the viable set at step $t$, a vector. Lesson&nbsp;1.</td></tr><tr><th>$\xi_t$</th><td>One step of noise, standard normal and independent across steps. Lesson&nbsp;1.</td></tr><tr><th>$\sigma$</th><td>The size of one step of noise, in the units of $x$. <strong>Not</strong> the softmax; see the note on collisions below. Lesson&nbsp;1.</td></tr><tr><th>$\kappa$</th><td>The gain: dimensionless, the fraction of the current displacement removed per step. Stability needs $0 < \kappa < 2$, and $\kappa = 1$ minimises the spread. Lesson&nbsp;1.</td></tr><tr><th>$v$</th><td>The stationary variance of one coordinate, $\sigma^2/\kappa(2-\kappa)$. Lesson&nbsp;1.</td></tr><tr><th>$T$</th><td>The number of steps in a life, the upper limit of a time average. Lesson&nbsp;1.</td></tr><tr><th>$P^{*}(\cdot)$</th><td>A star marks a distribution belonging to the <em>process</em>: the frequencies the world actually produces. No agent can evaluate it. Lesson&nbsp;2.</td></tr><tr><th>$P_A(\cdot),\ P_B(\cdot)$</th><td>A subscript marks the same distribution computed under a named agent's <em>model</em>. Lesson&nbsp;2.</td></tr><tr><th>$\bar{S}_X$</th><td>Agent $X$'s average surprise, $\sum_o P^{*}(o)[-\ln P_X(o)]$, in nats. Bounded below by $\mathrm{H}[P^{*}(o)]$. Lesson&nbsp;2.</td></tr><tr><th>$\alpha$</th><td>Ambiguity of a sensory channel, in $[0,1]$: the weight on the uniform matrix in $(1-\alpha)\mathbf{A} + \alpha U$. At $1$ observations carry nothing. Lesson&nbsp;3.</td></tr><tr><th>$n,\ k$</th><td>The number of state factors, and the number of values each can take. The evidence sum then has $k^n$ terms. Lessons&nbsp;3 and 4.</td></tr><tr><th>$w,\ \lambda$</th><td>In a noisy-OR likelihood, the probability that a present cause fires the effect, and the probability the effect fires with no cause present (the leak). Both in $[0,1]$. Lesson&nbsp;4.</td></tr><tr><th>$h_1, h_2$</th><td>Generic factor functions in the independence lemma, with no fixed meaning beyond that paragraph. Lesson&nbsp;4.</td></tr></tbody></table></div>
-<h2 id="the-two-sides-of-the-blanket-from-week-1">The two sides of the blanket, from Week 1</h2>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$\vartheta$</th><td>States of the generative <em>process</em>: what the world is actually doing. The agent has no access to these. Week&nbsp;1.</td></tr><tr><th>$s$</th><td>Hidden states of the generative <em>model</em>. Latent variables inside the agent. Not the same object as $\vartheta$, and not required to correspond to it. Week&nbsp;1.</td></tr><tr><th>$o$</th><td>Observations, or sensory states. On the blanket, shared by both sides. Some authors write $y$; the two are interchangeable and Weeks&nbsp;1 to 4 use $y$ where the emphasis is statistical rather than embodied.</td></tr><tr><th>$a$</th><td>Actions, or active states. On the blanket. Week&nbsp;1.</td></tr><tr><th>$\mu$</th><td>Internal states of the agent: the physical variables carrying the model, as against $s$, which is a variable inside it. Introduced in Week&nbsp;1 to state the Markov blanket; acquires dynamics of its own from Week&nbsp;5.</td></tr></tbody></table></div>
-<h2 id="distributions-from-week-1">Distributions, from Week 1</h2>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$P(s)$</th><td>The prior over hidden states.</td></tr><tr><th>$P(o \mid s)$</th><td>The likelihood. What each state predicts about observations.</td></tr><tr><th>$P(o, s)$</th><td>The generative model: the joint distribution the agent carries.</td></tr><tr><th>$P(o)$</th><td>The model evidence, or marginal likelihood, $\sum_s P(o \mid s)P(s)$.</td></tr><tr><th>$-\ln P(o)$</th><td>Surprise, or surprisal. Not an emotion. Week&nbsp;1.</td></tr><tr><th>$P(s \mid o)$</th><td>The exact posterior. Generally not computable. Week&nbsp;1.</td></tr><tr><th>$Q(s)$</th><td>A distribution the agent holds over states, as against the $P$ of the world or of its own model. Introduced in Week&nbsp;1 as one agent's beliefs; named the approximate posterior, or <em>recognition density</em>, and made the object of optimisation in Week&nbsp;4.</td></tr></tbody></table></div>
-<h2 id="information-theoretic-quantities-from-week-1">Information-theoretic quantities, from Week 1</h2>
-<p>Logarithms are natural throughout, so all information quantities are in <strong>nats</strong>.
-Multiply by $1/\ln 2 = 1.4427$ for bits.</p>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$\mathrm{H}[P]$</th><td>Shannon entropy, $-\sum_x P(x)\ln P(x)$.</td></tr><tr><th>$D_{\mathrm{KL}}[Q \,\|\, P]$</th><td>Kullback&ndash;Leibler divergence, $\sum_x Q(x)\ln\frac{Q(x)}{P(x)}$. Read as "the divergence from $P$ to $Q$", non-negative, and zero only when $Q = P$.</td></tr><tr><th>$\mathbb{E}_{Q(x)}[\,\cdot\,]$</th><td>Expectation under $Q$, used from Week&nbsp;1. The subscript names the distribution being averaged over, and it matters: much of Week&nbsp;4 turns on which distribution an expectation is taken with respect to.</td></tr><tr><th>$I(s;o)$</th><td>Mutual information, $\sum_o P(o)\,D_{\mathrm{KL}}[P(s\mid o)\,\|\,P(s)]$, in nats. Non-negative, and zero exactly when observations say nothing about states. Symmetric in its two arguments despite being built from an asymmetric divergence.</td></tr></tbody></table></div>
-<h2 id="free-energies">Free energies</h2>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$F[Q, o]$</th><td>Variational free energy. A functional of the approximate posterior $Q$ and a <em>given</em> observation $o$. An upper bound on surprise. Week&nbsp;4.</td></tr><tr><th>$G(\pi)$</th><td>Expected free energy of a policy $\pi$: a real number in nats, averaged over observations not yet made. Lower is better, and policies are chosen by $\sigma(-\gamma G)$, so only differences between policies matter, not the absolute value. Week&nbsp;10.</td></tr><tr><th>$\mathrm{ELBO}$</th><td>The evidence lower bound, equal to $-F$. Common in the machine learning literature; the sign convention is the only difference.</td></tr></tbody></table></div>
-<p>The distinction between $F$ and $G$ is the one students most often lose. $F$
-looks backwards at data in hand and is minimised by perception and learning.
-$G$ looks forwards at data not yet gathered and is minimised by choosing what to
-do. They are different functionals with different arguments and they are not
-each other's special cases.</p>
-<h2 id="discrete-models-from-week-9">Discrete models, from Week 9</h2>
-<p>The matrices below are the standard ones. Note the index convention carefully:
-in this course, and in most of the literature, $\mathbf{A}$ has observations
-down the rows and states across the columns, so that its <em>columns</em> are
-probability distributions.</p>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$\mathbf{A}$</th><td>The likelihood array, $A_{ij} = P(o = i \mid s = j)$. Columns sum to one. Introduced in Week&nbsp;1 for a single time step; the rest of the discrete machinery joins it in Week&nbsp;9.</td></tr><tr><th>$\mathbf{B}$</th><td>The transition array, $B^{(u)}_{ij} = P(s_{t+1} = i \mid s_t = j, u)$, one matrix per action $u$. Columns sum to one.</td></tr><tr><th>$\mathbf{C}$</th><td>Prior preferences over observations, one real number per observation per time step, read as an unnormalised log probability. Larger means more preferred; only differences matter, since adding a constant to a column changes nothing. Encodes what the agent expects to see, which under active inference is the same as what it wants to see.</td></tr><tr><th>$\mathbf{D}$</th><td>The prior over initial states, $D_i = P(s_1 = i)$.</td></tr><tr><th>$\mathbf{E}$</th><td>The prior over policies, $E_\pi = P(\pi)$, one entry per policy and summing to one over the policy set. The habit term: what the agent tends to do before this situation's expected free energy is considered.</td></tr><tr><th>$\pi$</th><td>A policy: a sequence of actions. $\Pi$ is the set of them, and $\boldsymbol{\pi}$ is the distribution over that set. Where confusion is possible we write $Q(\pi)$ for the distribution.</td></tr><tr><th>$\tau$</th><td>A time index <em>within</em> a policy, running over the planning horizon.</td></tr><tr><th>$t$</th><td>The current time, discrete from Week&nbsp;1 and continuous from Week&nbsp;5. Distinguishing $t$ from $\tau$ is essential in Week&nbsp;10 and is a place the literature is frequently careless.</td></tr><tr><th>$\gamma$</th><td>Precision over policies: the inverse temperature in $Q(\pi) \propto \exp(-\gamma G(\pi))$.</td></tr><tr><th>$\mathrm{softmax}(\cdot)$</th><td>$\mathrm{softmax}(x)_i = e^{x_i} / \sum_j e^{x_j}$. Much of the literature writes this $\sigma$; this course does not, because $\sigma$ is a standard deviation from Week&nbsp;1 onwards and the collision is worse than the inconvenience.</td></tr><tr><th>$\tilde{s}, \tilde{o}$</th><td>A tilde denotes a whole <em>sequence</em> over time rather than a single time point, so $\tilde{s} = (s_1, \dots, s_T)$.</td></tr></tbody></table></div>
-<h2 id="continuous-models-from-week-5">Continuous models, from Week 5</h2>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$\varepsilon$</th><td>A prediction error, the difference between what was predicted and what arrived, divided by a variance where it is precision-weighted. First used in Week&nbsp;2, where there are two of them; one per level of the hierarchy from Week&nbsp;5.</td></tr><tr><th>$\Pi$</th><td>A precision: the inverse of a variance, and from Week&nbsp;5 the inverse of a covariance matrix. It is what weights each prediction error, and it is the formal correlate of attention. First used in Week&nbsp;2, where there are two of them and both are scalars. Note the clash with $\Pi$ for the policy set; the two never occur in the same chapter.</td></tr><tr><th>$\tilde{x}$</th><td>In Weeks&nbsp;6 to 8, a variable in <strong>generalised coordinates of motion</strong>: the stacked vector $(x, x', x'', \dots)$ of the state and its temporal derivatives. This is a different use of the tilde from the discrete chapters, and Week&nbsp;6 says so again at the point where it starts.</td></tr><tr><th>$\mathcal{D}$</th><td>The block shift operator that maps $\tilde{x} = (x, x', x'', \dots)$ to $(x', x'', x''', \dots)$.</td></tr><tr><th>$g(\cdot)$</th><td>The observation function of the generative model, mapping a hidden state to the observation it predicts, $o = g(x) + z$ with $z$ the sensory noise. First used in Week&nbsp;2, for a single hidden variable; general from Week&nbsp;5.</td></tr><tr><th>$f(\cdot)$</th><td>The flow of the generative model, giving the rate of change of the hidden state, $\dot{x} = f(x) + w$ with $w$ the state noise. Week&nbsp;5.</td></tr></tbody></table></div>
-<div class="box warning"><div class="boxhd">Careful<span class="bt">Two different tildes</span></div><p>The tilde means "sequence over discrete time" in Weeks&nbsp;9 to 11 and
-"generalised coordinates of motion" in Weeks&nbsp;6 to 8. This is unfortunate
-and it is inherited from the literature rather than invented here. Both usages
-are standard, they never appear in the same derivation, and each chapter states
-which one is in force.</p></div>
-<h2 id="conventions">Conventions</h2>
-<p>Vectors are columns. Bold $\mathbf{s}$ is the vector whose $i$th entry is the
-probability of state $i$, as against italic $s$, which is a single state; the
-same convention holds for $\mathbf{o}$. A matrix acting on such a vector
-multiplies from the left, so $\mathbf{A}\mathbf{s}$ turns a distribution over
-states into one over observations. Transposes therefore appear whenever information flows
-from observations back to states, and where the literature omits a transpose we
-say so.</p>
-<p>Expectations always carry an explicit subscript. In this field the same
-expression can appear with the expectation taken under $P$, under $Q$, or under
-a joint, and the three mean different things; an unsubscripted $\mathbb{E}$ is a
-source of error rather than an economy.</p></article><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
-<script defer src="assets/js/aif-core.js"></script>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Two rules a brain has to obey</a><a class="" href="../week-02/exact.html">A problem small enough to solve exactly</a><a class="" href="../week-02/climbing.html">Climbing the log joint</a><a class="" href="../week-02/reading-the-update.html">Reading the update</a><a class="cur" href="../week-02/exercises.html">Problems and code</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Problems and code</h1><p class="deck">Seven problems with full solutions, two of which show the method of this week failing, and the notebook that rebuilds every figure.</p><div class="meta"><span>Week 2</span><span>&#167;5</span><span>100 min</span></div></header><article class="abody"><p>Work the problems before opening the solutions. The ones marked with a dagger
+are used again later in the course.</p>
+<p>Two of these, the last two, are attacks on the method rather than exercises in
+it. They belong here rather than in Week&nbsp;12 because the objections are
+already visible from what has been derived, and saving them up would mean
+teaching the method for ten weeks before admitting what is wrong with it.</p>
+<h2 id="the-notebook">The notebook</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Notebook</th>
+<th>What it does</th>
+<th>Run it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>week02_numpy.ipynb</code></td>
+<td>The exact posterior by quadrature, gradient ascent on the log joint, the two prediction errors, the step-size bound, and the linear case checked against its closed form</td>
+<td><a href="https://colab.research.google.com/github/shocklab/Active-Inference-course/blob/main/notebooks/week-02/week02_numpy.ipynb">Colab</a></td>
+</tr>
+<tr>
+<td><code>week02_jax.ipynb</code></td>
+<td>Three things that need many runs at once: the hand-derived gradient checked against automatic differentiation, ten thousand starting points mapping the basins of the bimodal case, and the whole precision plane swept at once</td>
+<td><a href="https://colab.research.google.com/github/shocklab/Active-Inference-course/blob/main/notebooks/week-02/week02_jax.ipynb">Colab</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>The JAX notebook is not a translation of the NumPy one. It does what only
+becomes practical when thousands of copies run together, and its basin map
+answers a question the problems below can only pose one starting point at a
+time.</p>
+<p>There is no <code>pymdp</code> notebook this week, for the same reason as last week: the
+library works with the discrete generative models of Week&nbsp;9, and there is
+nothing here for it to do.</p>
+<h2 id="problems">Problems</h2>
+<div class="box exercise"><div class="boxhd">Exercise 2.5.1<span class="bt">A different world &dagger;</span></div><p>Sound is also absorbed by the air, so over long distances intensity falls
+exponentially rather than as a power. Take $g(d) = e^{-d/L}$ with $L$ a fixed
+absorption length.</p>
+<p>(a) Write down the update rule.</p>
+<p>(b) Where in the range of $d$ is the sensory term most influential, and where
+does it become negligible? Compare with the inverse-square case.</p>
+<p>(c) Show that for this link the MAP estimate can be written in closed form when
+the prior is flat, and say why that stops being true as soon as the prior is not.</p><details><summary>Solution</summary><p>(a) $g'(d) = -\tfrac{1}{L}e^{-d/L}$, so substituting into the general rule,</p>
+<div class="eqn"><div class="eqbody">$$\dot d = \eta\Big(\Pi_p (d_p - d) - \frac{\Pi_u}{L}e^{-d/L}\big(u - e^{-d/L}\big)\Big).$$</div></div>
+<p>(b) The sensory gain is $|g'| = e^{-d/L}/L$, largest at $d = 0$ and decaying with
+length scale $L$. So the ear is informative nearby and, beyond a few multiples of
+$L$, says almost nothing: the predicted intensity has flattened out and moving
+the estimate barely changes it.</p>
+<p>The contrast with the inverse square is in the rate, not the direction. There
+$|g'| = 2/d^3$ also decays, but as a power, so it retains some sensitivity at
+every finite distance. Exponential absorption has a horizon; geometric spreading
+does not.</p>
+<p>(c) With a flat prior the first term is absent and the resting point needs
+$e^{-d/L}(u - e^{-d/L}) = 0$. The exponential is never zero, so $e^{-d/L} = u$,
+giving $\hat d = -L\ln u$ provided $0 < u < 1$. The estimate simply inverts the
+link, which is what a flat prior means: believe the measurement.</p>
+<p>With a Gaussian prior the condition becomes
+$\Pi_p(d_p - d) = \tfrac{\Pi_u}{L}e^{-d/L}(u - e^{-d/L})$, which sets a linear
+function of $d$ equal to a combination of $e^{-d/L}$ and $e^{-2d/L}$. That is a
+transcendental equation, and it has no solution in elementary functions.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 2.5.2<span class="bt">Implement it</span></div><p>Write the gradient ascent yourself, in about fifteen lines, and check it.</p>
+<p>(a) Code $g$, $g'$ and the update, and run it from $d_0 = 2.0$ with
+$\eta = 0.05$ for the values of this week. Confirm you reach
+$1.5500$.</p>
+<p>(b) Now find the same number a completely different way: evaluate the
+unnormalised posterior on a fine grid and take its largest entry. The two methods
+share no code. Agreement is therefore evidence; if you had reused the same
+function for both, it would not be.</p>
+<p>(c) Add a line that records $\varepsilon_p$ and $g'\varepsilon_u$ at every step
+and confirm their sum goes to zero while neither does.</p><details><summary>Solution</summary><pre><code class="language-python">import numpy as np
+
+d_p, var_p = 2.0, 1.0        # prior
+u,   var_u = 0.50, 0.10      # observation
+
+g      = lambda d: 1.0 / d**2
+g_prime = lambda d: -2.0 / d**3
+
+d, eta, trace = d_p, 0.05, []
+for _ in range(400):
+    eps_p = (d_p - d) / var_p
+    eps_u = (u - g(d)) / var_u
+    trace.append((eps_p, g_prime(d) * eps_u))
+    d += eta * (eps_p + g_prime(d) * eps_u)
+
+grid = np.linspace(0.05, 8.0, 600_000)
+logp = -(grid - d_p)**2 / (2*var_p) - (u - g(grid))**2 / (2*var_u)
+
+print(f&quot;ascent {d:.6f}   grid {grid[logp.argmax()]:.6f}&quot;)
+a, b = trace[-1]
+print(f&quot;eps_p {a:+.6f}   g'*eps_u {b:+.6f}   sum {a+b:.2e}&quot;)
+</code></pre>
+<p>This prints an ascent value and a grid value agreeing to about four decimal
+places, the residual being the grid spacing rather than any error in either
+method. The final line shows $+0.449965$ and $-0.449962$,
+summing to $3.44e-06$.</p>
+<p>On (b): the point is not that grids are trustworthy. It is that two methods
+sharing no code and resting on different ideas, one climbing a gradient and one
+enumerating, have no common way to be wrong. If they agree, the ways each could
+fail would both have to fail identically, which is unlikely enough to count as
+evidence.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 2.5.3<span class="bt">Repeated listening &dagger;</span></div><p>The animal listens $n$ times, getting independent readings $u_1, \dots, u_n$ from
+the same source, each with precision $\Pi_u$.</p>
+<p>(a) Show the update depends on the readings only through their mean $\bar u$.</p>
+<p>(b) Show the effective sensory precision is $n\Pi_u$, and say what that does to
+the estimate and to the largest stable step size as $n$ grows.</p><details><summary>Solution</summary><p>(a) Independence given $d$ makes the log likelihood a sum, so the sensory part of
+the gradient is</p>
+<div class="eqn"><div class="eqbody">$$g'(d)\sum_{i=1}^{n} \Pi_u\big(u_i - g(d)\big)
+= g'(d)\,\Pi_u\Big(\sum_i u_i - n\,g(d)\Big)
+= g'(d)\,n\Pi_u\big(\bar u - g(d)\big),$$</div></div>
+<p>pulling out $n$ and writing $\bar u = \tfrac{1}{n}\sum_i u_i$. Nothing else about
+the individual readings survives: $\bar u$ is a sufficient statistic for them.</p>
+<p>(b) The last expression is the one-observation rule with $\Pi_u$ replaced by
+$n\Pi_u$ and $u$ by $\bar u$. So $n$ readings are one reading of $n$ times the
+precision. As $n$ grows the sensory term dominates the prior term without limit
+and the estimate approaches whatever satisfies $g(\hat d) = \bar u$: the prior
+washes out, which is the usual asymptotic story and here it is visible directly
+in the gradient.</p>
+<p>For the step size, the curvature acquires a term $-n\Pi_u g'^2$, growing linearly
+in $n$, so the bound $\eta < 2/|\mathcal{F}''|$ falls off like $1/n$. More data
+makes the peak sharper and the ascent stiffer, which is the same trade the
+precision slider showed in Lesson&nbsp;3.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 2.5.4<span class="bt">Sequential listening</span></div><p>Instead of collecting $n$ readings and processing them together, the animal
+updates after each one, using the posterior from reading $k$ as the prior for
+reading $k+1$. Take the linear link $g(d) = d$, where everything stays Gaussian.</p>
+<p>(a) Show that after two readings the estimate is the same as processing both at
+once.</p>
+<p>(b) Say what breaks this equivalence when $g$ is nonlinear.</p><details><summary>Solution</summary><p>(a) With the linear link the posterior after one reading is Gaussian with
+precision $\Pi_1 = \Pi_p + \Pi_u$ and mean
+$m_1 = (\Pi_p d_p + \Pi_u u_1)/\Pi_1$, by the precision-weighted average of
+Lesson&nbsp;4. Using that as the prior for $u_2$ gives precision
+$\Pi_2 = \Pi_1 + \Pi_u = \Pi_p + 2\Pi_u$ and mean</p>
+<div class="eqn"><div class="eqbody">$$m_2 = \frac{\Pi_1 m_1 + \Pi_u u_2}{\Pi_2}
+    = \frac{\Pi_p d_p + \Pi_u u_1 + \Pi_u u_2}{\Pi_p + 2\Pi_u},$$</div></div>
+<p>since $\Pi_1 m_1 = \Pi_p d_p + \Pi_u u_1$ by construction. That is exactly the
+batch answer. Precisions add and precision-weighted means add, so the order and
+grouping of the readings do not matter.</p>
+<p>(b) Nothing in the <em>probability</em> breaks: the true posterior is always
+order-independent, because $P(d \mid u_1, u_2)$ does not know what order the
+readings arrived in. What breaks is the <em>representation</em>. With $g$ nonlinear the
+posterior after one reading is not Gaussian, so summarising it by a mean and a
+precision throws information away, and feeding that summary forward as the next
+prior propagates the loss. Process both at once and the approximation is made
+once; process them in sequence and it is made twice.</p>
+<p>This is the difference between exact recursive filtering and the extended Kalman
+filter, and Week&nbsp;7 meets it again in continuous time.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 2.5.5<span class="bt">Two peaks</span></div><p>Change the setting: prior mean $d_p = 4.0$ with $\Sigma_p = 0.5$, and
+the animal hears $u = 1.5$ with $\Sigma_u = 0.1$.</p>
+<p>(a) Plot the log joint on $0.05 \le d \le 10$. How many maxima are there?</p>
+<p>(b) Run the ascent from $d_0 = d_p$ with $\eta = 0.02$. Which one does it
+find? Is it the best one?</p>
+<p>(c) Now start it at $d_0 = 1$, and then at $d_0 = 0.6$. Explain both results.</p><details><summary>Solution</summary><p>(a) Two: one at $d = 0.8817$ and one at $d = 3.7234$. The
+posterior is bimodal. The animal is entertaining two incompatible stories, a near
+source and a far one, and the data do not settle between them.</p>
+<p>The lower peak is the taller: the far peak's height is
+$0.7272$ of it. So $d = 0.8817$ is the MAP estimate.</p>
+<p>(b) From $d_0 = 4.0$ the ascent converges to $3.7234$, the
+<em>wrong</em> peak. Gradient ascent is local: it goes uphill from where it starts and
+has no way to know that a taller peak exists somewhere it never visited. Nothing
+in the run signals a problem. The gradient reaches zero, the errors balance, and
+the animal is confidently at a local maximum.</p>
+<p>(c) From $d_0 = 1$ it converges to $0.8817$, the global maximum,
+because it started on that peak's side of the valley. The basin of attraction,
+not the quality of the answer, decides which one you get.</p>
+<p>From $d_0 = 0.6$ it lands at $3.7234$, the far peak, even though it
+started nearer the global one. This is a different failure. At $d = 0.6$ the
+predicted intensity is $g(0.6) = 2.7778$ against $1.5$ heard, and $|g'|$ is
+large there, so the gradient is $125.1$. One step at
+$\eta = 0.02$ moves the estimate by $2.502$, clear over the valley
+and the peak beyond it. A rate that is mild in one region is wild in another.</p>
+<p>Both failures are properties of the method and neither is announced by it. This
+is the first serious cost of the move made in Lesson&nbsp;3. Trading the whole
+posterior for its peak was cheap when there was one peak. A distribution with two
+modes has something to say that no single number can carry, and reporting
+$3.7234$ conceals the existence of $0.8817$ entirely.
+Week&nbsp;4's $Q$ is a distribution rather than a point in part for this reason,
+though a unimodal $Q$ will turn out to have its own version of the problem.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 2.5.6<span class="bt">The mode moves when you rename the axis &dagger;</span></div><p>The animal could equally well estimate $\rho = \ln d$, the log-distance, which
+describes the same physical situation in different coordinates.</p>
+<p>(a) The prior over $d$ is $\mathcal{N}(d_p, \Sigma_p)$. Write the density over
+$\rho$ that it induces, remembering the Jacobian.</p>
+<p>(b) Find the MAP estimate in $\rho$, then convert back with $e^{\hat\rho}$.
+Compare with the MAP in $d$.</p>
+<p>(c) Do the same for the posterior mean. What do you conclude about the mode as a
+summary?</p><details><summary>Solution</summary><p>(a) Changing variables in a density requires the Jacobian. With $d = e^{\rho}$,
+$\mathrm{d}d/\mathrm{d}\rho = e^{\rho} = d$, so</p>
+<div class="eqn"><div class="eqbody">$$p(\rho) = p\big(d(\rho)\big)\,\left|\frac{\mathrm{d}d}{\mathrm{d}\rho}\right|
+        = p(e^{\rho})\,e^{\rho}.$$</div></div>
+<p>In logs, $\ln p(\rho) = \ln p(d) + \rho$.</p>
+<p>(b) The log posterior in $\rho$ is therefore the log posterior in $d$ plus
+$\rho = \ln d$, and that extra term has a nonzero derivative, $1/d$. So the
+stationary condition is different and the peak sits somewhere else. Numerically,
+maximising in $d$ gives $1.5500$, while maximising in $\rho$ and
+transforming back gives $e^{\hat\rho} = 1.8787$, higher by
+21.2%.</p>
+<p>(c) The posterior mean is unaffected. It is
+$\mathbb{E}[d] = \int d\,p(d)\,\mathrm{d}d$, and a change of variables in that
+integral carries the Jacobian in the measure as well as in the density, so the
+two cancel and the number is the same. Both routes give $2.0900$.</p>
+<p>The conclusion is uncomfortable. A density is not invariant under
+reparameterisation, because it is a quantity per unit of something and the unit
+changed. So the location of its peak is a property of the coordinates as much as
+of the belief, and "the most probable distance" is not well defined until you say
+which variable you measured probability per unit of. Nothing distinguishes
+distance from log-distance physically; the animal is not told which one it is
+estimating.</p>
+<p>Two things follow. First, MAP is a convention rather than a canonical answer, and
+the convention is usually invisible because nobody writes down the alternative
+coordinates. Second, quantities defined by expectation, the mean, the variance,
+the free energy of Week&nbsp;4, do not have this problem, which is a reason to
+prefer methods built on them. Week&nbsp;12 returns to this; it is one of the more
+serious objections to the framework, and it does not go away by being ignored.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 2.5.7<span class="bt">Ambiguity has a shape</span></div><p>In Lesson&nbsp;4, $|g'(d)|$ was called the sensitivity of the observation to the
+state. Make it quantitative.</p>
+<p>(a) Show that under the Gauss-Newton approximation the sensory channel
+contributes a precision $g'(d)^2\Pi_u$ <em>about the state</em>, and check its units.</p>
+<p>(b) With $g(d) = 1/d^2$ and $\Pi_u = 10.0$, evaluate this at
+$d = 1$, $d = 1.55$ and $d = 4$.</p>
+<p>(c) A colleague proposes putting the animal's ear on a logarithmic scale, so it
+measures $\ln u$ rather than $u$, with Gaussian noise of fixed variance in the
+new units. What happens to the sensitivity?</p><details><summary>Solution</summary><p>(a) The curvature exercise of Lesson&nbsp;4 gave
+$\mathcal{F}'' = -\Pi_p - \Pi_u g'^2 + \Pi_u g''(u - g)$, and dropping the last
+term leaves $-(\Pi_p + \Pi_u g'^2)$. Since curvature at a peak is minus a
+precision, the sensory channel contributes $\Pi_u g'^2$.</p>
+<p>Units: $\Pi_u$ is inverse squared intensity and $g'$ is intensity per distance,
+so $g'^2\Pi_u$ is inverse squared distance, matching $\Pi_p$. They may be added,
+which they could not before the conversion.</p>
+<p>(b) $g'(d) = -2/d^3$, so $g'^2\Pi_u = 4\Pi_u/d^6$, and with
+$\Pi_u = 10.0$:</p>
+<p><div class="tablewrap"><table>
+<thead><tr><th>$d$</th><th>$g'(d)$</th><th>$g'^2\Pi_u$</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>-2.000</td><td>40.000</td></tr>
+<tr><td>1.55</td><td>-0.5370</td><td>2.8841</td></tr>
+<tr><td>4</td><td>-0.031</td><td>0.0098</td></tr>
+</tbody>
+</table></div>
+
+Across a factor of four in distance, the information the ear carries about that
+distance falls by a factor of $4^6 = 4096$. Far away, the animal is nearly blind
+however good its ear, and no amount of sensory precision compensates, because
+$\Pi_u$ enters multiplied by a number heading to zero.</p>
+<p>(c) The measurement becomes $\ln u$, whose predicted value is
+$\ln g(d) = -2\ln d$, with derivative $-2/d$. The sensitivity is now $4\Pi/d^2$
+rather than $4\Pi_u/d^6$: it still decays, but as an inverse square rather than
+an inverse sixth power.</p>
+<p>Compressing the sensory scale has spread the discriminable range out. This is a
+real design principle rather than an artefact, and it is one reason sensory
+systems are so often logarithmic. Note what it is not: it is not extra
+information. The same intensities arrive. What changed is where the fixed noise
+budget sits relative to the signal, so a channel with constant noise in log units
+is a channel whose noise scales with the signal in linear units.</p></details></div>
+<div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
+<li>Two of these problems show the method failing. Name each failure in one
+  sentence, and say whether more computation would fix it.</li>
+<li>Which of this week's results survive if $g$ is nonlinear, and which were
+  special to $g(d) = d$?</li>
+<li>What is a sufficient statistic, in the sense used in the repeated-listening
+  problem?</li>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/reading-the-update.html"><span class="dir">Previous</span><span class="ttl">Reading the update</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w02.js"></script>
 </body>
 </html>

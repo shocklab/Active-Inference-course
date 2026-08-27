@@ -147,9 +147,9 @@ also fatal**, and symmetrically so: since $\kappa(2-\kappa)$ is unchanged when
 $\kappa$ is replaced by $2-\kappa$, a gain of $1.5$ leaves a body exactly as
 spread out as a gain of $0.5$. Overcorrection is not a lesser sin than
 underreaction. It is the same sin measured from the other side, and Week&nbsp;5
-meets it again under a different name. There the gain is set by a **precision**,
-meaning the inverse of a variance, so a large precision is a claim that a signal
-is reliable; a system that believes its measurements are better than they are
+meets it again under a different name. There the gain is set by a precision,
+the inverse of a variance, defined properly in Week&nbsp;2. A large precision is
+a claim that a signal is reliable; a system that believes its measurements are better than they are
 overcorrects to each of them and ends up chasing its own noise.
 :::
 

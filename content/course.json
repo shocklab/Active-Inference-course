@@ -1,50 +1,86 @@
 {
   "title": "Active Inference",
   "subtitle": "A twelve-week course that does the algebra the textbooks leave out, and lets you turn every knob.",
-  "eyebrow": "Open course · University of Cape Town",
+  "eyebrow": "Open course \u00b7 University of Cape Town",
   "parts": {
-    "I. Inference": "From Bayes’ theorem to the variational bound",
+    "I. Inference": "From Bayes\u2019 theorem to the variational bound",
     "II. Continuous time": "Predictive coding, generalised coordinates, filtering",
     "III. Discrete time": "POMDPs, expected free energy, policy selection",
     "IV. Perspective": "Extensions, connections, and honest objections"
   },
   "weeks": [
-    { "n": 1,  "part": "I. Inference",
+    {
+      "n": 1,
+      "part": "I. Inference",
       "title": "The hypothesis-testing agent",
       "summary": "Why anything that persists must carry a model of what it persists in, and why running that model backwards is the hard direction.",
-      "status": "built" },
-    { "n": 2,  "part": "I. Inference",
+      "status": "built"
+    },
+    {
+      "n": 2,
+      "part": "I. Inference",
       "title": "Hidden state estimation",
-      "summary": "Exact inference where it is available, and what to do when it is not: conjugacy, the Gaussian case, maximum likelihood and maximum a posteriori, analytically and by gradient descent." },
-    { "n": 3,  "part": "I. Inference",
+      "summary": "Two rules a physical nervous system has to obey, and a nonlinear inference problem that breaks exact methods. Maximum a posteriori by gradient ascent on the log joint, whose gradient turns out to be two precision-weighted prediction errors: predictive coding, derived rather than assumed. Then what the mode costs you."
+    },
+    {
+      "n": 3,
+      "part": "I. Inference",
       "title": "Learning the model",
-      "summary": "Parameters as another kind of hidden state. Bayesian linear regression, linear Gaussian systems, and expectation maximisation as the bridge to what comes next." },
-    { "n": 4,  "part": "I. Inference",
+      "summary": "Parameters as another kind of hidden state. Bayesian linear regression, linear Gaussian systems, and expectation maximisation as the bridge to what comes next."
+    },
+    {
+      "n": 4,
+      "part": "I. Inference",
       "title": "Variational free energy",
-      "summary": "The heart of the course. Jensen’s inequality, the bound on surprise, and the three decompositions of free energy written out line by line." },
-    { "n": 5,  "part": "II. Continuous time",
+      "summary": "The heart of the course. Jensen\u2019s inequality, the bound on surprise, and the three decompositions of free energy written out line by line."
+    },
+    {
+      "n": 5,
+      "part": "II. Continuous time",
       "title": "Predictive coding",
-      "summary": "Free energy under a Laplace approximation becomes precision-weighted prediction error. A single unit, then many, then a hierarchy." },
-    { "n": 6,  "part": "II. Continuous time",
+      "summary": "Free energy under a Laplace approximation becomes precision-weighted prediction error. A single unit, then many, then a hierarchy."
+    },
+    {
+      "n": 6,
+      "part": "II. Continuous time",
       "title": "Generalised coordinates of motion",
-      "summary": "Why a state is not enough and you need its velocity, acceleration and beyond. Smooth noise, generalised measurements, and the shift operator." },
-    { "n": 7,  "part": "II. Continuous time",
+      "summary": "Why a state is not enough and you need its velocity, acceleration and beyond. Smooth noise, generalised measurements, and the shift operator."
+    },
+    {
+      "n": 7,
+      "part": "II. Continuous time",
       "title": "Generalised filtering",
-      "summary": "Assembling the generalised state-space model and the recognition dynamics that track a trajectory rather than a point." },
-    { "n": 8,  "part": "II. Continuous time",
+      "summary": "Assembling the generalised state-space model and the recognition dynamics that track a trajectory rather than a point."
+    },
+    {
+      "n": 8,
+      "part": "II. Continuous time",
       "title": "Action, learning and attention",
-      "summary": "Autonomous states close the loop: the agent changes its sensations instead of its beliefs. Then learning the parameters and tuning the precisions." },
-    { "n": 9,  "part": "III. Discrete time",
+      "summary": "Autonomous states close the loop: the agent changes its sensations instead of its beliefs. Then learning the parameters and tuning the precisions."
+    },
+    {
+      "n": 9,
+      "part": "III. Discrete time",
       "title": "Discrete generative models",
-      "summary": "Partially observable Markov decision processes, and the matrices A, B, C, D and E that specify one. State inference by variational message passing." },
-    { "n": 10, "part": "III. Discrete time",
+      "summary": "Partially observable Markov decision processes, and the matrices A, B, C, D and E that specify one. State inference by variational message passing."
+    },
+    {
+      "n": 10,
+      "part": "III. Discrete time",
       "title": "Expected free energy",
-      "summary": "Risk and ambiguity, information gain and pragmatic value, proved equal rather than asserted equal. Then the vectorised form, with every index accounted for." },
-    { "n": 11, "part": "III. Discrete time",
+      "summary": "Risk and ambiguity, information gain and pragmatic value, proved equal rather than asserted equal. Then the vectorised form, with every index accounted for."
+    },
+    {
+      "n": 11,
+      "part": "III. Discrete time",
       "title": "Policy selection and learning",
-      "summary": "Choosing what to do by softmax over expected free energy. Precision, habits, Dirichlet learning of the model itself, and adding factorial and hierarchical depth." },
-    { "n": 12, "part": "IV. Perspective",
+      "summary": "Choosing what to do by softmax over expected free energy. Precision, habits, Dirichlet learning of the model itself, and adding factorial and hierarchical depth."
+    },
+    {
+      "n": 12,
+      "part": "IV. Perspective",
       "title": "Extensions, connections and objections",
-      "summary": "Sophisticated inference and structure learning; how active inference relates to reinforcement learning and control as inference; and the criticisms that deserve a serious answer." }
+      "summary": "Sophisticated inference and structure learning; how active inference relates to reinforcement learning and control as inference; and the criticisms that deserve a serious answer."
+    }
   ]
 }

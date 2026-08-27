@@ -23,16 +23,17 @@ takes them one at a time, then puts the pieces back together as a circuit.
 
 Dividing by a variance appears twice, so give it a name.
 
-::: definition Precision
-The **precision** of a Gaussian channel is the reciprocal of its variance,
+Lesson&nbsp;3 defined the precision of a Gaussian channel as the reciprocal of
+its variance. Give the two of them symbols:
+
 $$
 \Pi_p \;=\; \frac{1}{\Sigma_p}, \qquad \Pi_u \;=\; \frac{1}{\Sigma_u}.
-$$
-A precise channel is one whose predictions are tight. Its units are the inverse
-of a squared measurement: $\Pi_u$ is in inverse squared intensity, $\Pi_p$ in
-inverse squared distance. The two are not comparable numbers and never appear
-added together.
-:::
+$$ {#precisions}
+
+Their units are the inverse of a squared measurement, so $\Pi_u$ is in inverse
+squared intensity and $\Pi_p$ in inverse squared distance. The two are not
+comparable numbers and never appear added together, a point the curvature
+exercise at the end returns to.
 
 ::: mn Why not just say variance
 Because every rule in the rest of the course multiplies by a precision rather

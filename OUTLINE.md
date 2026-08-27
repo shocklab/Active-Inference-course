@@ -64,7 +64,8 @@ reading finds. Update this table as sources are read, and do not delete it.
 5. Problems and code · six problems with solutions, notebooks.
 
 ### Week 2 · Hidden state estimation
-*Rewritten 2026-08-26 after reading Bogacz (2017) in full.*
+*Rewritten 2026-08-26 after reading Bogacz (2017) in full. **Drafted 2026-08-27**;
+five lessons, two widgets, two notebooks.*
 - **Open with the constraints, not the maths.** Two rules a physical nervous system
   has to obey: **local computation** (a unit computes only from its own inputs and
   their weights) and **local plasticity** (a connection changes only from the
@@ -87,10 +88,23 @@ reading finds. Update this table as sources are read, and do not delete it.
 - **Careful: $F$ here is not yet the free energy.** It is the log joint, and equals
   the negative variational free energy only when the approximate posterior is a
   point mass. Say so at the point of use; Week 4 says what the point mass costs.
-- Widgets: gradient ascent on $F$ with the two error terms drawn separately, so the
-  reader watches them trade off; a nonlinear $g$ skewing the posterior away from
-  both the prior mean and the data; posterior contraction as observations accumulate.
-- Notebooks: NumPy, JAX (posteriors over a grid of priors at once).
+- **Two things the drafting turned up that were not planned.** The step size is
+  bounded by $2/|\mathcal{F}''|$, and a sharper sensor stiffens the curvature, so
+  trusting your senses more makes the inference harder to run. And the MAP estimate
+  is not invariant under reparameterisation: estimating $\ln d$ instead of $d$ moves
+  the answer by 21% on this week's numbers, while the posterior mean does not move
+  at all. Both are in the lessons rather than saved for Week 12.
+  → forward to Week 12, which collects the objections.
+- Widgets: `ascent-errors`, gradient ascent with the two error terms drawn
+  separately so the reader watches them cancel rather than vanish; and
+  `precision-posterior`, the posterior itself under both precisions with mode and
+  mean marked, and a switch to the linear link that makes the skew collapse.
+  Posterior contraction with accumulating observations is in the JAX notebook
+  instead of a widget, where the sufficient-statistic argument can be shown.
+- Notebooks: NumPy (the week one run at a time); JAX (the hand-derived gradient
+  checked against `jax.grad`, ten thousand starting points mapping the basins of a
+  bimodal posterior, and the precision plane swept at once). No `pymdp`: nothing
+  discrete here.
 - Sources: Bogacz (2017) §1–2 **[read]**; Buckley et al. (2017) §2–4 **[read]**.
 
 ### Week 3 · Learning the model

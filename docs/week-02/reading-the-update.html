@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Two rules a brain has to obey</a><a class="" href="../week-02/exact.html">A problem small enough to solve exactly</a><a class="" href="../week-02/climbing.html">Climbing the log joint</a><a class="cur" href="../week-02/reading-the-update.html">Reading the update</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Reading the update</h1><p class="deck">The rule from Lesson 3 has three moving parts. Each one has a job, and together they are a circuit that has been proposed as a model of cortex.</p><div class="meta"><span>Week 2</span><span>&#167;4</span><span>40 min</span></div></header><article class="abody"><p>The result of Lesson&nbsp;3 was</p>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Two rules a brain has to obey</a><a class="" href="../week-02/exact.html">A problem small enough to solve exactly</a><a class="" href="../week-02/climbing.html">Climbing the log joint</a><a class="cur" href="../week-02/reading-the-update.html">Reading the update</a><a class="" href="../week-02/exercises.html">Problems and code</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Reading the update</h1><p class="deck">The rule from Lesson 3 has three moving parts. Each one has a job, and together they are a circuit that has been proposed as a model of cortex.</p><div class="meta"><span>Week 2</span><span>&#167;4</span><span>40 min</span></div></header><article class="abody"><p>The result of Lesson&nbsp;3 was</p>
 <div class="eqn" id="eq-recall"><div class="eqbody">$$\dot{d} \;=\; \eta\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),
 \qquad
 \varepsilon_p = \frac{d_p - d}{\Sigma_p},
@@ -360,18 +360,19 @@ document.addEventListener('DOMContentLoaded',function(){
 takes them one at a time, then puts the pieces back together as a circuit.</p>
 <h2 id="precisions"><span class="secno">1</span>Precisions</h2>
 <p>Dividing by a variance appears twice, so give it a name.</p>
-<div class="box definition"><div class="boxhd">Definition 2.4.1<span class="bt">Precision</span></div><p>The <strong>precision</strong> of a Gaussian channel is the reciprocal of its variance,
-<div class="eqn"><div class="eqbody">$$\Pi_p \;=\; \frac{1}{\Sigma_p}, \qquad \Pi_u \;=\; \frac{1}{\Sigma_u}.$$</div></div>
-A precise channel is one whose predictions are tight. Its units are the inverse
-of a squared measurement: $\Pi_u$ is in inverse squared intensity, $\Pi_p$ in
-inverse squared distance. The two are not comparable numbers and never appear
-added together.</p></div>
+<p>Lesson&nbsp;3 defined the precision of a Gaussian channel as the reciprocal of
+its variance. Give the two of them symbols:</p>
+<div class="eqn" id="eq-precisions"><div class="eqbody">$$\Pi_p \;=\; \frac{1}{\Sigma_p}, \qquad \Pi_u \;=\; \frac{1}{\Sigma_u}.$$</div><div class="eqno"><a href="#eq-precisions" title="Link to equation 2.4.3">(2.4.3)</a></div></div>
+<p>Their units are the inverse of a squared measurement, so $\Pi_u$ is in inverse
+squared intensity and $\Pi_p$ in inverse squared distance. The two are not
+comparable numbers and never appear added together, a point the curvature
+exercise at the end returns to.</p>
 <aside class="mn"><span class="mnl">Why not just say variance</span><p>Because every rule in the rest of the course multiplies by a precision rather
 than dividing by a variance, and the multiplicative form is the one that reads as
 a gain on a signal. Weeks&nbsp;5 to 8 make that gain a physical quantity that the
 system can adjust.</p></aside>
 <p>Rewriting <a class="eqref" href="#eq-recall">(2.4.2)</a>:</p>
-<div class="eqn" id="eq-precision-form"><div class="eqbody">$$\dot{d} \;=\; \eta\Big(\Pi_p\,(d_p - d) \;+\; \Pi_u\,g'(d)\,\big(u - g(d)\big)\Big).$$</div><div class="eqno"><a href="#eq-precision-form" title="Link to equation 2.4.3">(2.4.3)</a></div></div>
+<div class="eqn" id="eq-precision-form"><div class="eqbody">$$\dot{d} \;=\; \eta\Big(\Pi_p\,(d_p - d) \;+\; \Pi_u\,g'(d)\,\big(u - g(d)\big)\Big).$$</div><div class="eqno"><a href="#eq-precision-form" title="Link to equation 2.4.4">(2.4.4)</a></div></div>
 <p>Now the structure is visible. Each term is a raw error multiplied by a gain. The
 gain says how seriously to take that error, and nothing else in the expression
 says anything about seriousness.</p>
@@ -393,7 +394,7 @@ limits.</p>
 </table></div>
 
 Only the ratio matters, not the individual values. Multiplying both precisions by
-the same constant multiplies the whole bracket in <a class="eqref" href="#eq-precision-form">(2.4.3)</a> by that
+the same constant multiplies the whole bracket in <a class="eqref" href="#eq-precision-form">(2.4.4)</a> by that
 constant, which rescales $\eta$ and moves the resting point not at all. The
 resting point is set by $\Pi_u/\Pi_p$, and the rate is set by their overall size:
 the same distinction the step-size bound of Lesson&nbsp;3 ran into from the other
@@ -434,7 +435,7 @@ it.</p>
 <p>Replace the inverse square with the identity, $g(d) = d$, so that the animal
 measures distance directly with Gaussian noise. Then $g' = 1$ and the whole
 apparatus collapses to something recognisable.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The linear case gives a precision-weighted average</span></div><p>Set the gradient to zero in <a class="eqref" href="#eq-precision-form">(2.4.3)</a> with $g(d) = d$, $g'(d) = 1$:</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The linear case gives a precision-weighted average</span></div><p>Set the gradient to zero in <a class="eqref" href="#eq-precision-form">(2.4.4)</a> with $g(d) = d$, $g'(d) = 1$:</p>
 <div class="eqn"><div class="eqbody">$$\Pi_p (d_p - \hat d) + \Pi_u (u - \hat d) \;=\; 0 .$$</div></div>
 <p>Expand and collect the terms in $\hat d$:</p>
 <div class="eqn"><div class="eqbody">$$\Pi_p d_p + \Pi_u u \;=\; \hat d\,(\Pi_p + \Pi_u),$$</div></div>
@@ -462,7 +463,7 @@ and the only difference is the link function. So the entire gap is the
 nonlinearity, and none of it is the choice of prior.</p>
 <p>That also explains why the answer had to be found by climbing rather than by
 formula. <a class="eqref" href="#eq-linear-map">(2.4.1)</a> is a closed form because setting a <em>linear</em> gradient to
-zero is a linear equation. With $g(d) = 1/d^{2}$, setting <a class="eqref" href="#eq-precision-form">(2.4.3)</a> to
+zero is a linear equation. With $g(d) = 1/d^{2}$, setting <a class="eqref" href="#eq-precision-form">(2.4.4)</a> to
 zero gives a polynomial in $d$ of degree five, and there is no general formula
 for its roots. Iteration is not laziness; it is what is left.</p></div>
 <aside class="mn"><span class="mnl">The bill for the Gaussian prior</span><p>Lesson&nbsp;2 flagged that a Gaussian over a distance puts mass below zero. Here
@@ -475,7 +476,7 @@ it, so the likelihood suppresses the region entirely. The mass below
 $d = 0.5$ is about $1e-30$. The inverse square cleans up
 after the prior.</p></aside>
 <h2 id="the-circuit"><span class="secno">5</span>The circuit</h2>
-<p>Now assemble <a class="eqref" href="#eq-precision-form">(2.4.3)</a> as a diagram, taking seriously the constraints
+<p>Now assemble <a class="eqref" href="#eq-precision-form">(2.4.4)</a> as a diagram, taking seriously the constraints
 of Lesson&nbsp;1. Give each quantity a unit and each multiplication a connection.</p>
 <figure id="fig-2-4-1"><svg viewBox="0 0 660 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A predictive coding circuit: an estimate unit sends a prediction down to a sensory error unit and receives a weighted error back, while a prior error unit compares the estimate with the prior expectation.">
   <rect x="1" y="1" width="658" height="258" fill="#fdfcf9" stroke="#e4e1d9"/>
@@ -527,7 +528,7 @@ of Lesson&nbsp;1. Give each quantity a unit and each multiplication a connection
   <path d="M420 172 L420 96" fill="none" stroke="#3c3c42" stroke-width="1.6" marker-end="url(#ah)"/>
   <path d="M400 92 C330 126 240 100 176 78" fill="none" stroke="#2c5f8a" stroke-width="1.8" marker-end="url(#ahb)"/>
   <text x="300" y="122" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#2c5f8a">&#928;&#8346;</text>
-</svg><figcaption><span class="fno">Figure 2.4.1.</span> The update of <a class="eqref" href="#eq-precision-form">(2.4.3)</a> drawn as a circuit. Filled nodes hold estimates, open nodes hold errors. Every arrow carries one signal to one place, and no arrow needs a quantity from anywhere else.</figcaption></figure>
+</svg><figcaption><span class="fno">Figure 2.4.1.</span> The update of <a class="eqref" href="#eq-precision-form">(2.4.4)</a> drawn as a circuit. Filled nodes hold estimates, open nodes hold errors. Every arrow carries one signal to one place, and no arrow needs a quantity from anywhere else.</figcaption></figure>
 <p>Trace it. The estimate $d$ sends a prediction $g(d)$ down to the sensory error
 unit, which subtracts it from what the ear delivered and scales by $\Pi_u$. That
 error travels back up, multiplied by $g'(d)$ on the way. Separately the estimate
@@ -536,7 +537,7 @@ The estimate changes at a rate given by the sum of what comes back.</p>
 <p>Check it against Lesson&nbsp;1. Every arrow carries one number from one unit to
 one unit. No arrow requires a sum over states, and no unit reads a variable held
 somewhere it is not connected to. The rule satisfies local computation.</p>
-<div class="box definition"><div class="boxhd">Definition 2.4.2<span class="bt">Predictive coding</span></div><p>A scheme in which a system maintains estimates of hidden causes, sends
+<div class="box definition"><div class="boxhd">Definition 2.4.1<span class="bt">Predictive coding</span></div><p>A scheme in which a system maintains estimates of hidden causes, sends
 predictions from those estimates down towards the senses, computes the mismatch
 between prediction and input at each stage, and sends that mismatch back up to
 correct the estimates. What flows downward are predictions; what flows upward are
@@ -555,7 +556,7 @@ $g$ have been treated as known, when an animal is given neither. Lesson&nbsp;5
 of Week&nbsp;3 takes that up.</p></div>
 <figure id="fig-2-4-2"><div class="widget" data-widget="precision-posterior"></div><figcaption><span class="fno">Figure 2.4.2.</span> Vary the two precisions and watch the posterior move. The mode is what the update of this lesson finds; the mean is what it does not.</figcaption></figure>
 <div class="box exercise"><div class="boxhd">Exercise 2.4.1<span class="bt">Where the curvature comes from</span></div><p>Lesson&nbsp;3 needed $\mathcal{F}''$ to bound the step size. Differentiate
-<a class="eqref" href="#eq-precision-form">(2.4.3)</a> once more to get it, and evaluate the pieces at
+<a class="eqref" href="#eq-precision-form">(2.4.4)</a> once more to get it, and evaluate the pieces at
 $\hat d = 1.5500$. You will need
 $g''(d) = 6/d^{4} = 1.0394$ there.</p><details><summary>Solution</summary><p>Differentiating $\mathcal{F}'(d) = \Pi_p(d_p - d) + \Pi_u g'(d)(u - g(d))$ with
 respect to $d$, the first term gives $-\Pi_p$. The second needs the product rule
@@ -606,7 +607,7 @@ curvature, so by the step-size bound of Lesson&nbsp;3 a smaller step.</p></detai
   case is not. What is responsible, and what is not?</li>
 <li>Which two things does this week's rule treat as known that an animal would not
   be given?</li>
-</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/climbing.html"><span class="dir">Previous</span><span class="ttl">Climbing the log joint</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/climbing.html"><span class="dir">Previous</span><span class="ttl">Climbing the log joint</span></a><a class="nx" href="../week-02/exercises.html"><span class="dir">Next</span><span class="ttl">Problems and code</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w02.js"></script>
 </body>
 </html>

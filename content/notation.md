@@ -29,7 +29,7 @@ $w,\ \lambda$ :: In a noisy-OR likelihood, the probability that a present cause 
 $h_1, h_2$ :: Generic factor functions in the independence lemma, with no fixed meaning beyond that paragraph. Lesson&nbsp;4.
 :::
 
-## The two sides of the blanket
+## The two sides of the blanket, from Week 1
 
 ::: notation
 $\vartheta$ :: States of the generative *process*: what the world is actually doing. The agent has no access to these. Week&nbsp;1.
@@ -39,7 +39,7 @@ $a$ :: Actions, or active states. On the blanket. Week&nbsp;1.
 $\mu$ :: Internal states of the agent: the physical variables carrying the model, as against $s$, which is a variable inside it. Introduced in Week&nbsp;1 to state the Markov blanket; acquires dynamics of its own from Week&nbsp;5.
 :::
 
-## Distributions
+## Distributions, from Week 1
 
 ::: notation
 $P(s)$ :: The prior over hidden states.
@@ -51,7 +51,7 @@ $P(s \mid o)$ :: The exact posterior. Generally not computable. Week&nbsp;1.
 $Q(s)$ :: A distribution the agent holds over states, as against the $P$ of the world or of its own model. Introduced in Week&nbsp;1 as one agent's beliefs; named the approximate posterior, or *recognition density*, and made the object of optimisation in Week&nbsp;4.
 :::
 
-## Information-theoretic quantities
+## Information-theoretic quantities, from Week 1
 
 Logarithms are natural throughout, so all information quantities are in **nats**.
 Multiply by $1/\ln 2 = 1.4427$ for bits.
@@ -59,7 +59,7 @@ Multiply by $1/\ln 2 = 1.4427$ for bits.
 ::: notation
 $\mathrm{H}[P]$ :: Shannon entropy, $-\sum_x P(x)\ln P(x)$.
 $D_{\mathrm{KL}}[Q \,\|\, P]$ :: Kullback&ndash;Leibler divergence, $\sum_x Q(x)\ln\frac{Q(x)}{P(x)}$. Read as "the divergence from $P$ to $Q$", non-negative, and zero only when $Q = P$.
-$\mathbb{E}_{Q(x)}[\,\cdot\,]$ :: Expectation under $Q$. The subscript names the distribution being averaged over, and it matters: much of Week&nbsp;4 turns on which distribution an expectation is taken with respect to.
+$\mathbb{E}_{Q(x)}[\,\cdot\,]$ :: Expectation under $Q$, used from Week&nbsp;1. The subscript names the distribution being averaged over, and it matters: much of Week&nbsp;4 turns on which distribution an expectation is taken with respect to.
 $I(s;o)$ :: Mutual information, $\sum_o P(o)\,D_{\mathrm{KL}}[P(s\mid o)\,\|\,P(s)]$, in nats. Non-negative, and zero exactly when observations say nothing about states. Symmetric in its two arguments despite being built from an asymmetric divergence.
 :::
 
@@ -85,7 +85,7 @@ down the rows and states across the columns, so that its *columns* are
 probability distributions.
 
 ::: notation
-$\mathbf{A}$ :: The likelihood array, $A_{ij} = P(o = i \mid s = j)$. Columns sum to one.
+$\mathbf{A}$ :: The likelihood array, $A_{ij} = P(o = i \mid s = j)$. Columns sum to one. Introduced in Week&nbsp;1 for a single time step; the rest of the discrete machinery joins it in Week&nbsp;9.
 $\mathbf{B}$ :: The transition array, $B^{(u)}_{ij} = P(s_{t+1} = i \mid s_t = j, u)$, one matrix per action $u$. Columns sum to one.
 $\mathbf{C}$ :: Prior preferences over observations, one real number per observation per time step, read as an unnormalised log probability. Larger means more preferred; only differences matter, since adding a constant to a column changes nothing. Encodes what the agent expects to see, which under active inference is the same as what it wants to see.
 $\mathbf{D}$ :: The prior over initial states, $D_i = P(s_1 = i)$.
@@ -101,8 +101,8 @@ $\tilde{s}, \tilde{o}$ :: A tilde denotes a whole *sequence* over time rather th
 ## Continuous models, from Week 5
 
 ::: notation
-$\varepsilon$ :: A prediction error, the difference between what was predicted and what arrived.
-$\Pi$ :: A precision matrix: the inverse of a covariance. In continuous-time active inference this is what weights each prediction error, and it is the formal correlate of attention. Note the clash with $\Pi$ for the policy set; the two never occur in the same chapter.
+$\varepsilon$ :: A prediction error, the difference between what was predicted and what arrived, divided by a variance where it is precision-weighted. First used in Week&nbsp;2, where there are two of them; one per level of the hierarchy from Week&nbsp;5.
+$\Pi$ :: A precision: the inverse of a variance, and from Week&nbsp;5 the inverse of a covariance matrix. It is what weights each prediction error, and it is the formal correlate of attention. First used in Week&nbsp;2, where there are two of them and both are scalars. Note the clash with $\Pi$ for the policy set; the two never occur in the same chapter.
 $\tilde{x}$ :: In Weeks&nbsp;6 to 8, a variable in **generalised coordinates of motion**: the stacked vector $(x, x', x'', \dots)$ of the state and its temporal derivatives. This is a different use of the tilde from the discrete chapters, and Week&nbsp;6 says so again at the point where it starts.
 $\mathcal{D}$ :: The block shift operator that maps $\tilde{x} = (x, x', x'', \dots)$ to $(x', x'', x''', \dots)$.
 $g(\cdot)$ :: The observation function of the generative model, mapping a hidden state to the observation it predicts, $o = g(x) + z$ with $z$ the sensory noise. First used in Week&nbsp;2, for a single hidden variable; general from Week&nbsp;5.
