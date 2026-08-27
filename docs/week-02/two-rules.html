@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Home · Active Inference</title><meta name="description" content="A twelve-week course that does the algebra the textbooks leave out, and lets you turn every knob."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two rules a brain has to obey · Active Inference</title><meta name="description" content="Before asking how an agent should infer, ask what an agent is physically able to compute. The answer narrows the field sharply."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
 :root{
   --paper:#fdfcf9; --card:#ffffff;
   --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
@@ -349,26 +349,71 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 </head>
-<body class="landing">
-<div class="cover"><div class="cin"><div class="eyebrow">Open course · University of Cape Town</div><div class="rule"></div><h1>Active Inference</h1><p class="sub">A twelve-week course that does the algebra the textbooks leave out, and lets you turn every knob.</p></div></div><div class="wide"><article class="abody" style="max-width:none;padding-top:2.4rem"><div class="introcopy"><p>The books on active inference have a gap in them. Not a gap in the ideas: a gap
-in the working. Steps get skipped, indices go unexplained, and a derivation that
-would take a page is compressed into a line beginning "it can be shown that".</p>
-<p>This course does the working. Every result is derived in full, in the order a
-person actually needs it, with the algebra on the page rather than in an
-appendix. Where the standard texts assert that two expressions are equal, we
-prove it. Where an equation is written in vectorised form, we say what every
-index runs over and where it went.</p>
-<p>The second thing this course does is let you turn the knobs. Nearly every idea
-here is a statement about how a quantity responds when something else changes,
-and that is a miserable thing to learn from static type. So the figures are
-live: move a prior and watch a posterior swing, flatten a likelihood until an
-observation stops telling you anything, raise a precision until a filter starts
-chasing its own noise. Each week also ships a Python notebook, so you can take
-the same models away and break them yourself.</p>
-<p>It assumes you are comfortable with multivariable calculus, linear algebra and
-probability at roughly the level of a good undergraduate degree, and it assumes
-nothing at all about neuroscience or machine learning. It runs for twelve weeks,
-it is free, and the source is on GitHub.</p></div><div class="weeklist" style="margin-top:1.5rem"><div class="partband">I. Inference<span>From Bayes’ theorem to the variational bound</span></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">1</div></div><div class="wc"><h3><a href="week-01/index.html">The hypothesis-testing agent</a></h3><p>Why anything that persists must carry a model of what it persists in, and why running that model backwards is the hard direction.</p><ul><li><a href="week-01/soft-body.html">A soft body in a hard world</a></li><li><a href="week-01/process-and-model.html">Two models, not one</a></li><li><a href="week-01/bayes.html">Bayes with states and observations</a></li><li><a href="week-01/inverse-problem.html">The inverse problem</a></li><li><a href="week-01/exercises.html">Problems and code</a></li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">2</div></div><div class="wc"><h3><a href="week-02/index.html">Hidden state estimation</a></h3><p>Exact inference where it is available, and what to do when it is not: conjugacy, the Gaussian case, maximum likelihood and maximum a posteriori, analytically and by gradient descent.</p><ul><li><a href="week-02/two-rules.html">Two rules a brain has to obey</a></li><li><a href="week-02/exact.html">A problem small enough to solve exactly</a></li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">3</div></div><div class="wc"><h3><a href="week-03/index.html">Learning the model</a></h3><p>Parameters as another kind of hidden state. Bayesian linear regression, linear Gaussian systems, and expectation maximisation as the bridge to what comes next.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">4</div></div><div class="wc"><h3><a href="week-04/index.html">Variational free energy</a></h3><p>The heart of the course. Jensen’s inequality, the bound on surprise, and the three decompositions of free energy written out line by line.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="partband">II. Continuous time<span>Predictive coding, generalised coordinates, filtering</span></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">5</div></div><div class="wc"><h3><a href="week-05/index.html">Predictive coding</a></h3><p>Free energy under a Laplace approximation becomes precision-weighted prediction error. A single unit, then many, then a hierarchy.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">6</div></div><div class="wc"><h3><a href="week-06/index.html">Generalised coordinates of motion</a></h3><p>Why a state is not enough and you need its velocity, acceleration and beyond. Smooth noise, generalised measurements, and the shift operator.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">7</div></div><div class="wc"><h3><a href="week-07/index.html">Generalised filtering</a></h3><p>Assembling the generalised state-space model and the recognition dynamics that track a trajectory rather than a point.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">8</div></div><div class="wc"><h3><a href="week-08/index.html">Action, learning and attention</a></h3><p>Autonomous states close the loop: the agent changes its sensations instead of its beliefs. Then learning the parameters and tuning the precisions.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="partband">III. Discrete time<span>POMDPs, expected free energy, policy selection</span></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">9</div></div><div class="wc"><h3><a href="week-09/index.html">Discrete generative models</a></h3><p>Partially observable Markov decision processes, and the matrices A, B, C, D and E that specify one. State inference by variational message passing.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">10</div></div><div class="wc"><h3><a href="week-10/index.html">Expected free energy</a></h3><p>Risk and ambiguity, information gain and pragmatic value, proved equal rather than asserted equal. Then the vectorised form, with every index accounted for.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">11</div></div><div class="wc"><h3><a href="week-11/index.html">Policy selection and learning</a></h3><p>Choosing what to do by softmax over expected free energy. Precision, habits, Dirichlet learning of the model itself, and adding factorial and hierarchical depth.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="partband">IV. Perspective<span>Extensions, connections, and honest objections</span></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">12</div></div><div class="wc"><h3><a href="week-12/index.html">Extensions, connections and objections</a></h3><p>Sophisticated inference and structure learning; how active inference relates to reinforcement learning and control as inference; and the criticisms that deserve a serious answer.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div></div><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></article></div>
-<script defer src="assets/js/aif-core.js"></script>
+<body>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="cur" href="../week-02/two-rules.html">Two rules a brain has to obey</a><a class="" href="../week-02/exact.html">A problem small enough to solve exactly</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Two rules a brain has to obey</h1><p class="deck">Before asking how an agent should infer, ask what an agent is physically able to compute. The answer narrows the field sharply.</p><div class="meta"><span>Week 2</span><span>&#167;1</span><span>20 min</span></div></header><article class="abody"><p>Week&nbsp;1 ended with a negative result and three responses to it. The exact
+posterior is not available, because evaluating it means summing or integrating
+over every state the model admits. Of the three ways out, only one offers a
+partial answer at every instant and improves with more time, and that is to give
+up on the exact posterior and optimise towards it instead.</p>
+<p>That was an argument about mathematics. Before turning it into an algorithm it is
+worth asking a different question, and asking it first changes what the rest of
+the course looks like. Not <em>what should an agent compute</em>, but <em>what is an agent
+physically able to compute at all?</em></p>
+<h2 id="the-constraints"><span class="secno">1</span>The constraints</h2>
+<p>Two rules, both about locality. Neither is a theorem. They are modelling
+assumptions, chosen because they are the minimum that a device built out of cells
+and connections could plausibly satisfy, and everything in Weeks&nbsp;2, 3 and 5
+is an attempt to meet them.</p>
+<div class="box definition"><div class="boxhd">Definition 2.1.1<span class="bt">Local computation</span></div><p>A unit's output depends only on the signals arriving at it and on the strengths of
+the connections carrying them. It cannot read a quantity held somewhere else in
+the network.</p></div>
+<div class="box definition"><div class="boxhd">Definition 2.1.2<span class="bt">Local plasticity</span></div><p>A connection's strength changes using only quantities available at its two ends:
+the activity of the unit sending and the activity of the unit receiving.</p></div>
+<p>Stated so flatly they sound almost empty. They are not. Between them they rule
+out most of the obvious ways to do inference.</p>
+<p><strong>Normalising is ruled out.</strong> Bayes' theorem divides by $P(o) = \sum_s P(o\mid s)P(s)$.
+That sum ranges over every state in the model, so computing it requires a device
+that can see all of them at once. No unit obeying the first rule can, which is a
+sharper version of Week&nbsp;1's complaint: the trouble is not only that the sum
+is long, but that there is nobody to do it.</p>
+<p><strong>Carrying a whole distribution is ruled out</strong>, or at least made expensive. A
+distribution over a continuous variable is an infinite object. A unit that
+represents it must either restrict it to a family with a few parameters, or store
+values at a grid of points and pay for the grid.</p>
+<p><strong>Routing a global error backwards is ruled out.</strong> The obvious way to fit a model
+is to compute how wrong its output was and send that error back through the
+network, adjusting each connection by its contribution. That is what
+backpropagation does. But the error is a global quantity, and delivering it to a
+particular synapse means routing information from far away to a place that,
+under the second rule, can see only its own two ends.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">These are assumptions, not findings</span></div><p>It is not settled that real nervous systems obey either rule. There is evidence
+for local learning at synapses, and there are proposals for how something
+functionally like backpropagation might be implemented biologically. The
+constraints are adopted here because a framework that respects them is more
+interesting than one that does not: it has to earn its results rather than
+helping itself to arbitrary computation. Where the course later leans on them,
+it will say so.</p></div>
+<h2 id="why-begin-here"><span class="secno">2</span>Why begin here</h2>
+<p>Because it turns what follows into a search with a specification.</p>
+<p>Without the constraints, the next three weeks would be a series of results about
+probability that happen to be described in the language of brains. With them,
+every derivation has a question attached: could a thing made of local units do
+this? When the answer comes out yes, that is a real finding rather than a
+coincidence of notation. When it comes out no, the assumption that broke is
+visible and can be argued about.</p>
+<p>The pattern recurs. In Lesson&nbsp;3 an inference rule will turn out to be a
+weighted difference between two locally available quantities. In Week&nbsp;3 a
+learning rule will turn out to be a product of the activity at a connection's two
+ends. Neither was aimed at; both fall out of differentiating the same quantity.
+That is the sort of thing that makes a framework worth taking seriously, and it
+is only visible if the constraints were stated in advance.</p>
+<div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
+<li>State both rules in your own words, without using the word "local".</li>
+<li>Bayes' theorem has four terms. Which one violates the first rule, and why is
+  the objection stronger than "that sum is long"?</li>
+<li>Give an example of a computation that satisfies local computation but violates
+  local plasticity.</li>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-01/exercises.html"><span class="dir">Previous</span><span class="ttl">Problems and code</span></a><a class="nx" href="../week-02/exact.html"><span class="dir">Next</span><span class="ttl">A problem small enough to solve exactly</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script>
 </body>
 </html>

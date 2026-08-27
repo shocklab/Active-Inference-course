@@ -92,8 +92,57 @@ def pages_in_reading_order():
 
 
 # ── symbol collisions against the notation page ──────────────────────────
+# `2\pi` is the circle constant in a Gaussian normaliser, never the policy that
+# notation.md reserves for Week 10. Exempted here in that exact form only: a bare
+# `\pi`, or `\pi` in any other company, still collides. Kept this narrow on
+# purpose. The kappa miss in Week 1 happened because a cue list was widened to
+# silence one false positive, and the widening swallowed a real symbol with it.
+CONSTANT_PI = re.compile(r"2\s*\\pi\b")
+
 NOTE_ROW = re.compile(r"^\s*(\$[^:]+?\$)\s*::\s*(.+?)\s*$", re.M)
 WEEK_TAG = re.compile(r"Week&nbsp;(\d+)|Week (\d+)")
+
+
+
+# Single Latin letters carry reservations too, and until Week 2 nothing checked
+# them: the collision scan read only `\macro` tokens, so `g` reserved for the
+# observation function in Week 5 could be spent in Week 2 in silence. Same class
+# of miss the scan exists to catch, one letter shorter.
+STRIP_MACRO = re.compile(r"\\[a-zA-Z]+\s*(?:\{[^{}]*\})?")
+BARE_LETTER = re.compile(r"(?<![A-Za-z])([A-Za-z])(?![A-Za-z])")
+
+# Letters so common in generic algebra that reserving them course-wide would be
+# meaningless: bound indices, dummy variables, and the constant e.
+GENERIC_LETTERS = set("ijklmnpqre")
+
+
+def _bare_letters(src):
+    """Single Latin letters used as symbols, with macro names removed first."""
+    return {c for c in BARE_LETTER.findall(STRIP_MACRO.sub(" ", src))
+            if c not in GENERIC_LETTERS}
+
+
+# Operators and decorations that can sit in front of the symbol a row is about.
+ROW_PREFIX = re.compile(
+    r"^[\s$\-+]*(?:\\(?:ln|log|exp|left|mathrm|mathbf|mathbb|mathcal|bar|hat|dot|tilde)\b\s*)*")
+ROW_HEAD = re.compile(r"\\[a-zA-Z]+|[A-Za-z]")
+
+
+def _row_symbols(sym):
+    """The one symbol a notation.md row defines: its head, not its arguments.
+
+    `$Q(s)$` defines Q and merely mentions s; `$P(o \mid s)$` defines the letter
+    P. Reading every letter in the row made each argument look like a
+    reservation, which turned the collision scan into noise the moment it
+    learned to see bare letters at all.
+    """
+    core = ROW_PREFIX.sub("", sym.strip())
+    core = re.sub(r"^\{+", "", core)
+    m = ROW_HEAD.search(core)
+    if not m:
+        return set()
+    head = m.group(0)
+    return set() if head in EXEMPT else {head}
 
 
 def check_collisions():
@@ -111,10 +160,9 @@ def check_collisions():
     for m in NOTE_ROW.finditer(open(note, encoding="utf-8").read()):
         sym, desc = m.group(1), m.group(2)
         w = WEEK_TAG.search(desc)
-        for tok in re.findall(r"\\[a-zA-Z]+", sym):
-            if tok in EXEMPT or tok in ("\\mathrm","\\mathbf","\\bar","\\cdot","\\mathbb"):
-                continue
-            owner.setdefault(tok, []).append((int(w.group(1) or w.group(2)) if w else None, desc))
+        home = int(w.group(1) or w.group(2)) if w else None
+        for tok in _row_symbols(sym):
+            owner.setdefault(tok, []).append((home, desc))
 
     out = []
     course = json.load(open(os.path.join(ROOT, "content/course.json"), encoding="utf-8"))
@@ -126,8 +174,11 @@ def check_collisions():
         for fn in os.listdir(d):
             if fn.endswith(".md"):
                 body = NUMBER_TOKEN.sub(" ", open(os.path.join(d, fn), encoding="utf-8").read())
+                body = CONSTANT_PI.sub("2", body)
                 for mm in MATH.finditer(body):
-                    used |= {"\\" + t for t in MACRO.findall(mm.group(1) or mm.group(2))}
+                    src = mm.group(1) or mm.group(2)
+                    used |= {"\\" + t for t in MACRO.findall(src)}
+                    used |= _bare_letters(src)
         for tok in sorted(used):
             for home, desc in owner.get(tok, []):
                 if home and home > int(wk["n"]):

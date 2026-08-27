@@ -4,14 +4,14 @@
     python3 build/check_numbers.py
 
 Four wrong values reached a draft of Week 1 because they were worked out by hand.
-The fix is structural: a week's derived numbers live in content/week-NN/numbers.py
+The fix is structural: a week's derived numbers live in content/week-NN/values.py
 and the prose refers to them as {{key:.4f}}, so the published figure IS the
 computed figure and cannot drift.
 
 This checks two directions:
 
   resolved   every {{key}} in the source resolves, and the value that reached the
-             built page equals the value numbers.py computes right now
+             built page equals the value values.py computes right now
   untokenised any decimal still typed literally into the prose, which is a number
              nobody is checking
 
@@ -66,7 +66,7 @@ TOKEN = re.compile(r"\{\{([A-Za-z_][A-Za-z0-9_]*)(?::([^}]+))?\}\}")
 
 
 def load_values(week_dir):
-    path = os.path.join(week_dir, "numbers.py")
+    path = os.path.join(week_dir, "values.py")
     if not os.path.exists(path):
         return None
     spec = importlib.util.spec_from_file_location("nm", path)
@@ -91,7 +91,7 @@ def check_widget_constants():
     vals = load_values(os.path.join(ROOT, "content", "week-01"))
     if m and vals and "hs_bins" in vals and int(m.group(1)) != int(vals["hs_bins"]):
         out.append(f"widget w01.js bins onto {m.group(1)}x{m.group(1)} but "
-                   f"numbers.py says HS_BINS = {vals['hs_bins']}")
+                   f"values.py says HS_BINS = {vals['hs_bins']}")
     return out
 
 
@@ -114,9 +114,9 @@ def main():
                 n_tok += 1
                 key, fmt = m.group(1), m.group(2)
                 if values is None:
-                    problems.append(f"{label}: uses {{{{{key}}}}} but the week has no numbers.py")
+                    problems.append(f"{label}: uses {{{{{key}}}}} but the week has no values.py")
                 elif key not in values:
-                    problems.append(f"{label}: {{{{{key}}}}} is not defined in numbers.py")
+                    problems.append(f"{label}: {{{{{key}}}}} is not defined in values.py")
                 else:
                     try:
                         format(values[key], fmt) if fmt else str(values[key])
@@ -174,7 +174,7 @@ def main():
         print(f"\n  {len(untok)} decimals still typed by hand:")
         for label, v, ctx in untok[:40]:
             print(f"    {label}  {v}\n      …{ctx}")
-        print("\n  Move each into numbers.py and reference it as {{key}}, or add it to")
+        print("\n  Move each into values.py and reference it as {{key}}, or add it to")
         print("  ALLOW with a reason if it is an input rather than a result.")
     if unused:
         print(f"\n  {len(unused)} computed values are never cited (advisory: some are")

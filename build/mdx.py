@@ -16,7 +16,7 @@ Authoring syntax on top of CommonMark
                              so Week 3 lesson 2 gives (3.2.1), (3.2.2), ...
   [eq:vfe]                   cross-reference, renders as a link "(3.2.1)"
   {{ev_tawny:.4f}}           a COMPUTED number, substituted at build time from
-                             the week's numbers.py. Never type a derived number.
+                             the week's values.py. Never type a derived number.
   ::: type Title ... :::     block directives (see BOXES below)
   ::: mn Label ... :::       a margin note, floats into the right column
   ::: widget name | caption  mounts an interactive widget
@@ -391,7 +391,7 @@ def _wrap_tables(html):
 
 
 # ── computed numbers ─────────────────────────────────────────────────────
-# Every derived number in the prose is substituted from the week's numbers.py at
+# Every derived number in the prose is substituted from the week's values.py at
 # build time, so it cannot drift from the computation that produced it. Typing a
 # number by hand is how four wrong values reached a draft of Week 1.
 NUMBER_TOKEN = re.compile(r"\{\{([A-Za-z_][A-Za-z0-9_]*)(?::([^}]+))?\}\}")

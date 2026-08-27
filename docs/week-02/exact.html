@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Home · Active Inference</title><meta name="description" content="A twelve-week course that does the algebra the textbooks leave out, and lets you turn every knob."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A problem small enough to solve exactly · Active Inference</title><meta name="description" content="One hidden variable, one noisy reading, and a nonlinear link between them. Small enough to solve by brute force, which is what makes it useful."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
 :root{
   --paper:#fdfcf9; --card:#ffffff;
   --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
@@ -349,26 +349,133 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 </head>
-<body class="landing">
-<div class="cover"><div class="cin"><div class="eyebrow">Open course · University of Cape Town</div><div class="rule"></div><h1>Active Inference</h1><p class="sub">A twelve-week course that does the algebra the textbooks leave out, and lets you turn every knob.</p></div></div><div class="wide"><article class="abody" style="max-width:none;padding-top:2.4rem"><div class="introcopy"><p>The books on active inference have a gap in them. Not a gap in the ideas: a gap
-in the working. Steps get skipped, indices go unexplained, and a derivation that
-would take a page is compressed into a line beginning "it can be shown that".</p>
-<p>This course does the working. Every result is derived in full, in the order a
-person actually needs it, with the algebra on the page rather than in an
-appendix. Where the standard texts assert that two expressions are equal, we
-prove it. Where an equation is written in vectorised form, we say what every
-index runs over and where it went.</p>
-<p>The second thing this course does is let you turn the knobs. Nearly every idea
-here is a statement about how a quantity responds when something else changes,
-and that is a miserable thing to learn from static type. So the figures are
-live: move a prior and watch a posterior swing, flatten a likelihood until an
-observation stops telling you anything, raise a precision until a filter starts
-chasing its own noise. Each week also ships a Python notebook, so you can take
-the same models away and break them yourself.</p>
-<p>It assumes you are comfortable with multivariable calculus, linear algebra and
-probability at roughly the level of a good undergraduate degree, and it assumes
-nothing at all about neuroscience or machine learning. It runs for twelve weeks,
-it is free, and the source is on GitHub.</p></div><div class="weeklist" style="margin-top:1.5rem"><div class="partband">I. Inference<span>From Bayes’ theorem to the variational bound</span></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">1</div></div><div class="wc"><h3><a href="week-01/index.html">The hypothesis-testing agent</a></h3><p>Why anything that persists must carry a model of what it persists in, and why running that model backwards is the hard direction.</p><ul><li><a href="week-01/soft-body.html">A soft body in a hard world</a></li><li><a href="week-01/process-and-model.html">Two models, not one</a></li><li><a href="week-01/bayes.html">Bayes with states and observations</a></li><li><a href="week-01/inverse-problem.html">The inverse problem</a></li><li><a href="week-01/exercises.html">Problems and code</a></li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">2</div></div><div class="wc"><h3><a href="week-02/index.html">Hidden state estimation</a></h3><p>Exact inference where it is available, and what to do when it is not: conjugacy, the Gaussian case, maximum likelihood and maximum a posteriori, analytically and by gradient descent.</p><ul><li><a href="week-02/two-rules.html">Two rules a brain has to obey</a></li><li><a href="week-02/exact.html">A problem small enough to solve exactly</a></li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">3</div></div><div class="wc"><h3><a href="week-03/index.html">Learning the model</a></h3><p>Parameters as another kind of hidden state. Bayesian linear regression, linear Gaussian systems, and expectation maximisation as the bridge to what comes next.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">4</div></div><div class="wc"><h3><a href="week-04/index.html">Variational free energy</a></h3><p>The heart of the course. Jensen’s inequality, the bound on surprise, and the three decompositions of free energy written out line by line.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="partband">II. Continuous time<span>Predictive coding, generalised coordinates, filtering</span></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">5</div></div><div class="wc"><h3><a href="week-05/index.html">Predictive coding</a></h3><p>Free energy under a Laplace approximation becomes precision-weighted prediction error. A single unit, then many, then a hierarchy.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">6</div></div><div class="wc"><h3><a href="week-06/index.html">Generalised coordinates of motion</a></h3><p>Why a state is not enough and you need its velocity, acceleration and beyond. Smooth noise, generalised measurements, and the shift operator.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">7</div></div><div class="wc"><h3><a href="week-07/index.html">Generalised filtering</a></h3><p>Assembling the generalised state-space model and the recognition dynamics that track a trajectory rather than a point.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">8</div></div><div class="wc"><h3><a href="week-08/index.html">Action, learning and attention</a></h3><p>Autonomous states close the loop: the agent changes its sensations instead of its beliefs. Then learning the parameters and tuning the precisions.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="partband">III. Discrete time<span>POMDPs, expected free energy, policy selection</span></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">9</div></div><div class="wc"><h3><a href="week-09/index.html">Discrete generative models</a></h3><p>Partially observable Markov decision processes, and the matrices A, B, C, D and E that specify one. State inference by variational message passing.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">10</div></div><div class="wc"><h3><a href="week-10/index.html">Expected free energy</a></h3><p>Risk and ambiguity, information gain and pragmatic value, proved equal rather than asserted equal. Then the vectorised form, with every index accounted for.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">11</div></div><div class="wc"><h3><a href="week-11/index.html">Policy selection and learning</a></h3><p>Choosing what to do by softmax over expected free energy. Precision, habits, Dirichlet learning of the model itself, and adding factorial and hierarchical depth.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div><div class="partband">IV. Perspective<span>Extensions, connections, and honest objections</span></div><div class="weekrow"><div class="wn"><div class="l">Week</div><div class="n">12</div></div><div class="wc"><h3><a href="week-12/index.html">Extensions, connections and objections</a></h3><p>Sophisticated inference and structure learning; how active inference relates to reinforcement learning and control as inference; and the criticisms that deserve a serious answer.</p><ul><li style="color:#90909a">In preparation</li></ul></div></div></div><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></article></div>
-<script defer src="assets/js/aif-core.js"></script>
+<body>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Two rules a brain has to obey</a><a class="cur" href="../week-02/exact.html">A problem small enough to solve exactly</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>A problem small enough to solve exactly</h1><p class="deck">One hidden variable, one noisy reading, and a nonlinear link between them. Small enough to solve by brute force, which is what makes it useful.</p><div class="meta"><span>Week 2</span><span>&#167;2</span><span>30 min</span></div></header><article class="abody"><p>Here is the problem the next three lessons will work with. It has exactly one
+unknown, which means we can compute the exact answer by brute force and compare
+everything against it. That comparison is the point: a method whose approximation
+you cannot see is a method you cannot judge.</p>
+<h2 id="the-setup"><span class="secno">1</span>The setup</h2>
+<p>An animal hears a sound. Write $d$ for the distance to the source, $d$ for
+distance: this is the hidden variable, the thing the animal wants to know and
+cannot measure. What it can measure is intensity, and intensity falls off as the
+inverse square of distance. Write $g$ for that link, $g$ for the <strong>observation
+function</strong>, the map from a hidden state to the observation it would produce:</p>
+<div class="eqn" id="eq-link"><div class="eqbody">$$g(d) \;=\; \frac{1}{d^{2}} .$$</div><div class="eqno"><a href="#eq-link" title="Link to equation 2.2.1">(2.2.1)</a></div></div>
+<p>The source's power has been taken as one, which fixes the units so that intensity
+is $1$ at unit distance. Nothing turns on that choice; it saves carrying a
+constant through every line.</p>
+<p>$g$ is the same object Week&nbsp;1 called the model's likelihood, seen from a
+different angle. There we asked what observation a state makes probable; here we
+ask what observation a state <em>predicts</em>, and then add noise around the
+prediction. The letter $g$ is reserved for it for the rest of the course.</p>
+<p>Its ear is imperfect. Write $u$ for the intensity it actually registers, and take
+the error to be Gaussian about the true intensity:</p>
+<div class="eqn" id="eq-likelihood"><div class="eqbody">$$P(u \mid d) \;=\; \mathcal{N}\big(u;\ g(d),\ \Sigma_u\big),
+\qquad
+\mathcal{N}(x; \mu, \Sigma) = \frac{1}{\sqrt{2\pi\Sigma}}\exp\!\left(-\frac{(x-\mu)^2}{2\Sigma}\right).$$</div><div class="eqno"><a href="#eq-likelihood" title="Link to equation 2.2.2">(2.2.2)</a></div></div>
+<p>Here $\Sigma_u$ is the variance of the sensory noise, in squared units of
+intensity: small means a reliable ear.</p>
+<p>The animal is not starting from nothing. Sources it cares about tend to be at a
+characteristic sort of range, and that expectation is its prior:</p>
+<div class="eqn" id="eq-prior"><div class="eqbody">$$P(d) \;=\; \mathcal{N}\big(d;\ d_p,\ \Sigma_p\big),$$</div><div class="eqno"><a href="#eq-prior" title="Link to equation 2.2.3">(2.2.3)</a></div></div>
+<p>with $d_p$ the distance it expects and $\Sigma_p$ how firmly, again a variance.</p>
+<aside class="mn"><span class="mnl">On the Gaussian prior</span><p>A Gaussian over a distance puts a little mass below zero, which is unphysical.
+Nothing in what follows depends on that tail, and carrying a truncation through
+the algebra would obscure the argument. Week&nbsp;3 discusses what to do when the
+choice of family matters.</p></aside>
+<p>Concretely: $d_p = 2.0$, $\Sigma_p = 1.0$, and the animal hears
+$u = 0.5$ with $\Sigma_u = 0.1$.</p>
+<p>Before computing anything, notice the tension. The prior expects a source at
+$d = 2.0$, which by <a class="eqref" href="#eq-link">(2.2.1)</a> would produce an intensity of
+$0.25$. The animal heard $0.5$, twice that. Taken alone, an
+intensity of $0.5$ means $d = 1/\sqrt{ 0.5 } = 1.4142$.
+So the prior says one thing, the data another, and the answer will be somewhere
+between. Where exactly is the question.</p>
+<h2 id="the-exact-posterior"><span class="secno">2</span>The exact posterior</h2>
+<p>Bayes' theorem, in the continuous form:</p>
+<div class="eqn" id="eq-continuous-bayes"><div class="eqbody">$$P(d \mid u) \;=\; \frac{P(u \mid d)\,P(d)}{P(u)},
+\qquad
+P(u) \;=\; \int_0^{\infty} P(u \mid d)\,P(d)\;\mathrm{d}d .$$</div><div class="eqno"><a href="#eq-continuous-bayes" title="Link to equation 2.2.4">(2.2.4)</a></div></div>
+<p>The numerator is a product of two things we have written down. The denominator is
+an integral over every distance the source might be at, and it is the same
+difficulty as Week&nbsp;1's sum with the sum replaced by an integral. There are
+no longer $k^n$ terms to add; there are uncountably many, and no finite device
+adds them.</p>
+<p>For a problem this small we can evaluate it numerically, on a fine grid, and see
+what the answer looks like. Do that and three things stand out.</p>
+<figure id="fig-2-2-1"><svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Prior, likelihood and posterior over distance. The posterior is skewed right, with its mode below its mean.">
+  <rect x="1" y="1" width="678" height="298" fill="#fdfcf9" stroke="#e4e1d9"/>
+  <line x1="60" y1="250" x2="640" y2="250" stroke="#3c3c42"/>
+  <line x1="60" y1="30" x2="60" y2="250" stroke="#3c3c42"/>
+  <path d="M64.0 218.3 L68.0 215.6 L72.0 212.8 L76.0 209.8 L80.0 206.7 L84.0 203.4 L88.0 200.0 L92.0 196.3 L96.0 192.6 L100.0 188.6 L104.0 184.5 L108.0 180.2 L112.0 175.8 L116.0 171.3 L120.0 166.6 L124.0 161.7 L128.0 156.8 L132.0 151.7 L136.0 146.6 L140.0 141.4 L144.0 136.1 L148.0 130.7 L152.0 125.3 L156.0 119.9 L160.0 114.5 L164.0 109.1 L168.0 103.7 L172.0 98.4 L176.0 93.1 L180.0 88.0 L184.0 83.0 L188.0 78.1 L192.0 73.4 L196.0 68.8 L200.0 64.5 L204.0 60.4 L208.0 56.5 L212.0 52.9 L216.0 49.5 L220.0 46.4 L224.0 43.7 L228.0 41.3 L232.0 39.2 L236.0 37.4 L240.0 36.0 L244.0 35.0 L248.0 34.3 L252.0 34.0 L256.0 34.1 L260.0 34.5 L264.0 35.3 L268.0 36.5 L272.0 38.0 L276.0 39.8 L280.0 42.0 L284.0 44.6 L288.0 47.4 L292.0 50.6 L296.0 54.0 L300.0 57.7 L304.0 61.7 L308.0 65.9 L312.0 70.3 L316.0 74.9 L320.0 79.7 L324.0 84.6 L328.0 89.7 L332.0 94.9 L336.0 100.1 L340.0 105.5 L344.0 110.9 L348.0 116.3 L352.0 121.7 L356.0 127.1 L360.0 132.5 L364.0 137.8 L368.0 143.1 L372.0 148.3 L376.0 153.4 L380.0 158.5 L384.0 163.4 L388.0 168.1 L392.0 172.8 L396.0 177.3 L400.0 181.7 L404.0 185.9 L408.0 189.9 L412.0 193.8 L416.0 197.6 L420.0 201.1 L424.0 204.5 L428.0 207.8 L432.0 210.9 L436.0 213.8 L440.0 216.5 L444.0 219.1 L448.0 221.6 L452.0 223.9 L456.0 226.0 L460.0 228.0 L464.0 229.9 L468.0 231.6 L472.0 233.3 L476.0 234.8 L480.0 236.2 L484.0 237.5 L488.0 238.7 L492.0 239.7 L496.0 240.8 L500.0 241.7 L504.0 242.5 L508.0 243.3 L512.0 244.0 L516.0 244.6 L520.0 245.2 L524.0 245.7 L528.0 246.2 L532.0 246.6 L536.0 247.0 L540.0 247.3 L544.0 247.6 L548.0 247.9 L552.0 248.2 L556.0 248.4 L560.0 248.6 L564.0 248.8 L568.0 248.9 L572.0 249.1 L576.0 249.2 L580.0 249.3 L584.0 249.4 L588.0 249.5 L592.0 249.5 L596.0 249.6 L600.0 249.7 L604.0 249.7 L608.0 249.7 L612.0 249.8 L616.0 249.8 L620.0 249.8 L624.0 249.9 L628.0 249.9 L632.0 249.9 L636.0 249.9 L640.0 249.9" fill="none" stroke="#90909a" stroke-width="1.8" stroke-dasharray="4 3"/>
+  <path d="M64.0 250.0 L68.0 250.0 L72.0 250.0 L76.0 250.0 L80.0 250.0 L84.0 250.0 L88.0 250.0 L92.0 250.0 L96.0 250.0 L100.0 250.0 L104.0 250.0 L108.0 250.0 L112.0 250.0 L116.0 250.0 L120.0 250.0 L124.0 250.0 L128.0 250.0 L132.0 250.0 L136.0 249.6 L140.0 247.8 L144.0 242.8 L148.0 232.2 L152.0 215.1 L156.0 192.3 L160.0 165.9 L164.0 138.6 L168.0 112.7 L172.0 90.0 L176.0 71.2 L180.0 56.6 L184.0 46.1 L188.0 39.2 L192.0 35.4 L196.0 34.0 L200.0 34.6 L204.0 36.6 L208.0 39.7 L212.0 43.6 L216.0 48.0 L220.0 52.8 L224.0 57.7 L228.0 62.7 L232.0 67.7 L236.0 72.5 L240.0 77.3 L244.0 81.9 L248.0 86.3 L252.0 90.6 L256.0 94.6 L260.0 98.5 L264.0 102.2 L268.0 105.7 L272.0 109.0 L276.0 112.1 L280.0 115.1 L284.0 118.0 L288.0 120.6 L292.0 123.2 L296.0 125.6 L300.0 127.9 L304.0 130.1 L308.0 132.1 L312.0 134.1 L316.0 135.9 L320.0 137.7 L324.0 139.4 L328.0 141.0 L332.0 142.5 L336.0 144.0 L340.0 145.4 L344.0 146.7 L348.0 148.0 L352.0 149.2 L356.0 150.3 L360.0 151.4 L364.0 152.5 L368.0 153.5 L372.0 154.5 L376.0 155.4 L380.0 156.3 L384.0 157.2 L388.0 158.0 L392.0 158.8 L396.0 159.5 L400.0 160.3 L404.0 161.0 L408.0 161.6 L412.0 162.3 L416.0 162.9 L420.0 163.5 L424.0 164.1 L428.0 164.7 L432.0 165.2 L436.0 165.7 L440.0 166.2 L444.0 166.7 L448.0 167.2 L452.0 167.6 L456.0 168.1 L460.0 168.5 L464.0 168.9 L468.0 169.3 L472.0 169.7 L476.0 170.1 L480.0 170.5 L484.0 170.8 L488.0 171.2 L492.0 171.5 L496.0 171.8 L500.0 172.1 L504.0 172.4 L508.0 172.7 L512.0 173.0 L516.0 173.3 L520.0 173.6 L524.0 173.8 L528.0 174.1 L532.0 174.3 L536.0 174.6 L540.0 174.8 L544.0 175.0 L548.0 175.3 L552.0 175.5 L556.0 175.7 L560.0 175.9 L564.0 176.1 L568.0 176.3 L572.0 176.5 L576.0 176.7 L580.0 176.9 L584.0 177.0 L588.0 177.2 L592.0 177.4 L596.0 177.6 L600.0 177.7 L604.0 177.9 L608.0 178.0 L612.0 178.2 L616.0 178.3 L620.0 178.5 L624.0 178.6 L628.0 178.8 L632.0 178.9 L636.0 179.0 L640.0 179.2" fill="none" stroke="#8a6d1f" stroke-width="1.8" stroke-dasharray="2 3"/>
+  <path d="M64.0 250.0 L68.0 250.0 L72.0 250.0 L76.0 250.0 L80.0 250.0 L84.0 250.0 L88.0 250.0 L92.0 250.0 L96.0 250.0 L100.0 250.0 L104.0 250.0 L108.0 250.0 L112.0 250.0 L116.0 250.0 L120.0 250.0 L124.0 250.0 L128.0 250.0 L132.0 250.0 L136.0 249.8 L140.0 248.8 L144.0 245.6 L148.0 238.7 L152.0 226.9 L156.0 210.2 L160.0 189.5 L164.0 166.7 L168.0 143.4 L172.0 121.2 L176.0 101.1 L180.0 83.7 L184.0 69.3 L188.0 57.7 L192.0 48.8 L196.0 42.3 L200.0 37.9 L204.0 35.2 L208.0 34.0 L212.0 34.0 L216.0 35.1 L220.0 36.9 L224.0 39.4 L228.0 42.5 L232.0 46.0 L236.0 49.8 L240.0 53.9 L244.0 58.2 L248.0 62.6 L252.0 67.2 L256.0 71.9 L260.0 76.7 L264.0 81.5 L268.0 86.4 L272.0 91.3 L276.0 96.2 L280.0 101.1 L284.0 106.0 L288.0 110.9 L292.0 115.8 L296.0 120.6 L300.0 125.4 L304.0 130.1 L308.0 134.8 L312.0 139.4 L316.0 144.0 L320.0 148.5 L324.0 152.9 L328.0 157.3 L332.0 161.5 L336.0 165.7 L340.0 169.7 L344.0 173.7 L348.0 177.6 L352.0 181.3 L356.0 185.0 L360.0 188.5 L364.0 192.0 L368.0 195.3 L372.0 198.4 L376.0 201.5 L380.0 204.5 L384.0 207.3 L388.0 210.0 L392.0 212.6 L396.0 215.1 L400.0 217.5 L404.0 219.7 L408.0 221.8 L412.0 223.9 L416.0 225.8 L420.0 227.6 L424.0 229.3 L428.0 230.9 L432.0 232.4 L436.0 233.8 L440.0 235.1 L444.0 236.3 L448.0 237.5 L452.0 238.6 L456.0 239.6 L460.0 240.5 L464.0 241.4 L468.0 242.1 L472.0 242.9 L476.0 243.5 L480.0 244.2 L484.0 244.7 L488.0 245.3 L492.0 245.7 L496.0 246.2 L500.0 246.6 L504.0 246.9 L508.0 247.2 L512.0 247.5 L516.0 247.8 L520.0 248.0 L524.0 248.3 L528.0 248.5 L532.0 248.6 L536.0 248.8 L540.0 248.9 L544.0 249.1 L548.0 249.2 L552.0 249.3 L556.0 249.4 L560.0 249.4 L564.0 249.5 L568.0 249.6 L572.0 249.6 L576.0 249.7 L580.0 249.7 L584.0 249.8 L588.0 249.8 L592.0 249.8 L596.0 249.8 L600.0 249.9 L604.0 249.9 L608.0 249.9 L612.0 249.9 L616.0 249.9 L620.0 249.9 L624.0 249.9 L628.0 250.0 L632.0 250.0 L636.0 250.0 L640.0 250.0" fill="none" stroke="#0f5f57" stroke-width="2.6"/>
+  <line x1="209.8" y1="33.9" x2="209.8" y2="250" stroke="#0f5f57" stroke-width="1" stroke-dasharray="2 3"/>
+  <line x1="262.0" y1="79.2" x2="262.0" y2="250" stroke="#9c4d2f" stroke-width="1" stroke-dasharray="2 3"/>
+  <text x="209.8" y="26" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#0f5f57">mode 1.55</text>
+  <text x="262.0" y="70" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#9c4d2f">&#8592; mean 2.09</text>
+  <text x="60" y="268" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">0</text>
+  <text x="209.8" y="268" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">1.55</text>
+  <text x="640" y="268" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">6</text>
+  <text x="350" y="288" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">distance d</text>
+  <rect x="470" y="40" width="12" height="3" fill="#0f5f57"/>
+  <text x="490" y="45" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#3c3c42">posterior</text>
+  <rect x="470" y="58" width="12" height="2" fill="#90909a"/>
+  <text x="490" y="63" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#3c3c42">prior</text>
+  <rect x="470" y="76" width="12" height="2" fill="#8a6d1f"/>
+  <text x="490" y="81" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#3c3c42">likelihood</text>
+</svg><figcaption><span class="fno">Figure 2.2.1.</span> The exact posterior over distance, against the prior and the likelihood that produced it. Each curve is scaled to its own peak, so the figure compares shapes rather than heights. The likelihood is plotted as a function of $d$, which is what makes it lean.</figcaption></figure>
+<p><strong>It is not Gaussian.</strong> Both ingredients were Gaussian and the result is not,
+because <a class="eqref" href="#eq-link">(2.2.1)</a> is nonlinear. Passing a Gaussian through $1/d^2$ stretches one
+side and compresses the other, and the product inherits the distortion. Measured
+on the grid, the posterior's skewness is $+0.881$, where a Gaussian
+would give zero. This is the general situation: a nonlinear link between what you
+want and what you measure takes you out of any convenient family, and no clever
+choice of prior brings you back.</p>
+<p><strong>Its mean and its mode are different, and not slightly.</strong> The peak sits at
+$d = 1.550$; the mean sits at $d = 2.090$, higher by
+35%. Both are defensible answers to "how far away is it", and
+they disagree. The long right tail, which is the possibility that the source is
+distant and the ear happened to over-report, drags the mean out without moving
+the peak. Remember this: the method built over the next two lessons finds the
+mode, and the fact that it is not the mean is a choice the framework makes
+quietly.</p>
+<p><strong>It required an integral we cannot do in general.</strong> The curve above was computed
+by evaluating <a class="eqref" href="#eq-continuous-bayes">(2.2.4)</a> at six hundred thousand grid points and
+normalising. That is available here because $d$ is one number. With ten unknowns
+the same grid would need $10^{60}$ points, and the grid is the <em>easy</em> method.</p>
+<div class="box keyidea"><div class="boxhd">The idea</div><p>Two obstacles, and they are different from each other. The <strong>normaliser</strong> is an
+integral over the whole state space, which grows impossible with dimension. The
+<strong>shape</strong> is not in any standard family, so even knowing the posterior exactly,
+an agent could not summarise it in a few numbers to carry around.</p>
+<p>Week&nbsp;1 met the first, in its counting form. The second is new, and it is why
+the next lesson gives up on the distribution altogether and goes looking for a
+single point.</p></div>
+<div class="box exercise"><div class="boxhd">Exercise 2.2.1<span class="bt">Why the likelihood leans</span></div><p>In the figure the likelihood, plotted against $d$, is visibly lopsided even
+though the sensory noise is Gaussian. Explain why, and say which way it would
+lean if the link were $g(d) = d^2$ instead of $1/d^2$.</p><details><summary>Solution</summary><p>The noise is Gaussian <em>in intensity</em>, so the likelihood is symmetric as a
+function of $u$. Plotted against $d$ it is not, because $d$ and $u$ are related
+nonlinearly and the map compresses one region while stretching another.</p>
+<p>Concretely, near $d = 1.41$ the derivative
+$g'(d) = -2/d^{3}$ has magnitude about $0.7$, so a given interval in intensity
+corresponds to an interval in distance about $1/0.7$ times as wide. Further out,
+$|g'|$ falls sharply: at $d = 4$ it is about $0.03$, so the same interval in
+intensity spans a range in distance more than twenty times wider. Equal steps in
+intensity become unequal steps in distance, and the further away the source, the
+more distance a given change in loudness buys. The likelihood therefore has a
+long tail to the right.</p>
+<p>With $g(d) = d^{2}$ the situation reverses. There $g'(d) = 2d$ grows with
+distance, so far-away distances are <em>compressed</em> in intensity terms and the tail
+runs the other way, towards small $d$.</p>
+<p>The general statement: a nonlinear change of variable reweights a density by
+$|\mathrm{d}u/\mathrm{d}d|$, and wherever that factor is small the density spreads out.</p></details></div>
+<div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
+<li>Both prior and likelihood are Gaussian. Why is the posterior not?</li>
+<li>Which is larger here, the posterior mean or the posterior mode, and what
+  feature of the distribution decides it?</li>
+<li>Name the two separate difficulties this lesson identifies, and say which of
+  them Week&nbsp;1 had already met.</li>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/two-rules.html"><span class="dir">Previous</span><span class="ttl">Two rules a brain has to obey</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script>
 </body>
 </html>

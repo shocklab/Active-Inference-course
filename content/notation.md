@@ -48,7 +48,7 @@ $P(o, s)$ :: The generative model: the joint distribution the agent carries.
 $P(o)$ :: The model evidence, or marginal likelihood, $\sum_s P(o \mid s)P(s)$.
 $-\ln P(o)$ :: Surprise, or surprisal. Not an emotion. Week&nbsp;1.
 $P(s \mid o)$ :: The exact posterior. Generally not computable. Week&nbsp;1.
-$Q(s)$ :: The approximate posterior, or *recognition density*. The thing the agent actually maintains and updates. Week&nbsp;4.
+$Q(s)$ :: A distribution the agent holds over states, as against the $P$ of the world or of its own model. Introduced in Week&nbsp;1 as one agent's beliefs; named the approximate posterior, or *recognition density*, and made the object of optimisation in Week&nbsp;4.
 :::
 
 ## Information-theoretic quantities
@@ -92,7 +92,7 @@ $\mathbf{D}$ :: The prior over initial states, $D_i = P(s_1 = i)$.
 $\mathbf{E}$ :: The prior over policies, $E_\pi = P(\pi)$, one entry per policy and summing to one over the policy set. The habit term: what the agent tends to do before this situation's expected free energy is considered.
 $\pi$ :: A policy: a sequence of actions. $\Pi$ is the set of them, and $\boldsymbol{\pi}$ is the distribution over that set. Where confusion is possible we write $Q(\pi)$ for the distribution.
 $\tau$ :: A time index *within* a policy, running over the planning horizon.
-$t$ :: The current time. Distinguishing $t$ from $\tau$ is essential in Week&nbsp;10 and is a place the literature is frequently careless.
+$t$ :: The current time, discrete from Week&nbsp;1 and continuous from Week&nbsp;5. Distinguishing $t$ from $\tau$ is essential in Week&nbsp;10 and is a place the literature is frequently careless.
 $\gamma$ :: Precision over policies: the inverse temperature in $Q(\pi) \propto \exp(-\gamma G(\pi))$.
 $\mathrm{softmax}(\cdot)$ :: $\mathrm{softmax}(x)_i = e^{x_i} / \sum_j e^{x_j}$. Much of the literature writes this $\sigma$; this course does not, because $\sigma$ is a standard deviation from Week&nbsp;1 onwards and the collision is worse than the inconvenience.
 $\tilde{s}, \tilde{o}$ :: A tilde denotes a whole *sequence* over time rather than a single time point, so $\tilde{s} = (s_1, \dots, s_T)$.
@@ -105,7 +105,7 @@ $\varepsilon$ :: A prediction error, the difference between what was predicted a
 $\Pi$ :: A precision matrix: the inverse of a covariance. In continuous-time active inference this is what weights each prediction error, and it is the formal correlate of attention. Note the clash with $\Pi$ for the policy set; the two never occur in the same chapter.
 $\tilde{x}$ :: In Weeks&nbsp;6 to 8, a variable in **generalised coordinates of motion**: the stacked vector $(x, x', x'', \dots)$ of the state and its temporal derivatives. This is a different use of the tilde from the discrete chapters, and Week&nbsp;6 says so again at the point where it starts.
 $\mathcal{D}$ :: The block shift operator that maps $\tilde{x} = (x, x', x'', \dots)$ to $(x', x'', x''', \dots)$.
-$g(\cdot)$ :: The observation function of the generative model, mapping a hidden state to the observation it predicts, $o = g(x) + z$ with $z$ the sensory noise. Week&nbsp;5.
+$g(\cdot)$ :: The observation function of the generative model, mapping a hidden state to the observation it predicts, $o = g(x) + z$ with $z$ the sensory noise. First used in Week&nbsp;2, for a single hidden variable; general from Week&nbsp;5.
 $f(\cdot)$ :: The flow of the generative model, giving the rate of change of the hidden state, $\dot{x} = f(x) + w$ with $w$ the state noise. Week&nbsp;5.
 :::
 

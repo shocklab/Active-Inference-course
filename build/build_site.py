@@ -25,8 +25,8 @@ import theme    # noqa: E402
 
 
 def load_numbers(week_dir):
-    """Import content/week-NN/numbers.py and return its VALUES dict, if present."""
-    path = os.path.join(week_dir, "numbers.py")
+    """Import content/week-NN/values.py and return its VALUES dict, if present."""
+    path = os.path.join(week_dir, "values.py")
     if not os.path.exists(path):
         return {}
     spec = importlib.util.spec_from_file_location("numbers_mod", path)
