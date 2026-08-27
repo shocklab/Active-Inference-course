@@ -355,12 +355,16 @@ unknown, which means we can compute the exact answer by brute force and compare
 everything against it. That comparison is the point: a method whose approximation
 you cannot see is a method you cannot judge.</p>
 <h2 id="the-setup"><span class="secno">1</span>The setup</h2>
-<p>An animal hears a sound. Write $d$ for the distance to the source, $d$ for
-distance: this is the hidden variable, the thing the animal wants to know and
-cannot measure. What it can measure is intensity, and intensity falls off as the
-inverse square of distance. Write $g$ for that link, $g$ for the <strong>observation
+<p>An animal hears a sound. Write $d$ for the distance to the source, the letter
+chosen for exactly that. It is a <strong>hidden state</strong> in Week&nbsp;1's sense, the same
+role $s$ played there: something the world has and the agent does not, to be
+reached only through what arrives at the senses. Week&nbsp;1's $s$ ranged over
+three named possibilities; $d$ ranges over an interval, which is the only
+difference and the reason for a fresh letter.</p>
+<p>What the animal can measure is intensity, and intensity falls off as the inverse
+square of distance. Write $g$ for that link, $g$ for the <strong>observation
 function</strong>, the map from a hidden state to the observation it would produce:</p>
-<div class="eqn" id="eq-link"><div class="eqbody">$$g(d) \;=\; \frac{1}{d^{2}} .$$</div><div class="eqno"><a href="#eq-link" title="Link to equation 2.2.1">(2.2.1)</a></div></div>
+<div class="eqn" id="eq-link"><div class="eqbody">$$g(d) \;=\; \frac{1}{d^{2}} .$$</div><div class="eqno"><a href="#eq-link" title="Link to equation 2.2.2">(2.2.2)</a></div></div>
 <p>The source's power has been taken as one, which fixes the units so that intensity
 is $1$ at unit distance. Nothing turns on that choice; it saves carrying a
 constant through every line.</p>
@@ -368,17 +372,32 @@ constant through every line.</p>
 different angle. There we asked what observation a state makes probable; here we
 ask what observation a state <em>predicts</em>, and then add noise around the
 prediction. The letter $g$ is reserved for it for the rest of the course.</p>
-<p>Its ear is imperfect. Write $u$ for the intensity it actually registers, and take
-the error to be Gaussian about the true intensity:</p>
+<p>Its ear is imperfect. Write $u$ for the intensity it actually registers, $u$ for
+the input arriving at the agent, as in control theory. <strong>This is an observation:
+it is the same kind of thing Week&nbsp;1 wrote $o$ for, and everything said there
+about observations applies to it.</strong> The change of letter is a concession to the
+predictive coding literature, which writes $u$ without exception, and a reader
+going on to Bogacz or Buckley will meet it there. Nothing else changes: $u$ is
+what the world delivers, and it is all the animal has.</p>
+<p>Take the sensory error to be Gaussian about the true intensity:</p>
 <div class="eqn" id="eq-likelihood"><div class="eqbody">$$P(u \mid d) \;=\; \mathcal{N}\big(u;\ g(d),\ \Sigma_u\big),
 \qquad
-\mathcal{N}(x; \mu, \Sigma) = \frac{1}{\sqrt{2\pi\Sigma}}\exp\!\left(-\frac{(x-\mu)^2}{2\Sigma}\right).$$</div><div class="eqno"><a href="#eq-likelihood" title="Link to equation 2.2.2">(2.2.2)</a></div></div>
-<p>Here $\Sigma_u$ is the variance of the sensory noise, in squared units of
-intensity: small means a reliable ear.</p>
+\mathcal{N}(x; m, \Sigma) = \frac{1}{\sqrt{2\pi\Sigma}}\exp\!\left(-\frac{(x-m)^2}{2\Sigma}\right).$$</div><div class="eqno"><a href="#eq-likelihood" title="Link to equation 2.2.3">(2.2.3)</a></div></div>
+<p>Here $m$ and $\Sigma$ are placeholders naming the two slots of a Gaussian, its
+mean and its variance, and they take different fillings each time it is used.
+$\Sigma_u$ is the variance of the sensory noise, in squared units of intensity:
+small means a reliable ear.</p>
+<aside class="mn"><span class="mnl">Not $\mu$ for the mean</span><p>The obvious letter for a Gaussian's mean is $\mu$, and it is not used here
+because Week&nbsp;1 already spent it. There $\mu$ is the agent's <strong>internal
+states</strong>, the physical variables carrying the model, and it acquires dynamics of
+its own from Week&nbsp;5. A letter cannot mean two things in one course, so the
+generic mean gets $m$.</p></aside>
 <p>The animal is not starting from nothing. Sources it cares about tend to be at a
 characteristic sort of range, and that expectation is its prior:</p>
-<div class="eqn" id="eq-prior"><div class="eqbody">$$P(d) \;=\; \mathcal{N}\big(d;\ d_p,\ \Sigma_p\big),$$</div><div class="eqno"><a href="#eq-prior" title="Link to equation 2.2.3">(2.2.3)</a></div></div>
-<p>with $d_p$ the distance it expects and $\Sigma_p$ how firmly, again a variance.</p>
+<div class="eqn" id="eq-prior"><div class="eqbody">$$P(d) \;=\; \mathcal{N}\big(d;\ d_p,\ \Sigma_p\big),$$</div><div class="eqno"><a href="#eq-prior" title="Link to equation 2.2.4">(2.2.4)</a></div></div>
+<p>with $d_p$ the distance it expects, the subscript standing for <em>prior</em>, and
+$\Sigma_p$ how firmly it expects it. $\Sigma_p$ is again a variance, this time in
+squared units of distance, and a small one is a confident prior.</p>
 <aside class="mn"><span class="mnl">On the Gaussian prior</span><p>A Gaussian over a distance puts a little mass below zero, which is unphysical.
 Nothing in what follows depends on that tail, and carrying a truncation through
 the algebra would obscure the argument. Week&nbsp;3 discusses what to do when the
@@ -386,16 +405,43 @@ choice of family matters.</p></aside>
 <p>Concretely: $d_p = 2.0$, $\Sigma_p = 1.0$, and the animal hears
 $u = 0.5$ with $\Sigma_u = 0.1$.</p>
 <p>Before computing anything, notice the tension. The prior expects a source at
-$d = 2.0$, which by <a class="eqref" href="#eq-link">(2.2.1)</a> would produce an intensity of
+$d = 2.0$, which by <a class="eqref" href="#eq-link">(2.2.2)</a> would produce an intensity of
 $0.25$. The animal heard $0.5$, twice that. Taken alone, an
 intensity of $0.5$ means $d = 1/\sqrt{ 0.5 } = 1.4142$.
 So the prior says one thing, the data another, and the answer will be somewhere
 between. Where exactly is the question.</p>
-<h2 id="the-exact-posterior"><span class="secno">2</span>The exact posterior</h2>
+<h2 id="what-changed-when-the-variable-went-continuous"><span class="secno">2</span>What changed when the variable went continuous</h2>
+<p>Week&nbsp;1 worked entirely with finite sets. There were three states, the prior
+was three numbers adding to one, and $P(o)$ was a sum with one term per state.
+Here $d$ ranges over an interval, and every one of those has to be replaced. The
+replacement is routine, but it changes what the symbols <em>are</em>, and the change is
+easy to slide past.</p>
+<div class="box definition"><div class="boxhd">Definition 2.2.1<span class="bt">Probability density</span></div><p>For a continuous variable, $P(d)$ is a <strong>probability density</strong>, not a
+probability. The probability lives in $P(d)\,\mathrm{d}d$, the density times a
+width, and only an integral over a range of $d$ returns a number meaning "how
+likely". Normalisation reads $\int P(d)\,\mathrm{d}d = 1$ in place of
+$\sum_s P(s) = 1$.</p></div>
+<p>Three consequences, and the third bites much later.</p>
+<p><strong>A density can exceed one.</strong> Nothing forbids it, because it is not a
+probability. In this very problem the likelihood, read as a function of $u$,
+peaks at $1/\sqrt{2\pi\Sigma_u} = 1.2616$. A probability of
+$1.2616$ would be nonsense; a density of it is ordinary. The
+prior, being wider, peaks at only $0.3989$, so height alone
+tells you nothing about which is the more confident claim.</p>
+<p><strong>Only an area is a probability.</strong> The posterior below peaks at a density of
+$0.6228$. Asking how probable the source is at exactly
+$d = 1.5500$ has no answer but zero. Asking how probable it is between
+$1.5$ and $1.6$ does have one: integrate over that
+band and get 0.0622.</p>
+<p><strong>A density carries units.</strong> $P(d)\,\mathrm{d}d$ is dimensionless, so $P(d)$ is
+per unit distance. That is why the two prediction errors of Lesson&nbsp;3 cannot
+be added until one has been converted into the other's units, and it is the whole
+of why the last problem of the week comes out as it does.</p>
+<h2 id="the-exact-posterior"><span class="secno">3</span>The exact posterior</h2>
 <p>Bayes' theorem, in the continuous form:</p>
 <div class="eqn" id="eq-continuous-bayes"><div class="eqbody">$$P(d \mid u) \;=\; \frac{P(u \mid d)\,P(d)}{P(u)},
 \qquad
-P(u) \;=\; \int_0^{\infty} P(u \mid d)\,P(d)\;\mathrm{d}d .$$</div><div class="eqno"><a href="#eq-continuous-bayes" title="Link to equation 2.2.4">(2.2.4)</a></div></div>
+P(u) \;=\; \int_0^{\infty} P(u \mid d)\,P(d)\;\mathrm{d}d .$$</div><div class="eqno"><a href="#eq-continuous-bayes" title="Link to equation 2.2.5">(2.2.5)</a></div></div>
 <p>The numerator is a product of two things we have written down. The denominator is
 an integral over every distance the source might be at, and it is the same
 difficulty as Week&nbsp;1's sum with the sum replaced by an integral. There are
@@ -426,10 +472,44 @@ what the answer looks like. Do that and three things stand out.</p>
   <text x="490" y="81" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#3c3c42">likelihood</text>
 </svg><figcaption><span class="fno">Figure 2.2.1.</span> The exact posterior over distance, against the prior and the likelihood that produced it. Each curve is scaled to its own peak, so the figure compares shapes rather than heights. The likelihood is plotted as a function of $d$, which is what makes it lean.</figcaption></figure>
 <p><strong>It is not Gaussian.</strong> Both ingredients were Gaussian and the result is not,
-because <a class="eqref" href="#eq-link">(2.2.1)</a> is nonlinear. Passing a Gaussian through $1/d^2$ stretches one
-side and compresses the other, and the product inherits the distortion. Measured
-on the grid, the posterior's skewness is $+0.881$, where a Gaussian
-would give zero. This is the general situation: a nonlinear link between what you
+because <a class="eqref" href="#eq-link">(2.2.2)</a> is nonlinear. Measured on the grid, the posterior's skewness is
+$+0.881$, where a Gaussian would give zero.</p>
+<div class="box definition"><div class="boxhd">Definition 2.2.2<span class="bt">Skewness</span></div><p>The <strong>skewness</strong> of a distribution is the third moment of its standardised
+deviation from the mean,
+<div class="eqn"><div class="eqbody">$$\mathrm{skew} \;=\; \mathbb{E}\!\left[\left(\frac{d - \mathbb{E}[d]}{\mathrm{sd}(d)}\right)^{3}\right],$$</div></div>
+with $\mathrm{sd}$ the standard deviation. Cubing keeps the sign, so deviations
+above the mean contribute positively and those below negatively, and dividing by
+the standard deviation first makes the answer a pure number, unchanged by
+rescaling the axis. Any symmetric distribution gives zero, because every positive
+term is cancelled by its mirror image. A positive value means the tail to the
+right is the longer one.</p></div>
+<p>The reason is easiest to see in the exponent. A posterior is a product, so its
+logarithm is a sum:</p>
+<div class="eqn" id="eq-exponent-sum"><div class="eqbody">$$\ln P(d \mid u) \;=\; \underbrace{-\frac{(d - d_p)^2}{2\Sigma_p}}_{\text{exactly a parabola}}
+\;\underbrace{-\;\frac{\big(u - g(d)\big)^2}{2\Sigma_u}}_{\text{not a parabola}} \;+\; \text{const}.$$</div><div class="eqno"><a href="#eq-exponent-sum" title="Link to equation 2.2.6">(2.2.6)</a></div></div>
+<p>A Gaussian is precisely a distribution whose log is a parabola, so the question
+is whether the right-hand side is one. The first term is, exactly, by
+construction. The second is not, because $g$ is nonlinear: fit the best parabola
+to it over $1.15 \le d \le 1.95$, the range the
+posterior mostly occupies, and it is still off by 0.070 in
+log units. A parabola plus a non-parabola is a non-parabola, so the posterior is
+not Gaussian, and the asymmetry that a Gaussian cannot have survives.</p>
+<p>That also says when the skew would go away: when the parabola is sharp enough to
+swamp the other term's departure from one. Narrow the prior to
+$\Sigma_p = 0.01$ and the skew falls to
+0.0012, which is zero to the precision of the grid. Widen it
+and the skew grows. The widget in Lesson&nbsp;4 has a slider for this.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">The likelihood alone is not a distribution over $d$</span></div><p>It is tempting to read the middle curve in the figure as "what the data say about
+the distance", and to ask for its mean. It has none. As $d$ grows, $g(d) \to 0$,
+so the sensory error tends to the fixed value $u$ and the likelihood flattens onto
+$\exp(-u^2/2\Sigma_u) = 0.2865$ rather than decaying. Its integral
+over $(0, \infty)$ therefore diverges: it is not normalisable, and any mean, variance
+or skew you compute for it is a property of where you cut the axis off.</p>
+<p>What this means physically is that hearing a quiet sound is compatible with the
+source being at any large distance whatever, and the data alone never rule that
+out. It is the prior that does, and the posterior is normalisable only because
+the prior's tail decays. The prior is not decoration here; without it there is no
+answer at all. This is the general situation: a nonlinear link between what you
 want and what you measure takes you out of any convenient family, and no clever
 choice of prior brings you back.</p>
 <p><strong>Its mean and its mode are different, and not slightly.</strong> The peak sits at
@@ -441,10 +521,14 @@ the peak. Remember this: the method built over the next two lessons finds the
 mode, and the fact that it is not the mean is a choice the framework makes
 quietly.</p>
 <p><strong>It required an integral we cannot do in general.</strong> The curve above was computed
-by evaluating <a class="eqref" href="#eq-continuous-bayes">(2.2.4)</a> at six hundred thousand grid points and
-normalising. That is available here because $d$ is one number. With ten unknowns
+by evaluating <a class="eqref" href="#eq-continuous-bayes">(2.2.5)</a> at six hundred thousand grid points and
+normalising, which is <strong>quadrature</strong>: approximating an integral by a weighted sum
+over sample points. Later lessons refer back to "the mode computed by
+quadrature", and this is the computation they mean. That is available here because $d$ is one number. With ten unknowns
 the same grid would need $10^{60}$ points, and the grid is the <em>easy</em> method.</p>
-<div class="box keyidea"><div class="boxhd">The idea</div><p>Two obstacles, and they are different from each other. The <strong>normaliser</strong> is an
+<div class="box keyidea"><div class="boxhd">The idea</div><p>Two obstacles, and they are different from each other. The <strong>normaliser</strong>, which
+is Week&nbsp;1's evidence $P(o)$ under a name that describes its job here rather
+than its meaning, is an
 integral over the whole state space, which grows impossible with dimension. The
 <strong>shape</strong> is not in any standard family, so even knowing the posterior exactly,
 an agent could not summarise it in a few numbers to carry around.</p>
@@ -467,15 +551,43 @@ long tail to the right.</p>
 <p>With $g(d) = d^{2}$ the situation reverses. There $g'(d) = 2d$ grows with
 distance, so far-away distances are <em>compressed</em> in intensity terms and the tail
 runs the other way, towards small $d$.</p>
-<p>The general statement: a nonlinear change of variable reweights a density by
-$|\mathrm{d}u/\mathrm{d}d|$, and wherever that factor is small the density spreads out.</p></details></div>
+<p>The general statement is worth deriving once, since the week uses it twice and
+the second use carries the sharpest result in it.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Changing variables in a density</span></div><p>Let $D$ be a random variable with density $p_D$, and let $\rho = r(D)$ for a
+smooth, strictly increasing $r$. What is the density of $\rho$?</p>
+<p>Densities do not transform simply, but <em>cumulative</em> probabilities do, because
+they are probabilities of events and an event does not care what the axis is
+called. Since $r$ is increasing, $\rho \le y$ happens exactly when
+$D \le r^{-1}(y)$. Same event, same probability:</p>
+<div class="eqn"><div class="eqbody">$$\Phi_\rho(y) \;=\; \Pr(\rho \le y) \;=\; \Pr\big(D \le r^{-1}(y)\big) \;=\; \Phi_D\big(r^{-1}(y)\big).$$</div></div>
+<p>Differentiate both sides with respect to $y$. Writing $\Phi$ for a cumulative
+distribution function, the left-hand side differentiates to $\Phi_\rho' = p_\rho$
+by the definition of a density as the derivative of a cumulative. On the right, the
+chain rule gives $p_D$ evaluated at $r^{-1}(y)$, times the derivative of
+$r^{-1}$:</p>
+<div class="eqn"><div class="eqbody">$$p_\rho(y) \;=\; p_D\big(r^{-1}(y)\big)\,\frac{\mathrm{d}r^{-1}}{\mathrm{d}y} .$$</div></div>
+<p>Writing $d = r^{-1}(y)$ for the corresponding value of the original variable,</p>
+<div class="eqn" id="eq-jacobian"><div class="eqbody">$$p_\rho \;=\; p_D(d)\,\left|\frac{\mathrm{d}d}{\mathrm{d}\rho}\right| ,$$</div><div class="eqno"><a href="#eq-jacobian" title="Link to equation 2.2.1">(2.2.1)</a></div></div>
+<p>the modulus covering the decreasing case, where the matching events are
+$\rho \le y$ and $D \ge r^{-1}(y)$, and the derivative comes out negative while a
+density cannot.</p></div>
+<p>The factor $|\mathrm{d}d/\mathrm{d}\rho|$ is the <strong>Jacobian</strong> of the change of
+variables. Read it as bookkeeping: it says how much of the old axis is packed
+into a unit of the new one, and a fixed amount of probability spread over more
+axis has to be thinner. Where the map stretches, the density drops.</p>
+<p>That is what is happening to the likelihood here, with the two variables the
+other way round. The noise is Gaussian per unit of intensity; reading it per unit
+of distance multiplies by $|\mathrm{d}u/\mathrm{d}d| = |g'(d)|$, which is small far
+away. So the density spreads out there, and the tail is long to the right.</p>
+<p><a class="eqref" href="#eq-jacobian">(2.2.1)</a> returns in the problems, under the heading "The mode moves when you
+rename the axis", doing something less comfortable than explaining a lean.</p></details></div>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
 <li>Both prior and likelihood are Gaussian. Why is the posterior not?</li>
 <li>Which is larger here, the posterior mean or the posterior mode, and what
   feature of the distribution decides it?</li>
 <li>Name the two separate difficulties this lesson identifies, and say which of
   them Week&nbsp;1 had already met.</li>
-</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/two-rules.html"><span class="dir">Previous</span><span class="ttl">Two rules a brain has to obey</span></a><a class="nx" href="../week-02/climbing.html"><span class="dir">Next</span><span class="ttl">Climbing the log joint</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+</ul></div></div></article><nav class="pagenav"><a class="pv" href="../week-02/two-rules.html"><span class="dir">Previous</span><span class="ttl">Two rules a brain has to obey</span></a><a class="nx" href="../week-02/climbing.html"><span class="dir">Next</span><span class="ttl">Climbing the log joint</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script>
 </body>
 </html>

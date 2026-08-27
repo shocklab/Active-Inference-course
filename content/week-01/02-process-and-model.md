@@ -40,6 +40,11 @@ $\vartheta$, for external states of the generative process, keeping the letter
 $s$ for states inside the agent's model. We follow that; $s$ is defined in the
 next section. When you meet a paper that writes $s$ for both, read carefully:
 the ambiguity is not always harmless.
+
+We do not use $\eta$ for external states ourselves, and from Week&nbsp;2 the
+letter is doing an unrelated job as the rate constant on a gradient ascent. That
+is a genuine clash with the literature and there is no way round it: both uses
+are too standard to rename.
 :::
 
 ## The generative model

@@ -34,7 +34,7 @@ $h_1, h_2$ :: Generic factor functions in the independence lemma, with no fixed 
 ::: notation
 $\vartheta$ :: States of the generative *process*: what the world is actually doing. The agent has no access to these. Week&nbsp;1.
 $s$ :: Hidden states of the generative *model*. Latent variables inside the agent. Not the same object as $\vartheta$, and not required to correspond to it. Week&nbsp;1.
-$o$ :: Observations, or sensory states. On the blanket, shared by both sides. Some authors write $y$; the two are interchangeable and Weeks&nbsp;1 to 4 use $y$ where the emphasis is statistical rather than embodied.
+$o$ :: Observations, or sensory states. On the blanket, shared by both sides. Some authors write $y$. From Week&nbsp;2 the course writes $u$ for the same object wherever the setting is predictive coding, following that literature; it says so where it first does it.
 $a$ :: Actions, or active states. On the blanket. Week&nbsp;1.
 $\mu$ :: Internal states of the agent: the physical variables carrying the model, as against $s$, which is a variable inside it. Introduced in Week&nbsp;1 to state the Markov blanket; acquires dynamics of its own from Week&nbsp;5.
 :::
@@ -66,16 +66,21 @@ $I(s;o)$ :: Mutual information, $\sum_o P(o)\,D_{\mathrm{KL}}[P(s\mid o)\,\|\,P(
 ## Free energies
 
 ::: notation
-$F[Q, o]$ :: Variational free energy. A functional of the approximate posterior $Q$ and a *given* observation $o$. An upper bound on surprise. Week&nbsp;4.
-$G(\pi)$ :: Expected free energy of a policy $\pi$: a real number in nats, averaged over observations not yet made. Lower is better, and policies are chosen by $\sigma(-\gamma G)$, so only differences between policies matter, not the absolute value. Week&nbsp;10.
-$\mathrm{ELBO}$ :: The evidence lower bound, equal to $-F$. Common in the machine learning literature; the sign convention is the only difference.
+$\mathcal{F}[Q, o]$ :: Variational free energy. A functional of the approximate posterior $Q$ and a *given* observation $o$. An upper bound on surprise. Week&nbsp;4. The same script letter is used in Week&nbsp;2 for the log joint $\ln P(d) + \ln P(u \mid d)$, which is what $-\mathcal{F}$ reduces to when $Q$ is a point mass; deliberately the same symbol, because the second is the first's degenerate case.
+$\mathcal{G}(\pi)$ :: Expected free energy of a policy $\pi$: a real number in nats, averaged over observations not yet made. Lower is better, and policies are chosen by $\mathrm{softmax}(-\gamma \mathcal{G})$, so only differences between policies matter, not the absolute value. Week&nbsp;10.
+$\mathrm{ELBO}$ :: The evidence lower bound, equal to $-\mathcal{F}$. Common in the machine learning literature; the sign convention is the only difference.
 :::
 
-The distinction between $F$ and $G$ is the one students most often lose. $F$
-looks backwards at data in hand and is minimised by perception and learning.
-$G$ looks forwards at data not yet gathered and is minimised by choosing what to
-do. They are different functionals with different arguments and they are not
-each other's special cases.
+Both free energies are set in script, $\mathcal{F}$ and $\mathcal{G}$, to keep them
+clear of the plain $F$ and $G$ a reader meets as ordinary functions elsewhere.
+Week&nbsp;2 introduces the script $\mathcal{F}$ before the free energy itself
+exists, and says so at the point of use.
+
+The distinction between $\mathcal{F}$ and $\mathcal{G}$ is the one students most
+often lose. $\mathcal{F}$ looks backwards at data in hand and is minimised by
+perception and learning. $\mathcal{G}$ looks forwards at data not yet gathered and
+is minimised by choosing what to do. They are different functionals with
+different arguments and they are not each other's special cases.
 
 ## Discrete models, from Week 9
 
@@ -96,6 +101,19 @@ $t$ :: The current time, discrete from Week&nbsp;1 and continuous from Week&nbsp
 $\gamma$ :: Precision over policies: the inverse temperature in $Q(\pi) \propto \exp(-\gamma G(\pi))$.
 $\mathrm{softmax}(\cdot)$ :: $\mathrm{softmax}(x)_i = e^{x_i} / \sum_j e^{x_j}$. Much of the literature writes this $\sigma$; this course does not, because $\sigma$ is a standard deviation from Week&nbsp;1 onwards and the collision is worse than the inconvenience.
 $\tilde{s}, \tilde{o}$ :: A tilde denotes a whole *sequence* over time rather than a single time point, so $\tilde{s} = (s_1, \dots, s_T)$.
+:::
+
+## Estimating one hidden state, from Week 2
+
+::: notation
+$d$ :: The distance to a sound source: the single hidden state of Week&nbsp;2's running example. A continuous stand-in for Week&nbsp;1's discrete $s$.
+$u$ :: The observation, in the predictive coding notation. The same object as $o$; the letter is the control-theoretic *input*. Week&nbsp;2.
+$m,\ \Sigma$ :: Placeholders for the two slots of a Gaussian, its mean and its variance, filled differently at each use. $m$ rather than $\mu$, because $\mu$ is already the agent's internal states. Week&nbsp;2.
+$d_p,\ \Sigma_p$ :: The prior's mean and variance over the hidden state, in distance and in squared distance. Week&nbsp;2.
+$\Sigma_u$ :: The variance of the sensory noise, in squared units of the observation. Week&nbsp;2.
+$\eta$ :: A rate constant on a gradient ascent, in units of the variable per unit of gradient. Bounded above by $2/|\mathcal{F}''|$, derived in Week&nbsp;2. The letter also appears in Week&nbsp;1, but only to report that much of the literature uses it for external states; this course does not, and the two meanings never both apply.
+$r,\ w$ :: The activity of a unit and the weight of a connection, in the stylised device of Week&nbsp;2 Lesson&nbsp;1. $r$ for rate, since $a$ is already actions.
+$\Phi$ :: A cumulative distribution function, needed to change variables in a density. Week&nbsp;2.
 :::
 
 ## Continuous models, from Week 5

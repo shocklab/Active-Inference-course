@@ -114,8 +114,18 @@ print(f"eps_p {a:+.6f}   g'*eps_u {b:+.6f}   sum {a+b:.2e}")
 
 This prints an ascent value and a grid value agreeing to about four decimal
 places, the residual being the grid spacing rather than any error in either
-method. The final line shows ${{err_prior:+.6f}}$ and ${{err_obs_weighted:+.6f}}$,
-summing to ${{err_sum:.2e}}$.
+method. The final line shows ${{err_prior_ascent:+.6f}}$ and
+${{err_obs_weighted_ascent:+.6f}}$, summing to ${{err_sum_ascent:.2e}}$.
+
+That residual is smaller than the ${{err_sum:.2e}}$ quoted in Lesson&nbsp;3, and
+the difference is worth understanding rather than ignoring. Lesson&nbsp;3
+evaluates the two errors at the mode found by quadrature; this code evaluates
+them where its own ascent stopped. The two locations agree to five decimal
+places, but the quantity being reported is a cancellation between two numbers of
+size ${{err_prior:.2f}}$, so a difference in the fifth decimal of each becomes the whole of
+the answer. A cancellation magnifies whatever disagreement its inputs had, which
+is a general fact about floating point and the reason the sum is a poor way to
+measure how well either method has converged.
 
 On (b): the point is not that grids are trustworthy. It is that two methods
 sharing no code and resting on different ideas, one climbing a gradient and one
@@ -143,7 +153,20 @@ g'(d)\sum_{i=1}^{n} \Pi_u\big(u_i - g(d)\big)
 $$
 
 pulling out $n$ and writing $\bar u = \tfrac{1}{n}\sum_i u_i$. Nothing else about
-the individual readings survives: $\bar u$ is a sufficient statistic for them.
+the individual readings survives.
+
+::: definition Sufficient statistic
+A function $T(u_1, \dots, u_n)$ of the data is a **sufficient statistic** for a
+hidden state $d$ when the likelihood depends on the data only through it: that
+is, $P(u_1,\dots,u_n \mid d)$ can be written as a function of $T$ and $d$ times a
+factor containing no $d$. Two data sets with the same $T$ then give the same
+posterior, whatever the prior, so everything the data have to say about $d$ is
+already in $T$ and the rest may be discarded.
+
+Here $T = \bar u$, together with the count $n$. An animal that has heard a
+thousand sounds need not remember any of them; a running mean and a tally carry
+the whole of what those sounds said about the distance.
+:::
 
 (b) The last expression is the one-observation rule with $\Pi_u$ replaced by
 $n\Pi_u$ and $u$ by $\bar u$. So $n$ readings are one reading of $n$ times the

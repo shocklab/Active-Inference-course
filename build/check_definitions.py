@@ -204,10 +204,14 @@ def check_collisions():
         # find. A row reading "first used in Week 2, general from Week 5" has
         # its home in Week 2, and reading it left to right would file it under
         # whichever number the sentence put first.
+        # Every week the row points at, its section heading included, and the
+        # earliest of them wins. Taking only the description refiled $o$ under
+        # Week 2 the moment its row mentioned Week 2 in passing, even though the
+        # row sits under a heading that says Week 1.
         weeks = [int(a or b) for a, b in WEEK_TAG.findall(desc)]
-        if not weeks:
-            inherited = week_of_offset(m.start())
-            weeks = [inherited] if inherited is not None else []
+        inherited = week_of_offset(m.start())
+        if inherited is not None:
+            weeks.append(inherited)
         home = min(weeks) if weeks else None
         for tok in _row_symbols(sym):
             owner.setdefault(tok, []).append((home, desc))

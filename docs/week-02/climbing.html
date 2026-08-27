@@ -410,6 +410,14 @@ squared terms are small: when $d$ is near what the prior expected, <em>and</em> 
 intensity that $d$ predicts is near the intensity actually heard. It is a
 scoring rule with two ways to lose marks, and the variances set the exchange
 rate between them.</p>
+<p>Cash that out with this week's numbers. Dividing by $\Sigma_p = 1.0$ and
+$\Sigma_u = 0.1$ means a squared error in intensity is charged
+10 times as heavily as a squared error in distance is. So the
+animal will accept being a fair way from what it expected in order to avoid
+mispredicting the loudness by much, and the ratio 10 is the entire
+content of "how much". Neither variance matters on its own: multiply both by any
+constant and every term in $\mathcal{F}$ scales together, leaving the maximum
+where it was.</p>
 <h2 id="differentiate"><span class="secno">4</span>Differentiate</h2>
 <div class="box derivation"><div class="boxhd">Derivation<span class="bt">The gradient of the log joint</span></div><p>Differentiate <a class="eqref" href="#eq-F-explicit">(2.3.6)</a> term by term.</p>
 <p>The first term. Write $A = -(d - d_p)^2 / (2\Sigma_p)$. By the chain rule, with
@@ -465,12 +473,27 @@ network and nothing is summed over the state space. The rule is local.</p>
 because that is what maximising a function requires, and a locally computable
 quantity came out.</p>
 <h2 id="climbing"><span class="secno">6</span>Climbing</h2>
-<p>Having the gradient, take the obvious step. Move in the direction it points:</p>
+<p>Having the gradient, move in the direction it points:</p>
 <div class="eqn" id="eq-ascent"><div class="eqbody">$$\dot{d} \;=\; \eta \, \frac{\partial \mathcal{F}}{\partial d}
 \;=\; \eta\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),$$</div><div class="eqno"><a href="#eq-ascent" title="Link to equation 2.3.8">(2.3.8)</a></div></div>
 <p>with $\eta > 0$ a rate constant setting how large a step to take, in units of
-distance per unit of gradient. Equivalently, in discrete steps,
-$d_{k+1} = d_k + \eta\,\partial\mathcal{F}/\partial d\big|_{d_k}$.</p>
+distance per unit of gradient. In discrete steps,
+$d_{k+1} = d_k + \eta\,\partial\mathcal{F}/\partial d\big|_{d_k}$, which is the
+forward-Euler integration of the flow with the time step absorbed into $\eta$.
+That is a numerical choice and not a restatement: a different integrator would
+give a different stability condition from the one derived below.</p>
+<aside class="mn"><span class="mnl">Why not Newton's method</span><p>The faster move, and a mathematician's first instinct, is
+$d_{k+1} = d_k - \mathcal{F}'(d_k)/\mathcal{F}''(d_k)$, which on a quadratic lands
+on the peak in one step and converges quadratically near any smooth maximum. We
+have $\mathcal{F}''$ available; the last section of this lesson computes it.</p>
+<p>It is ruled out by Lesson&nbsp;1. With one hidden variable $\mathcal{F}''$ is a
+number, but with $n$ of them it is the $n \times n$ matrix of second derivatives,
+and its $(i,j)$ entry couples variable $i$ to variable $j$. Newton's step needs
+that matrix inverted, which mixes information from every variable into every
+component of the update. No unit computing from its own inputs can assemble it.</p>
+<p>So gradient ascent is not the obvious choice, it is the choice the constraints
+leave. The price is paid in the next section: without curvature information, the
+step size has to be chosen in advance and can be wrong.</p></aside>
 <aside class="mn"><span class="mnl">Why $\dot{d}$ and not $\Delta d$</span><p>The dot is Newton's notation for a time derivative. Writing the update as a flow
 rather than a jump anticipates Weeks&nbsp;5 to 8, where the estimate genuinely is
 a continuous physical quantity relaxing in real time, and the discrete version is
@@ -504,14 +527,24 @@ g'(\hat d)\,\varepsilon_u = -0.449962,$$</div></div>
 <p>summing to $3.44e-06$, which is zero to the tolerance the iteration was
 run to. Note what is <em>not</em> zero: the raw sensory error is
 $\varepsilon_u = 0.8379$, and the estimate still predicts an intensity
-of $0.4162$ against the $0.5$ heard. The animal has not explained
-the observation away. It has stopped at the point where explaining more of it
-would cost more in prior implausibility than it gains in fit.</p>
+of $0.4162$ against the $0.5$ heard. The animal has not moved far
+enough to account for the whole of what it heard. It has stopped where accounting
+for more would cost more in prior implausibility than it gains in fit.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">A phrase to keep clear of</span></div><p>It is tempting to say the animal has not "explained away" the observation.
+Resist it. <strong>Explaining away</strong> is Week&nbsp;1's technical term for something
+quite different: two independent causes of a shared effect becoming
+anti-correlated once that effect is observed, so that evidence for one is
+evidence against the other. It needs at least two causes and there is only one
+here. What is happening in this paragraph is a residual left by a compromise
+between two terms, which is not the same phenomenon and should not borrow its
+name.</p></div>
 <h2 id="how-large-a-step"><span class="secno">8</span>How large a step</h2>
 <p>$\eta$ was set to $0.05$ without comment. It cannot be set freely, and
 the bound on it turns out to depend on the precisions, which is the first sign of
 something the rest of the course keeps running into.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The largest stable rate</span></div><p>Write $d^{*}$ for the peak and $e_k = d_k - d^{*}$ for the error at step $k$. Near
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The largest stable rate</span></div><p>Write $d^{*}$ for the peak, the same point the earlier sections called $\hat d$,
+and $e_k = d_k - d^{*}$ for the error at step $k$. The star is used here only to
+keep the algebra readable while a hat is already doing work on other symbols. Near
 the peak, expand the gradient to first order. Since $\mathcal{F}'(d^{*}) = 0$ by
 definition of the peak,</p>
 <div class="eqn"><div class="eqbody">$$\mathcal{F}'(d_k) \;\approx\; \mathcal{F}'(d^{*}) + \mathcal{F}''(d^{*})\,e_k
@@ -534,6 +567,10 @@ it. Exactly at $\eta = 2/|\mathcal{F}''|$ the factor is $-1$ and the error neith
 grows nor shrinks.</p>
 <p>For the run above, $\mathcal{F}''(\hat d) = -3.013$, so any rate below
 $0.664$ converges and $0.05$ is comfortably inside it.</p>
+<p>The numbers here come from differentiating <a class="eqref" href="#eq-gradient-eps">(2.3.7)</a> a second time, which
+is done in full as the first exercise of Lesson&nbsp;4, once the notation for the
+precisions is in place. What matters now is not the formula but that
+$\mathcal{F}''$ depends on $\Sigma_u$, so the bound moves when the ear changes.</p>
 <p>Now sharpen the ear. Take $\Sigma_u = 0.01$, ten times more precise.
 The peak moves to $1.4261$, nearer what the data alone would say, and
 the curvature there stiffens to $-47.34$. The bound collapses to

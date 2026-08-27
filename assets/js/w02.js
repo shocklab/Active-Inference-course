@@ -57,25 +57,33 @@
       }
       var mode = exactMode(u, vp, vu);
       var hit = path.findIndex(function (p) { return Math.abs(p - mode) < 0.01 * mode; });
-      st = { path: path, ep: ep, eu: eu, mode: mode, hit: hit, u: u };
+
+      /* The landscape itself. The lesson is called "climbing the log joint" and
+       * without this panel the hill is never drawn: the other two show the walk
+       * against step number, which is a record of the climb, not the terrain. */
+      var F = function (d) {
+        return -(d - DP) * (d - DP) / (2 * vp)
+               - (u - g(d)) * (u - g(d)) / (2 * vu);
+      };
+      st = { path: path, ep: ep, eu: eu, mode: mode, hit: hit, u: u, F: F };
       out.show([
         ['settles at', path[path.length - 1].toFixed(4)],
         ['exact mode', mode.toFixed(4)],
         ['steps to 1%', hit < 0 ? 'not within ' + STEPS : String(hit)],
-        ['final Σε', (st.ep[STEPS - 1] + st.eu[STEPS - 1]).toFixed(4)]
+        ['errors sum to', (st.ep[STEPS - 1] + st.eu[STEPS - 1]).toFixed(4)]
       ]);
       plot.render();
     }
 
-    var plot = new A.Plot({ aspect: 0.42, pad: { l: 44, r: 14, t: 22, b: 38 } });
+    var plot = new A.Plot({ aspect: 0.34, pad: { l: 44, r: 14, t: 22, b: 38 } });
     var out = A.readout();
 
     plot.onDraw(function (p) {
       p.clear();
       var c = p.ctx;
-      var gap = 46;
-      var pw = (p.plotW() - gap) / 2, ph = p.plotH();
-      var ax = p.o.pad.l, bx = ax + pw + gap, ty = p.o.pad.t;
+      var gap = 40;
+      var pw = (p.plotW() - 2 * gap) / 3, ph = p.plotH();
+      var lx = p.o.pad.l, ax = lx + pw + gap, bx = ax + pw + gap, ty = p.o.pad.t;
 
       function box(x, ylo, yhi, title) {
         c.strokeStyle = C.rule2; c.lineWidth = 1;
@@ -87,9 +95,60 @@
         };
       }
 
-      /* ── left: the trajectory ─────────────────────────────────────────── */
+      /* ── left: the landscape, with the walk drawn on it ───────────────── */
+      var DLO = 0.35, DHI = 5.0, NS = 260;
+      var fs = [], fmin = Infinity, fmax = -Infinity;
+      for (var i = 0; i <= NS; i++) {
+        var dd = DLO + (DHI - DLO) * i / NS;
+        var fv = st.F(dd);
+        fs.push([dd, fv]);
+        if (fv > fmax) fmax = fv;
+        if (fv < fmin) fmin = fv;
+      }
+      /* The log joint dives to minus infinity as d -> 0, so a floor is needed or
+       * the interesting part of the curve is a flat line at the top. Clip at a
+       * fixed multiple of the peak-to-visible range rather than at the true
+       * minimum, and say in the note that the bottom is cut. */
+      var floor = fmax - Math.max(6, (fmax - fs[NS][1]) * 2.2);
+      var Lx = function (d) { return lx + ((d - DLO) / (DHI - DLO)) * pw; };
+      var Ly = function (v) {
+        return ty + ph - ((Math.max(v, floor) - floor) / (fmax - floor)) * ph;
+      };
+      c.strokeStyle = C.rule2; c.lineWidth = 1;
+      c.strokeRect(lx + 0.5, ty + 0.5, pw, ph);
+      p.text(lx, ty - 8, 'the log joint F(d)',
+        { pixel: true, align: 'left', size: 10.5, colour: C.ink2, weight: '600' });
+
+      c.strokeStyle = C.ink2; c.lineWidth = 2;
+      c.beginPath();
+      fs.forEach(function (q, i) {
+        i ? c.lineTo(Lx(q[0]), Ly(q[1])) : c.moveTo(Lx(q[0]), Ly(q[1]));
+      });
+      c.stroke();
+
+      c.strokeStyle = C.clay; c.lineWidth = 1.2; c.setLineDash([3, 3]);
+      c.beginPath(); c.moveTo(Lx(st.mode), ty); c.lineTo(Lx(st.mode), ty + ph); c.stroke();
+      c.setLineDash([]);
+
+      /* every fourth iterate, so the crowding near the peak stays readable */
+      for (var k = 0; k < st.path.length; k += 4) {
+        var dv = st.path[k];
+        if (dv < DLO || dv > DHI) continue;
+        c.globalAlpha = 0.25 + 0.75 * (1 - k / st.path.length);
+        c.fillStyle = C.accent;
+        c.beginPath(); c.arc(Lx(dv), Ly(st.F(dv)), 2.6, 0, 6.284); c.fill();
+      }
+      c.globalAlpha = 1;
+      c.fillStyle = C.gold;
+      c.beginPath(); c.arc(Lx(DP), Ly(st.F(DP)), 4.2, 0, 6.284); c.fill();
+      p.text(Lx(DP), Ly(st.F(DP)) - 11, 'start',
+        { pixel: true, size: 9.5, colour: C.gold });
+      p.text(lx + pw - 4, ty + ph - 8, 'd \u2192',
+        { pixel: true, align: 'right', size: 9.5, colour: C.faint });
+
+      /* ── middle: the trajectory ───────────────────────────────────────── */
       var dlo = 0, dhi = Math.max(4, st.mode * 1.6, DP * 1.4);
-      var Lp = box(ax, dlo, dhi, 'estimate d');
+      var Lp = box(ax, dlo, dhi, 'estimate, by step');
 
       [1, 2, 3, 4].forEach(function (v) {
         if (v > dhi) return;
@@ -152,7 +211,9 @@
         p.text(bx + 29, ly, it[0], { pixel: true, align: 'left', size: 9.8, colour: C.ink2 });
       });
 
-      p.text(p.o.pad.l + p.plotW() / 2, p.h - 4, 'gradient-ascent step',
+      p.text(ax + pw / 2, p.h - 4, 'gradient-ascent step',
+        { pixel: true, size: 10.5, colour: C.ink2 });
+      p.text(bx + pw / 2, p.h - 4, 'gradient-ascent step',
         { pixel: true, size: 10.5, colour: C.ink2 });
     });
 
@@ -162,7 +223,11 @@
     mount.appendChild(A.panel([
       A.row([sU.el, sVp.el, sVu.el, sEta.el]),
       body, out,
-      A.note('The prior mean is held at <i>d</i><sub>p</sub> = 2 throughout, and the estimate '
+      A.note('Left is the hill being climbed: <i>F</i> as a function of <i>d</i>, with the walk '
+        + 'drawn on it and later steps fainter. Its bottom is cut off, because <i>F</i> runs to '
+        + 'minus infinity as <i>d</i> approaches zero and plotting that flattens everything else. '
+        + 'The other two panels show the same walk against step number. '
+        + 'The prior mean is held at <i>d</i><sub>p</sub> = 2 throughout, and the estimate '
         + 'always starts there, so the prior error begins at exactly zero. Watch the right-hand '
         + 'panel: the two terms are not driven to zero, they are driven to cancel. Lower the '
         + 'sensory variance and the gold curve dominates, pulling the estimate towards what the '
@@ -237,7 +302,7 @@
       out.show([
         ['mode', mode.toFixed(4)],
         ['mean', mean.toFixed(4)],
-        ['gap', (100 * (mean - mode) / mode).toFixed(1) + '%'],
+        ['mean above mode by', (100 * (mean - mode) / mode).toFixed(1) + '%'],
         ['skew', skew.toFixed(3)]
       ]);
       plot.render();

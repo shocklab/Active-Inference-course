@@ -33,6 +33,14 @@ V = {
     "d_from_data_alone": sqrt(SOURCE_POWER / U_OBS),
 }
 
+# A density can exceed 1, and in this very problem one does. The likelihood as a
+# function of u peaks at 1/sqrt(2*pi*VAR_OBS), which is the cheapest possible
+# demonstration that a density is not a probability.
+V["lik_peak_density"] = 1 / sqrt(2 * pi * VAR_OBS)
+V["prior_peak_density"] = 1 / sqrt(2 * pi * VAR_PRIOR)
+V["prior_sd"] = sqrt(VAR_PRIOR)
+V["var_ratio"] = VAR_PRIOR / VAR_OBS
+
 # ── the exact posterior, by quadrature ───────────────────────────────────
 _grid = np.linspace(0.05, 8.0, 600000)
 _post = (np.exp(-(_grid - D_PRIOR) ** 2 / (2 * VAR_PRIOR))
@@ -45,6 +53,44 @@ V["post_sd"] = float(sqrt(np.trapezoid((_grid - V["post_mean"]) ** 2 * _post, _g
 V["post_skew"] = float(np.trapezoid(((_grid - V["post_mean"]) / V["post_sd"]) ** 3 * _post, _grid))
 V["mean_mode_gap"] = V["post_mean"] - V["post_mode"]
 V["mean_mode_pct"] = 100 * V["mean_mode_gap"] / V["post_mode"]
+V["post_peak_density"] = float(_post.max())
+
+# The probability that the source is between 1.5 and 1.6, to show what a density
+# has to be integrated over before it means anything.
+_band = (_grid >= 1.5) & (_grid <= 1.6)
+V["post_band_lo"], V["post_band_hi"] = 1.5, 1.6
+V["post_band_mass"] = float(np.trapezoid(_post[_band], _grid[_band]))
+
+# ── why the posterior is skewed, checked rather than argued ─────────────
+# A first draft of this passage claimed the likelihood "dominates near the peak"
+# and drags the product with it. Measured, the prior varies by a factor of 2.93
+# across the posterior's central 90% and the likelihood by 2.38, so neither
+# dominates and the claim was false. The real mechanism is in the exponent.
+_LOGLIK_RANGE = 0.4          # half-width in d over which the fit is judged
+_h = np.linspace(-_LOGLIK_RANGE, _LOGLIK_RANGE, 9)
+_ll = -(U_OBS - g(V["post_mode"] + _h)) ** 2 / (2 * VAR_OBS)
+_resid = _ll - np.polyval(np.polyfit(_h, _ll, 2), _h)
+V["loglik_parabola_resid"] = float(np.abs(_resid).max())
+V["loglik_fit_lo"] = V["post_mode"] - _LOGLIK_RANGE
+V["loglik_fit_hi"] = V["post_mode"] + _LOGLIK_RANGE
+
+# The likelihood is not a density over d at all: as d grows, g(d) -> 0 and the
+# likelihood flattens onto a nonzero constant, so its integral diverges. Any
+# "skew of the likelihood" is a property of where the grid was cut. It is the
+# PRIOR that makes the posterior normalisable.
+V["lik_limit_far"] = float(np.exp(-U_OBS ** 2 / (2 * VAR_OBS)))
+
+# With a narrow enough prior the quadratic term swamps everything and the skew
+# goes away. Computed on the week's own grid, which is wide enough here because
+# a narrow prior keeps every bit of the mass near d = 2.
+VAR_PRIOR_NARROW = 0.01
+_pn = (np.exp(-(_grid - D_PRIOR) ** 2 / (2 * VAR_PRIOR_NARROW))
+       * np.exp(-(U_OBS - g(_grid)) ** 2 / (2 * VAR_OBS)))
+_pn /= np.trapezoid(_pn, _grid)
+_mn = np.trapezoid(_grid * _pn, _grid)
+_sn = sqrt(np.trapezoid((_grid - _mn) ** 2 * _pn, _grid))
+V["var_prior_narrow"] = VAR_PRIOR_NARROW
+V["skew_narrow_prior"] = float(np.trapezoid(((_grid - _mn) / _sn) ** 3 * _pn, _grid))
 
 # ── the two prediction errors at the optimum ─────────────────────────────
 _phi = V["post_mode"]
@@ -74,6 +120,15 @@ def ascend(phi0=D_PRIOR, rate=0.05, steps=400):
 
 
 _path = ascend()
+
+# The errors AT THE LAST ASCENT ITERATE, which is not the same place as the
+# quadrature mode. They agree to five decimals, but the SUM is a cancellation
+# and differs by nine orders of magnitude between the two, so the exercise that
+# prints the ascent's own numbers must cite these and not the ones above.
+_dl = _path[-1]
+V["err_prior_ascent"] = (D_PRIOR - _dl) / VAR_PRIOR
+V["err_obs_weighted_ascent"] = (U_OBS - g(_dl)) / VAR_OBS * g_prime(_dl)
+V["err_sum_ascent"] = V["err_prior_ascent"] + V["err_obs_weighted_ascent"]
 V["ascent_rate"] = 0.05
 V["ascent_final"] = _path[-1]
 V["ascent_steps_to_1pct"] = next(
@@ -197,6 +252,18 @@ V["lin_mass_below_zero"] = float(np.trapezoid(_lp[_wide < 0], _wide[_wide < 0]))
 # kills the density long before the prior's unphysical tail can matter.
 _near = _grid < 0.5
 V["nonlin_mass_below_half"] = float(np.trapezoid(_post[_near], _grid[_near]))
+
+# Completing the square is an identity, so it can be checked rather than
+# trusted: the exact linear posterior divided by the claimed Gaussian must be
+# a CONSTANT in d, not merely close to one.
+_claim = np.exp(-0.5 * _lin_den * (_wide - V["lin_mode"]) ** 2)
+_exact = np.exp(-(_wide - D_PRIOR) ** 2 / (2 * VAR_PRIOR)
+                - (U_OBS - _wide) ** 2 / (2 * VAR_OBS))
+_ratio = _exact / _claim
+V["lin_square_spread"] = float(_ratio.max() - _ratio.min())
+
+# The simple average is what equal variances must give, whatever their value.
+V["lin_equal_mean"] = (D_PRIOR + U_OBS) / 2
 
 # ── how much of the curvature the g'' term accounts for ──────────────────
 def g_second(d):

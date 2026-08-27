@@ -114,6 +114,15 @@ intensity that $d$ predicts is near the intensity actually heard. It is a
 scoring rule with two ways to lose marks, and the variances set the exchange
 rate between them.
 
+Cash that out with this week's numbers. Dividing by $\Sigma_p = {{var_prior}}$ and
+$\Sigma_u = {{var_obs}}$ means a squared error in intensity is charged
+{{var_ratio:.0f}} times as heavily as a squared error in distance is. So the
+animal will accept being a fair way from what it expected in order to avoid
+mispredicting the loudness by much, and the ratio {{var_ratio:.0f}} is the entire
+content of "how much". Neither variance matters on its own: multiply both by any
+constant and every term in $\mathcal{F}$ scales together, leaving the maximum
+where it was.
+
 ## Differentiate
 
 ::: derivation The gradient of the log joint
@@ -208,7 +217,7 @@ quantity came out.
 
 ## Climbing
 
-Having the gradient, take the obvious step. Move in the direction it points:
+Having the gradient, move in the direction it points:
 
 $$
 \dot{d} \;=\; \eta \, \frac{\partial \mathcal{F}}{\partial d}
@@ -216,8 +225,28 @@ $$
 $$ {#ascent}
 
 with $\eta > 0$ a rate constant setting how large a step to take, in units of
-distance per unit of gradient. Equivalently, in discrete steps,
-$d_{k+1} = d_k + \eta\,\partial\mathcal{F}/\partial d\big|_{d_k}$.
+distance per unit of gradient. In discrete steps,
+$d_{k+1} = d_k + \eta\,\partial\mathcal{F}/\partial d\big|_{d_k}$, which is the
+forward-Euler integration of the flow with the time step absorbed into $\eta$.
+That is a numerical choice and not a restatement: a different integrator would
+give a different stability condition from the one derived below.
+
+::: mn Why not Newton's method
+The faster move, and a mathematician's first instinct, is
+$d_{k+1} = d_k - \mathcal{F}'(d_k)/\mathcal{F}''(d_k)$, which on a quadratic lands
+on the peak in one step and converges quadratically near any smooth maximum. We
+have $\mathcal{F}''$ available; the last section of this lesson computes it.
+
+It is ruled out by Lesson&nbsp;1. With one hidden variable $\mathcal{F}''$ is a
+number, but with $n$ of them it is the $n \times n$ matrix of second derivatives,
+and its $(i,j)$ entry couples variable $i$ to variable $j$. Newton's step needs
+that matrix inverted, which mixes information from every variable into every
+component of the update. No unit computing from its own inputs can assemble it.
+
+So gradient ascent is not the obvious choice, it is the choice the constraints
+leave. The price is paid in the next section: without curvature information, the
+step size has to be chosen in advance and can be wrong.
+:::
 
 ::: mn Why $\dot{d}$ and not $\Delta d$
 The dot is Newton's notation for a time derivative. Writing the update as a flow
@@ -271,9 +300,20 @@ $$
 summing to ${{err_sum:.2e}}$, which is zero to the tolerance the iteration was
 run to. Note what is *not* zero: the raw sensory error is
 $\varepsilon_u = {{err_obs:.4f}}$, and the estimate still predicts an intensity
-of ${{g_at_mode:.4f}}$ against the ${{u_obs}}$ heard. The animal has not explained
-the observation away. It has stopped at the point where explaining more of it
-would cost more in prior implausibility than it gains in fit.
+of ${{g_at_mode:.4f}}$ against the ${{u_obs}}$ heard. The animal has not moved far
+enough to account for the whole of what it heard. It has stopped where accounting
+for more would cost more in prior implausibility than it gains in fit.
+
+::: warning A phrase to keep clear of
+It is tempting to say the animal has not "explained away" the observation.
+Resist it. **Explaining away** is Week&nbsp;1's technical term for something
+quite different: two independent causes of a shared effect becoming
+anti-correlated once that effect is observed, so that evidence for one is
+evidence against the other. It needs at least two causes and there is only one
+here. What is happening in this paragraph is a residual left by a compromise
+between two terms, which is not the same phenomenon and should not borrow its
+name.
+:::
 
 ## How large a step
 
@@ -282,7 +322,9 @@ the bound on it turns out to depend on the precisions, which is the first sign o
 something the rest of the course keeps running into.
 
 ::: derivation The largest stable rate
-Write $d^{*}$ for the peak and $e_k = d_k - d^{*}$ for the error at step $k$. Near
+Write $d^{*}$ for the peak, the same point the earlier sections called $\hat d$,
+and $e_k = d_k - d^{*}$ for the error at step $k$. The star is used here only to
+keep the algebra readable while a hat is already doing work on other symbols. Near
 the peak, expand the gradient to first order. Since $\mathcal{F}'(d^{*}) = 0$ by
 definition of the peak,
 
@@ -323,6 +365,11 @@ grows nor shrinks.
 
 For the run above, $\mathcal{F}''(\hat d) = {{curv_at_mode:.3f}}$, so any rate below
 ${{eta_max:.3f}}$ converges and ${{ascent_rate}}$ is comfortably inside it.
+
+The numbers here come from differentiating [eq:gradient-eps] a second time, which
+is done in full as the first exercise of Lesson&nbsp;4, once the notation for the
+precisions is in place. What matters now is not the formula but that
+$\mathcal{F}''$ depends on $\Sigma_u$, so the bound moves when the ear changes.
 
 Now sharpen the ear. Take $\Sigma_u = {{var_obs_sharp}}$, ten times more precise.
 The peak moves to ${{mode_sharp:.4f}}$, nearer what the data alone would say, and

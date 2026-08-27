@@ -26,6 +26,8 @@ Department of Mathematics & Applied Mathematics, University of Cape Town.
 | `smith-2022-...pdf` | **CC BY-NC-ND 4.0** (verified in the PDF) | Read, cite, link, brief quotation with attribution under fair dealing. |
 | `shock-notes-latex/` | Jonathan's own | **Free to use in full.** Seeds Weeks 4 and 10. |
 | `shock-active-inference-notebook.nb` | Jonathan's own | **Free to use in full.** See `notes/mathematica-notebook-diagnosis.md`. |
+| `papers/` | arXiv e-prints, licences vary per paper. Check `metadata.json` and the DOI before leaning on one. | Read and cite freely. Adapting requires checking the individual licence, which is usually not CC BY. |
+| `papers/2001.07203/` | **CC BY 4.0** for the version of record, confirmed against Crossref for doi:10.1016/j.jmp.2020.102447 | The one permissive source we have. Adaptation is licensed, and CC BY 4.0 is compatible with this course's own licence. Attribution is still required. Even so, prefer our own derivations: that is the premise of the course, not a licence constraint. Spine of Weeks 9 to 11. |
 
 Parr, Pezzulo & Friston (MIT Press, 2022) is also **CC BY-NC-ND 4.0**, not permissive.
 
@@ -183,6 +185,32 @@ statistics come from, via `_svg_path` in `content/week-02/values.py`, and cited 
 `{{fig_post_path}}`. Schematics with no data in them (the circuit diagram) may still
 be drawn by hand.
 
+### What the collision check cannot see
+
+It catches a symbol **spent early**: used in Week $N$ when `notation.md` files it
+under a later week. It does not catch a symbol **spent twice**, because that
+needs meaning and it only has letters.
+
+Every one of these got through it, and every one is real:
+
+- $\mu$ for a generic Gaussian mean in Week 2, when Week 1 owns it for the
+  agent's internal states.
+- $a$ for a unit's activity, when Week 1 owns it for actions.
+- $w$ for a synaptic weight, against Week 1's noisy-OR probability.
+- $z$ for an out-of-reach quantity, against the sensory noise of Week 5.
+- $\alpha$ for a learning rate, against Week 1's channel ambiguity.
+
+Four of the five were written in a single edit, by the author of the check, ten
+minutes after extending it. **The check licenses nothing. Before spending a
+letter, grep `notation.md` and Week 1 for it.**
+
+Two related traps in the notation page itself, both found by reading rather than
+by running anything: a row that mentions a later week in passing was refiled
+under that week until `home` became the earliest of all evidence rather than the
+first match; and $\sigma$ still meant softmax in one row long after the rename
+that was supposed to remove it, because it sat inside another row's description
+where no head-symbol scan reaches.
+
 ### Check the check by breaking it
 
 `check_definitions.py` reported zero collisions after being rewritten, which is also
@@ -335,8 +363,10 @@ is not a translation of the NumPy one but does what needs many runs at once.
 
 Known outstanding, in order:
 1. Read Da Costa et al. (2020), arXiv:2001.07203, before drafting Weeks 9 to 11.
-   It is the only planned source not in `source-material/papers/`, and the outline
-   calls it the spine of those three weeks.
+   Downloaded 2026-08-27 and sitting in `source-material/papers/2001.07203/`, PDF
+   and LaTeX source both, but **not yet read**. The outline calls it the spine of
+   those three weeks, and Week 9 went wrong once already by being built from a
+   table of contents rather than a source.
 2. Week 1's exercises have gaps: no exercise computes an entropy, mutual information
    is never independently exercised, the regulated $\kappa > 0$ case is tested only
    by the widget, there is no rung-zero warm-up, and the reader is never asked to
