@@ -313,7 +313,7 @@ prefer methods built on them. Week&nbsp;12 returns to this; it is one of the mor
 serious objections to the framework, and it does not go away by being ignored.
 :::
 
-::: exercise Ambiguity has a shape
+::: exercise Where the ear stops being informative
 In Lesson&nbsp;4, $|g'(d)|$ was called the sensitivity of the observation to the
 state. Make it quantitative.
 

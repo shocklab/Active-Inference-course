@@ -1,6 +1,6 @@
 ---
 title: What makes the denominator hard
-deck: "Exact inference is intractable" is four separate claims wearing one coat. They fail in different places, are escaped by different tricks, and only one of them is about the size of a sum.
+deck: The claim that exact inference is intractable is four claims, not one. They fail in different places, are escaped by different methods, and only one of them is about the size of a sum.
 week: 1
 time: 45 min
 scripts: [w01.js]
@@ -47,7 +47,7 @@ $$
 and the observation attaches to the chain somewhere. The sum still has
 ${{den_terms:.3e}}$ terms. Nothing about the count has changed.
 
-::: derivation Summing an astronomical number of terms in linear time
+::: derivation Summing a trillion trillion terms in linear time
 Write the sum out and push each factor as far right as it will go:
 
 $$
@@ -153,7 +153,7 @@ exact inference is cheap when the model is nearly a tree, expensive when it is
 not, and the world does not supply trees.
 :::
 
-## Nobody else can do it either
+## No algorithm does better
 
 Everything so far is about one algorithm. Elimination is defeated by high
 treewidth, but that leaves the obvious question: might some cleverer method
@@ -195,7 +195,7 @@ Lesson&nbsp;3. That argument showed a faster machine cannot help, because a
 constant factor cannot beat an exponent. This one shows a cleverer *algorithm*
 cannot help either. Two different claims, and the second is the one that matters.
 
-## The continuous case fails for a different reason entirely
+## The continuous case fails differently
 
 Everything above concerns counting and structure. Now take the smallest possible
 continuous problem: **one** hidden variable, no dimension to speak of, no
@@ -270,7 +270,7 @@ square, it applies only to quadratic exponents, and [eq:cont-denom] with a
 nonlinear $g$ has a non-quadratic exponent. No general method replaces it.
 :::
 
-## Approximating the integral, and where each method breaks
+## Where quadrature and sampling break
 
 Two obvious escapes from [eq:cont-denom], and each fails in a way that is worth
 knowing, because both reappear in later weeks.
@@ -325,7 +325,7 @@ The exponential did not go away; it moved from the number of terms into the
 number of samples. This is the honest reading of "Monte Carlo beats the curse of
 dimensionality": the *rate* is dimension-free, and the *constant* is not.
 
-## The fourth reason, which is not about computers at all
+## Locality
 
 Three reasons so far, all of them about difficulty of computation. The fourth is
 different in kind, and for this course it is the one that bites first.

@@ -177,7 +177,7 @@ which is intuitive and, as the exercises will show, not a theorem.
 ::: widget bayes-discrete | The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.
 :::
 
-## What the ambiguity slider is showing you
+## What the ambiguity slider shows
 
 The figure's third slider is a dimensionless parameter $\alpha \in [0,1]$ that
 blends the likelihood towards a uniform one. Writing $U$ for the matrix every one

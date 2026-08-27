@@ -46,7 +46,7 @@ and third. Every practical method for solving it is, at bottom, a way of
 smuggling in enough prior structure to restore well-posedness.
 :::
 
-## Explaining away, and why it ruins the obvious shortcut
+## Explaining away
 
 Here is the natural idea for beating the cost. Suppose the state breaks into
 several independent parts, one per thing the agent tracks: position, hunger,
@@ -179,7 +179,7 @@ really doing inference: a circuit that merely accumulates evidence for each
 cause separately cannot produce it, because the effect requires the causes to
 see one another.
 
-## What can be done
+## Three families of response
 
 There are three families of response, and the entire structure of Part&nbsp;I is
 a tour of them.

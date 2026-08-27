@@ -438,7 +438,13 @@ def split_front_matter(raw):
         elif v.lower() in ("true", "false"):
             v = v.lower() == "true"
         else:
-            v = v.strip("'\"")
+            # Strip surrounding quotes only when they are a MATCHED pair. A bare
+            # strip took the opening quote off a deck that began with a quoted
+            # phrase and left the closing one behind, so the published page read
+            # `Exact inference is intractable" is four claims`, with a stray
+            # mark and no way for any checker to notice.
+            if len(v) >= 2 and v[0] == v[-1] and v[0] in "'\"":
+                v = v[1:-1]
         meta[k.strip()] = v
     return meta, body.lstrip("\n")
 

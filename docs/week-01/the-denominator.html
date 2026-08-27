@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>What makes the denominator hard · Active Inference</title><meta name="description" content="Exact inference is intractable" is four separate claims wearing one coat. They fail in different places, are escaped by different tricks, and only one of them is about the size of a sum."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>What makes the denominator hard · Active Inference</title><meta name="description" content="The claim that exact inference is intractable is four claims, not one. They fail in different places, are escaped by different methods, and only one of them is about the size of a sum."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
 :root{
   --paper:#fdfcf9; --card:#ffffff;
   --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">A soft body in a hard world</a><a class="" href="../week-01/process-and-model.html">Two models, not one</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="cur" href="../week-01/the-denominator.html">What makes the denominator hard</a><a class="" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>What makes the denominator hard</h1><p class="deck">Exact inference is intractable" is four separate claims wearing one coat. They fail in different places, are escaped by different tricks, and only one of them is about the size of a sum.</p><div class="meta"><span>Week 1</span><span>&#167;5</span><span>45 min</span></div></header><article class="abody"><p>Lesson&nbsp;3 counted the terms in</p>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">A soft body in a hard world</a><a class="" href="../week-01/process-and-model.html">Two models, not one</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="cur" href="../week-01/the-denominator.html">What makes the denominator hard</a><a class="" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>What makes the denominator hard</h1><p class="deck">The claim that exact inference is intractable is four claims, not one. They fail in different places, are escaped by different methods, and only one of them is about the size of a sum.</p><div class="meta"><span>Week 1</span><span>&#167;5</span><span>45 min</span></div></header><article class="abody"><p>Lesson&nbsp;3 counted the terms in</p>
 <div class="eqn" id="eq-denom"><div class="eqbody">$$P(o) \;=\; \sum_s P(o \mid s)\,P(s)$$</div><div class="eqno"><a href="#eq-denom" title="Link to equation 1.5.2">(1.5.2)</a></div></div>
 <p>and found $k^n$ of them for a model with $n$ state factors of $k$ values each.
 Lesson&nbsp;4 took that as settled and moved on. Almost every treatment of active
@@ -373,7 +373,7 @@ influences factor 3, and so on, with no other dependencies. The joint is</p>
 <div class="eqn"><div class="eqbody">$$P(s_1, \dots, s_n) \;=\; P(s_1)\prod_{i=1}^{n-1} P(s_{i+1} \mid s_i),$$</div></div>
 <p>and the observation attaches to the chain somewhere. The sum still has
 $1.209e+24$ terms. Nothing about the count has changed.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Summing an astronomical number of terms in linear time</span></div><p>Write the sum out and push each factor as far right as it will go:</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Summing a trillion trillion terms in linear time</span></div><p>Write the sum out and push each factor as far right as it will go:</p>
 <div class="eqn"><div class="eqbody">$$\sum_{s_1}\sum_{s_2}\cdots\sum_{s_n} P(s_1)\,P(s_2\mid s_1)\,P(s_3 \mid s_2)\cdots P(s_n \mid s_{n-1}).$$</div></div>
 <p>Only the last factor contains $s_n$, so the innermost sum can be done on its own:</p>
 <div class="eqn"><div class="eqbody">$$\sum_{s_n} P(s_n \mid s_{n-1}) \;=\; m_{n}(s_{n-1}),$$</div></div>
@@ -440,7 +440,7 @@ posterior. Conditioning is what fills the graph in.</p>
 <div class="box keyidea"><div class="boxhd">The idea</div><p>The obstacle is not $n$. It is $w$. Restate the claim of Lesson&nbsp;3 accordingly:
 exact inference is cheap when the model is nearly a tree, expensive when it is
 not, and the world does not supply trees.</p></div>
-<h2 id="nobody-else-can-do-it-either"><span class="secno">3</span>Nobody else can do it either</h2>
+<h2 id="no-algorithm-does-better"><span class="secno">3</span>No algorithm does better</h2>
 <p>Everything so far is about one algorithm. Elimination is defeated by high
 treewidth, but that leaves the obvious question: might some cleverer method
 succeed where elimination fails? Most treatments never ask. The answer is known,
@@ -473,7 +473,7 @@ being assumed gets named.</p></div>
 Lesson&nbsp;3. That argument showed a faster machine cannot help, because a
 constant factor cannot beat an exponent. This one shows a cleverer <em>algorithm</em>
 cannot help either. Two different claims, and the second is the one that matters.</p>
-<h2 id="the-continuous-case-fails-for-a-different-reason-entirely"><span class="secno">4</span>The continuous case fails for a different reason entirely</h2>
+<h2 id="the-continuous-case-fails-differently"><span class="secno">4</span>The continuous case fails differently</h2>
 <p>Everything above concerns counting and structure. Now take the smallest possible
 continuous problem: <strong>one</strong> hidden variable, no dimension to speak of, no
 structure to exploit, nothing to count.</p>
@@ -519,7 +519,7 @@ $\int_{-\infty}^{\infty} e^{-x^2}\mathrm{d}x = \sqrt{\pi}$ exactly. The claim
 here is the narrower and safer one: the technique that works is completing the
 square, it applies only to quadratic exponents, and <a class="eqref" href="#eq-cont-denom">(1.5.3)</a> with a
 nonlinear $g$ has a non-quadratic exponent. No general method replaces it.</p></aside>
-<h2 id="approximating-the-integral-and-where-each-method-breaks"><span class="secno">5</span>Approximating the integral, and where each method breaks</h2>
+<h2 id="where-quadrature-and-sampling-break"><span class="secno">5</span>Where quadrature and sampling break</h2>
 <p>Two obvious escapes from <a class="eqref" href="#eq-cont-denom">(1.5.3)</a>, and each fails in a way that is worth
 knowing, because both reappear in later weeks.</p>
 <p><strong>Put down a grid.</strong> With $m$ sample points and an integrand having $\rho$ bounded
@@ -567,7 +567,7 @@ independent coordinates, so a per-coordinate mismatch of
 The exponential did not go away; it moved from the number of terms into the
 number of samples. This is the honest reading of "Monte Carlo beats the curse of
 dimensionality": the <em>rate</em> is dimension-free, and the <em>constant</em> is not.</p>
-<h2 id="the-fourth-reason-which-is-not-about-computers-at-all"><span class="secno">6</span>The fourth reason, which is not about computers at all</h2>
+<h2 id="locality"><span class="secno">6</span>Locality</h2>
 <p>Three reasons so far, all of them about difficulty of computation. The fourth is
 different in kind, and for this course it is the one that bites first.</p>
 <p>Suppose the sum were short. Suppose the model had ten states and <a class="eqref" href="#eq-denom">(1.5.2)</a> had

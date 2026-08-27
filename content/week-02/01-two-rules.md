@@ -127,7 +127,7 @@ helping itself to arbitrary computation. Where the course later leans on them,
 it will say so.
 :::
 
-## Why begin here
+## What the constraints buy
 
 Because it turns what follows into a search with a specification.
 
@@ -145,7 +145,7 @@ ends. Neither was aimed at; both fall out of differentiating the same quantity.
 That is the sort of thing that makes a framework worth taking seriously, and it
 is only visible if the constraints were stated in advance.
 
-## Something that does satisfy them
+## A rule that satisfies both
 
 Every example so far has been of a rule breaking. Here is the smallest one that
 does not, so there is something to compare against.

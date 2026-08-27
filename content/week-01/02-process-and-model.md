@@ -268,7 +268,7 @@ That is the precise version of Lesson&nbsp;1's remark that the two meanings of
 $P(o)$ coincide when the model is good and part company when it is not, and it
 is why the framework can get away with using one as a stand-in for the other.
 
-::: exercise Confirm the price
+::: exercise Verify the excess surprise
 Verify [eq:lamp-kl] by hand: compute $P^{*}(\text{dim})$ and
 $P_B(\text{dim})$, then evaluate
 $\sum_o P^{*}(o)\ln\big[P^{*}(o)/P_B(o)\big]$.

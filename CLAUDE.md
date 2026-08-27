@@ -211,6 +211,19 @@ first match; and $\sigma$ still meant softmax in one row long after the rename
 that was supposed to remove it, because it sat inside another row's description
 where no head-symbol scan reaches.
 
+### A deck lost its opening quotation mark for a week
+
+`split_front_matter` stripped quote characters off both ends of every value with
+a bare `.strip("'\"")`. A deck that *began* with a quoted phrase lost the opening
+mark and kept the closing one, so the published page read
+`Exact inference is intractable" is four claims`. Balanced HTML, valid maths,
+correct numbers, and a stray quotation mark in the subtitle of the page.
+
+Nothing could have caught it: the checkers see the rendered string and have no
+idea what it was supposed to be. It was found by dumping every title and deck
+into a list to review the wording, which is the same act that finds bad headings.
+Quotes are now stripped only as a matched pair.
+
 ### The builder has no citation syntax, and nothing said so
 
 Four `[@key]` citations reached a built page verbatim, carried over from Pandoc
@@ -352,6 +365,31 @@ Additionally, for this course specifically:
   important, honest, or clever. Make the point.
 - **No bold for emphasis.** Bold is for first use of a technical term being
   defined, and for table labels. Nothing else.
+- **Headings name the section; they do not perform.** Flagged twice now, so it
+  is a rule rather than a correction. The failures found, in order of how often
+  they recurred:
+  - **An explainer appended to the name.** "Explaining away, and why it ruins the
+    obvious shortcut" is a heading plus a defence of the heading. Six of these.
+    The name alone was better every time: "Explaining away".
+  - **Chattiness.** "Nothing else can do it either" belongs in speech, not a
+    contents list.
+  - **Signposting.** "An aside on brains and sea squirts" → "Brains and sea
+    squirts". The reader can see it is an aside.
+  - **The second person.** "What the ambiguity slider is showing you" → "shows".
+  - **A fragment.** "How large a step" is not a phrase.
+  - **Repeating the lesson's own title.** A section called "Climbing" inside a
+    lesson called "Climbing the log joint".
+  - **An ordinal with nothing to count from.** "The fourth reason is locality",
+    where sections one to three were never numbered.
+
+  Declarative claims are good headings when the claim is the section's point:
+  "Drift is the default", "Structure is the reason", "Surprise is not a property
+  of the world". A negation stays when the negation *is* the finding.
+
+  **Judge them extracted, never in place.** In situ every heading looks
+  reasonable, because the paragraph beneath it has already explained it. Pull
+  every title, deck and heading into one list and read it top to bottom; the
+  patterns are invisible until they are adjacent.
 - Run the `writing-review` skill on anything substantial before publishing.
 
 ## Code streams

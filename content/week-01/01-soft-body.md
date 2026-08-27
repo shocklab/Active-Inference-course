@@ -100,7 +100,7 @@ $\kappa = {{hs_kappa}}$ this is $v = {{hs_var_per_coord:.5f}}$, a standard
 deviation of {{hs_sd_per_coord:.4f}} per coordinate, which puts the boundary at
 $\lVert x \rVert = 1$ about {{hs_boundary_in_sd:.0f}} standard deviations away.
 
-### How much regulation is the right amount?
+### The range of stable gains
 
 Strip the noise from [eq:homeostat] and the displacement is multiplied by
 $1 - \kappa$ each step. Whether the organism returns to the centre therefore
@@ -368,7 +368,7 @@ Or you can **change the world** so that your next observation is one the model
 did expect. This is action: you are cold, your model expects to be warm, and
 instead of revising the expectation you move into the sun.
 
-::: mn The name
+::: mn Where the name comes from
 Perception is inference over states. Action is inference carried out by moving.
 Doing both at once, with one quantity governing both, is what puts the
 *active* in active inference.
@@ -381,7 +381,7 @@ is the **variational free energy**, shortened to just "the free energy" once
 there is no risk of confusing it with the thermodynamic quantity of the same
 name. Week&nbsp;4 constructs it properly.
 
-## An aside on brains and sea squirts
+## Brains and sea squirts
 
 There is a story that gets repeated whenever anyone argues that brains exist for
 movement. The sea squirt, it goes, swims about as a larva with a little brain,

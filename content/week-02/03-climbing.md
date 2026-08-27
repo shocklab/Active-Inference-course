@@ -10,7 +10,7 @@ Last lesson left two obstacles. The normaliser $P(u)$ is an integral over the
 whole state space, and the shape of the posterior belongs to no convenient
 family. This lesson removes both, at a price that will be named exactly.
 
-## Ask for less
+## Ask only for the peak
 
 The animal does not obviously need the whole posterior. If it must act, one
 number might do: the single distance the evidence most supports.
@@ -215,7 +215,7 @@ That is a real result, and it was not arranged. We differentiated the log joint
 because that is what maximising a function requires, and a locally computable
 quantity came out.
 
-## Climbing
+## Climb
 
 Having the gradient, move in the direction it points:
 
@@ -315,7 +315,7 @@ between two terms, which is not the same phenomenon and should not borrow its
 name.
 :::
 
-## How large a step
+## Choosing the rate
 
 $\eta$ was set to ${{ascent_rate}}$ without comment. It cannot be set freely, and
 the bound on it turns out to depend on the precisions, which is the first sign of

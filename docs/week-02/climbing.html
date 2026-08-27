@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Two rules a brain has to obey</a><a class="" href="../week-02/exact.html">A problem small enough to solve exactly</a><a class="cur" href="../week-02/climbing.html">Climbing the log joint</a><a class="" href="../week-02/reading-the-update.html">Reading the update</a><a class="" href="../week-02/exercises.html">Problems and code</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Climbing the log joint</h1><p class="deck">Give up on the distribution and chase its peak instead. The intractable term drops out, and what is left is a difference between two locally available quantities.</p><div class="meta"><span>Week 2</span><span>&#167;3</span><span>45 min</span></div></header><article class="abody"><p>Last lesson left two obstacles. The normaliser $P(u)$ is an integral over the
 whole state space, and the shape of the posterior belongs to no convenient
 family. This lesson removes both, at a price that will be named exactly.</p>
-<h2 id="ask-for-less"><span class="secno">1</span>Ask for less</h2>
+<h2 id="ask-only-for-the-peak"><span class="secno">1</span>Ask only for the peak</h2>
 <p>The animal does not obviously need the whole posterior. If it must act, one
 number might do: the single distance the evidence most supports.</p>
 <div class="box definition"><div class="boxhd">Definition 2.3.1<span class="bt">Maximum a posteriori estimate</span></div><p>The <strong>MAP estimate</strong> is the value of the hidden variable at which the posterior
@@ -472,7 +472,7 @@ network and nothing is summed over the state space. The rule is local.</p>
 <p>That is a real result, and it was not arranged. We differentiated the log joint
 because that is what maximising a function requires, and a locally computable
 quantity came out.</p>
-<h2 id="climbing"><span class="secno">6</span>Climbing</h2>
+<h2 id="climb"><span class="secno">6</span>Climb</h2>
 <p>Having the gradient, move in the direction it points:</p>
 <div class="eqn" id="eq-ascent"><div class="eqbody">$$\dot{d} \;=\; \eta \, \frac{\partial \mathcal{F}}{\partial d}
 \;=\; \eta\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),$$</div><div class="eqno"><a href="#eq-ascent" title="Link to equation 2.3.8">(2.3.8)</a></div></div>
@@ -538,7 +538,7 @@ evidence against the other. It needs at least two causes and there is only one
 here. What is happening in this paragraph is a residual left by a compromise
 between two terms, which is not the same phenomenon and should not borrow its
 name.</p></div>
-<h2 id="how-large-a-step"><span class="secno">8</span>How large a step</h2>
+<h2 id="choosing-the-rate"><span class="secno">8</span>Choosing the rate</h2>
 <p>$\eta$ was set to $0.05$ without comment. It cannot be set freely, and
 the bound on it turns out to depend on the precisions, which is the first sign of
 something the rest of the course keeps running into.</p>

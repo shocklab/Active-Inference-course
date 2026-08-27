@@ -93,7 +93,7 @@ intensity of ${{u_obs}}$ means $d = 1/\sqrt{ {{u_obs}} } = {{d_from_data_alone:.
 So the prior says one thing, the data another, and the answer will be somewhere
 between. Where exactly is the question.
 
-## What changed when the variable went continuous
+## From sums to densities
 
 Week&nbsp;1 worked entirely with finite sets. There were three states, the prior
 was three numbers adding to one, and $P(o)$ was a sum with one term per state.
