@@ -365,7 +365,20 @@ result and two honest observations.
 
 ## Cross-cutting to-dos
 
+Done, and recorded so nobody redoes them:
+- [x] Equation refs and widget registration are verified by `build/check_site.py`.
+- [x] Numerical claims are substituted from `numbers.py` at build time, never typed.
+- [x] A depth-audit and definition-sweep brief that works; both are in `CLAUDE.md`.
+
+Open:
 - [ ] Glossary, built from the `::: notation` blocks the way the sibling course builds `glossary.json`.
-- [ ] A `check_content.py` that verifies every `[eq:...]` resolves and every widget named in content is registered in a loaded JS file.
 - [ ] Decide whether Weeks 6–8 need a shared worked continuous example carried across all three.
-- [ ] Numerical claims in prose should be regenerated from the notebooks at build time, not typed by hand.
+- [ ] **Exercise coverage gaps in Week 1**, found by the depth audit and not yet closed:
+      no exercise computes an entropy; mutual information is never independently
+      exercised; the regulated case $\kappa > 0$ is tested only by the widget and
+      never analytically; there is no rung-zero warm-up before the first full
+      three-state Bayes update; the reader is never asked to implement anything,
+      despite the week shipping notebooks.
+- [ ] Run the four audits per week **as each week is drafted**, not afterwards.
+      Week 1 needed fifteen agent runs to reach its current state; catching the
+      same faults at draft time is far cheaper than retrofitting them.
