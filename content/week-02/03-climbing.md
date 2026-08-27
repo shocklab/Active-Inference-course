@@ -21,7 +21,7 @@ is largest,
 $$
 \hat{d} \;=\; \operatorname*{arg\,max}_{d} \; P(d \mid u).
 $$
-It is the mode of the posterior, not its mean, and Lesson&nbsp;2 showed those can
+It is the mode of the posterior, not its mean, and [lesson:2.2] showed those can
 differ substantially.
 :::
 
@@ -182,7 +182,7 @@ sits from what was expected before any data arrived. $\varepsilon_u$ is the
 intensity the current estimate predicts.
 
 Each is divided by a variance. The next definition names what that division is
-doing, and Lesson&nbsp;4 is largely about it.
+doing, and [lesson:2.4] is largely about it.
 :::
 
 ::: definition Precision
@@ -190,7 +190,7 @@ The **precision** of a Gaussian channel is the reciprocal of its variance. A
 precise channel is one whose predictions are tight, so dividing an error by a
 variance is the same as multiplying it by a precision: a gain saying how
 seriously to take that error. The symbol $\Pi$ is reserved for it from
-Lesson&nbsp;4 onwards.
+[lesson:2.4] onwards.
 :::
 
 ::: mn Where the subscripts come from
@@ -205,7 +205,7 @@ $$
 \frac{\partial \mathcal{F}}{\partial d} \;=\; \varepsilon_p \;+\; g'(d)\,\varepsilon_u .
 $$ {#gradient-eps}
 
-Now check [eq:gradient-eps] against the constraints from Lesson&nbsp;1. To
+Now check [eq:gradient-eps] against the constraints from [lesson:2.1]. To
 compute $\varepsilon_u$ a unit needs $u$, which arrives at it, and $g(d)$, which
 is a prediction sent to it. To compute $\varepsilon_p$ it needs $d_p$, held
 locally, and $d$, the current estimate. Nothing has to be fetched from across the
@@ -237,7 +237,7 @@ $d_{k+1} = d_k - \mathcal{F}'(d_k)/\mathcal{F}''(d_k)$, which on a quadratic lan
 on the peak in one step and converges quadratically near any smooth maximum. We
 have $\mathcal{F}''$ available; the last section of this lesson computes it.
 
-It is ruled out by Lesson&nbsp;1. With one hidden variable $\mathcal{F}''$ is a
+It is ruled out by [lesson:2.1]. With one hidden variable $\mathcal{F}''$ is a
 number, but with $n$ of them it is the $n \times n$ matrix of second derivatives,
 and its $(i,j)$ entry couples variable $i$ to variable $j$. Newton's step needs
 that matrix inverted, which mixes information from every variable into every
@@ -285,7 +285,7 @@ closer than expected.
 
 It settles at $d = {{ascent_final:.4f}}$, reaching within one per cent of the
 exact mode after {{ascent_steps_to_1pct}} steps. The mode computed by quadrature
-in Lesson&nbsp;2 was ${{post_mode:.4f}}$. The two agree, which they must: gradient
+in [lesson:2.2] was ${{post_mode:.4f}}$. The two agree, which they must: gradient
 ascent on the log joint finds the peak of the posterior, and the peak is what
 quadrature located.
 
@@ -367,7 +367,7 @@ For the run above, $\mathcal{F}''(\hat d) = {{curv_at_mode:.3f}}$, so any rate b
 ${{eta_max:.3f}}$ converges and ${{ascent_rate}}$ is comfortably inside it.
 
 The numbers here come from differentiating [eq:gradient-eps] a second time, which
-is done in full as the first exercise of Lesson&nbsp;4, once the notation for the
+is done in full as the first exercise of [lesson:2.4], once the notation for the
 precisions is in place. What matters now is not the formula but that
 $\mathcal{F}''$ depends on $\Sigma_u$, so the bound moves when the ear changes.
 

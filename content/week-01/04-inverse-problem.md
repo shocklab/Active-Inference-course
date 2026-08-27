@@ -104,7 +104,7 @@ The branch shakes. Multiply prior by likelihood, state by state:
 | 1 | 0 | {{noisy_prior_10:.2f}} | {{noisy_lik_10:.4f}} | {{noisy_prod_10:.6f}} | {{noisy_post_10:.4f}} |
 | 1 | 1 | {{noisy_prior_11:.2f}} | {{noisy_lik_11:.4f}} | {{noisy_prod_11:.6f}} | {{noisy_post_11:.4f}} |
 
-The evidence is $P(o=1) = {{noisy_ev:.4f}}$, so by the definition from Lesson&nbsp;1 the shake carries $-\ln {{noisy_ev:.4f}} = {{noisy_surprise:.3f}}$ nats of surprise, natural-log units throughout. Both marginals move the same way and by a lot:
+The evidence is $P(o=1) = {{noisy_ev:.4f}}$, so by the definition from [lesson:1.1] the shake carries $-\ln {{noisy_ev:.4f}} = {{noisy_surprise:.3f}}$ nats of surprise, natural-log units throughout. Both marginals move the same way and by a lot:
 
 $$
 P(s_{\text{gust}} = 1 \mid o) \;=\; P(s_{\text{bab}} = 1 \mid o) \;=\; {{noisy_marg_gust:.3f}},

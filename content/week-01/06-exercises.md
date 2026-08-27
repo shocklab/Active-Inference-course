@@ -66,7 +66,7 @@ mistake hard to find. Check the column sums.
 :::
 
 ::: exercise What the prior decides
-Using the leopard, baboon and nothing model from Lesson&nbsp;3, write $\rho$ for the prior
+Using the leopard, baboon and nothing model from [lesson:1.3], write $\rho$ for the prior
 probability that a leopard is present, and find the value of $\rho$ at which observing a tawny flash leaves you exactly
 undecided between leopard and not-leopard, that is,
 $P(s = \text{leopard} \mid o) = 1/2$. Keep the baboon and nothing priors in the
@@ -86,7 +86,7 @@ Setting this to 1 gives $0.70\rho = {{tip_coef:.6f}}(1-\rho)$, so
 $\rho = {{tip_coef:.6f}} / {{tip_denominator:.6f}} = {{tip_q:.4f}}$.
 
 So a leopard prior of about {{tip_q_pct:.1f}}% is the tipping point: the model in
-Lesson&nbsp;3 used $q = 0.08$, which is just above it, which is why the
+[lesson:1.3] used $q = 0.08$, which is just above it, which is why the
 posterior came out at ${{post_tawny_leopard:.3f}}$ rather than exactly a half. The observation is
 strong, but it is only just strong enough to overturn a prior of that size, and
 a slightly more sceptical hiker would have remained unconvinced by the same
@@ -99,7 +99,7 @@ the two observations are conditionally independent given the state, and that the
 state has not changed.
 
 (a) Compute the posterior after both observations, starting from the
-Lesson&nbsp;3 prior.
+[lesson:1.3] prior.
 
 (b) Show that you get the same answer whichever order you process them in.
 
@@ -164,7 +164,7 @@ exactly to the extent that different states disagree about what it will report.
 :::
 
 ::: exercise Explaining away with three causes
-Extend the noisy-OR example of Lesson&nbsp;4 to three independent causes, each
+Extend the noisy-OR example of [lesson:1.4] to three independent causes, each
 with prior $0.1$ and each firing the observation with probability $0.9$, keeping
 the leak at $0.01$. Compute $P(s_1 = 1 \mid o = 1)$ and compare it with the
 two-cause answer of ${{noisy_marg_gust:.3f}}$. Explain the direction of the change.
@@ -203,7 +203,7 @@ approximation gets worse in exactly the regime where you most want to use it.
 :::
 
 ::: exercise The survival curve &dagger;
-Consider the homeostasis model from Lesson&nbsp;1 with the action strength set
+Consider the homeostasis model from [lesson:1.1] with the action strength set
 to zero, $\kappa = 0$. It is then a two-dimensional random walk with independent increments of standard deviation
 $\sigma$ per step in each coordinate, starting at the origin, absorbed when
 $\|x\| > 1$.
@@ -227,7 +227,7 @@ $\sigma$ here should cut it by a factor of about ${{lifetime_factor:.1f}}$.
 
 Register this as intuition about what regulation is
 buying. Without action, lifetime scales as the inverse square of the noise: a
-punishing dependence. With action, as the figure in Lesson&nbsp;1 shows, the
+punishing dependence. With action, as the figure in [lesson:1.1] shows, the
 walk does not diffuse at all, and lifetime is no longer set by $\sigma$ in the
 same way. That is a qualitative change in the character of the dynamics, not
 merely a better constant.
@@ -246,4 +246,4 @@ Everything here is freely accessible.
   MATLAB code.
 - Bruineberg, Dolega, Dewhurst and Baltieri, "The Emperor's New Markov Blankets",
   *Behavioral and Brain Sciences* (2022). A careful criticism of exactly the
-  interface picture drawn in Lesson&nbsp;2. Read it now, and again after Week&nbsp;12.
+  interface picture drawn in [lesson:1.2]. Read it now, and again after Week&nbsp;12.

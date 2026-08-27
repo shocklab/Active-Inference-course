@@ -191,7 +191,7 @@ thing: they are among the quantities the organism measures.
 
 Call the state of that surface at one moment an **observation**, and write it $o$. The letter
 stands for *observation*. An organism has no access to the world; it has access
-only to what its senses report of the world, and those are not the same thing. Lesson&nbsp;2 makes that distinction precise and
+only to what its senses report of the world, and those are not the same thing. [lesson:1.2] makes that distinction precise and
 gives the world's own states a different letter. Until then, $o$ is simply
 whatever the organism can actually measure.
 
@@ -329,7 +329,7 @@ the first. Where the model is good, the two are close and minimising one
 minimises the other. Where the model is bad, an organism can be serenely
 unsurprised while its actual sensory statistics wander off, which is one of the
 more interesting ways for a thing to die. We will keep writing $P$ for both, as
-the literature does, and say which is meant whenever it matters. Such a model is called a *generative model*; Lesson&nbsp;2 defines
+the literature does, and say which is meant whenever it matters. Such a model is called a *generative model*; [lesson:1.2] defines
 it properly and says what it is generative of. Building one, running it, and
 correcting it is what the rest of this course is about.
 

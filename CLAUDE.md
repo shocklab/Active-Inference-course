@@ -251,6 +251,32 @@ as `[eq:name]`. Numbering every intermediate line of a derivation is noise.
 Never write maths inside a code fence expecting it to render; fences are excluded
 from maths scanning by design.
 
+### Cross-references are directives, never paths
+
+Point at another lesson with `[lesson:1.5]`, and at a week with `[week:4]`.
+`build_site.py` resolves them against the real lesson list, so a renamed file
+fails the build rather than rotting into a dead link. Never hand-write
+`../week-01/the-denominator.html`.
+
+- **Link text is automatic**: "Lesson&nbsp;5" when the target is in the citing
+  page's own week, "Week&nbsp;1, Lesson&nbsp;5" when it is not. Override with a
+  pipe, `[lesson:1.5|the denominator lesson]`, and put no directive inside that
+  label. A blanket regex over already-edited text nested one inside another and
+  produced `[lesson:1.5|Week 1's [lesson:2.5]]`, which markdown then tore in half.
+- **Mark every occurrence.** Only the first reference to a given target on a page
+  renders as a link; the rest come out as plain text. Week&nbsp;1's Lesson&nbsp;2
+  refers back to Lesson&nbsp;1 six times, and six identical links is a rash, not
+  navigation. Thinning them at build time means the rule survives a paragraph
+  being moved.
+- A lesson never links to itself, and a week with no lessons yet renders as plain
+  text rather than a link to an empty index.
+- `check_site.py` fails on any `[lesson:` or `[week:` left in the output.
+
+**When you add a syntax, tell the other checks about it.** `[lesson:1.5]`
+contains `1.5`, so `check_numbers.py` read 61 cross-references as hand-typed
+decimals the moment the syntax existed. A report that floods is a report nobody
+reads.
+
 ### Numbers are regenerated, never typed
 Every numerical claim in prose must be computed and pasted from an actual run.
 Four wrong values reached a draft of Week 1 by being worked out by hand. Before

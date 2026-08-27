@@ -405,7 +405,7 @@ distribution, so the surprise $-\ln P(o)$ is not comparable across observations
 and can even be negative. Bayes' theorem still returns a normalised posterior,
 because the division by $P(o)$ hides the error, which is exactly what makes this
 mistake hard to find. Check the column sums.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.6.2<span class="bt">What the prior decides</span></div><p>Using the leopard, baboon and nothing model from Lesson&nbsp;3, write $\rho$ for the prior
+<div class="box exercise"><div class="boxhd">Exercise 1.6.2<span class="bt">What the prior decides</span></div><p>Using the leopard, baboon and nothing model from <a href="../week-01/bayes.html">Lesson&nbsp;3</a>, write $\rho$ for the prior
 probability that a leopard is present, and find the value of $\rho$ at which observing a tawny flash leaves you exactly
 undecided between leopard and not-leopard, that is,
 $P(s = \text{leopard} \mid o) = 1/2$. Keep the baboon and nothing priors in the
@@ -464,7 +464,7 @@ to get $P(o\mid s) = P(o)$, a quantity that does not depend on $s$. Taking a
 prior with full support forces this at every $s$.</p>
 <p>This is the formal content of the ambiguity slider. A sensory channel is useful
 exactly to the extent that different states disagree about what it will report.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.6.5<span class="bt">Explaining away with three causes</span></div><p>Extend the noisy-OR example of Lesson&nbsp;4 to three independent causes, each
+<div class="box exercise"><div class="boxhd">Exercise 1.6.5<span class="bt">Explaining away with three causes</span></div><p>Extend the noisy-OR example of <a href="../week-01/inverse-problem.html">Lesson&nbsp;4</a> to three independent causes, each
 with prior $0.1$ and each firing the observation with probability $0.9$, keeping
 the leak at $0.01$. Compute $P(s_1 = 1 \mid o = 1)$ and compare it with the
 two-cause answer of $0.505$. Explain the direction of the change.</p><details><summary>Solution</summary><p>There are eight joint states. Write $k$ for the number of causes present. The
@@ -485,7 +485,7 @@ says "something did this", but there are now three somethings to choose from and
 each individually gets less of the credit. Explaining away gets stronger as the
 number of competing causes grows, which is precisely why a factorised
 approximation gets worse in exactly the regime where you most want to use it.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.6.6<span class="bt">The survival curve &dagger;</span></div><p>Consider the homeostasis model from Lesson&nbsp;1 with the action strength set
+<div class="box exercise"><div class="boxhd">Exercise 1.6.6<span class="bt">The survival curve &dagger;</span></div><p>Consider the homeostasis model from <a href="../week-01/soft-body.html">Lesson&nbsp;1</a> with the action strength set
 to zero, $\kappa = 0$. It is then a two-dimensional random walk with independent increments of standard deviation
 $\sigma$ per step in each coordinate, starting at the origin, absorbed when
 $\|x\| > 1$.</p>
@@ -519,7 +519,7 @@ merely a better constant.</p></details></div>
   MATLAB code.</li>
 <li>Bruineberg, Dolega, Dewhurst and Baltieri, "The Emperor's New Markov Blankets",
   <em>Behavioral and Brain Sciences</em> (2022). A careful criticism of exactly the
-  interface picture drawn in Lesson&nbsp;2. Read it now, and again after Week&nbsp;12.</li>
+  interface picture drawn in <a href="../week-01/process-and-model.html">Lesson&nbsp;2</a>. Read it now, and again after Week&nbsp;12.</li>
 </ul></article><nav class="pagenav"><a class="pv" href="../week-01/the-denominator.html"><span class="dir">Previous</span><span class="ttl">What makes the denominator hard</span></a><a class="nx" href="../week-02/two-rules.html"><span class="dir">Next</span><span class="ttl">Two rules a brain has to obey</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>
 </body>

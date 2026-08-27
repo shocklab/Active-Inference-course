@@ -36,7 +36,7 @@ lesson. Bayes' theorem is trivial. The sum underneath it is not.
 ::: notation
 $P(s)$, the prior :: What the agent expects before it looks. In this framework a prior is read as the agent's own commitment rather than as a measured frequency in the world. That reading is a choice, and Week&nbsp;12 returns to what it costs.
 $P(o \mid s)$, the likelihood :: Read as a function of $s$ for fixed $o$, this scores how well each state would account for the data you actually got. It is not a distribution over $s$ and does not sum to one over $s$.
-$P(o)$, the evidence :: The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from Lesson&nbsp;1.
+$P(o)$, the evidence :: The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from [lesson:1.1].
 $P(s \mid o)$, the posterior :: The updated belief. Prior reweighted by how well each state explains the data, then renormalised.
 :::
 
@@ -247,7 +247,7 @@ says exactly where it runs out.
 
 Narrower still than that, in fact. Counting the terms is the weakest of the
 arguments available here and, taken alone, it does not survive contact with a
-model that factorises: Lesson&nbsp;5 exhibits a sum of ${{den_terms:.0e}}$ terms
+model that factorises: [lesson:1.5] exhibits a sum of ${{den_terms:.0e}}$ terms
 computed exactly in {{den_chain_ops}} operations. That lesson separates the four
 distinct reasons the denominator is out of reach and says which methods escape
 which. Read it before deciding how much the count above proves. Adding one more thing to keep
@@ -283,7 +283,7 @@ Quiet still argues for an empty path, and it does so strongly enough to take
 "nothing" from {{prior_nervous_nothing_pct:.0f}}% to {{post_quiet_nervous_nothing_pct:.0f}}%. But the nervous hiker is more surprised by quiet than
 the calm one is, because their model expected trouble. Two agents, one
 observation, different surprise. This is the concrete version of the claim in
-Lesson&nbsp;2 that surprise is a property of the model and not of the world.
+[lesson:1.2] that surprise is a property of the model and not of the world.
 :::
 
 ::: exercise Surprise and information are not the same quantity
@@ -315,7 +315,7 @@ leaves the posterior exactly where the prior was. The most informative
 observation, $o_1$, is {{ctr_prob_ratio:.0f}} times more probable.
 
 The structural reason is that the two quantities are averages of different
-things. Averaging surprise over $P(o)$ gives the entropy of Lesson&nbsp;1, $\mathrm{H}[P(o)] = -\sum_o P(o)\ln P(o)$;
+things. Averaging surprise over $P(o)$ gives the entropy of [lesson:1.1], $\mathrm{H}[P(o)] = -\sum_o P(o)\ln P(o)$;
 averaging information gain over $P(o)$ gives the **mutual information** between
 states and observations,
 

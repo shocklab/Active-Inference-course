@@ -138,7 +138,7 @@ this? When the answer comes out yes, that is a real finding rather than a
 coincidence of notation. When it comes out no, the assumption that broke is
 visible and can be argued about.
 
-The pattern recurs. In Lesson&nbsp;3 an inference rule will turn out to be a
+The pattern recurs. In [lesson:2.3] an inference rule will turn out to be a
 weighted difference between two locally available quantities. In Week&nbsp;3 a
 learning rule will turn out to be a product of the activity at a connection's two
 ends. Neither was aimed at; both fall out of differentiating the same quantity.

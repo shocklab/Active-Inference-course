@@ -117,8 +117,8 @@ places, the residual being the grid spacing rather than any error in either
 method. The final line shows ${{err_prior_ascent:+.6f}}$ and
 ${{err_obs_weighted_ascent:+.6f}}$, summing to ${{err_sum_ascent:.2e}}$.
 
-That residual is smaller than the ${{err_sum:.2e}}$ quoted in Lesson&nbsp;3, and
-the difference is worth understanding rather than ignoring. Lesson&nbsp;3
+That residual is smaller than the ${{err_sum:.2e}}$ quoted in [lesson:2.3], and
+the difference is worth understanding rather than ignoring. [lesson:2.3]
 evaluates the two errors at the mode found by quadrature; this code evaluates
 them where its own ascent stopped. The two locations agree to five decimal
 places, but the quantity being reported is a cancellation between two numbers of
@@ -178,7 +178,7 @@ in the gradient.
 For the step size, the curvature acquires a term $-n\Pi_u g'^2$, growing linearly
 in $n$, so the bound $\eta < 2/|\mathcal{F}''|$ falls off like $1/n$. More data
 makes the peak sharper and the ascent stiffer, which is the same trade the
-precision slider showed in Lesson&nbsp;3.
+precision slider showed in [lesson:2.3].
 :::
 
 ::: exercise Sequential listening
@@ -194,7 +194,7 @@ once.
 (a) With the linear link the posterior after one reading is Gaussian with
 precision $\Pi_1 = \Pi_p + \Pi_u$ and mean
 $m_1 = (\Pi_p d_p + \Pi_u u_1)/\Pi_1$, by the precision-weighted average of
-Lesson&nbsp;4. Using that as the prior for $u_2$ gives precision
+[lesson:2.4]. Using that as the prior for $u_2$ gives precision
 $\Pi_2 = \Pi_1 + \Pi_u = \Pi_p + 2\Pi_u$ and mean
 
 $$
@@ -254,7 +254,7 @@ $\eta = {{bi_eta}}$ moves the estimate by ${{bi_step_at_low:.3f}}$, clear over t
 and the peak beyond it. A rate that is mild in one region is wild in another.
 
 Both failures are properties of the method and neither is announced by it. This
-is the first serious cost of the move made in Lesson&nbsp;3. Trading the whole
+is the first serious cost of the move made in [lesson:2.3]. Trading the whole
 posterior for its peak was cheap when there was one peak. A distribution with two
 modes has something to say that no single number can carry, and reporting
 ${{bi_from_prior:.4f}}$ conceals the existence of ${{bi_peak_lo:.4f}}$ entirely.
@@ -314,7 +314,7 @@ serious objections to the framework, and it does not go away by being ignored.
 :::
 
 ::: exercise Where the ear stops being informative
-In Lesson&nbsp;4, $|g'(d)|$ was called the sensitivity of the observation to the
+In [lesson:2.4], $|g'(d)|$ was called the sensitivity of the observation to the
 state. Make it quantitative.
 
 (a) Show that under the Gauss-Newton approximation the sensory channel
@@ -327,7 +327,7 @@ $d = 1$, $d = {{post_mode:.2f}}$ and $d = 4$.
 measures $\ln u$ rather than $u$, with Gaussian noise of fixed variance in the
 new units. What happens to the sensitivity?
 ---solution---
-(a) The curvature exercise of Lesson&nbsp;4 gave
+(a) The curvature exercise of [lesson:2.4] gave
 $\mathcal{F}'' = -\Pi_p - \Pi_u g'^2 + \Pi_u g''(u - g)$, and dropping the last
 term leaves $-(\Pi_p + \Pi_u g'^2)$. Since curvature at a peak is minus a
 precision, the sensory channel contributes $\Pi_u g'^2$.

@@ -367,7 +367,7 @@ surface.</p>
 sensory surface. The generative process specifies how $\vartheta$ evolves, and how
 $\vartheta$ gives rise to $o$. Write $a$ for the agent's <strong>actions</strong>, drawn from whatever set of things the agent can do: for a thermostat $a \in \{\text{heat}, \text{idle}\}$, for an animal a continuous space of muscle commands. Week&nbsp;9 makes the discrete case concrete; the lamp example below has no actions at all, being about perception alone. The process also specifies how $a$ feeds
 back into $\vartheta$, and it has to: an agent that could only watch would have no
-way of staying in the small region of Lesson&nbsp;1, since staying there is
+way of staying in the small region of <a href="../week-01/soft-body.html">Lesson&nbsp;1</a>, since staying there is
 something a body does rather than something that happens to it.</p>
 <p>The agent does not have access to $\vartheta$. Not partially, not noisily: not at
 all. Everything the agent will ever know about the world it must extract from
@@ -473,9 +473,11 @@ which the framework has been applied to psychiatric conditions.</p></div>
 <p>Three things become clear once you keep the two apart, and stay muddy if you do not.</p>
 <p><strong>Where the intractability lives.</strong> To use the model you need the probability of
 an observation on its own, $P(o) = \sum_s P(o \mid s) P(s)$, and that sum runs
-over the agent's $s$, not the world's $\vartheta$. Avoiding it occupies the next
-three weeks. The world
-does not compute anything. It has no marginalisation problem. The difficulty is
+over the agent's $s$, not the world's $\vartheta$. <a href="../week-01/bayes.html">Lesson&nbsp;3</a> says why you need
+it, as the denominator of Bayes' theorem, and gives the first argument that it is
+out of reach; <a href="../week-01/the-denominator.html">Lesson&nbsp;5</a> gives the rest, including the reason that first
+argument is the weakest one available. Avoiding it occupies the next three weeks.
+The world does not compute anything. It has no marginalisation problem. The difficulty is
 entirely on the agent's side of the blanket. That is a useful place for it to be:
 it makes the problem one of algorithm rather than physics, so it can be attacked
 by choosing a better approximation scheme, which is what Week&nbsp;4 does.</p>

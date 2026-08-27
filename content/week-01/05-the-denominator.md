@@ -6,14 +6,14 @@ time: 45 min
 scripts: [w01.js]
 ---
 
-Lesson&nbsp;3 counted the terms in
+[lesson:1.3] counted the terms in
 
 $$
 P(o) \;=\; \sum_s P(o \mid s)\,P(s)
 $$ {#denom}
 
 and found $k^n$ of them for a model with $n$ state factors of $k$ values each.
-Lesson&nbsp;4 took that as settled and moved on. Almost every treatment of active
+[lesson:1.4] took that as settled and moved on. Almost every treatment of active
 inference does the same, in a sentence or two, and the sentence is usually some
 version of "the sum is intractable".
 
@@ -141,14 +141,14 @@ inference is still exponential, but in $\sqrt{n}$ rather than $n$, and that is
 the difference between hopeless and merely expensive.
 
 The last row is the honest one for an agent. Nothing entitles a creature
-modelling an open world to a sparse dependency graph, and Lesson&nbsp;4 showed a
+modelling an open world to a sparse dependency graph, and [lesson:1.4] showed a
 mechanism that actively destroys sparsity: **explaining away** couples causes
 that were independent in the prior the moment a shared effect is observed. A
 model may be built out of independent parts and still have a densely coupled
 posterior. Conditioning is what fills the graph in.
 
 ::: keyidea
-The obstacle is not $n$. It is $w$. Restate the claim of Lesson&nbsp;3 accordingly:
+The obstacle is not $n$. It is $w$. Restate the claim of [lesson:1.3] accordingly:
 exact inference is cheap when the model is nearly a tree, expensive when it is
 not, and the world does not supply trees.
 :::
@@ -191,7 +191,7 @@ being assumed gets named.
 :::
 
 Note also what these results are not. They are not the hardware argument of
-Lesson&nbsp;3. That argument showed a faster machine cannot help, because a
+[lesson:1.3]. That argument showed a faster machine cannot help, because a
 constant factor cannot beat an exponent. This one shows a cleverer *algorithm*
 cannot help either. Two different claims, and the second is the one that matters.
 
@@ -372,7 +372,7 @@ worth knowing which.
   terms. Give the one-sentence counterexample.
 - What quantity actually sits in the exponent of the cost of exact inference,
   and what does it measure?
-- The hardware argument of Lesson&nbsp;3 and the complexity results of this
+- The hardware argument of [lesson:1.3] and the complexity results of this
   lesson rule out two different things. Which two?
 - Give a problem that is hard for reason three but trivial for reasons one and
   two.

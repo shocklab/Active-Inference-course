@@ -161,6 +161,10 @@ UNSUPPORTED = [
     (r"\{%[^}]*%\}", "Jinja/Liquid tag"),
     (r"\[\[[^\]|]+\]\]", "wiki-style link"),
     (r":::\s*\w+", "an unclosed or unknown block directive, rendered as text"),
+    (r"\[(?:lesson|week):[^\]]*\]", "an internal cross-reference the builder could "
+                                    "not resolve; check the week and lesson numbers, "
+                                    "and that a [lesson:W.L|label] has no directive "
+                                    "nested inside its label"),
 ]
 
 

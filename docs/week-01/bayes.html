@@ -366,7 +366,7 @@ denominator. This page is mostly about why, because if you leave
 this lesson thinking Bayes' theorem is hard, you have taken away the wrong
 lesson. Bayes' theorem is trivial. The sum underneath it is not.</p>
 <h2 id="the-four-quantities-named"><span class="secno">1</span>The four quantities, named</h2>
-<div class="tablewrap"><table class="notation"><tbody><tr><th>$P(s)$, the prior</th><td>What the agent expects before it looks. In this framework a prior is read as the agent's own commitment rather than as a measured frequency in the world. That reading is a choice, and Week&nbsp;12 returns to what it costs.</td></tr><tr><th>$P(o \mid s)$, the likelihood</th><td>Read as a function of $s$ for fixed $o$, this scores how well each state would account for the data you actually got. It is not a distribution over $s$ and does not sum to one over $s$.</td></tr><tr><th>$P(o)$, the evidence</th><td>The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from Lesson&nbsp;1.</td></tr><tr><th>$P(s \mid o)$, the posterior</th><td>The updated belief. Prior reweighted by how well each state explains the data, then renormalised.</td></tr></tbody></table></div>
+<div class="tablewrap"><table class="notation"><tbody><tr><th>$P(s)$, the prior</th><td>What the agent expects before it looks. In this framework a prior is read as the agent's own commitment rather than as a measured frequency in the world. That reading is a choice, and Week&nbsp;12 returns to what it costs.</td></tr><tr><th>$P(o \mid s)$, the likelihood</th><td>Read as a function of $s$ for fixed $o$, this scores how well each state would account for the data you actually got. It is not a distribution over $s$ and does not sum to one over $s$.</td></tr><tr><th>$P(o)$, the evidence</th><td>The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from <a href="../week-01/soft-body.html">Lesson&nbsp;1</a>.</td></tr><tr><th>$P(s \mid o)$, the posterior</th><td>The updated belief. Prior reweighted by how well each state explains the data, then renormalised.</td></tr></tbody></table></div>
 <p>Two of these deserve a moment.</p>
 <p>The likelihood is a <strong>column</strong> of a matrix, not a row. If you tabulate
 $P(o \mid s)$ with observations down the side and states across the top, then
@@ -590,7 +590,7 @@ agents cannot rest on it. Week&nbsp;2 uses conjugacy where it is available and
 says exactly where it runs out.</p>
 <p>Narrower still than that, in fact. Counting the terms is the weakest of the
 arguments available here and, taken alone, it does not survive contact with a
-model that factorises: Lesson&nbsp;5 exhibits a sum of $1e+24$ terms
+model that factorises: <a href="../week-01/the-denominator.html">Lesson&nbsp;5</a> exhibits a sum of $1e+24$ terms
 computed exactly in 624 operations. That lesson separates the four
 distinct reasons the denominator is out of reach and says which methods escape
 which. Read it before deciding how much the count above proves. Adding one more thing to keep
@@ -613,7 +613,7 @@ hiker. Posterior:</p>
 "nothing" from 30% to 84%. But the nervous hiker is more surprised by quiet than
 the calm one is, because their model expected trouble. Two agents, one
 observation, different surprise. This is the concrete version of the claim in
-Lesson&nbsp;2 that surprise is a property of the model and not of the world.</p></details></div>
+<a href="../week-01/process-and-model.html">Lesson&nbsp;2</a> that surprise is a property of the model and not of the world.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 1.3.2<span class="bt">Surprise and information are not the same quantity</span></div><p>In the worked example the most surprising observation was also the most
 informative. Show that this cannot be a general law, by constructing a model in
 which the <em>rarest</em> observation carries <em>no</em> information at all.</p><details><summary>Solution</summary><p>Take two states with a flat prior $P(s) = (0.5,\ 0.5)$, and three observations

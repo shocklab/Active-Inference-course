@@ -6,7 +6,7 @@ time: 40 min
 scripts: [w02.js]
 ---
 
-The result of Lesson&nbsp;3 was
+The result of [lesson:2.3] was
 
 $$
 \dot{d} \;=\; \eta\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),
@@ -23,7 +23,7 @@ takes them one at a time, then puts the pieces back together as a circuit.
 
 Dividing by a variance appears twice, so give it a name.
 
-Lesson&nbsp;3 defined the precision of a Gaussian channel as the reciprocal of
+[lesson:2.3] defined the precision of a Gaussian channel as the reciprocal of
 its variance. Give the two of them symbols:
 
 $$
@@ -91,7 +91,7 @@ Only the ratio matters, not the individual values. Multiplying both precisions b
 the same constant multiplies the whole bracket in [eq:precision-form] by that
 constant, which rescales $\eta$ and moves the resting point not at all. The
 resting point is set by $\Pi_u/\Pi_p$, and the rate is set by their overall size:
-the same distinction the step-size bound of Lesson&nbsp;3 ran into from the other
+the same distinction the step-size bound of [lesson:2.3] ran into from the other
 direction.
 
 Between the corners, the estimate slides. With $\Sigma_u = {{var_obs_loose}}$ the
@@ -211,7 +211,7 @@ average $m$, and the precision is $\Pi = \Pi_p + \Pi_u$. Precisions of independe
 sources add.
 
 Being Gaussian, it has no skew and its mode and mean coincide. That is the
-opposite of what Lesson&nbsp;2 found for the same problem with the inverse-square
+opposite of what [lesson:2.2] found for the same problem with the inverse-square
 link, and the contrast is the point: swapping the link is the only change, so the
 link is what was responsible.
 :::
@@ -255,7 +255,7 @@ does not suffer because it is an integral over every point rather than the
 location of one.
 
 ::: keyidea
-Compare that with Lesson&nbsp;2, where the mode and mean of the same problem
+Compare that with [lesson:2.2], where the mode and mean of the same problem
 differed by {{mean_mode_pct:.0f}}%. The ingredients were Gaussian in both cases
 and the only difference is the link function. So the entire gap is the
 nonlinearity, and none of it is the choice of prior.
@@ -268,7 +268,7 @@ for its roots. Iteration is not laziness; it is what is left.
 :::
 
 ::: mn The bill for the Gaussian prior
-Lesson&nbsp;2 flagged that a Gaussian over a distance puts mass below zero. Here
+[lesson:2.2] flagged that a Gaussian over a distance puts mass below zero. Here
 is the size of it. In the linear case the posterior is centred at
 ${{lin_mode:.4f}}$ with a standard deviation of ${{lin_sd_quad:.4f}}$, so
 {{lin_mass_below_zero:.1%}} of its mass sits at negative distances, which is
@@ -282,7 +282,7 @@ after the prior.
 ## The circuit
 
 Now assemble [eq:precision-form] as a diagram, taking seriously the constraints
-of Lesson&nbsp;1. Give each quantity a unit and each multiplication a connection.
+of [lesson:2.1]. Give each quantity a unit and each multiplication a connection.
 
 ::: fig The update of [eq:precision-form] drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. Arrow labels give what multiplies a signal in transit. Every arrow carries one number from one place to one place, and none needs a quantity from anywhere else.
 <svg viewBox="0 0 660 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A predictive coding circuit: an estimate unit sends a prediction down to a sensory error unit and receives a weighted error back, while a prior error unit compares the estimate with the prior expectation.">
@@ -359,7 +359,7 @@ live. Read the arrow labels as naming what multiplies the error on its way, whic
 is $g'(d)$ on the sensory branch and $1$ on the prior branch.
 :::
 
-Check it against Lesson&nbsp;1. Every arrow carries one number from one unit to
+Check it against [lesson:2.1]. Every arrow carries one number from one unit to
 one unit. No arrow requires a sum over states, and no unit reads a variable held
 somewhere it is not connected to. The rule satisfies local computation.
 
@@ -388,19 +388,19 @@ gradient-ascent scheme for a particular estimation problem, and nothing about
 whether cortex does it.
 
 Two gaps. First, the update carries a point estimate and no uncertainty at all:
-this is the point-mass case flagged in Lesson&nbsp;3, and Week&nbsp;4 puts the
+this is the point-mass case flagged in [lesson:2.3], and Week&nbsp;4 puts the
 uncertainty back. Second, the precisions and the function $g$ have been treated
 as known, when an animal is given neither. Week&nbsp;3 takes that up.
 :::
 
 ::: warning A contradiction to hold on to
-Lesson&nbsp;1 ruled out carrying a whole distribution, and that was the
-justification for spending this entire week on a single point. Lesson&nbsp;3's
+[lesson:2.1] ruled out carrying a whole distribution, and that was the
+justification for spending this entire week on a single point. [lesson:2.3]'s
 warning then promises that Week&nbsp;4 brings a distribution $Q(d)$ back. Those
 two cannot both stand as written, and a reader who notices is right to be
 suspicious.
 
-The resolution is in the exact wording of Lesson&nbsp;1: what was ruled out was
+The resolution is in the exact wording of [lesson:2.1]: what was ruled out was
 carrying an *arbitrary* distribution, one whose shape belongs to no family and
 which therefore needs a value stored at every point. Week&nbsp;4's $Q$ is
 restricted to a family with a few parameters, typically a Gaussian, so carrying
@@ -408,7 +408,7 @@ it means carrying a mean and a precision. That is two numbers where this week
 carried one, not infinitely many.
 
 The bill for that restriction is real and Week&nbsp;4 pays it explicitly: the
-true posterior of Lesson&nbsp;2 is *not* Gaussian, so no Gaussian $Q$ can equal
+true posterior of [lesson:2.2] is *not* Gaussian, so no Gaussian $Q$ can equal
 it, and the whole of variational inference is the study of what you lose. This
 week's point estimate is the extreme case of the same trade, a $Q$ with one
 parameter and no width at all.
@@ -426,7 +426,7 @@ only shown the single-variable case.
 :::
 
 ::: exercise Where the curvature comes from
-Lesson&nbsp;3 needed $\mathcal{F}''$ to bound the step size. Differentiate
+[lesson:2.3] needed $\mathcal{F}''$ to bound the step size. Differentiate
 [eq:precision-form] once more to get it, and evaluate the pieces at
 $\hat d = {{post_mode:.4f}}$. You will need
 $g''(d) = 6/d^{4} = {{gsecond_at_mode:.4f}}$ there.
@@ -454,7 +454,7 @@ $-{{prec_prior}} - {{sensory_prec_on_state:.4f}} = {{curv_gaussnewton:.4f}}$,
 and the third is
 $\varepsilon_u\,g''(\hat d) = {{err_obs:.4f}} \times {{gsecond_at_mode:.4f}}
 = {{curv_gpp_term:.4f}}$. Together, ${{curv_at_mode:.4f}}$, which is the number
-Lesson&nbsp;3 used.
+[lesson:2.3] used.
 
 The quantity $\Pi_u g'^2 = {{sensory_prec_on_state:.4f}}$ is the sensory
 channel's precision *expressed about the state* rather than about the
@@ -495,14 +495,14 @@ $\Pi\big[(u_1 + u_2) - 2g(d)\big] = 2\Pi\big[\bar u - g(d)\big]$ with
 $\bar u$ the mean of the two readings. Two equally precise ears are exactly one
 ear of twice the precision, reporting their average. The resting point is what a
 single ear would give on the averaged reading, and it is reached with a stiffer
-curvature, so by the step-size bound of Lesson&nbsp;3 a smaller step.
+curvature, so by the step-size bound of [lesson:2.3] a smaller step.
 :::
 
 ::: checkpoint
 - Write the update in precision form and say what each gain is doing.
 - Why does $g'$ appear on one term and not the other? Give both the units answer
   and the sensitivity answer.
-- The posterior in Lesson&nbsp;2 was skewed and the one in this lesson's linear
+- The posterior in [lesson:2.2] was skewed and the one in this lesson's linear
   case is not. What is responsible, and what is not?
 - Which two things does this week's rule treat as known that an animal would not
   be given?

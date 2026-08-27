@@ -446,7 +446,7 @@ print(f&quot;eps_p {a:+.6f}   g'*eps_u {b:+.6f}   sum {a+b:.2e}&quot;)
 places, the residual being the grid spacing rather than any error in either
 method. The final line shows $+0.449964$ and
 $-0.449964$, summing to $-1.55e-15$.</p>
-<p>That residual is smaller than the $3.44e-06$ quoted in Lesson&nbsp;3, and
+<p>That residual is smaller than the $3.44e-06$ quoted in <a href="../week-02/climbing.html">Lesson&nbsp;3</a>, and
 the difference is worth understanding rather than ignoring. Lesson&nbsp;3
 evaluates the two errors at the mode found by quadrature; this code evaluates
 them where its own ascent stopped. The two locations agree to five decimal
@@ -498,7 +498,7 @@ once.</p>
 <p>(b) Say what breaks this equivalence when $g$ is nonlinear.</p><details><summary>Solution</summary><p>(a) With the linear link the posterior after one reading is Gaussian with
 precision $\Pi_1 = \Pi_p + \Pi_u$ and mean
 $m_1 = (\Pi_p d_p + \Pi_u u_1)/\Pi_1$, by the precision-weighted average of
-Lesson&nbsp;4. Using that as the prior for $u_2$ gives precision
+<a href="../week-02/reading-the-update.html">Lesson&nbsp;4</a>. Using that as the prior for $u_2$ gives precision
 $\Pi_2 = \Pi_1 + \Pi_u = \Pi_p + 2\Pi_u$ and mean</p>
 <div class="eqn"><div class="eqbody">$$m_2 = \frac{\Pi_1 m_1 + \Pi_u u_2}{\Pi_2}
     = \frac{\Pi_p d_p + \Pi_u u_1 + \Pi_u u_2}{\Pi_p + 2\Pi_u},$$</div></div>

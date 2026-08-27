@@ -359,7 +359,7 @@ number might do: the single distance the evidence most supports.</p>
 <div class="box definition"><div class="boxhd">Definition 2.3.1<span class="bt">Maximum a posteriori estimate</span></div><p>The <strong>MAP estimate</strong> is the value of the hidden variable at which the posterior
 is largest,
 <div class="eqn"><div class="eqbody">$$\hat{d} \;=\; \operatorname*{arg\,max}_{d} \; P(d \mid u).$$</div></div>
-It is the mode of the posterior, not its mean, and Lesson&nbsp;2 showed those can
+It is the mode of the posterior, not its mean, and <a href="../week-02/exact.html">Lesson&nbsp;2</a> showed those can
 differ substantially.</p></div>
 <p>Now the move that makes everything work. Substitute Bayes' theorem:</p>
 <div class="eqn"><div class="eqbody">$$\hat{d} \;=\; \operatorname*{arg\,max}_{d} \; \frac{P(u \mid d)\,P(d)}{P(u)} .$$</div></div>
@@ -453,7 +453,7 @@ sits from what was expected before any data arrived. $\varepsilon_u$ is the
 <strong>sensory prediction error</strong>: how far the intensity actually heard sits from the
 intensity the current estimate predicts.</p>
 <p>Each is divided by a variance. The next definition names what that division is
-doing, and Lesson&nbsp;4 is largely about it.</p></div>
+doing, and <a href="../week-02/reading-the-update.html">Lesson&nbsp;4</a> is largely about it.</p></div>
 <div class="box definition"><div class="boxhd">Definition 2.3.4<span class="bt">Precision</span></div><p>The <strong>precision</strong> of a Gaussian channel is the reciprocal of its variance. A
 precise channel is one whose predictions are tight, so dividing an error by a
 variance is the same as multiplying it by a precision: a gain saying how
@@ -464,7 +464,7 @@ observation $u$. Weeks&nbsp;5 onwards will have a chain of these, one per level,
 and the subscripts become level indices.</p></aside>
 <p>In this notation the gradient is short:</p>
 <div class="eqn" id="eq-gradient-eps"><div class="eqbody">$$\frac{\partial \mathcal{F}}{\partial d} \;=\; \varepsilon_p \;+\; g'(d)\,\varepsilon_u .$$</div><div class="eqno"><a href="#eq-gradient-eps" title="Link to equation 2.3.7">(2.3.7)</a></div></div>
-<p>Now check <a class="eqref" href="#eq-gradient-eps">(2.3.7)</a> against the constraints from Lesson&nbsp;1. To
+<p>Now check <a class="eqref" href="#eq-gradient-eps">(2.3.7)</a> against the constraints from <a href="../week-02/two-rules.html">Lesson&nbsp;1</a>. To
 compute $\varepsilon_u$ a unit needs $u$, which arrives at it, and $g(d)$, which
 is a prediction sent to it. To compute $\varepsilon_p$ it needs $d_p$, held
 locally, and $d$, the current estimate. Nothing has to be fetched from across the

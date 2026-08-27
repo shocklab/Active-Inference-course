@@ -61,6 +61,11 @@ NON_PROSE = [
     re.compile(r"^(```|~~~).*?^\1", re.S | re.M),   # fenced code
     re.compile(r"`[^`\n]+`"),                       # inline code
     re.compile(r"\]\([^)]*\)"),                    # link targets
+    # `[lesson:1.5]` is a cross-reference, and its week.lesson pair is not a
+    # decimal anyone typed as a result. Adding the syntax without adding this
+    # put 61 false positives into the report at once, which is how a check
+    # stops being read.
+    re.compile(r"\[(?:lesson|week):[^\]]*\]"),
 ]
 TOKEN = re.compile(r"\{\{([A-Za-z_][A-Za-z0-9_]*)(?::([^}]+))?\}\}")
 

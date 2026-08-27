@@ -163,6 +163,67 @@ def pagenav(prev, nxt, root):
     return "".join(bits)
 
 
+# ── internal cross-references ────────────────────────────────────────────
+# `[lesson:1.5]` and `[week:4]` in a markdown source become real links, resolved
+# here against the actual lesson list rather than written as paths by hand. A
+# hand-written `../week-01/the-denominator.html` is correct until a file is
+# renamed and then silently wrong; these fail the build instead.
+#
+# Link text is what you would have written anyway: "Lesson 5" when the target is
+# in the page's own week, "Week 1, Lesson 5" when it is not. Override it with a
+# pipe, as `[lesson:1.5|the denominator lesson]`.
+LESSON_REF = re.compile(r"\[lesson:(\d+)\.(\d+)(?:\|([^\]]+))?\]")
+WEEK_REF = re.compile(r"\[week:(\d+)(?:\|([^\]]+))?\]")
+
+
+def resolve_internal_links(html, week, weeks, flat, root, where):
+    """Turn [lesson:W.L] and [week:N] into anchors. Reports what it cannot find.
+
+    Only the FIRST reference to a given target on a page becomes a link; later
+    ones render as plain text. Week 1's Lesson 2 refers back to Lesson 1 six
+    times, and six identical links in one page is not navigation, it is a rash.
+    Marking every occurrence in the source and thinning them here means the rule
+    survives a paragraph being moved.
+    """
+    missing = []
+    linked = set()
+
+    def lesson_sub(m):
+        wn, ln, text = int(m.group(1)), int(m.group(2)), m.group(3)
+        for ls in flat:
+            if ls.week == wn and ls.order == ln:
+                if text is None:
+                    text = (f"Lesson&nbsp;{ln}" if wn == week.n
+                            else f"Week&nbsp;{wn}, Lesson&nbsp;{ln}")
+                if ls.href in linked or ls.href == getattr(week, "_self_href", None):
+                    return text
+                linked.add(ls.href)
+                return f'<a href="{root}{ls.href}">{text}</a>'
+        missing.append(f"lesson:{wn}.{ln}")
+        return m.group(0)
+
+    def week_sub(m):
+        wn, text = int(m.group(1)), m.group(2)
+        for w in weeks:
+            if w.n == wn:
+                label = text or f"Week&nbsp;{wn}"
+                # A week with no content yet has an index page and nothing on it.
+                # Linking there is worse than not linking.
+                if not w.lessons or w.href in linked:
+                    return label
+                linked.add(w.href)
+                return f'<a href="{root}{w.href}">{label}</a>'
+        missing.append(f"week:{wn}")
+        return m.group(0)
+
+    html = LESSON_REF.sub(lesson_sub, html)
+    html = WEEK_REF.sub(week_sub, html)
+    if missing:
+        print(f"    ! unresolved cross-references in {where}: "
+              f"{', '.join(sorted(set(missing)))}")
+    return html
+
+
 # ── page renderers ───────────────────────────────────────────────────────
 def render_lesson(lesson, week, weeks, flat):
     raw = open(lesson.path, encoding="utf-8").read()
@@ -178,6 +239,8 @@ def render_lesson(lesson, week, weeks, flat):
             print(f"    ! unresolved [eq:...] refs in {lesson.slug}: {', '.join(missing)}")
 
     root = "../"
+    week._self_href = lesson.href
+    html = resolve_internal_links(html, week, weeks, flat, root, lesson.slug)
     i = flat.index(lesson)
     prev = flat[i - 1] if i > 0 else None
     nxt = flat[i + 1] if i + 1 < len(flat) else None

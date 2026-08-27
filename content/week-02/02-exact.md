@@ -125,7 +125,7 @@ ${{post_band_lo}}$ and ${{post_band_hi}}$ does have one: integrate over that
 band and get {{post_band_mass:.4f}}.
 
 **A density carries units.** $P(d)\,\mathrm{d}d$ is dimensionless, so $P(d)$ is
-per unit distance. That is why the two prediction errors of Lesson&nbsp;3 cannot
+per unit distance. That is why the two prediction errors of [lesson:2.3] cannot
 be added until one has been converted into the other's units, and it is the whole
 of why the last problem of the week comes out as it does.
 
@@ -146,7 +146,7 @@ It is worth being exact about why that is a problem, because the obvious answer
 is wrong. The obvious answer is that an integral is a sum with uncountably many
 terms, so it must be harder than Week&nbsp;1's finite sum. But
 $\int_0^1 x\,\mathrm{d}x$ also has uncountably many terms and takes a second, so
-the count is not what decides it. Week&nbsp;1's Lesson&nbsp;5 sets out the four
+the count is not what decides it. [lesson:1.5|Week&nbsp;1's Lesson&nbsp;5] sets out the four
 reasons the denominator resists, and the one that applies here is the third: with
 $g$ nonlinear the exponent of the integrand is not a quadratic, so the one closed
 form available for integrals of this shape does not apply. There is nothing wrong
@@ -218,7 +218,7 @@ That also says when the skew would go away: when the parabola is sharp enough to
 swamp the other term's departure from one. Narrow the prior to
 $\Sigma_p = {{var_prior_narrow}}$ and the skew falls to
 {{skew_narrow_prior:.4f}}, which is zero to the precision of the grid. Widen it
-and the skew grows. The widget in Lesson&nbsp;4 has a slider for this.
+and the skew grows. The widget in [lesson:2.4] has a slider for this.
 
 ::: warning The likelihood alone is not a distribution over $d$
 It is tempting to read the middle curve in the figure as "what the data say about

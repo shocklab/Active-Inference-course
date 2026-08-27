@@ -27,7 +27,7 @@ Write $\vartheta$ for the true state of the world and $o$ for what arrives at th
 sensory surface. The generative process specifies how $\vartheta$ evolves, and how
 $\vartheta$ gives rise to $o$. Write $a$ for the agent's **actions**, drawn from whatever set of things the agent can do: for a thermostat $a \in \{\text{heat}, \text{idle}\}$, for an animal a continuous space of muscle commands. Week&nbsp;9 makes the discrete case concrete; the lamp example below has no actions at all, being about perception alone. The process also specifies how $a$ feeds
 back into $\vartheta$, and it has to: an agent that could only watch would have no
-way of staying in the small region of Lesson&nbsp;1, since staying there is
+way of staying in the small region of [lesson:1.1], since staying there is
 something a body does rather than something that happens to it.
 
 The agent does not have access to $\vartheta$. Not partially, not noisily: not at
@@ -118,7 +118,7 @@ joint distribution every marginal and every conditional follows in principle.
 
 The two dashed lines mark the only place the world and the agent meet. The
 variables sitting on them have names. The **sensory states** are the observations
-$o$ of Lesson&nbsp;1, seen now as one half of an interface rather than as a bare
+$o$ of [lesson:1.1], seen now as one half of an interface rather than as a bare
 measurement; they carry information inward. The **active states** $a$ carry
 influence outward. Nothing crosses except through the two. That interface is
 called a **Markov blanket**. The name is borrowed from graphical models, and it
@@ -161,9 +161,11 @@ Three things become clear once you keep the two apart, and stay muddy if you do 
 
 **Where the intractability lives.** To use the model you need the probability of
 an observation on its own, $P(o) = \sum_s P(o \mid s) P(s)$, and that sum runs
-over the agent's $s$, not the world's $\vartheta$. Avoiding it occupies the next
-three weeks. The world
-does not compute anything. It has no marginalisation problem. The difficulty is
+over the agent's $s$, not the world's $\vartheta$. [lesson:1.3] says why you need
+it, as the denominator of Bayes' theorem, and gives the first argument that it is
+out of reach; [lesson:1.5] gives the rest, including the reason that first
+argument is the weakest one available. Avoiding it occupies the next three weeks.
+The world does not compute anything. It has no marginalisation problem. The difficulty is
 entirely on the agent's side of the blanket. That is a useful place for it to be:
 it makes the problem one of algorithm rather than physics, so it can be attacked
 by choosing a better approximation scheme, which is what Week&nbsp;4 does.
@@ -212,7 +214,7 @@ P(\text{bright}) = {{lamp_prior}} \times {{lamp_true_on}} + {{lamp_prior}} \time
 $$ {#lamp-evidence}
 
 so a bright reading carries $-\ln {{lamp_ev_bright_true:.2f}} = {{lamp_surprise_bright_true:.4f}}$
-nats of surprise, in the natural-log units of Lesson&nbsp;1,
+nats of surprise, in the natural-log units of [lesson:1.1],
 and by Bayes the posterior on the lamp being on is
 ${{lamp_prior}} \times {{lamp_true_on}} / {{lamp_ev_bright_true:.2f}} = {{lamp_post_on_true:.4f}}$.
 
@@ -252,7 +254,7 @@ $$
 $$ {#avg-surprise}
 
 For agent A this is ${{lamp_entropy_true:.6f}}$ nats, which is exactly
-$\mathrm{H}[P^{*}(o)]$: the entropy of Lesson&nbsp;1 applied to the world's own
+$\mathrm{H}[P^{*}(o)]$: the entropy of [lesson:1.1] applied to the world's own
 frequencies. That is the floor, because an agent whose $P_X$ already equals
 $P^{*}$ has nothing left to get wrong. Agent B averages
 ${{lamp_avg_surprise_b:.6f}}$ nats. The excess is
@@ -264,7 +266,7 @@ $$ {#lamp-kl}
 
 the same number. The extra surprise a mismodelling agent pays, per observation
 and on average, *is* the divergence between the world's statistics and its own.
-That is the precise version of Lesson&nbsp;1's remark that the two meanings of
+That is the precise version of [lesson:1.1]'s remark that the two meanings of
 $P(o)$ coincide when the model is good and part company when it is not, and it
 is why the framework can get away with using one as a stand-in for the other.
 
@@ -336,8 +338,8 @@ $P(s \mid o)$ :: The posterior. What the agent should believe after seeing $o$. 
 $P(o, s)$ :: The joint distribution over observations and model states. The generative model itself, [eq:gen-model].
 $P^{*}(\cdot)$ :: A star marks a distribution belonging to the *process*: the frequencies the world actually produces. No agent can evaluate it.
 $P_A(\cdot),\ P_B(\cdot)$ :: A subscript marks the same distribution computed under a named agent's *model*.
-$D_{\mathrm{KL}}[Q \,\|\, P]$ :: Kullback&ndash;Leibler divergence, $\sum_x Q(x)\ln[Q(x)/P(x)]$. Non-negative, zero only when $Q = P$, and not symmetric. Lesson&nbsp;3.
-$\mathrm{H}[P]$ :: Shannon entropy, $-\sum_x P(x)\ln P(x)$, in nats. Lesson&nbsp;1.
+$D_{\mathrm{KL}}[Q \,\|\, P]$ :: Kullback&ndash;Leibler divergence, $\sum_x Q(x)\ln[Q(x)/P(x)]$. Non-negative, zero only when $Q = P$, and not symmetric. [lesson:1.3].
+$\mathrm{H}[P]$ :: Shannon entropy, $-\sum_x P(x)\ln P(x)$, in nats. [lesson:1.1].
 :::
 
 ::: checkpoint
