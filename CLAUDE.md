@@ -141,8 +141,55 @@ Do not treat a green pipeline as proof. Recorded so far:
   renders client-side and the static HTML still holds raw LaTeX minus signs.
 - `check_all.py` misattributed every section, because the parent's buffered headers
   landed after each child's output.
+- `check_definitions.py` read only `\macro` tokens when scanning for symbols spent
+  before their reserved week, so any bare letter could collide in silence: $g$ was
+  reserved for Week 5 and used in Week 2 with nothing to say so.
+- Taught to read bare letters, it then filed every *argument* of a notation row as a
+  reservation, so `$Q(s)$` looked like a definition of $s$ and the report drowned.
+- Taught to take only a row's head symbol, it still skipped every row whose
+  description had no `Week N` in it, which was 33 of them, because the page is
+  sectioned by week and the rows say "Lesson 1". $\Pi$ hid there.
+- Stripping `\mathbf` and `\mathcal` to find the letter underneath made
+  $\mathbf{D}$, $\mathcal{D}$ and $D_{\mathrm{KL}}$ one symbol, and it reported
+  collisions between three things no reader would confuse.
 
 Read the reports. The exit code is a prompt to look, not an answer.
+
+### A green pipeline is not a rendered page
+
+Week 2's central figure, the predictive coding circuit, read $g'(d)\cdot\Pi€_u$ for
+a working day. Entity `&#8364;` where `&#7524;` was meant. Tag balance passed, SVG
+integrity passed, maths checking passed, because none of them look at what the glyphs
+say. Reading `svg text` content in the browser found it in one call.
+
+The same page's widget note claimed a skew "drops to zero" where the running widget
+showed 0.191, because the note had been written from the algebra rather than from the
+thing the reader will actually see.
+
+**So: before committing a page with a figure or a widget, open it and read what it
+says.** Not a screenshot glance. Pull the text content, drive the controls, and check
+the readout against the Python. Three independent implementations of Week 2 (the
+`values.py` module, the widget's JavaScript, and the notebook) agree to four figures,
+and that agreement is worth more than any single check, because the ways each could
+be wrong are not the same ways.
+
+### A hand-drawn curve is a typed number in disguise
+
+Week 2's first figure was hand-authored SVG. It put the posterior mode at x=252 where
+the computation puts it at 209.8, and the mean at 316 against 262: a picture
+disagreeing with the prose beside it, in a project whose whole numbers discipline
+exists to stop exactly that. Path data is now emitted from the same arrays the
+statistics come from, via `_svg_path` in `content/week-02/values.py`, and cited as
+`{{fig_post_path}}`. Schematics with no data in them (the circuit diagram) may still
+be drawn by hand.
+
+### Check the check by breaking it
+
+`check_definitions.py` reported zero collisions after being rewritten, which is also
+what a broken check reports. Planting `\gamma`, `\mathbf{C}`, `\tilde{s}` and
+`\mathcal{D}` in Week 2 and confirming all four fire is what made the zero mean
+something. The first run of that test said `\tilde{s}` passed; the cause was
+`printf` turning the `\t` into a tab, not the checker. Verify the harness too.
 
 ## Authoring rules
 
@@ -278,5 +325,21 @@ say so.
 
 ## Current state
 
-Week 1 is built. Weeks 2 to 12 are outlined in `OUTLINE.md` and not yet drafted.
-`OUTLINE.md` names, per week, which of Jonathan's own notes seed it.
+Weeks 1 and 2 are built. Weeks 3 to 12 are outlined in `OUTLINE.md` and not yet
+drafted. `OUTLINE.md` names, per week, which of Jonathan's own notes seed it.
+
+Week 2 derives predictive coding from gradient ascent on the log joint, so the
+circuit arrives in Week 2 and variational free energy not until Week 4. It carries
+two widgets (`ascent-errors`, `precision-posterior`) and two notebooks; the JAX one
+is not a translation of the NumPy one but does what needs many runs at once.
+
+Known outstanding, in order:
+1. Read Da Costa et al. (2020), arXiv:2001.07203, before drafting Weeks 9 to 11.
+   It is the only planned source not in `source-material/papers/`, and the outline
+   calls it the spine of those three weeks.
+2. Week 1's exercises have gaps: no exercise computes an entropy, mutual information
+   is never independently exercised, the regulated $\kappa > 0$ case is tested only
+   by the widget, there is no rung-zero warm-up, and the reader is never asked to
+   implement anything. Week 2's problem 2 is the first that asks for code.
+3. A glossary built from `::: notation` blocks.
+4. Whether Weeks 6 to 8 need a shared worked continuous example.
