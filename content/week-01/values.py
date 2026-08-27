@@ -7,6 +7,7 @@ is a number nobody has checked; build/check_numbers.py reports those.
 Run standalone to see the values:  python3 content/week-01/numbers.py
 """
 import itertools
+from decimal import Decimal
 from math import comb, exp, log, log2, sqrt
 
 # ── the running discrete model (Lessons 3 and 5) ─────────────────────────
@@ -341,6 +342,26 @@ for _n in (1, 10, 20, 50):
     V[f"is_kl_n{_n}"] = _kl
     V[f"is_ess_frac_n{_n}"] = exp(-_kl)
     V[f"is_samples_n{_n}"] = V["is_target_ess"] * exp(_kl)
+
+# ── the continuous marginal, from Mathematica ────────────────────────────
+# Recorded results, not derivations: wolframscript 14.3 returns the integral
+# unevaluated for the inverse-square link and Sqrt[2 Pi/11] Exp[-45/44] for the
+# linear one. The value below is NIntegrate at WorkingPrecision 50, quoted to
+# 20 digits, of Integrate[Exp[-5(1/2 - 1/d^2)^2 - (d-2)^2/2], {d, 0, Infinity}]
+# with Week 2's numbers. Verified against Python quadrature to 12 digits.
+# A Decimal, not a float. A float carries about 17 significant digits, so
+# formatting one to 20 places does not fail, it INVENTS the last three: the
+# first version of this line published 1.40110530805058952630 for a number
+# whose true value is 1.4011053080505894180. Anything quoted beyond 17 digits
+# has to be carried as text or Decimal all the way to the page.
+V["nl_marginal_20"] = Decimal("1.4011053080505894180")
+
+# FindIntegerNullVector against {value, 1, Pi, Sqrt[Pi], E, Sqrt[2], Log[2]}.
+# A genuine relation keeps its coefficients as precision rises; these do not,
+# and the 28-digit relation's residual sits at 7.9e-28, exactly the precision it
+# was fitted to. There is no relation in that basis.
+V["pslq_coeff_20"] = 17944
+V["pslq_coeff_36"] = 2255543
 
 # ── constants quoted in prose ────────────────────────────────────────────
 V["ln2"] = log(2)

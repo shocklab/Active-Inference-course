@@ -251,6 +251,19 @@ as `[eq:name]`. Numbering every intermediate line of a derivation is noise.
 Never write maths inside a code fence expecting it to render; fences are excluded
 from maths scanning by design.
 
+### A float cannot carry twenty digits, and will not say so
+
+`V["x"] = 1.4011053080505894180` stores a double, which holds about 17
+significant digits. Formatting it with `{{x:.20f}}` does not fail or warn: it
+prints the double's own expansion, so the page published
+`1.40110530805058952630` for a number whose true value is
+`1.4011053080505894180`. Three invented digits, and every check green, because
+the number matched its key exactly and the key held what it had been given.
+
+Anything quoted beyond about 15 digits must be carried as `Decimal` or as text
+from the source to the page. High-precision results out of Mathematica are the
+usual case.
+
 ### Cross-references are directives, never paths
 
 Point at another lesson with `[lesson:1.5]`, and at a week with `[week:4]`.

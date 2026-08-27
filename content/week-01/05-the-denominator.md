@@ -268,6 +268,16 @@ $\int_{-\infty}^{\infty} e^{-x^2}\mathrm{d}x = \sqrt{\pi}$ exactly. The claim
 here is the narrower and safer one: the technique that works is completing the
 square, it applies only to quadratic exponents, and [eq:cont-denom] with a
 nonlinear $g$ has a non-quadratic exponent. No general method replaces it.
+
+For what it is worth as evidence rather than proof, a computer algebra system
+returns [eq:cont-denom] unevaluated for [lesson:2.2]'s inverse-square link, both
+as a definite integral and as an antiderivative, while returning
+$\sqrt{2\pi/11}\,e^{-45/44}$ for the linear case in a second. Its value to
+twenty digits is ${{nl_marginal_20:.19f}}$, and an integer-relation search finds
+nothing among $\pi$, $\sqrt{\pi}$, $e$, $\sqrt{2}$ and $\ln 2$: the coefficients
+it returns grow from ${{pslq_coeff_20:,}}$ to ${{pslq_coeff_36:,}}$ as the
+precision fed to it rises from 20 digits to 36, which is what a search returns
+when there is no relation to find.
 :::
 
 ## Where quadrature and sampling break

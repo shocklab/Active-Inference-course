@@ -518,7 +518,16 @@ $\int e^{-x^2}\mathrm{d}x$ is not elementary, yet
 $\int_{-\infty}^{\infty} e^{-x^2}\mathrm{d}x = \sqrt{\pi}$ exactly. The claim
 here is the narrower and safer one: the technique that works is completing the
 square, it applies only to quadratic exponents, and <a class="eqref" href="#eq-cont-denom">(1.5.3)</a> with a
-nonlinear $g$ has a non-quadratic exponent. No general method replaces it.</p></aside>
+nonlinear $g$ has a non-quadratic exponent. No general method replaces it.</p>
+<p>For what it is worth as evidence rather than proof, a computer algebra system
+returns <a class="eqref" href="#eq-cont-denom">(1.5.3)</a> unevaluated for <a href="../week-02/exact.html">Week&nbsp;2, Lesson&nbsp;2</a>'s inverse-square link, both
+as a definite integral and as an antiderivative, while returning
+$\sqrt{2\pi/11}\,e^{-45/44}$ for the linear case in a second. Its value to
+twenty digits is $1.4011053080505894180$, and an integer-relation search finds
+nothing among $\pi$, $\sqrt{\pi}$, $e$, $\sqrt{2}$ and $\ln 2$: the coefficients
+it returns grow from $17,944$ to $2,255,543$ as the
+precision fed to it rises from 20 digits to 36, which is what a search returns
+when there is no relation to find.</p></aside>
 <h2 id="where-quadrature-and-sampling-break"><span class="secno">5</span>Where quadrature and sampling break</h2>
 <p>Two obvious escapes from <a class="eqref" href="#eq-cont-denom">(1.5.3)</a>, and each fails in a way that is worth
 knowing, because both reappear in later weeks.</p>
