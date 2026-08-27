@@ -61,7 +61,18 @@ reading finds. Update this table as sources are read, and do not delete it.
 2. Two models, not one · generative process vs generative model, the Markov blanket, why the intractability is the agent's problem. SVG diagram.
 3. Bayes with states and observations · the four terms, rows vs columns, a fully worked numerical example, ambiguity. Widgets: `bayes-discrete`.
 4. The inverse problem · many-to-one, the normaliser, ill-posedness, explaining away, the three solution families. Widgets: `forward-inverse`, `evidence-blowup`.
-5. Problems and code · six problems with solutions, notebooks.
+5. What makes the denominator hard · added 2026-08-27, because "the sum is
+   intractable" was doing more work than one sentence can carry. Four distinct
+   reasons, separated: the term count (which proves almost nothing, since a chain
+   sums $4^{40}$ terms in 624 operations); treewidth, which is what actually sits
+   in the exponent, and which explaining away destroys; the complexity results,
+   which rule out cleverer algorithms and not merely slower machines; and the
+   analytic failure of the continuous case, visible with one variable and nothing
+   to do with dimension. Then quadrature and importance sampling, and where each
+   breaks. Closes on a table of which escape dodges which reason, which is where
+   the mean-field approximation of Week 4 gets its price tag.
+   → forward to Week 2 §2 and Week 4.
+6. Problems and code · six problems with solutions, notebooks.
 
 ### Week 2 · Hidden state estimation
 *Rewritten 2026-08-26 after reading Bogacz (2017) in full. **Drafted 2026-08-27**;

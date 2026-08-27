@@ -107,13 +107,14 @@ $\tilde{s}, \tilde{o}$ :: A tilde denotes a whole *sequence* over time rather th
 
 ::: notation
 $d$ :: The distance to a sound source: the single hidden state of Week&nbsp;2's running example. A continuous stand-in for Week&nbsp;1's discrete $s$.
-$u$ :: The observation, in the predictive coding notation. The same object as $o$; the letter is the control-theoretic *input*. Week&nbsp;2.
+$u$ :: The observation, in the predictive coding notation. The same object as $o$; the letter is the control-theoretic *input*. First used in Week&nbsp;1 Lesson&nbsp;5, and throughout from Week&nbsp;2.
 $m,\ \Sigma$ :: Placeholders for the two slots of a Gaussian, its mean and its variance, filled differently at each use. $m$ rather than $\mu$, because $\mu$ is already the agent's internal states. Week&nbsp;2.
-$d_p,\ \Sigma_p$ :: The prior's mean and variance over the hidden state, in distance and in squared distance. Week&nbsp;2.
-$\Sigma_u$ :: The variance of the sensory noise, in squared units of the observation. Week&nbsp;2.
+$d_p,\ \Sigma_p$ :: The prior's mean and variance over the hidden state, in the units of the state and their square. $\Sigma_p$ first appears in Week&nbsp;1 Lesson&nbsp;5, written over a generic $x$; Week&nbsp;2 makes the state a distance.
+$\Sigma_u$ :: The variance of the sensory noise, in squared units of the observation. First used in Week&nbsp;1 Lesson&nbsp;5; Week&nbsp;2 throughout.
 $\eta$ :: A rate constant on a gradient ascent, in units of the variable per unit of gradient. Bounded above by $2/|\mathcal{F}''|$, derived in Week&nbsp;2. The letter also appears in Week&nbsp;1, but only to report that much of the literature uses it for external states; this course does not, and the two meanings never both apply.
 $r,\ w$ :: The activity of a unit and the weight of a connection, in the stylised device of Week&nbsp;2 Lesson&nbsp;1. $r$ for rate, since $a$ is already actions.
 $\Phi$ :: A cumulative distribution function, needed to change variables in a density. Week&nbsp;2.
+$\delta,\ \rho$ :: An error tolerance and a count of bounded derivatives, in the quadrature bound of Week&nbsp;1 Lesson&nbsp;5. Both are local to that argument. $\varepsilon$ is deliberately not used there.
 :::
 
 ## Continuous models, from Week 5
@@ -123,7 +124,7 @@ $\varepsilon$ :: A prediction error, the difference between what was predicted a
 $\Pi$ :: A precision: the inverse of a variance, and from Week&nbsp;5 the inverse of a covariance matrix. It is what weights each prediction error, and it is the formal correlate of attention. First used in Week&nbsp;2, where there are two of them and both are scalars. Note the clash with $\Pi$ for the policy set; the two never occur in the same chapter.
 $\tilde{x}$ :: In Weeks&nbsp;6 to 8, a variable in **generalised coordinates of motion**: the stacked vector $(x, x', x'', \dots)$ of the state and its temporal derivatives. This is a different use of the tilde from the discrete chapters, and Week&nbsp;6 says so again at the point where it starts.
 $\mathcal{D}$ :: The block shift operator that maps $\tilde{x} = (x, x', x'', \dots)$ to $(x', x'', x''', \dots)$.
-$g(\cdot)$ :: The observation function of the generative model, mapping a hidden state to the observation it predicts, $o = g(x) + z$ with $z$ the sensory noise. First used in Week&nbsp;2, for a single hidden variable; general from Week&nbsp;5.
+$g(\cdot)$ :: The observation function of the generative model, mapping a hidden state to the observation it predicts, $o = g(x) + z$ with $z$ the sensory noise. First used in Week&nbsp;1 Lesson&nbsp;5 as a bare link function; named and worked through in Week&nbsp;2 for a single hidden variable; general from Week&nbsp;5.
 $f(\cdot)$ :: The flow of the generative model, giving the rate of change of the hidden state, $\dot{x} = f(x) + w$ with $w$ the state noise. Week&nbsp;5.
 :::
 

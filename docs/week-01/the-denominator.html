@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>What makes the denominator hard · Active Inference</title><meta name="description" content="Exact inference is intractable" is four separate claims wearing one coat. They fail in different places, are escaped by different tricks, and only one of them is about the size of a sum."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+:root{
+  --paper:#fdfcf9; --card:#ffffff;
+  --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
+  --rule:#e4e1d9; --rule2:#d3cfc4;
+  --accent:#0f5f57; --accent2:#14837a; --accent-tint:#e9f2f0; --accent-deep:#0a423d;
+  --clay:#9c4d2f; --clay-tint:#f9efe9;
+  --gold:#8a6d1f; --gold-tint:#faf5e6;
+  --tint:#f4f2ec; --code-bg:#f5f4f0;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SF Mono',Menlo,Consolas,monospace;
+  --measure:44rem; --margincol:13rem; --gap:2.5rem; --shell:80rem;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);
+     font-variant-numeric:oldstyle-nums proportional-nums;line-height:1.6}
+::selection{background:var(--accent);color:#fff}
+img,svg,canvas{max-width:100%}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2)}
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.topbar{position:sticky;top:0;z-index:60;background:var(--accent-deep);
+        border-bottom:2px solid var(--accent);}
+.topbar .tin{max-width:var(--shell);margin:0 auto;padding:0 2rem;height:3rem;
+             display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.topbar a.home{font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.13em;
+               text-transform:uppercase;color:rgba(255,255,255,.82)}
+.topbar a.home:hover{color:#fff}
+.topbar .tcode{font-family:var(--sans);font-size:.7rem;font-weight:500;letter-spacing:.2em;
+               text-transform:uppercase;color:rgba(255,255,255,.42)}
+.tocbtn{display:none;font-family:var(--sans);font-size:.75rem;letter-spacing:.1em;
+        text-transform:uppercase;color:rgba(255,255,255,.82);background:none;border:0;cursor:pointer}
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:14rem minmax(0,1fr);gap:0 var(--gap);
+       max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.maincol{min-width:0;max-width:calc(var(--measure) + var(--margincol) + var(--gap))}
+
+/* ── side nav ────────────────────────────────────────────────────────── */
+.sidenav{position:sticky;top:3rem;align-self:start;max-height:calc(100vh - 3rem);
+         overflow-y:auto;padding:2.6rem 0 3rem;scrollbar-width:thin}
+.sidenav::-webkit-scrollbar{width:0}
+.sidenav .part{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--faint);margin:1.6rem 0 .55rem}
+.sidenav .part:first-child{margin-top:0}
+.sidenav a.wk{display:block;font-family:var(--sans);font-size:.83rem;line-height:1.35;
+              color:var(--ink2);padding:.34rem 0 .34rem .8rem;border-left:2px solid var(--rule)}
+.sidenav a.wk:hover{color:var(--accent);border-left-color:var(--rule2)}
+.sidenav a.wk.cur{color:var(--accent);font-weight:500;border-left-color:var(--accent)}
+.sidenav a.wk .n{color:var(--faint);font-variant-numeric:tabular-nums;margin-right:.45rem}
+.sidenav a.wk.cur .n{color:var(--accent2)}
+.sidenav .lessons{margin:.15rem 0 .5rem .8rem;border-left:1px solid var(--rule)}
+.sidenav .lessons a{display:block;font-family:var(--sans);font-size:.76rem;line-height:1.35;
+                    color:var(--muted);padding:.28rem 0 .28rem .75rem;border-left:2px solid transparent;margin-left:-1px}
+.sidenav .lessons a:hover{color:var(--accent)}
+.sidenav .lessons a.cur{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.sidenav .navhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.16em;
+                text-transform:uppercase;color:var(--accent);padding-bottom:.6rem;
+                margin-bottom:1rem;border-bottom:1px solid var(--rule)}
+
+/* ── article head ────────────────────────────────────────────────────── */
+.ahead{padding:3.2rem 0 1.7rem;border-bottom:1px solid var(--rule);max-width:var(--measure)}
+.ahead .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.2em;
+                text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.ahead h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.2vw,2.9rem);
+          line-height:1.08;letter-spacing:-.015em;color:var(--ink);margin-bottom:.85rem;
+          font-variant-numeric:lining-nums}
+.ahead .deck{font-family:var(--serif);font-style:italic;font-size:1.18rem;line-height:1.5;
+             color:var(--muted)}
+.ahead .meta{font-family:var(--sans);font-size:.74rem;letter-spacing:.06em;color:var(--faint);
+             margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap}
+
+/* ── body ────────────────────────────────────────────────────────────── */
+.abody{padding:2rem 0 1rem;font-size:1.115rem;max-width:var(--measure)}
+.abody > *{max-width:var(--measure)}
+.abody p{margin:0 0 1.15rem;color:var(--ink);text-wrap:pretty}
+.abody p.lede{font-size:1.24rem;line-height:1.55;color:var(--ink2)}
+.abody strong{font-weight:600}
+.abody em{font-style:italic}
+.abody a{border-bottom:1px solid var(--rule2)}
+.abody a:hover{border-bottom-color:var(--accent2)}
+.abody h2{font-family:var(--serif);font-weight:500;font-size:1.72rem;line-height:1.16;
+          color:var(--ink);letter-spacing:-.01em;margin:2.9rem 0 .9rem;padding-top:1.6rem;
+          border-top:1px solid var(--rule);scroll-margin-top:4rem}
+.abody h2 .secno{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.6rem;font-weight:400}
+.abody h3{font-family:var(--serif);font-weight:600;font-size:1.24rem;color:var(--ink);
+          margin:2rem 0 .6rem;scroll-margin-top:4rem}
+.abody h4{font-family:var(--sans);font-weight:600;font-size:.78rem;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--accent);margin:1.6rem 0 .5rem}
+.abody ul,.abody ol{margin:0 0 1.25rem;padding-left:1.5rem}
+.abody li{margin-bottom:.45rem;color:var(--ink)}
+.abody ul>li::marker{color:var(--accent)}
+.abody ol>li::marker{color:var(--accent);font-family:var(--sans);font-size:.9em}
+.abody li>ul,.abody li>ol{margin:.45rem 0 .2rem}
+.abody blockquote{border-left:2px solid var(--accent);padding:.15rem 0 .15rem 1.3rem;
+                  margin:1.6rem 0;color:var(--ink2);font-style:italic}
+.abody blockquote p:last-child{margin-bottom:0}
+.abody hr{border:0;border-top:1px solid var(--rule);margin:2.4rem 0}
+
+/* ── code ────────────────────────────────────────────────────────────── */
+.abody code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);
+            padding:.1em .35em;border-radius:2px;border:1px solid var(--rule)}
+.abody pre{background:var(--code-bg);border:1px solid var(--rule);border-left:2px solid var(--accent);
+           padding:1rem 1.15rem;overflow-x:auto;margin:1.5rem 0;line-height:1.55}
+.abody pre code{background:none;border:0;padding:0;font-size:.83rem;color:var(--ink2)}
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.abody .tablewrap{overflow-x:auto;margin:1.7rem 0;
+           width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+.abody table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.86rem}
+.abody th{text-align:left;font-weight:600;color:var(--accent);border-bottom:1.5px solid var(--accent);
+          padding:.5rem .7rem;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;
+          vertical-align:bottom}
+.abody td{padding:.55rem .7rem;border-bottom:1px solid var(--rule);color:var(--ink2);vertical-align:top}
+.abody tbody tr:hover td{background:var(--tint)}
+
+/* ── maths ───────────────────────────────────────────────────────────── */
+.katex{font-size:1.045em}
+.katex-display{margin:0;padding:.15rem 0;overflow-x:auto;overflow-y:hidden}
+.eqn{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;max-width:var(--measure);
+     scroll-margin-top:4.5rem}
+.eqn > .eqbody{flex:1;min-width:0}
+.eqn > .eqno{flex:0 0 auto;font-family:var(--sans);font-size:.8rem;color:var(--faint);
+             font-variant-numeric:tabular-nums}
+.eqn > .eqno a{color:var(--faint);border:0}
+.eqn > .eqno a:hover{color:var(--accent)}
+.eqn:target{background:var(--gold-tint);box-shadow:0 0 0 .7rem var(--gold-tint);border-radius:2px}
+.eqn:target > .eqno a{color:var(--gold)}
+a.eqref{font-variant-numeric:tabular-nums;white-space:nowrap;border-bottom:1px solid var(--rule2)}
+
+/* ── margin notes ────────────────────────────────────────────────────── */
+.mn{float:right;clear:right;width:var(--margincol);
+    margin:.3rem calc(-1 * (var(--margincol) + var(--gap))) 1.1rem var(--gap);
+    font-family:var(--sans);font-size:.775rem;line-height:1.5;color:var(--muted)}
+.mn .mnl{display:block;font-weight:600;font-size:.66rem;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.mn p{margin:0 0 .5rem;font-size:inherit;line-height:inherit;color:inherit}
+.mn p:last-child{margin-bottom:0}
+.mn code{font-size:.85em}
+.mn a{border-bottom:1px solid var(--rule2)}
+
+/* ── boxes ───────────────────────────────────────────────────────────── */
+.box{margin:1.9rem 0;padding:1.15rem 1.35rem;border:1px solid var(--rule);
+     background:var(--card);max-width:var(--measure)}
+.box > :last-child{margin-bottom:0}
+.box .boxhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.15em;
+            text-transform:uppercase;margin-bottom:.6rem;display:flex;gap:.5rem;align-items:baseline}
+.box .boxhd .bt{color:var(--ink2);font-weight:500;letter-spacing:.02em;text-transform:none;
+                font-size:.95rem;font-family:var(--serif);font-style:italic}
+.box p,.box li{font-size:1.03rem}
+
+.box.definition,.box.theorem,.box.proposition,.box.lemma{
+  border-left:2px solid var(--accent);background:var(--card)}
+.box.definition .boxhd,.box.theorem .boxhd,.box.proposition .boxhd,.box.lemma .boxhd{color:var(--accent)}
+
+.box.keyidea{border:0;border-left:2px solid var(--accent);background:var(--accent-tint);
+             padding:1.2rem 1.4rem}
+.box.keyidea .boxhd{color:var(--accent)}
+
+.box.remark,.box.aside{border-left:2px solid var(--rule2);background:var(--tint)}
+.box.remark .boxhd,.box.aside .boxhd{color:var(--muted)}
+
+.box.warning{border-left:2px solid var(--clay);background:var(--clay-tint)}
+.box.warning .boxhd{color:var(--clay)}
+
+.box.derivation{border:1px solid var(--rule);border-left:2px solid var(--gold);background:#fdfcf7;
+                padding:1.25rem 1.45rem}
+.box.derivation .boxhd{color:var(--gold)}
+.box.derivation .eqn{margin:1rem 0}
+.box.derivation p{color:var(--ink2)}
+
+.box.exercise{border-left:2px solid var(--clay)}
+.box.exercise .boxhd{color:var(--clay)}
+.box.exercise details{margin-top:.9rem;border-top:1px solid var(--rule);padding-top:.7rem}
+.box.exercise summary{font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.11em;
+                      text-transform:uppercase;color:var(--clay);cursor:pointer;list-style:none}
+.box.exercise summary::-webkit-details-marker{display:none}
+.box.exercise summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+.box.exercise details[open] summary::before{content:'▾ '}
+.box.exercise details > :nth-child(2){margin-top:.8rem}
+
+.box.checkpoint{border-left:2px solid var(--accent2);background:var(--accent-tint)}
+.box.checkpoint .boxhd{color:var(--accent)}
+.box.checkpoint ul{margin-bottom:0}
+
+/* ── figures & widgets ───────────────────────────────────────────────── */
+.abody figure{margin:2.2rem 0;width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+figure{margin:2.2rem 0}
+figure figcaption{font-family:var(--sans);font-size:.79rem;line-height:1.5;color:var(--muted);
+                  margin-top:.7rem;max-width:var(--measure)}
+figure figcaption .fno{font-weight:600;color:var(--accent);letter-spacing:.03em}
+figure.widget .wmount{border:1px solid var(--rule2);background:var(--card);padding:1rem}
+figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:var(--muted);
+                                 padding:2rem 1rem;text-align:center}
+
+/* widget internals (used by aif-widgets.js) */
+.wpanel{display:grid;gap:1rem}
+.wrow{display:flex;flex-wrap:wrap;gap:1.1rem 1.6rem;align-items:flex-start}
+.wctl{font-family:var(--sans);font-size:.78rem;color:var(--ink2);display:flex;
+      flex-direction:column;gap:.28rem;min-width:11rem;flex:1 1 11rem}
+.wctl .wlab{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline}
+.wctl .wlab b{font-weight:500;color:var(--ink2)}
+.wctl .wlab .wval{font-family:var(--mono);font-size:.76rem;color:var(--accent);
+                  font-variant-numeric:tabular-nums}
+.wctl input[type=range]{width:100%;accent-color:var(--accent);height:1.1rem;cursor:pointer}
+.wbtn{font-family:var(--sans);font-size:.76rem;font-weight:500;letter-spacing:.04em;
+      background:var(--accent);color:#fff;border:0;padding:.42rem .9rem;cursor:pointer;
+      border-radius:2px}
+.wbtn:hover{background:var(--accent2)}
+.wbtn.ghost{background:transparent;color:var(--accent);border:1px solid var(--rule2)}
+.wbtn.ghost:hover{background:var(--accent-tint)}
+.wbtns{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.wnote{font-family:var(--sans);font-size:.78rem;line-height:1.5;color:var(--muted);
+       border-top:1px solid var(--rule);padding-top:.7rem}
+.wnote b{color:var(--accent);font-weight:600}
+.wreadout{font-family:var(--mono);font-size:.78rem;color:var(--ink2);display:flex;
+          flex-wrap:wrap;gap:.4rem 1.3rem;font-variant-numeric:tabular-nums}
+.wreadout span b{color:var(--faint);font-weight:500}
+.wtabs{display:flex;gap:.3rem;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.wtab{font-family:var(--sans);font-size:.75rem;padding:.34rem .75rem;cursor:pointer;
+      color:var(--muted);border:1px solid transparent;border-bottom:0;background:none}
+.wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
+canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
+
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
+
+/* ── footer nav ──────────────────────────────────────────────────────── */
+.pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
+         border-top:1px solid var(--rule);margin-top:3.5rem;padding:1.7rem 0 0;
+         max-width:var(--measure)}
+.pagenav a{display:flex;flex-direction:column;gap:.22rem;max-width:20rem;border:0}
+.pagenav a.nx{text-align:right;margin-left:auto}
+.pagenav .dir{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.16em;
+              text-transform:uppercase;color:var(--accent)}
+.pagenav .ttl{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);line-height:1.3}
+.pagenav a:hover .ttl{color:var(--accent)}
+.sitefoot{border-top:1px solid var(--rule);margin-top:3rem;padding:1.6rem 0 3.5rem;
+          font-family:var(--sans);font-size:.76rem;line-height:1.65;color:var(--faint);
+          max-width:var(--measure)}
+.sitefoot a{color:var(--muted);border-bottom:1px solid var(--rule)}
+.sitefoot a:hover{color:var(--accent)}
+.sitefoot p{margin-bottom:.4rem}
+
+/* ── landing page ────────────────────────────────────────────────────── */
+.cover{background:var(--accent-deep);color:#fff;padding:4.5rem 0 3.6rem;margin-bottom:0}
+.cover .cin{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.cover .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.22em;
+                text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1.3rem}
+.cover h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,6vw,4.2rem);
+          line-height:1.04;letter-spacing:-.02em;max-width:24ch;margin-bottom:1.2rem}
+.cover .sub{font-family:var(--serif);font-style:italic;font-size:1.25rem;line-height:1.5;
+            color:rgba(255,255,255,.72);max-width:44rem}
+.cover .rule{width:3rem;height:2px;background:var(--accent2);margin:0 0 1.2rem}
+.wide{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.weeklist{border-top:1px solid var(--rule)}
+.landing .abody>*{max-width:none}
+.landing .abody .introcopy{max-width:44rem}
+.weekrow{display:flex;gap:2.2rem;padding:1.7rem 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.weekrow .wn{flex:0 0 3.4rem;text-align:right}
+.weekrow .wn .l{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.18em;
+                text-transform:uppercase;color:var(--faint)}
+.weekrow .wn .n{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--accent);
+                line-height:1;font-variant-numeric:lining-nums}
+.weekrow .wc{flex:1 1 20rem;min-width:0}
+.weekrow .wc h3{font-family:var(--serif);font-weight:500;font-size:1.28rem;margin-bottom:.3rem}
+.weekrow .wc h3 a{color:var(--ink);border:0}
+.weekrow .wc h3 a:hover{color:var(--accent)}
+.weekrow .wc p{font-family:var(--sans);font-size:.86rem;line-height:1.6;color:var(--muted);
+               margin-bottom:.55rem;max-width:46rem}
+.weekrow .wc ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+.weekrow .wc ul li{font-family:var(--sans);font-size:.79rem;margin:0}
+.weekrow .wc ul li a{color:var(--ink2);border-bottom:1px solid var(--rule)}
+.weekrow .wc ul li a:hover{color:var(--accent);border-bottom-color:var(--accent2)}
+.partband{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.2em;
+          text-transform:uppercase;color:var(--accent);padding:2.2rem 0 .5rem}
+.partband span{color:var(--faint);font-weight:400;letter-spacing:.04em;text-transform:none;
+               font-family:var(--serif);font-style:italic;font-size:1rem;margin-left:.8rem}
+
+/* ── responsive ──────────────────────────────────────────────────────── */
+@media (max-width:1280px){
+  .shell{grid-template-columns:13rem minmax(0,1fr);gap:0 2rem;padding:0 1.6rem}
+  .maincol{max-width:var(--measure)}
+  .mn{float:none;clear:both;width:auto;margin:1rem 0 1.3rem;padding-left:1rem;
+      border-left:2px solid var(--rule2)}
+  .abody .tablewrap,.abody figure{width:auto;max-width:100%}
+  .cover .cin,.wide{padding:0 1.6rem}
+}
+@media (max-width:860px){
+  html{font-size:97%}
+  .shell{grid-template-columns:minmax(0,1fr);padding:0 1.3rem}
+  .sidenav{position:static;max-height:none;padding:1rem 0 0;display:none;
+           border-bottom:1px solid var(--rule);margin-bottom:1rem}
+  .sidenav.open{display:block}
+  .tocbtn{display:block}
+  .topbar .tin{padding:0 1.3rem}
+  .cover{padding:3rem 0 2.4rem}
+  .cover .cin,.wide{padding:0 1.3rem}
+  .abody{font-size:1.06rem}
+  .weekrow{gap:1rem}
+  .weekrow .wn{flex-basis:2.6rem}
+  .eqn{gap:.5rem}
+  .eqn > .eqno{font-size:.72rem}
+}
+@media print{
+  .topbar,.sidenav,.pagenav,.wbtns,.wctl{display:none}
+  .shell{display:block;max-width:none}
+  body{background:#fff}
+}
+</style><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script><script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(!window.renderMathInElement) return;
+  renderMathInElement(document.body,{
+    delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'\\[',right:'\\]',display:true},
+      {left:'$',right:'$',display:false},
+      {left:'\\(',right:'\\)',display:false}
+    ],
+    ignoredTags:['script','noscript','style','textarea','pre','code','option'],
+    throwOnError:false,
+    macros:{
+      '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
+      '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
+      '\\ta':'\\tilde{s}','\\to':'\\tilde{o}'
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.querySelector('.tocbtn'),n=document.querySelector('.sidenav');
+  if(b&&n){b.addEventListener('click',function(){n.classList.toggle('open');});}
+});
+</script>
+</head>
+<body>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">A soft body in a hard world</a><a class="" href="../week-01/process-and-model.html">Two models, not one</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="cur" href="../week-01/the-denominator.html">What makes the denominator hard</a><a class="" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>What makes the denominator hard</h1><p class="deck">Exact inference is intractable" is four separate claims wearing one coat. They fail in different places, are escaped by different tricks, and only one of them is about the size of a sum.</p><div class="meta"><span>Week 1</span><span>&#167;5</span><span>45 min</span></div></header><article class="abody"><p>Lesson&nbsp;3 counted the terms in</p>
+<div class="eqn" id="eq-denom"><div class="eqbody">$$P(o) \;=\; \sum_s P(o \mid s)\,P(s)$$</div><div class="eqno"><a href="#eq-denom" title="Link to equation 1.5.2">(1.5.2)</a></div></div>
+<p>and found $k^n$ of them for a model with $n$ state factors of $k$ values each.
+Lesson&nbsp;4 took that as settled and moved on. Almost every treatment of active
+inference does the same, in a sentence or two, and the sentence is usually some
+version of "the sum is intractable".</p>
+<p>That sentence is doing more work than it can carry. There are at least four
+distinct reasons the denominator is out of reach, they are not the same reason,
+they fail at different points, and the methods that escape one often do nothing
+about another. Worse, the reason most often given is the weakest of the four.
+This lesson separates them.</p>
+<h2 id="the-count-is-not-the-reason"><span class="secno">1</span>The count is not the reason</h2>
+<p>Start by demolishing the standard explanation, because it is wrong as stated.</p>
+<p>Here is a model with $n = 40$ binary-ish factors, $k = 4$ values
+each. Its state space has</p>
+<div class="eqn"><div class="eqbody">$$k^n \;=\; 4^{40} \;\approx\; 1.209e+24$$</div></div>
+<p>states, so <a class="eqref" href="#eq-denom">(1.5.2)</a> has that many terms. More states than there are atoms in a
+mountain. Surely nothing can add them.</p>
+<p>Now suppose the factors form a <strong>chain</strong>: factor 1 influences factor 2, which
+influences factor 3, and so on, with no other dependencies. The joint is</p>
+<div class="eqn"><div class="eqbody">$$P(s_1, \dots, s_n) \;=\; P(s_1)\prod_{i=1}^{n-1} P(s_{i+1} \mid s_i),$$</div></div>
+<p>and the observation attaches to the chain somewhere. The sum still has
+$1.209e+24$ terms. Nothing about the count has changed.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Summing an astronomical number of terms in linear time</span></div><p>Write the sum out and push each factor as far right as it will go:</p>
+<div class="eqn"><div class="eqbody">$$\sum_{s_1}\sum_{s_2}\cdots\sum_{s_n} P(s_1)\,P(s_2\mid s_1)\,P(s_3 \mid s_2)\cdots P(s_n \mid s_{n-1}).$$</div></div>
+<p>Only the last factor contains $s_n$, so the innermost sum can be done on its own:</p>
+<div class="eqn"><div class="eqbody">$$\sum_{s_n} P(s_n \mid s_{n-1}) \;=\; m_{n}(s_{n-1}),$$</div></div>
+<p>a function of $s_{n-1}$ alone, and computing it for every value of $s_{n-1}$
+costs $k^2$ multiply-adds. Substitute it back and the expression is a sum over
+$n-1$ variables of the same shape as before. Repeat.</p>
+<p>After $n-1$ eliminations, each costing $k^2$, one sum over $s_1$ remains. Total
+cost:</p>
+<div class="eqn" id="eq-chain-cost"><div class="eqbody">$$(n-1)\,k^2 \;=\; 624 \text{ operations},$$</div><div class="eqno"><a href="#eq-chain-cost" title="Link to equation 1.5.1">(1.5.1)</a></div></div>
+<p>against $1.209e+24$ terms in the sum being computed. The answer is exact.
+Not approximated, not sampled: the same number brute force would have produced.</p></div>
+<p>The distributive law did that, and nothing else. $ab + ac = a(b+c)$ turns two
+multiplications into one, and applied recursively it turns an exponential sum
+into a linear one.</p>
+<p>Run both and compare. At $n = 12$, where brute force is still
+just possible, the sum has $16,777,216$ terms. Brute force takes
+about 35 seconds; elimination takes a fraction of a
+millisecond, some five orders of magnitude less, and the two agree to the last
+bit. Those are wall-clock times on one machine and yours will differ; the
+notebook runs the comparison so you can watch it on your own. What does not vary
+is the operation count, and that is what the argument rests on.</p>
+<p>At $n = 40$ brute force would take longer than the universe has existed.
+Elimination still takes 624 operations.</p>
+<div class="box keyidea"><div class="boxhd">The idea</div><p><strong>A sum having $k^n$ terms tells you almost nothing about whether it can be
+computed.</strong> The count is a property of how the sum is <em>written</em>; the cost is a
+property of how it <em>factorises</em>.</p>
+<p>Every treatment that stops at "the sum has exponentially many terms" has stopped
+one step before the argument starts. It is the step this course exists to take.</p></div>
+<h2 id="structure-is-the-reason"><span class="secno">2</span>Structure is the reason</h2>
+<p>So what did the chain have that a general model does not?</p>
+<p>Elimination worked because at each step there was a variable appearing in only
+one remaining factor, so summing it out produced a function of one other
+variable. In a general model, summing out $s_i$ produces a function of <em>every
+variable that shared a factor with it</em>, and that function has to be tabulated
+over all of them. If $s_i$ was coupled to $w$ others, that table has $k^w$
+entries and the step costs $k^{w+1}$.</p>
+<div class="box definition"><div class="boxhd">Definition 1.5.1<span class="bt">Treewidth</span></div><p>Eliminate the variables in some order. At each step, record how many variables
+the newly created function depends on. The largest such number, minimised over
+all elimination orders, is the <strong>treewidth</strong> $w$ of the model.</p>
+<p>Exact inference by elimination costs about $n\,k^{\,w+1}$. The treewidth, not the
+number of variables, is what sits in the exponent.</p></div>
+<aside class="mn"><span class="mnl">Why "tree"</span><p>A tree has treewidth 1: at every stage there is a leaf whose elimination touches
+only its parent. The definition measures how far a graph is from being a tree,
+and elimination is exactly as expensive as that distance.</p></aside>
+<p>Three models, same $k = 4$, and the difference is entirely in the wiring.</p>
+<p><div class="tablewrap"><table>
+<thead><tr><th>Structure</th><th>Variables</th><th>Treewidth</th><th>Elimination cost</th><th>Brute force</th></tr></thead>
+<tbody>
+<tr><td>chain or any tree</td><td>40</td><td>1</td><td>624</td><td>1.2e+24</td></tr>
+<tr><td>square grid</td><td>36</td><td>6</td><td>589,824</td><td>4.7e+21</td></tr>
+<tr><td>densely coupled</td><td>40</td><td>39</td><td>no better than brute force</td><td>1.2e+24</td></tr>
+</tbody>
+</table></div>
+
+The grid is the interesting row. Its treewidth grows like $\sqrt{n}$, so exact
+inference is still exponential, but in $\sqrt{n}$ rather than $n$, and that is
+the difference between hopeless and merely expensive.</p>
+<p>The last row is the honest one for an agent. Nothing entitles a creature
+modelling an open world to a sparse dependency graph, and Lesson&nbsp;4 showed a
+mechanism that actively destroys sparsity: <strong>explaining away</strong> couples causes
+that were independent in the prior the moment a shared effect is observed. A
+model may be built out of independent parts and still have a densely coupled
+posterior. Conditioning is what fills the graph in.</p>
+<div class="box keyidea"><div class="boxhd">The idea</div><p>The obstacle is not $n$. It is $w$. Restate the claim of Lesson&nbsp;3 accordingly:
+exact inference is cheap when the model is nearly a tree, expensive when it is
+not, and the world does not supply trees.</p></div>
+<h2 id="nobody-else-can-do-it-either"><span class="secno">3</span>Nobody else can do it either</h2>
+<p>Everything so far is about one algorithm. Elimination is defeated by high
+treewidth, but that leaves the obvious question: might some cleverer method
+succeed where elimination fails? Most treatments never ask. The answer is known,
+and it is stronger than "not so far".</p>
+<p>Computing <a class="eqref" href="#eq-denom">(1.5.2)</a> for a general model is at least as hard as counting the
+satisfying assignments of a Boolean formula, the canonical
+$\#\mathrm{P}$-complete problem
+(<a href="https://doi.org/10.1016/0304-3975(79)90044-6">Valiant 1979</a>). Deciding a much
+weaker question, whether a particular posterior probability exceeds a threshold,
+is already NP-hard
+(<a href="https://doi.org/10.1016/0004-3702(90)90060-D">Cooper 1990</a>). So a
+polynomial-time exact algorithm would give $\mathrm{P} = \mathrm{NP}$.</p>
+<p>The result that actually closes the door is about approximation. It is tempting
+to concede exactness and hope for a good estimate instead. But approximating the
+denominator to within any fixed relative factor is <em>also</em> NP-hard
+(<a href="https://doi.org/10.1016/0004-3702(93)90036-B">Dagum &amp; Luby 1993</a>), and the
+hardness survives when you ask only for a crude answer with high probability
+(<a href="https://doi.org/10.1016/0004-3702(94)00092-1">Roth 1996</a>). There is no
+polynomial-time scheme, deterministic or randomised, exact or approximate, unless
+P and NP coincide.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">What these results do and do not say</span></div><p>They are worst-case statements about the general problem. They do not say your
+particular model is hard, and real models are often far from worst case, which
+is why approximate inference works as well as it does in practice.</p>
+<p>What they do establish is that no <em>general-purpose</em> method can exist. Any
+working scheme must be exploiting something about the particular model it is
+applied to, and is therefore obliged to say what. This is the standard the rest
+of the course holds itself to: every time an approximation is made, the structure
+being assumed gets named.</p></div>
+<p>Note also what these results are not. They are not the hardware argument of
+Lesson&nbsp;3. That argument showed a faster machine cannot help, because a
+constant factor cannot beat an exponent. This one shows a cleverer <em>algorithm</em>
+cannot help either. Two different claims, and the second is the one that matters.</p>
+<h2 id="the-continuous-case-fails-for-a-different-reason-entirely"><span class="secno">4</span>The continuous case fails for a different reason entirely</h2>
+<p>Everything above concerns counting and structure. Now take the smallest possible
+continuous problem: <strong>one</strong> hidden variable, no dimension to speak of, no
+structure to exploit, nothing to count.</p>
+<p>Write $x$ for the hidden variable and $u$ for what is measured. Let the prior over
+$x$ be Gaussian with mean $x_p$ and variance $\Sigma_p$; let a <strong>link function</strong>
+$g$ say what value of $u$ each $x$ predicts; and let the measurement carry
+Gaussian noise of variance $\Sigma_u$ about that prediction. Then</p>
+<div class="eqn" id="eq-cont-denom"><div class="eqbody">$$P(u) \;=\; \int_{-\infty}^{\infty} \mathcal{N}\big(u;\ g(x),\ \Sigma_u\big)\,\mathcal{N}\big(x;\ x_p,\ \Sigma_p\big)\,\mathrm{d}x .$$</div><div class="eqno"><a href="#eq-cont-denom" title="Link to equation 1.5.3">(1.5.3)</a></div></div>
+<p>That is the notation Week&nbsp;2 uses throughout, and it works this exact model
+through with a concrete $g$. Here only the shape of the integral matters.</p>
+<p>It is tempting to say this is hard because an integral is a sum with uncountably
+many terms. That explanation is worthless: $\int_0^1 x\,\mathrm{d}x$ has
+uncountably many terms too and is not hard. Something else is going on, and it
+can be seen exactly.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Why one link function integrates and another does not</span></div><p>Multiply the two Gaussians and collect the exponent. Constants that do not
+contain $x$ come outside the integral and may be ignored.</p>
+<p><strong>Take $g(x) = x$ first.</strong> The exponent is</p>
+<div class="eqn"><div class="eqbody">$$-\frac{(x - x_p)^2}{2\Sigma_p} - \frac{(u - x)^2}{2\Sigma_u},$$</div></div>
+<p>and expanding it gives terms in $x^2$, $x^1$ and $x^0$ and nothing else. It is a
+quadratic. Complete the square, as in Week&nbsp;2, and the integral becomes
+$\int e^{-a(x-b)^2}\mathrm{d}x = \sqrt{\pi/a}$, the one nontrivial integral
+everyone knows.</p>
+<p><strong>Now take $g(x) = 1/x^2$.</strong> The exponent is</p>
+<div class="eqn"><div class="eqbody">$$-\frac{(x - x_p)^2}{2\Sigma_p} - \frac{\big(u - x^{-2}\big)^2}{2\Sigma_u},$$</div></div>
+<p>and expanding the second bracket produces $u^2$, $-2u\,x^{-2}$ and $x^{-4}$. The
+powers of $x$ present are now</p>
+<div class="eqn"><div class="eqbody">$$\{\,-4,\ -2,\ 0,\ 1,\ 2\,\}.$$</div></div>
+<p>That is not a quadratic and no substitution makes it one, because a substitution
+that clears $x^{-4}$ reintroduces trouble at the other end. There is no square to
+complete, so the one closed form available does not apply.</p></div>
+<p>The point generalises, and it is worth stating plainly because the literature
+rarely does. <strong>The catalogue of integrals we can do in closed form is tiny.</strong> The
+Gaussian is essentially the only continuous marginal that comes out, and
+conjugacy is the study of exactly which prior-likelihood pairs land back inside
+that catalogue. A nonlinear $g$ takes you outside it immediately, and once
+outside there is nothing to fall back on. This has nothing to do with dimension,
+nothing to do with treewidth, and nothing to do with complexity classes. One
+variable is already enough.</p>
+<aside class="mn"><span class="mnl">A caution about "no closed form"</span><p>Failing to find an antiderivative is not proof that none exists, and definite
+integrals sometimes have closed forms when the indefinite ones do not:
+$\int e^{-x^2}\mathrm{d}x$ is not elementary, yet
+$\int_{-\infty}^{\infty} e^{-x^2}\mathrm{d}x = \sqrt{\pi}$ exactly. The claim
+here is the narrower and safer one: the technique that works is completing the
+square, it applies only to quadratic exponents, and <a class="eqref" href="#eq-cont-denom">(1.5.3)</a> with a
+nonlinear $g$ has a non-quadratic exponent. No general method replaces it.</p></aside>
+<h2 id="approximating-the-integral-and-where-each-method-breaks"><span class="secno">5</span>Approximating the integral, and where each method breaks</h2>
+<p>Two obvious escapes from <a class="eqref" href="#eq-cont-denom">(1.5.3)</a>, and each fails in a way that is worth
+knowing, because both reappear in later weeks.</p>
+<p><strong>Put down a grid.</strong> With $m$ sample points and an integrand having $\rho$ bounded
+derivatives in $n$ dimensions, the best error any deterministic rule can achieve
+is of order $m^{-\rho/n}$. Holding the error at $\delta$ therefore needs about
+$\delta^{-n/\rho}$ points, with $\delta$ the error we are willing to tolerate and
+$\rho$ the count of derivatives. Neither letter is used elsewhere in the course.
+The obvious letter for an error tolerance is reserved from Week&nbsp;2 for a
+prediction error, which this is not. With $\rho = 2$ and a one per cent
+target:</p>
+<p><div class="tablewrap"><table>
+<thead><tr><th>Dimensions $n$</th><th>Grid points for 1% error</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>10</td></tr>
+<tr><td>2</td><td>100</td></tr>
+<tr><td>5</td><td>1e+05</td></tr>
+<tr><td>10</td><td>1e+10</td></tr>
+<tr><td>20</td><td>1e+20</td></tr>
+</tbody>
+</table></div>
+
+The exponent $n$ is back, and it is in the same place it was for the discrete
+sum. Grids convert the counting problem into a different counting problem of the
+same size. Week&nbsp;2 uses one anyway, because with a single variable the first
+row of that table is the one that applies.</p>
+<p><strong>Sample instead.</strong> Draw $x^{(1)}, \dots, x^{(N)}$ from some proposal $q$ and
+average the ratio $P(u\mid x)P(x)/q(x)$. The error of a Monte Carlo estimate
+falls like $N^{-1/2}$ <em>regardless of dimension</em>, which looks like an escape and
+is genuinely one, but only from the rate.</p>
+<p>The constant hidden in that rate is the estimator's variance, and it degrades as
+the proposal mismatches the target. A serviceable measure is the effective sample
+size, which behaves like $N\exp(-D_{\mathrm{KL}}[P\,\|\,q])$. Divergences add over
+independent coordinates, so a per-coordinate mismatch of
+0.5 nats compounds:</p>
+<p><div class="tablewrap"><table>
+<thead><tr><th>Coordinates $n$</th><th>Divergence, nats</th><th>Useful fraction of samples</th><th>Draws for 1,000 effective</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>0.5</td><td>0.607</td><td>1,649</td></tr>
+<tr><td>10</td><td>5.0</td><td>6.74e-03</td><td>148,413</td></tr>
+<tr><td>20</td><td>10.0</td><td>4.54e-05</td><td>22,026,466</td></tr>
+<tr><td>50</td><td>25.0</td><td>1.39e-11</td><td>7.20e+13</td></tr>
+</tbody>
+</table></div>
+
+The exponential did not go away; it moved from the number of terms into the
+number of samples. This is the honest reading of "Monte Carlo beats the curse of
+dimensionality": the <em>rate</em> is dimension-free, and the <em>constant</em> is not.</p>
+<h2 id="the-fourth-reason-which-is-not-about-computers-at-all"><span class="secno">6</span>The fourth reason, which is not about computers at all</h2>
+<p>Three reasons so far, all of them about difficulty of computation. The fourth is
+different in kind, and for this course it is the one that bites first.</p>
+<p>Suppose the sum were short. Suppose the model had ten states and <a class="eqref" href="#eq-denom">(1.5.2)</a> had
+ten terms, addable by hand. An agent still could not evaluate it, because
+evaluating it requires something that can see all ten states at once, and a
+device built from units that read only their own inputs contains no such thing.</p>
+<p>Week&nbsp;2 states this as a constraint and builds on it. Note that it is
+logically independent of everything above: a short sum can be unavailable for
+want of anyone to do it, and a long sum can be available to a machine that
+happens to have global memory. The complexity results apply to computers; this
+one applies to bodies, and an account of biological inference needs both.</p>
+<h2 id="four-reasons-four-escapes"><span class="secno">7</span>Four reasons, four escapes</h2>
+<p>They come apart, and seeing which method dodges which is the fastest way to see
+that they are genuinely different claims.</p>
+<p><div class="tablewrap"><table>
+<thead><tr><th>Reason</th><th>Bites when</th><th>Escaped by</th><th>Not helped by</th></tr></thead>
+<tbody>
+<tr><td>Too many terms to enumerate</td><td>always, on paper</td><td>the distributive law: elimination, belief propagation</td><td>faster hardware</td></tr>
+<tr><td>High treewidth</td><td>densely coupled models, and after explaining away</td><td>assuming structure that is not there, which is what mean-field does</td><td>any exact method</td></tr>
+<tr><td>No closed form</td><td>any nonlinear link, even in one variable</td><td>conjugacy where available; otherwise approximation</td><td>more dimensions being small</td></tr>
+<tr><td>No unit can see the state space</td><td>always, for an embodied agent</td><td>local message passing</td><td>every method above</td></tr>
+</tbody>
+</table></div>
+
+Read the second row again, because it is the one the rest of the course turns on.
+The escape from high treewidth is to <em>pretend the coupling is not there</em>: to
+replace the true posterior with a product of independent factors and optimise
+within that restricted family. That is the mean-field approximation of
+Week&nbsp;4, and the table says plainly what it is buying and with what. It buys
+tractability, and it pays in exactly the dependencies that explaining away
+created.</p>
+<p>Every subsequent week is an attempt on one or more of these four rows. It is
+worth knowing which.</p>
+<div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
+<li>A colleague says the denominator is intractable because the sum has $2^{100}$
+  terms. Give the one-sentence counterexample.</li>
+<li>What quantity actually sits in the exponent of the cost of exact inference,
+  and what does it measure?</li>
+<li>The hardware argument of Lesson&nbsp;3 and the complexity results of this
+  lesson rule out two different things. Which two?</li>
+<li>Give a problem that is hard for reason three but trivial for reasons one and
+  two.</li>
+<li>Which of the four reasons would remain if an agent had unlimited time and a
+  perfect computer, and why?</li>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-01/inverse-problem.html"><span class="dir">Previous</span><span class="ttl">The inverse problem</span></a><a class="nx" href="../week-01/exercises.html"><span class="dir">Next</span><span class="ttl">Problems and code</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>
+</body>
+</html>

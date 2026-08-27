@@ -69,6 +69,7 @@ EXEMPT = {
     "\\rVert", "\\underbrace", "\\qquad", "\\ \\", "\\sim",
     "\\min", "\\max", "\\inf", "\\sup", "\\arg", "\\propto", "\\mathbb",
     "E",   # expectation, standard for this audience and listed in notation.md
+    "\\mathrm{d}",  # the differential in an integral, not a symbol
     "\\langle", "\\rangle", "\\lVert", "\\rVert", "\\colon", "\\operatorname",
     "e", "i", "j", "k", "n", "m", "c", "x", "y", "z",   # generic dummies and indices
 }
@@ -97,7 +98,10 @@ def pages_in_reading_order():
 # `\pi`, or `\pi` in any other company, still collides. Kept this narrow on
 # purpose. The kappa miss in Week 1 happened because a cue list was widened to
 # silence one false positive, and the widening swallowed a real symbol with it.
-CONSTANT_PI = re.compile(r"2\s*\\pi\b")
+# `2\pi` in a normaliser and `\sqrt{\pi...}` in a Gaussian integral are both
+# unmistakably the circle constant: a policy is never doubled and never
+# square-rooted. Still just those two forms; a bare `\pi` collides.
+CONSTANT_PI = re.compile(r"2\s*\\pi\b|\\sqrt\{\s*\\pi\b")
 
 NOTE_ROW = re.compile(r"^\s*(\$[^:]+?\$)\s*::\s*(.+?)\s*$", re.M)
 WEEK_TAG = re.compile(r"Week&nbsp;(\d+)|Week (\d+)")

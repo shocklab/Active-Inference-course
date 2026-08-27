@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">A soft body in a hard world</a><a class="" href="../week-01/process-and-model.html">Two models, not one</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="cur" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>Problems and code</h1><p class="deck">Six problems with full solutions, and the notebooks that let you rebuild this week's figures yourself.</p><div class="meta"><span>Week 1</span><span>&#167;5</span><span>90 min</span></div></header><article class="abody"><p>Work the problems before opening the solutions. The ones marked with a dagger
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">A soft body in a hard world</a><a class="" href="../week-01/process-and-model.html">Two models, not one</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="" href="../week-01/the-denominator.html">What makes the denominator hard</a><a class="cur" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>Problems and code</h1><p class="deck">Six problems with full solutions, and the notebooks that let you rebuild this week's figures yourself.</p><div class="meta"><span>Week 1</span><span>&#167;6</span><span>90 min</span></div></header><article class="abody"><p>Work the problems before opening the solutions. The ones marked with a dagger
 are the ones that will be used again later in the course.</p>
 <h2 id="the-notebooks">The notebooks</h2>
 <p>Each week ships a notebook that rebuilds the week's figures from scratch. The
@@ -383,7 +383,7 @@ JAX version too.</p>
 <p>There is no <code>pymdp</code> notebook this week. The library operates on the discrete
 generative models we meet in Week&nbsp;9; there is nothing here for it to do yet.</p>
 <h2 id="problems">Problems</h2>
-<div class="box exercise"><div class="boxhd">Exercise 1.5.1<span class="bt">Normalisation, both ways &dagger;</span></div><p>Let $\mathbf{A}$ be the likelihood matrix with $A_{ij} = P(o = i \mid s = j)$.</p>
+<div class="box exercise"><div class="boxhd">Exercise 1.6.1<span class="bt">Normalisation, both ways &dagger;</span></div><p>Let $\mathbf{A}$ be the likelihood matrix with $A_{ij} = P(o = i \mid s = j)$.</p>
 <p>(a) State which of the rows and columns of $\mathbf{A}$ sum to one, and why.</p>
 <p>(b) Show that $\sum_i P(o = i) = 1$ follows from that, for any prior $P(s)$.</p>
 <p>(c) A colleague builds a model in which the <em>rows</em> of $\mathbf{A}$ have been
@@ -405,7 +405,7 @@ distribution, so the surprise $-\ln P(o)$ is not comparable across observations
 and can even be negative. Bayes' theorem still returns a normalised posterior,
 because the division by $P(o)$ hides the error, which is exactly what makes this
 mistake hard to find. Check the column sums.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.5.2<span class="bt">What the prior decides</span></div><p>Using the leopard, baboon and nothing model from Lesson&nbsp;3, write $\rho$ for the prior
+<div class="box exercise"><div class="boxhd">Exercise 1.6.2<span class="bt">What the prior decides</span></div><p>Using the leopard, baboon and nothing model from Lesson&nbsp;3, write $\rho$ for the prior
 probability that a leopard is present, and find the value of $\rho$ at which observing a tawny flash leaves you exactly
 undecided between leopard and not-leopard, that is,
 $P(s = \text{leopard} \mid o) = 1/2$. Keep the baboon and nothing priors in the
@@ -423,7 +423,7 @@ posterior came out at $0.544$ rather than exactly a half. The observation is
 strong, but it is only just strong enough to overturn a prior of that size, and
 a slightly more sceptical hiker would have remained unconvinced by the same
 evidence.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.5.3<span class="bt">Two observations in a row &dagger;</span></div><p>You observe a branch shaking, and then, a moment later, a tawny flash. Assume
+<div class="box exercise"><div class="boxhd">Exercise 1.6.3<span class="bt">Two observations in a row &dagger;</span></div><p>You observe a branch shaking, and then, a moment later, a tawny flash. Assume
 the two observations are conditionally independent given the state, and that the
 state has not changed.</p>
 <p>(a) Compute the posterior after both observations, starting from the
@@ -454,7 +454,7 @@ depends on the first directly, not only through what the animal is. Sequential
 active inference agents create exactly this kind of dependence on purpose, which
 is why Week&nbsp;9 has to be careful about the difference between the time index
 on an observation and the time index on a belief.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.5.4<span class="bt">When does an observation tell you nothing?</span></div><p>Prove that the posterior equals the prior for every prior if and only if
+<div class="box exercise"><div class="boxhd">Exercise 1.6.4<span class="bt">When does an observation tell you nothing?</span></div><p>Prove that the posterior equals the prior for every prior if and only if
 $P(o \mid s)$ does not depend on $s$.</p><details><summary>Solution</summary><p>($\Leftarrow$) Suppose $P(o\mid s) = c$ for all $s$, for the observed $o$. Then
 $P(o) = \sum_s c\,P(s) = c$, and</p>
 <div class="eqn"><div class="eqbody">$$P(s \mid o) = \frac{c\,P(s)}{c} = P(s).$$</div></div>
@@ -464,7 +464,7 @@ to get $P(o\mid s) = P(o)$, a quantity that does not depend on $s$. Taking a
 prior with full support forces this at every $s$.</p>
 <p>This is the formal content of the ambiguity slider. A sensory channel is useful
 exactly to the extent that different states disagree about what it will report.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.5.5<span class="bt">Explaining away with three causes</span></div><p>Extend the noisy-OR example of Lesson&nbsp;4 to three independent causes, each
+<div class="box exercise"><div class="boxhd">Exercise 1.6.5<span class="bt">Explaining away with three causes</span></div><p>Extend the noisy-OR example of Lesson&nbsp;4 to three independent causes, each
 with prior $0.1$ and each firing the observation with probability $0.9$, keeping
 the leak at $0.01$. Compute $P(s_1 = 1 \mid o = 1)$ and compare it with the
 two-cause answer of $0.505$. Explain the direction of the change.</p><details><summary>Solution</summary><p>There are eight joint states. Write $k$ for the number of causes present. The
@@ -485,7 +485,7 @@ says "something did this", but there are now three somethings to choose from and
 each individually gets less of the credit. Explaining away gets stronger as the
 number of competing causes grows, which is precisely why a factorised
 approximation gets worse in exactly the regime where you most want to use it.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.5.6<span class="bt">The survival curve &dagger;</span></div><p>Consider the homeostasis model from Lesson&nbsp;1 with the action strength set
+<div class="box exercise"><div class="boxhd">Exercise 1.6.6<span class="bt">The survival curve &dagger;</span></div><p>Consider the homeostasis model from Lesson&nbsp;1 with the action strength set
 to zero, $\kappa = 0$. It is then a two-dimensional random walk with independent increments of standard deviation
 $\sigma$ per step in each coordinate, starting at the origin, absorbed when
 $\|x\| > 1$.</p>
@@ -520,7 +520,7 @@ merely a better constant.</p></details></div>
 <li>Bruineberg, Dolega, Dewhurst and Baltieri, "The Emperor's New Markov Blankets",
   <em>Behavioral and Brain Sciences</em> (2022). A careful criticism of exactly the
   interface picture drawn in Lesson&nbsp;2. Read it now, and again after Week&nbsp;12.</li>
-</ul></article><nav class="pagenav"><a class="pv" href="../week-01/inverse-problem.html"><span class="dir">Previous</span><span class="ttl">The inverse problem</span></a><a class="nx" href="../week-02/two-rules.html"><span class="dir">Next</span><span class="ttl">Two rules a brain has to obey</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+</ul></article><nav class="pagenav"><a class="pv" href="../week-01/the-denominator.html"><span class="dir">Previous</span><span class="ttl">What makes the denominator hard</span></a><a class="nx" href="../week-02/two-rules.html"><span class="dir">Next</span><span class="ttl">Two rules a brain has to obey</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>
 </body>
 </html>

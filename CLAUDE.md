@@ -211,6 +211,17 @@ first match; and $\sigma$ still meant softmax in one row long after the rename
 that was supposed to remove it, because it sat inside another row's description
 where no head-symbol scan reaches.
 
+### The builder has no citation syntax, and nothing said so
+
+Four `[@key]` citations reached a built page verbatim, carried over from Pandoc
+habit. Every existing check passed them: a leaked `[@key]` is balanced,
+well-formed, contains no maths and breaks no tag. `check_site.py` now has an
+`UNSUPPORTED` list for markup some other tool would resolve and this one will
+not, and it is verified by planting three kinds and confirming all three fire.
+
+Cite as REFERENCES.md does: the author and year as link text, the DOI as the
+href.
+
 ### Check the check by breaking it
 
 `check_definitions.py` reported zero collisions after being rewritten, which is also
@@ -353,7 +364,15 @@ say so.
 
 ## Current state
 
-Weeks 1 and 2 are built. Weeks 3 to 12 are outlined in `OUTLINE.md` and not yet
+Weeks 1 and 2 are built. Week 1 has six lessons since 2026-08-27, the new one
+being **What makes the denominator hard**: the standard "the sum is intractable"
+is four separate claims, and the lesson separates them, because the reason
+usually given is the weakest of the four. A sum of $4^{40}$ terms is computed
+exactly in 624 operations when the model is a chain, so the count proves almost
+nothing; treewidth is what sits in the exponent; the complexity results rule out
+cleverer algorithms rather than just slower ones; the continuous case fails for
+an unrelated analytic reason visible in one variable; and locality is a fifth
+obstacle that applies to bodies rather than computers. Weeks 3 to 12 are outlined in `OUTLINE.md` and not yet
 drafted. `OUTLINE.md` names, per week, which of Jonathan's own notes seed it.
 
 Week 2 derives predictive coding from gradient ascent on the log joint, so the

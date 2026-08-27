@@ -7,7 +7,7 @@ is a number nobody has checked; build/check_numbers.py reports those.
 Run standalone to see the values:  python3 content/week-01/numbers.py
 """
 import itertools
-from math import comb, log, log2, sqrt
+from math import comb, exp, log, log2, sqrt
 
 # ── the running discrete model (Lessons 3 and 5) ─────────────────────────
 STATES = ["leopard", "baboon", "nothing"]
@@ -289,6 +289,58 @@ V["lamp_entropy_true"] = -sum(_star[o] * log(_star[o]) for o in _star)
 V["lamp_avg_surprise_b"] = sum(_star[o] * -log(_QB[o]) for o in _star)
 V["lamp_excess"] = V["lamp_avg_surprise_b"] - V["lamp_entropy_true"]
 V["lamp_kl"] = sum(_star[o] * log(_star[o] / _QB[o]) for o in _star)
+
+# ── the cost of the denominator, Lesson 5 ────────────────────────────────
+# Everything here is an exact count except the four wall-clock figures, which
+# are measurements and are labelled as such.
+DEN_K, DEN_N = 4, 40
+V["den_k"], V["den_n"] = DEN_K, DEN_N
+V["den_terms"] = DEN_K ** DEN_N
+V["den_chain_ops"] = (DEN_N - 1) * DEN_K ** 2
+
+# Elimination costs k^(w+1) per bucket, with w the treewidth of the model's
+# graph: 1 for a chain or any tree, about sqrt(n) for a square grid, n-1 when
+# every variable touches every other.
+V["den_grid_n"] = 36
+V["den_grid_w"] = 6
+V["den_grid_ops"] = V["den_grid_n"] * DEN_K ** (V["den_grid_w"] + 1)
+V["den_grid_brute"] = DEN_K ** V["den_grid_n"]
+V["den_dense_w"] = DEN_N - 1
+
+# Measured on this machine (Apple M-series, CPython 3.13, single core,
+# 2026-08-27) by the timing cell of the Week 1 notebook. Recorded rather than
+# derived: they are observations of one computer, not properties of the problem,
+# and the operation counts above are what the argument actually rests on.
+# Two runs on the same machine gave 34969 ms and 34133 ms for brute force, and
+# 0.31 ms and 0.07 ms for elimination. The brute-force figure is stable to a
+# couple of per cent; the elimination figure is sub-millisecond and dominated by
+# timer noise, so it is quoted to one significant figure and the ratio only to
+# an order of magnitude. Quoting either to five figures, as a first draft did,
+# would be reporting the noise.
+V["den_brute_s_n12"] = 35
+V["den_elim_ms_n12"] = 0.1
+V["den_measured_n"] = 12
+V["den_measured_terms"] = DEN_K ** 12
+V["den_speedup_order"] = 5   # log10 of the ratio, which is all it supports
+
+# Quadrature: with r bounded derivatives in n dimensions the best possible
+# deterministic error from m points is of order m^(-r/n), so holding the error
+# at eps needs m ~ eps^(-n/r) points. Bakhvalov's bound; r = 2 taken here.
+V["quad_eps"] = 0.01
+V["quad_r"] = 2
+for _n in (1, 2, 5, 10, 20):
+    V[f"quad_pts_n{_n}"] = V["quad_eps"] ** (-_n / V["quad_r"])
+
+# Importance sampling escapes the dimension in its rate but not its constant.
+# Effective sample size falls like exp(-KL), and over n independent coordinates
+# the divergence adds, so the sample count needed grows exponentially again.
+V["is_kl_per_coord"] = 0.5
+V["is_target_ess"] = 1000
+for _n in (1, 10, 20, 50):
+    _kl = _n * V["is_kl_per_coord"]
+    V[f"is_kl_n{_n}"] = _kl
+    V[f"is_ess_frac_n{_n}"] = exp(-_kl)
+    V[f"is_samples_n{_n}"] = V["is_target_ess"] * exp(_kl)
 
 # ── constants quoted in prose ────────────────────────────────────────────
 V["ln2"] = log(2)

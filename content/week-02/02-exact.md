@@ -140,10 +140,17 @@ P(u) \;=\; \int_0^{\infty} P(u \mid d)\,P(d)\;\mathrm{d}d .
 $$ {#continuous-bayes}
 
 The numerator is a product of two things we have written down. The denominator is
-an integral over every distance the source might be at, and it is the same
-difficulty as Week&nbsp;1's sum with the sum replaced by an integral. There are
-no longer $k^n$ terms to add; there are uncountably many, and no finite device
-adds them.
+an integral over every distance the source might be at.
+
+It is worth being exact about why that is a problem, because the obvious answer
+is wrong. The obvious answer is that an integral is a sum with uncountably many
+terms, so it must be harder than Week&nbsp;1's finite sum. But
+$\int_0^1 x\,\mathrm{d}x$ also has uncountably many terms and takes a second, so
+the count is not what decides it. Week&nbsp;1's Lesson&nbsp;5 sets out the four
+reasons the denominator resists, and the one that applies here is the third: with
+$g$ nonlinear the exponent of the integrand is not a quadratic, so the one closed
+form available for integrals of this shape does not apply. There is nothing wrong
+with the dimension. One variable is already enough.
 
 For a problem this small we can evaluate it numerically, on a fine grid, and see
 what the answer looks like. Do that and three things stand out.

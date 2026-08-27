@@ -29,6 +29,15 @@ cite them by equation number and fill the gaps ourselves.
 | Buckley, C. L., Kim, C. S., McGregor, S. & Seth, A. K. (2017). The free energy principle for action and perception: A mathematical review. *J. Math. Psych.* **81**, 55–79. | **Read in full 2026-08-26**; Weeks 5–8 rewritten against it. The mathematical review of the continuous case, and the closest existing work to this course's purpose. Source of the moving-frame gradient descent result that is now Week 7's centrepiece. | doi:[10.1016/j.jmp.2017.09.004](https://doi.org/10.1016/j.jmp.2017.09.004) · [arXiv:1705.09156](https://arxiv.org/abs/1705.09156) |
 | Bogacz, R. (2017). A tutorial on the free-energy framework for modelling perception and learning. *J. Math. Psych.* **76**, 198–211. | Step-by-step derivations from very simple examples, plus how the model sits in neural circuits. The register this course is aiming for. | doi:[10.1016/j.jmp.2015.11.003](https://doi.org/10.1016/j.jmp.2015.11.003) |
 
+### Week 1 · Why exact inference is out of reach
+
+| Work | Why | Where |
+|---|---|---|
+| Cooper, G. F. (1990). The computational complexity of probabilistic inference using Bayesian belief networks. *Artificial Intelligence* **42**, 393–405. | Exact inference in a general Bayesian network is NP-hard. Upgrades "the sum is long" into a statement about every possible algorithm. | doi:[10.1016/0004-3702(90)90060-D](https://doi.org/10.1016/0004-3702(90)90060-D) |
+| Dagum, P. & Luby, M. (1993). Approximating probabilistic inference in Bayesian belief networks is NP-hard. *Artificial Intelligence* **60**, 141–153. | The one that closes the door: conceding exactness does not buy tractability either. | doi:[10.1016/0004-3702(93)90036-B](https://doi.org/10.1016/0004-3702(93)90036-B) |
+| Roth, D. (1996). On the hardness of approximate reasoning. *Artificial Intelligence* **82**, 273–302. | Hardness survives even for crude answers with high probability. | doi:[10.1016/0004-3702(94)00092-1](https://doi.org/10.1016/0004-3702(94)00092-1) |
+| Valiant, L. G. (1979). The complexity of computing the permanent. *Theoretical Computer Science* **8**, 189–201. | Where #P comes from. The marginal is a counting problem of this kind. | doi:[10.1016/0304-3975(79)90044-6](https://doi.org/10.1016/0304-3975(79)90044-6) |
+
 ### Weeks 5–8 · Continuous time
 
 | Work | Why | Where |

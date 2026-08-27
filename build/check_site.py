@@ -10,6 +10,7 @@ Checks, in order of how much trouble they have already caused:
   4. HTML tags balance on every page (counting every tag the corpus uses,
      not only the ones we thought of)
   5. no stray LaTeX delimiters left outside a maths span
+  6. no markup the builder does not implement, reaching a page verbatim
 Exit code is non-zero if anything fails, so it can gate a commit.
 """
 import os
@@ -147,12 +148,39 @@ def check_math():
                  f"KaTeX wants 'aligned' inside $$...$$")
 
 
+# ── 6. markup the builder does not implement ─────────────────────────────
+# Written after four `[@key]` citations reached a built page verbatim. The
+# builder has no citation syntax and never did; the habit came from Pandoc.
+# Nothing here looked wrong to any other check, because a leaked `[@key]` is
+# balanced, well-formed, and contains no maths.
+#
+# Each pattern is markup some other tool would resolve and this one will not.
+UNSUPPORTED = [
+    (r"\[@[A-Za-z][\w:.-]*\]", "Pandoc-style citation; write the reference inline "
+                                "with a DOI link, as REFERENCES.md does"),
+    (r"\{%[^}]*%\}", "Jinja/Liquid tag"),
+    (r"\[\[[^\]|]+\]\]", "wiki-style link"),
+    (r":::\s*\w+", "an unclosed or unknown block directive, rendered as text"),
+]
+
+
+def check_unsupported():
+    for path in html_files():
+        h = open(path, encoding="utf-8").read()
+        body = re.sub(r"<script.*?</script>", "", h, flags=re.S)
+        body = re.sub(r"<style.*?</style>", "", body, flags=re.S)
+        for pat, what in UNSUPPORTED:
+            for hit in sorted(set(re.findall(pat, body)))[:4]:
+                fail(f"unrendered markup {hit!r} on "
+                     f"{os.path.relpath(path, ROOT)}: {what}")
+
+
 def main():
     if not os.path.isdir(DOCS):
         print("docs/ does not exist; run build_site.py first")
         return 1
     check_eqrefs(); check_widgets(); check_links(); check_tags()
-    check_svg(); check_math()
+    check_svg(); check_math(); check_unsupported()
 
     pages = len(list(html_files()))
     for w in warns:
