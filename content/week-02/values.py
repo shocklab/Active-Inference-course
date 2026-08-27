@@ -54,6 +54,15 @@ V["err_obs_weighted"] = V["err_obs"] * g_prime(_phi)
 V["g_at_mode"] = g(_phi)
 V["gprime_at_mode"] = g_prime(_phi)
 
+V["err_sum"] = V["err_prior"] + V["err_obs_weighted"]
+
+# The same two errors evaluated away from the optimum, at the prior mean, where
+# the sensory term is large and the prior term is exactly zero.
+V["err_prior_at_start"] = (D_PRIOR - D_PRIOR) / VAR_PRIOR
+V["err_obs_at_start"] = (U_OBS - g(D_PRIOR)) / VAR_OBS
+V["err_obs_weighted_at_start"] = V["err_obs_at_start"] * g_prime(D_PRIOR)
+V["gprime_at_prior"] = g_prime(D_PRIOR)
+
 # ── gradient ascent from the prior mean ──────────────────────────────────
 def ascend(phi0=D_PRIOR, rate=0.05, steps=400):
     phi, path = phi0, [phi0]
@@ -70,6 +79,21 @@ V["ascent_final"] = _path[-1]
 V["ascent_steps_to_1pct"] = next(
     i for i, p in enumerate(_path) if abs(p - V["post_mode"]) < 0.01 * V["post_mode"])
 
+# ── how large a step the ascent will tolerate ────────────────────────────
+# Linearising the update about the peak gives d_{k+1} - d* = (1 + eta F'')(d_k - d*),
+# so the iteration converges only while |1 + eta F''| < 1, that is eta < 2/|F''|.
+# Found by driving the widget's sensory-variance slider to its low end and
+# watching the estimate settle into a two-cycle instead of onto the mode.
+def _curvature(d, var_obs=VAR_OBS, h=1e-5):
+    def F(x):
+        return (-(x - D_PRIOR) ** 2 / (2 * VAR_PRIOR)
+                - (U_OBS - g(x)) ** 2 / (2 * var_obs))
+    return (F(d + h) - 2 * F(d) + F(d - h)) / h ** 2
+
+
+V["curv_at_mode"] = _curvature(V["post_mode"])
+V["eta_max"] = 2.0 / abs(V["curv_at_mode"])
+
 # ── what happens as the sensory channel is trusted more or less ──────────
 for _tag, _vo in (("sharp", 0.01), ("loose", 1.0)):
     _p = (np.exp(-(_grid - D_PRIOR) ** 2 / (2 * VAR_PRIOR))
@@ -77,6 +101,18 @@ for _tag, _vo in (("sharp", 0.01), ("loose", 1.0)):
     _p /= np.trapezoid(_p, _grid)
     V[f"mode_{_tag}"] = float(_grid[np.argmax(_p)])
     V[f"var_obs_{_tag}"] = _vo
+    V[f"curv_{_tag}"] = _curvature(V[f"mode_{_tag}"], var_obs=_vo)
+    V[f"eta_max_{_tag}"] = 2.0 / abs(V[f"curv_{_tag}"])
+
+# The two-cycle the widget falls into when the rate exceeds that bound.
+_osc = D_PRIOR
+for _ in range(400):
+    _osc += 0.05 * ((D_PRIOR - _osc) / VAR_PRIOR
+                    + (U_OBS - g(_osc)) / 0.01 * g_prime(_osc))
+V["osc_lo"] = min(_osc, _osc + 0.05 * ((D_PRIOR - _osc) / VAR_PRIOR
+                                       + (U_OBS - g(_osc)) / 0.01 * g_prime(_osc)))
+V["osc_hi"] = max(_osc, _osc + 0.05 * ((D_PRIOR - _osc) / VAR_PRIOR
+                                       + (U_OBS - g(_osc)) / 0.01 * g_prime(_osc)))
 
 # ── figure paths, generated from the curves above, never drawn by hand ───
 # A hand-drawn curve in an SVG is a typed number wearing a disguise: it looks
