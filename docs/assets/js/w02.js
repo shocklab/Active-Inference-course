@@ -176,3 +176,142 @@
     return null;
   });
 })();
+
+(function () {
+  'use strict';
+  var A = window.AIF, el = A.el, C = A.colours;
+
+  var DP = 2.0, U = 0.5;
+  function g(d) { return 1 / (d * d); }
+
+  /* ══════════════════════════════════════════════════════════════════════
+   * 2. precision-posterior
+   *    The posterior itself, as the two precisions move. Two things to see:
+   *    the peak sliding between the prior mean and what the data alone say,
+   *    and the mode parting company with the mean as the curve goes lopsided.
+   *    The update of Lesson 4 finds the first of those and not the second.
+   * ═════════════════════════════════════════════════════════════════════ */
+  A.register('precision-posterior', function (mount) {
+    var N = 1600, DMAX = 6;
+    var st;
+
+    var sVp = A.slider({ label: 'prior variance, &Sigma;<sub>p</sub>', min: 0.05, max: 4, step: 0.05, value: 1 });
+    var sVu = A.slider({ label: 'sensory variance, &Sigma;<sub>u</sub>', min: 0.005, max: 1, step: 0.005, value: 0.1, decimals: 3 });
+    var sLin = el('label', { class: 'wctl' }, []);
+    var chk = el('input', { type: 'checkbox' });
+    sLin.appendChild(el('div', { class: 'wlab' }, [el('b', { html: 'link function' })]));
+    sLin.appendChild(chk);
+    var linLab = el('span', { class: 'wval', text: 'g(d) = 1/d²' });
+    sLin.querySelector('.wlab').appendChild(linLab);
+
+    function build() {
+      var vp = sVp.get(), vu = sVu.get(), lin = chk.checked;
+      var link = lin ? function (d) { return d; } : g;
+      linLab.textContent = lin ? 'g(d) = d' : 'g(d) = 1/d²';
+
+      var xs = [], pr = [], lk = [], po = [];
+      var h = DMAX / N;
+      for (var i = 1; i <= N; i++) {
+        var d = i * h;
+        var a = Math.exp(-(d - DP) * (d - DP) / (2 * vp));
+        var b = Math.exp(-(U - link(d)) * (U - link(d)) / (2 * vu));
+        xs.push(d); pr.push(a); lk.push(b); po.push(a * b);
+      }
+      /* Normalise on the grid so mean and mode are the grid's own, not a
+       * formula's. With the linear link the grid starts at 0 and the true
+       * Gaussian has mass below it, so the mean shown is the mean of the
+       * physically admissible part. The note says so. */
+      var Z = 0; po.forEach(function (v) { Z += v * h; });
+      var mean = 0, mode = xs[0], best = -1;
+      po.forEach(function (v, i) {
+        mean += xs[i] * (v / Z) * h;
+        if (v > best) { best = v; mode = xs[i]; }
+      });
+      var sd = 0;
+      po.forEach(function (v, i) { sd += (xs[i] - mean) * (xs[i] - mean) * (v / Z) * h; });
+      sd = Math.sqrt(sd);
+      var skew = 0;
+      po.forEach(function (v, i) { skew += Math.pow((xs[i] - mean) / sd, 3) * (v / Z) * h; });
+
+      st = { xs: xs, pr: pr, lk: lk, po: po, mean: mean, mode: mode, skew: skew, lin: lin };
+      out.show([
+        ['mode', mode.toFixed(4)],
+        ['mean', mean.toFixed(4)],
+        ['gap', (100 * (mean - mode) / mode).toFixed(1) + '%'],
+        ['skew', skew.toFixed(3)]
+      ]);
+      plot.render();
+    }
+
+    var plot = new A.Plot({ aspect: 0.40, pad: { l: 30, r: 16, t: 18, b: 40 } });
+    var out = A.readout();
+
+    plot.onDraw(function (p) {
+      p.clear();
+      var c = p.ctx, pw = p.plotW(), ph = p.plotH();
+      var ox = p.o.pad.l, oy = p.o.pad.t;
+      var X = function (d) { return ox + (d / 6) * pw; };
+
+      c.strokeStyle = C.rule2; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(ox, oy + ph); c.lineTo(ox + pw, oy + ph); c.stroke();
+      [0, 1, 2, 3, 4, 5, 6].forEach(function (v) {
+        p.text(X(v), oy + ph + 14, String(v), { pixel: true, size: 10, colour: C.faint });
+      });
+      p.text(ox + pw / 2, p.h - 5, 'distance d', { pixel: true, size: 10.5, colour: C.ink2 });
+
+      function curve(arr, col, wid, dash) {
+        var m = Math.max.apply(null, arr);
+        c.strokeStyle = col; c.lineWidth = wid; c.setLineDash(dash || []);
+        c.beginPath();
+        arr.forEach(function (v, i) {
+          var x = X(st.xs[i]), y = oy + ph - (v / m) * ph * 0.94;
+          i ? c.lineTo(x, y) : c.moveTo(x, y);
+        });
+        c.stroke(); c.setLineDash([]);
+      }
+      curve(st.pr, C.faint, 1.6, [4, 3]);
+      curve(st.lk, C.gold, 1.6, [2, 3]);
+      curve(st.po, C.accent, 2.6);
+
+      function marker(d, col, label, up) {
+        c.strokeStyle = col; c.lineWidth = 1.2; c.setLineDash([2, 3]);
+        c.beginPath(); c.moveTo(X(d), oy + 4); c.lineTo(X(d), oy + ph); c.stroke();
+        c.setLineDash([]);
+        p.text(X(d), oy + (up ? 10 : 26), label + ' ' + d.toFixed(3),
+          { pixel: true, size: 9.8, colour: col });
+      }
+      marker(st.mode, C.accent, 'mode', true);
+      marker(st.mean, C.clay, 'mean', false);
+
+      [['prior', C.faint, true], ['likelihood', C.gold, true], ['posterior', C.accent, false]]
+        .forEach(function (it, i) {
+          var ly = oy + 12 + i * 14, lx = ox + pw - 108;
+          c.strokeStyle = it[1]; c.lineWidth = 2;
+          c.setLineDash(it[2] ? [4, 3] : []);
+          c.beginPath(); c.moveTo(lx, ly); c.lineTo(lx + 16, ly); c.stroke();
+          c.setLineDash([]);
+          p.text(lx + 21, ly, it[0], { pixel: true, align: 'left', size: 9.8, colour: C.ink2 });
+        });
+    });
+
+    [sVp, sVu].forEach(function (s) { s.onchange(build); });
+    chk.addEventListener('change', build);
+
+    var body = el('div', {});
+    mount.appendChild(A.panel([
+      A.row([sVp.el, sVu.el, sLin]),
+      body, out,
+      A.note('Each curve is scaled to its own peak. Switch the link to <i>g</i>(<i>d</i>) = <i>d</i> '
+        + 'and the skew collapses by most of its value and the two markers nearly coincide: with a '
+        + 'linear link the posterior is exactly Gaussian, whatever the precisions. What is left is '
+        + 'not the link. The axis starts at zero because a negative distance is meaningless, and at '
+        + 'these settings the linear posterior sits close enough to zero that cutting it there '
+        + 'removes a slice of its left tail, which is what the residual skew is measuring. Widen '
+        + 'the prior or sharpen the ear and watch that residual change without the link changing '
+        + 'at all.')
+    ]));
+    build();
+    plot.attach(body);
+    return null;
+  });
+})();

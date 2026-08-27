@@ -159,6 +159,55 @@ V["fig_mode_y"] = _svg_y(_post_f, V["post_mode"])
 V["fig_mean_x"] = _svg_x(V["post_mean"])
 V["fig_mean_y"] = _svg_y(_post_f, V["post_mean"])
 
+# ── the linear special case, where everything is exact ───────────────────
+# Replacing 1/d^2 by the identity makes the posterior exactly Gaussian, so the
+# mode and the mean coincide and the whole 35% gap of Lesson 2 is attributable
+# to the nonlinearity and to nothing else.
+_lin_num = D_PRIOR / VAR_PRIOR + U_OBS / VAR_OBS
+_lin_den = 1 / VAR_PRIOR + 1 / VAR_OBS
+V["lin_mode"] = _lin_num / _lin_den
+V["lin_var"] = 1 / _lin_den
+
+# Checked against quadrature rather than asserted: an algebraic identity that
+# has never been evaluated is a claim, not a result.
+#
+# On a WIDE grid, deliberately. The first version of this check reused the
+# d > 0.05 grid the nonlinear posterior lives on and reported a mean of 0.6550
+# against an algebraic 0.6364, with a skew of 0.24 where the algebra says zero.
+# Nothing was wrong with the algebra: the linear posterior is centred at 0.64
+# with a standard deviation of 0.30, so cutting it off at 0.05 removes a real
+# part of its left tail. The check had been measuring the truncation.
+_wide = np.linspace(-6.0, 8.0, 600000)
+_lp = (np.exp(-(_wide - D_PRIOR) ** 2 / (2 * VAR_PRIOR))
+       * np.exp(-(U_OBS - _wide) ** 2 / (2 * VAR_OBS)))
+_lp /= np.trapezoid(_lp, _wide)
+V["lin_mean_quad"] = float(np.trapezoid(_wide * _lp, _wide))
+V["lin_mode_quad"] = float(_wide[np.argmax(_lp)])
+_lin_sd = sqrt(np.trapezoid((_wide - V["lin_mean_quad"]) ** 2 * _lp, _wide))
+V["lin_sd_quad"] = float(_lin_sd)
+V["lin_skew_quad"] = float(np.trapezoid(
+    ((_wide - V["lin_mean_quad"]) / _lin_sd) ** 3 * _lp, _wide))
+
+# How much of the linear posterior the physical domain d > 0 would cut off,
+# and how much of the nonlinear one. The Gaussian prior over a distance is a
+# convenience, and this is the size of the bill.
+V["lin_mass_below_zero"] = float(np.trapezoid(_lp[_wide < 0], _wide[_wide < 0]))
+# The nonlinear posterior needs no such apology. As d falls towards zero, g(d)
+# runs to infinity, so the squared sensory error does too and the likelihood
+# kills the density long before the prior's unphysical tail can matter.
+_near = _grid < 0.5
+V["nonlin_mass_below_half"] = float(np.trapezoid(_post[_near], _grid[_near]))
+
+# ── how much of the curvature the g'' term accounts for ──────────────────
+def g_second(d):
+    return 6.0 * SOURCE_POWER / d ** 4
+
+
+V["gsecond_at_mode"] = g_second(V["post_mode"])
+V["curv_gaussnewton"] = -(1 / VAR_PRIOR + g_prime(V["post_mode"]) ** 2 / VAR_OBS)
+V["curv_gpp_term"] = V["err_obs"] * g_second(V["post_mode"])
+V["sensory_prec_on_state"] = g_prime(V["post_mode"]) ** 2 / VAR_OBS
+
 VALUES = V
 
 if __name__ == "__main__":
