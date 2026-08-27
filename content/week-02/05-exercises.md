@@ -115,9 +115,9 @@ print(f"eps_p {a:+.6f}   g'*eps_u {b:+.6f}   sum {a+b:.2e}")
 This prints an ascent value and a grid value agreeing to about four decimal
 places, the residual being the grid spacing rather than any error in either
 method. The final line shows ${{err_prior_ascent:+.6f}}$ and
-${{err_obs_weighted_ascent:+.6f}}$, summing to ${{err_sum_ascent:.2e}}$.
+${{err_obs_weighted_ascent:+.6f}}$, summing to ${{err_sum_ascent:sci2}}$.
 
-That residual is smaller than the ${{err_sum:.2e}}$ quoted in [lesson:2.3], and
+That residual is smaller than the ${{err_sum:sci2}}$ quoted in [lesson:2.3], and
 the difference is worth understanding rather than ignoring. [lesson:2.3]
 evaluates the two errors at the mode found by quadrature; this code evaluates
 them where its own ascent stopped. The two locations agree to five decimal

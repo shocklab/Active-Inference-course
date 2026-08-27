@@ -247,7 +247,7 @@ says exactly where it runs out.
 
 Narrower still than that, in fact. Counting the terms is the weakest of the
 arguments available here and, taken alone, it does not survive contact with a
-model that factorises: [lesson:1.5] exhibits a sum of ${{den_terms:.0e}}$ terms
+model that factorises: [lesson:1.5] exhibits a sum of ${{den_terms:sci0}}$ terms
 computed exactly in {{den_chain_ops}} operations. That lesson separates the four
 distinct reasons the denominator is out of reach and says which methods escape
 which. Read it before deciding how much the count above proves. Adding one more thing to keep

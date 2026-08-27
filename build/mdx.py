@@ -408,6 +408,15 @@ def substitute_numbers(text, values, missing):
             missing.append(key)
             return f"<mark>?{key}?</mark>"
         v = values[key]
+        # `sciN` is not a Python format: it renders LaTeX scientific notation.
+        # Writing {{x:.2e}} inside $...$ typesets as `1.21e+24`, which a reader
+        # of a maths course parses as 1.21 times e plus 24. Found by printing
+        # the site and looking at the page.
+        m2 = re.fullmatch(r"sci(\d*)", fmt or "")
+        if m2:
+            digits = int(m2.group(1) or 2)
+            mant, _, expo = format(float(v), f".{digits}e").partition("e")
+            return f"{mant} \\times 10^{{{int(expo)}}}"
         try:
             return format(v, fmt) if fmt else str(v)
         except (ValueError, TypeError):

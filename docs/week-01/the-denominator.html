@@ -365,14 +365,14 @@ This lesson separates them.</p>
 <p>Start by demolishing the standard explanation, because it is wrong as stated.</p>
 <p>Here is a model with $n = 40$ binary-ish factors, $k = 4$ values
 each. Its state space has</p>
-<div class="eqn"><div class="eqbody">$$k^n \;=\; 4^{40} \;\approx\; 1.209e+24$$</div></div>
+<div class="eqn"><div class="eqbody">$$k^n \;=\; 4^{40} \;\approx\; 1.209 \times 10^{24}$$</div></div>
 <p>states, so <a class="eqref" href="#eq-denom">(1.5.2)</a> has that many terms. More states than there are atoms in a
 mountain. Surely nothing can add them.</p>
 <p>Now suppose the factors form a <strong>chain</strong>: factor 1 influences factor 2, which
 influences factor 3, and so on, with no other dependencies. The joint is</p>
 <div class="eqn"><div class="eqbody">$$P(s_1, \dots, s_n) \;=\; P(s_1)\prod_{i=1}^{n-1} P(s_{i+1} \mid s_i),$$</div></div>
 <p>and the observation attaches to the chain somewhere. The sum still has
-$1.209e+24$ terms. Nothing about the count has changed.</p>
+$1.209 \times 10^{24}$ terms. Nothing about the count has changed.</p>
 <div class="box derivation"><div class="boxhd">Derivation<span class="bt">Summing a trillion trillion terms in linear time</span></div><p>Write the sum out and push each factor as far right as it will go:</p>
 <div class="eqn"><div class="eqbody">$$\sum_{s_1}\sum_{s_2}\cdots\sum_{s_n} P(s_1)\,P(s_2\mid s_1)\,P(s_3 \mid s_2)\cdots P(s_n \mid s_{n-1}).$$</div></div>
 <p>Only the last factor contains $s_n$, so the innermost sum can be done on its own:</p>
@@ -383,7 +383,7 @@ $n-1$ variables of the same shape as before. Repeat.</p>
 <p>After $n-1$ eliminations, each costing $k^2$, one sum over $s_1$ remains. Total
 cost:</p>
 <div class="eqn" id="eq-chain-cost"><div class="eqbody">$$(n-1)\,k^2 \;=\; 624 \text{ operations},$$</div><div class="eqno"><a href="#eq-chain-cost" title="Link to equation 1.5.1">(1.5.1)</a></div></div>
-<p>against $1.209e+24$ terms in the sum being computed. The answer is exact.
+<p>against $1.209 \times 10^{24}$ terms in the sum being computed. The answer is exact.
 Not approximated, not sampled: the same number brute force would have produced.</p></div>
 <p>The distributive law did that, and nothing else. $ab + ac = a(b+c)$ turns two
 multiplications into one, and applied recursively it turns an exponential sum
@@ -422,9 +422,9 @@ and elimination is exactly as expensive as that distance.</p></aside>
 <p><div class="tablewrap"><table>
 <thead><tr><th>Structure</th><th>Variables</th><th>Treewidth</th><th>Elimination cost</th><th>Brute force</th></tr></thead>
 <tbody>
-<tr><td>chain or any tree</td><td>40</td><td>1</td><td>624</td><td>1.2e+24</td></tr>
-<tr><td>square grid</td><td>36</td><td>6</td><td>589,824</td><td>4.7e+21</td></tr>
-<tr><td>densely coupled</td><td>40</td><td>39</td><td>no better than brute force</td><td>1.2e+24</td></tr>
+<tr><td>chain or any tree</td><td>40</td><td>1</td><td>624</td><td>$1.2 \times 10^{24}$</td></tr>
+<tr><td>square grid</td><td>36</td><td>6</td><td>589,824</td><td>$4.7 \times 10^{21}$</td></tr>
+<tr><td>densely coupled</td><td>40</td><td>39</td><td>no better than brute force</td><td>$1.2 \times 10^{24}$</td></tr>
 </tbody>
 </table></div>
 
@@ -544,9 +544,9 @@ target:</p>
 <tbody>
 <tr><td>1</td><td>10</td></tr>
 <tr><td>2</td><td>100</td></tr>
-<tr><td>5</td><td>1e+05</td></tr>
-<tr><td>10</td><td>1e+10</td></tr>
-<tr><td>20</td><td>1e+20</td></tr>
+<tr><td>5</td><td>$1 \times 10^{5}$</td></tr>
+<tr><td>10</td><td>$1 \times 10^{10}$</td></tr>
+<tr><td>20</td><td>$1 \times 10^{20}$</td></tr>
 </tbody>
 </table></div>
 
@@ -567,9 +567,9 @@ independent coordinates, so a per-coordinate mismatch of
 <thead><tr><th>Coordinates $n$</th><th>Divergence, nats</th><th>Useful fraction of samples</th><th>Draws for 1,000 effective</th></tr></thead>
 <tbody>
 <tr><td>1</td><td>0.5</td><td>0.607</td><td>1,649</td></tr>
-<tr><td>10</td><td>5.0</td><td>6.74e-03</td><td>148,413</td></tr>
-<tr><td>20</td><td>10.0</td><td>4.54e-05</td><td>22,026,466</td></tr>
-<tr><td>50</td><td>25.0</td><td>1.39e-11</td><td>7.20e+13</td></tr>
+<tr><td>10</td><td>5.0</td><td>$6.74 \times 10^{-3}$</td><td>148,413</td></tr>
+<tr><td>20</td><td>10.0</td><td>$4.54 \times 10^{-5}$</td><td>22,026,466</td></tr>
+<tr><td>50</td><td>25.0</td><td>$1.39 \times 10^{-11}$</td><td>$7.20 \times 10^{13}$</td></tr>
 </tbody>
 </table></div>
 

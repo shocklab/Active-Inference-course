@@ -297,7 +297,7 @@ $$
 g'(\hat d)\,\varepsilon_u = {{err_obs_weighted:+.6f}},
 $$
 
-summing to ${{err_sum:.2e}}$, which is zero to the tolerance the iteration was
+summing to ${{err_sum:sci2}}$, which is zero to the tolerance the iteration was
 run to. Note what is *not* zero: the raw sensory error is
 $\varepsilon_u = {{err_obs:.4f}}$, and the estimate still predicts an intensity
 of ${{g_at_mode:.4f}}$ against the ${{u_obs}}$ heard. The animal has not moved far

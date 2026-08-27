@@ -31,7 +31,7 @@ Here is a model with $n = {{den_n}}$ binary-ish factors, $k = {{den_k}}$ values
 each. Its state space has
 
 $$
-k^n \;=\; {{den_k}}^{{{den_n}}} \;\approx\; {{den_terms:.3e}}
+k^n \;=\; {{den_k}}^{{{den_n}}} \;\approx\; {{den_terms:sci3}}
 $$
 
 states, so [eq:denom] has that many terms. More states than there are atoms in a
@@ -45,7 +45,7 @@ P(s_1, \dots, s_n) \;=\; P(s_1)\prod_{i=1}^{n-1} P(s_{i+1} \mid s_i),
 $$
 
 and the observation attaches to the chain somewhere. The sum still has
-${{den_terms:.3e}}$ terms. Nothing about the count has changed.
+${{den_terms:sci3}}$ terms. Nothing about the count has changed.
 
 ::: derivation Summing a trillion trillion terms in linear time
 Write the sum out and push each factor as far right as it will go:
@@ -71,7 +71,7 @@ $$
 (n-1)\,k^2 \;=\; {{den_chain_ops}} \text{ operations},
 $$ {#chain-cost}
 
-against ${{den_terms:.3e}}$ terms in the sum being computed. The answer is exact.
+against ${{den_terms:sci3}}$ terms in the sum being computed. The answer is exact.
 Not approximated, not sampled: the same number brute force would have produced.
 :::
 
@@ -130,9 +130,9 @@ Three models, same $k = {{den_k}}$, and the difference is entirely in the wiring
 <table>
 <thead><tr><th>Structure</th><th>Variables</th><th>Treewidth</th><th>Elimination cost</th><th>Brute force</th></tr></thead>
 <tbody>
-<tr><td>chain or any tree</td><td>{{den_n}}</td><td>1</td><td>{{den_chain_ops}}</td><td>{{den_terms:.1e}}</td></tr>
-<tr><td>square grid</td><td>{{den_grid_n}}</td><td>{{den_grid_w}}</td><td>{{den_grid_ops:,}}</td><td>{{den_grid_brute:.1e}}</td></tr>
-<tr><td>densely coupled</td><td>{{den_n}}</td><td>{{den_dense_w}}</td><td>no better than brute force</td><td>{{den_terms:.1e}}</td></tr>
+<tr><td>chain or any tree</td><td>{{den_n}}</td><td>1</td><td>{{den_chain_ops}}</td><td>${{den_terms:sci1}}$</td></tr>
+<tr><td>square grid</td><td>{{den_grid_n}}</td><td>{{den_grid_w}}</td><td>{{den_grid_ops:,}}</td><td>${{den_grid_brute:sci1}}$</td></tr>
+<tr><td>densely coupled</td><td>{{den_n}}</td><td>{{den_dense_w}}</td><td>no better than brute force</td><td>${{den_terms:sci1}}$</td></tr>
 </tbody>
 </table>
 
@@ -299,9 +299,9 @@ target:
 <tbody>
 <tr><td>1</td><td>{{quad_pts_n1:.0f}}</td></tr>
 <tr><td>2</td><td>{{quad_pts_n2:.0f}}</td></tr>
-<tr><td>5</td><td>{{quad_pts_n5:.0e}}</td></tr>
-<tr><td>10</td><td>{{quad_pts_n10:.0e}}</td></tr>
-<tr><td>20</td><td>{{quad_pts_n20:.0e}}</td></tr>
+<tr><td>5</td><td>${{quad_pts_n5:sci0}}$</td></tr>
+<tr><td>10</td><td>${{quad_pts_n10:sci0}}$</td></tr>
+<tr><td>20</td><td>${{quad_pts_n20:sci0}}$</td></tr>
 </tbody>
 </table>
 
@@ -325,9 +325,9 @@ independent coordinates, so a per-coordinate mismatch of
 <thead><tr><th>Coordinates $n$</th><th>Divergence, nats</th><th>Useful fraction of samples</th><th>Draws for {{is_target_ess:,}} effective</th></tr></thead>
 <tbody>
 <tr><td>1</td><td>{{is_kl_n1}}</td><td>{{is_ess_frac_n1:.3f}}</td><td>{{is_samples_n1:,.0f}}</td></tr>
-<tr><td>10</td><td>{{is_kl_n10}}</td><td>{{is_ess_frac_n10:.2e}}</td><td>{{is_samples_n10:,.0f}}</td></tr>
-<tr><td>20</td><td>{{is_kl_n20}}</td><td>{{is_ess_frac_n20:.2e}}</td><td>{{is_samples_n20:,.0f}}</td></tr>
-<tr><td>50</td><td>{{is_kl_n50}}</td><td>{{is_ess_frac_n50:.2e}}</td><td>{{is_samples_n50:.2e}}</td></tr>
+<tr><td>10</td><td>{{is_kl_n10}}</td><td>${{is_ess_frac_n10:sci2}}$</td><td>{{is_samples_n10:,.0f}}</td></tr>
+<tr><td>20</td><td>{{is_kl_n20}}</td><td>${{is_ess_frac_n20:sci2}}$</td><td>{{is_samples_n20:,.0f}}</td></tr>
+<tr><td>50</td><td>{{is_kl_n50}}</td><td>${{is_ess_frac_n50:sci2}}$</td><td>${{is_samples_n50:sci2}}$</td></tr>
 </tbody>
 </table>
 

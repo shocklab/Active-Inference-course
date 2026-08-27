@@ -228,7 +228,7 @@ no square to complete.
 Completing a square is an identity, so it can be checked rather than trusted.
 Divide the exact linear posterior by the claimed Gaussian on a fine grid: the
 quotient must be *constant* in $d$, not merely small. Over the whole grid that
-quotient, which is of order one, varies by {{lin_square_spread:.1e}} between its
+quotient, which is of order one, varies by ${{lin_square_spread:sci1}}$ between its
 largest and smallest values. That is floating point, not algebra.
 
 One more check, and it needs no arithmetic. Set the two variances equal. Then
@@ -248,7 +248,7 @@ with variance $1/(\Pi_p + \Pi_u) = {{lin_var:.6f}}$.
 
 Checking that against quadrature on the same wide grid: the mode comes out at
 ${{lin_mode_quad:.6f}}$, the mean at ${{lin_mean_quad:.6f}}$, and the skew at
-${{lin_skew_quad:.1e}}$, which is zero to machine precision. Mode and mean agree
+${{lin_skew_quad:sci1}}$, which is zero to machine precision. Mode and mean agree
 to five figures and part in the sixth. The algebra says they are equal exactly;
 the disagreement is the spacing of the grid the mode was read off, which the mean
 does not suffer because it is an integral over every point rather than the
@@ -275,7 +275,7 @@ ${{lin_mode:.4f}}$ with a standard deviation of ${{lin_sd_quad:.4f}}$, so
 small but not nothing. In the nonlinear case the same prior is harmless: as $d$
 falls towards zero, $g(d)$ runs to infinity and the squared sensory error with
 it, so the likelihood suppresses the region entirely. The mass below
-$d = 0.5$ is about ${{nonlin_mass_below_half:.0e}}$. The inverse square cleans up
+$d = 0.5$ is about ${{nonlin_mass_below_half:sci0}}$. The inverse square cleans up
 after the prior.
 :::
 
@@ -284,7 +284,7 @@ after the prior.
 Now assemble [eq:precision-form] as a diagram, taking seriously the constraints
 of [lesson:2.1]. Give each quantity a unit and each multiplication a connection.
 
-::: fig The update of [eq:precision-form] drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. Arrow labels give what multiplies a signal in transit. Every arrow carries one number from one place to one place, and none needs a quantity from anywhere else.
+::: fig The update of [eq:precision-form] drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. Arrow labels give what multiplies a signal in transit, so the sensory error returns scaled by $g'(d)$ and the prior error returns unchanged. Every arrow carries one number from one place to one place, and none needs a quantity from anywhere else.
 <svg viewBox="0 0 660 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A predictive coding circuit: an estimate unit sends a prediction down to a sensory error unit and receives a weighted error back, while a prior error unit compares the estimate with the prior expectation.">
   <rect x="1" y="1" width="658" height="258" fill="#fdfcf9" stroke="#e4e1d9"/>
 
@@ -327,8 +327,7 @@ of [lesson:2.1]. Give each quantity a unit and each multiplication a connection.
   <text x="72" y="152" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#6d6d75">prediction</text>
 
   <path d="M170 176 C196 146 196 106 170 82" fill="none" stroke="#8a6d1f" stroke-width="1.8" marker-end="url(#ahg)"/>
-  <text x="238" y="128" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#8a6d1f">g&#8242;(d)</text>
-  <text x="238" y="144" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#6d6d75">error back, via the slope</text>
+  <text x="232" y="150" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#8a6d1f">&#215; g&#8242;(d)</text>
 
   <path d="M76 196 L124 196" fill="none" stroke="#3c3c42" stroke-width="1.6" marker-end="url(#ah)"/>
   <path d="M392 187 L176 193" fill="none" stroke="#3c3c42" stroke-width="1.2" stroke-dasharray="3 3"/>
@@ -336,8 +335,7 @@ of [lesson:2.1]. Give each quantity a unit and each multiplication a connection.
   <path d="M176 70 L394 70" fill="none" stroke="#0f5f57" stroke-width="1.8" marker-end="url(#ah)"/>
   <path d="M420 172 L420 96" fill="none" stroke="#3c3c42" stroke-width="1.6" marker-end="url(#ah)"/>
   <path d="M400 92 C330 126 240 100 176 78" fill="none" stroke="#2c5f8a" stroke-width="1.8" marker-end="url(#ahb)"/>
-  <text x="300" y="122" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#2c5f8a">1</text>
-  <text x="300" y="138" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#6d6d75">error back, unweighted</text>
+  <text x="306" y="112" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#2c5f8a">&#215; 1</text>
 </svg>
 :::
 

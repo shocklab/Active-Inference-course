@@ -491,7 +491,7 @@ no square to complete.</p></aside>
 <p>Completing a square is an identity, so it can be checked rather than trusted.
 Divide the exact linear posterior by the claimed Gaussian on a fine grid: the
 quotient must be <em>constant</em> in $d$, not merely small. Over the whole grid that
-quotient, which is of order one, varies by 6.1e-14 between its
+quotient, which is of order one, varies by $6.1 \times 10^{-14}$ between its
 largest and smallest values. That is floating point, not algebra.</p>
 <p>One more check, and it needs no arithmetic. Set the two variances equal. Then
 $\Pi_p = \Pi_u$, the weights in $m$ are equal, and the estimate must be the plain
@@ -504,7 +504,7 @@ $d_p = 2.0$, $u = 0.5$:</p>
 <p>with variance $1/(\Pi_p + \Pi_u) = 0.090909$.</p>
 <p>Checking that against quadrature on the same wide grid: the mode comes out at
 $0.636361$, the mean at $0.636364$, and the skew at
-$-8.8e-16$, which is zero to machine precision. Mode and mean agree
+$-8.8 \times 10^{-16}$, which is zero to machine precision. Mode and mean agree
 to five figures and part in the sixth. The algebra says they are equal exactly;
 the disagreement is the spacing of the grid the mode was read off, which the mean
 does not suffer because it is an integral over every point rather than the
@@ -525,7 +525,7 @@ $0.6364$ with a standard deviation of $0.3015$, so
 small but not nothing. In the nonlinear case the same prior is harmless: as $d$
 falls towards zero, $g(d)$ runs to infinity and the squared sensory error with
 it, so the likelihood suppresses the region entirely. The mass below
-$d = 0.5$ is about $1e-30$. The inverse square cleans up
+$d = 0.5$ is about $1 \times 10^{-30}$. The inverse square cleans up
 after the prior.</p></aside>
 <h2 id="the-circuit"><span class="secno">5</span>The circuit</h2>
 <p>Now assemble <a class="eqref" href="#eq-precision-form">(2.4.5)</a> as a diagram, taking seriously the constraints
@@ -572,8 +572,7 @@ of <a href="../week-02/two-rules.html">Lesson&nbsp;1</a>. Give each quantity a u
   <text x="72" y="152" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#6d6d75">prediction</text>
 
   <path d="M170 176 C196 146 196 106 170 82" fill="none" stroke="#8a6d1f" stroke-width="1.8" marker-end="url(#ahg)"/>
-  <text x="238" y="128" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#8a6d1f">g&#8242;(d)</text>
-  <text x="238" y="144" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#6d6d75">error back, via the slope</text>
+  <text x="232" y="150" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#8a6d1f">&#215; g&#8242;(d)</text>
 
   <path d="M76 196 L124 196" fill="none" stroke="#3c3c42" stroke-width="1.6" marker-end="url(#ah)"/>
   <path d="M392 187 L176 193" fill="none" stroke="#3c3c42" stroke-width="1.2" stroke-dasharray="3 3"/>
@@ -581,9 +580,8 @@ of <a href="../week-02/two-rules.html">Lesson&nbsp;1</a>. Give each quantity a u
   <path d="M176 70 L394 70" fill="none" stroke="#0f5f57" stroke-width="1.8" marker-end="url(#ah)"/>
   <path d="M420 172 L420 96" fill="none" stroke="#3c3c42" stroke-width="1.6" marker-end="url(#ah)"/>
   <path d="M400 92 C330 126 240 100 176 78" fill="none" stroke="#2c5f8a" stroke-width="1.8" marker-end="url(#ahb)"/>
-  <text x="300" y="122" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#2c5f8a">1</text>
-  <text x="300" y="138" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="9.5" fill="#6d6d75">error back, unweighted</text>
-</svg><figcaption><span class="fno">Figure 2.4.1.</span> The update of <a class="eqref" href="#eq-precision-form">(2.4.5)</a> drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. Arrow labels give what multiplies a signal in transit. Every arrow carries one number from one place to one place, and none needs a quantity from anywhere else.</figcaption></figure>
+  <text x="306" y="112" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#2c5f8a">&#215; 1</text>
+</svg><figcaption><span class="fno">Figure 2.4.1.</span> The update of <a class="eqref" href="#eq-precision-form">(2.4.5)</a> drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. Arrow labels give what multiplies a signal in transit, so the sensory error returns scaled by $g'(d)$ and the prior error returns unchanged. Every arrow carries one number from one place to one place, and none needs a quantity from anywhere else.</figcaption></figure>
 <p>Trace it. The estimate $d$ sends a prediction $g(d)$ down to the sensory error
 unit, which subtracts it from what the ear delivered. That unit's activity is the
 precision-weighted error $\varepsilon_u = \Pi_u(u - g(d))$, the weighting being

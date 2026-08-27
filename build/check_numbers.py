@@ -122,6 +122,8 @@ def main():
                     problems.append(f"{label}: uses {{{{{key}}}}} but the week has no values.py")
                 elif key not in values:
                     problems.append(f"{label}: {{{{{key}}}}} is not defined in values.py")
+                elif re.fullmatch(r"sci\d*", fmt or ""):
+                    pass   # mdx renders LaTeX scientific notation, not a Python format
                 else:
                     try:
                         format(values[key], fmt) if fmt else str(values[key])

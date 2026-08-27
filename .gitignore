@@ -17,3 +17,6 @@ venv/
 # Scratch
 scratch/
 *.tmp
+
+# generated books; rebuild with the course-to-pdf skill
+*.pdf
