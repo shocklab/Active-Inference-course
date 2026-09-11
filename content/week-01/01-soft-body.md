@@ -1,413 +1,279 @@
 ---
-title: A soft body in a hard world
-deck: Why anything that stays alive must carry a model of the thing it is staying alive in.
+title: Regulation and inference
+deck: A feedback model of physiological regulation, followed by the questions that connect regulation to inference.
 week: 1
-time: 25 min
+time: 35 min
 scripts: [w01.js]
 ---
 
-You are a bag of warm salt water, held a few degrees below the temperature at
-which your own proteins come apart. Your core sits within about a degree of
-37&nbsp;°C. Your blood pH stays between 7.35 and 7.45. The sodium concentration
-outside your cells holds near 140&nbsp;mmol per litre, and if it wanders far in
-either direction you become confused, then unconscious, then dead.
+A body must keep some things within tolerable ranges. Temperature, acidity and
+salt concentration can vary, but sufficiently large departures disrupt the
+processes that keep the organism alive. Shivering, sweating and moving into the
+shade are familiar ways of correcting those departures.
 
-Each of those is a coordinate. Along every one of them, the range compatible
-with being alive is tiny next to the range physics is perfectly content to put
-you in. A living body occupies a vanishingly small corner of the space of
-configurations available to the atoms it is made of, and it keeps occupying that
-corner for decades.
+We can describe regulation mathematically before deciding how much of it requires
+inference. That distinction matters. A feedback mechanism may stabilise a variable
+without calculating probabilities or representing a hidden cause. Active inference
+is a proposal for connecting regulation, perception and action; a model of stable
+feedback alone does not establish that proposal.
 
-That is the fact this whole course is an attempt to explain. Not consciousness,
-not intelligence, not language. Just this: how does a thing stay in its corner?
+## A feedback model
 
-::: mn Physiological ranges
-Core temperature, blood pH and plasma sodium are the standard clinical
-examples because they are the ones we monitor. The argument does not depend
-on them; pick any measurable state of your body and the same narrowness holds.
-:::
+Call the set of physiological states compatible with survival the **viable set**.
+For a small example, take two regulated variables and measure each as a deviation
+from its target. Scale their units so that the viable set is the circle of radius
+one. This circular boundary is an assumption of the example, not a claim about the
+shape of a real organism's physiological limits.
 
-## Drift is the default
-
-Left alone, a physical system drifts. Heat leaks across gradients, concentrations
-even out, structure decays into mush. There is no force in physics that gently
-returns your body temperature to 37&nbsp;°C when you stand in a cold wind. If you
-stay at 37&nbsp;°C it is because something is working to keep you there: you
-shiver, you constrict blood vessels in your skin, you put on a jumper, you go
-inside.
-
-Call the set of states in which the organism continues to exist its **viable
-set**. The picture to hold is a small region of a large space, with the system
-being nudged out of it constantly by noise, and something inside the system
-pushing back.
-
-::: widget homeostasis-drift | A body in a two-dimensional physiological space, each axis one regulated variable measured as a deviation from its setpoint. The solid circle at radius $1$ is the boundary of the viable set; cross it and the organism is no longer an organism. $\sigma$ is the size of one step of noise; $\kappa$ is the fraction of the current displacement the body removes per step, defined properly below. The dashed circle is the spread the algebra predicts, $\sqrt{2v}$ with $v$ from [eq:stationary-var]; it is absent at $\kappa = 0$ and $\kappa \ge 2$, where no stationary spread exists. The right-hand panel tracks the entropy of the visited states: the position is binned onto a ${{hs_bins:d}} \times {{hs_bins:d}}$ grid, the visit counts are normalised into a distribution, and its entropy is reported in nats, against a maximum of $\ln {{hs_bin_cells:d}} = {{hs_max_entropy:.3f}}$ for a body found equally often everywhere.
-:::
-
-The figure is running one line of arithmetic. Writing $x_t \in \mathbb{R}^2$ for
-the displacement from the centre of the viable set,
+Write $x_t\in\mathbb R^2$ for the displacement at time step $t$, starting at
+$x_0=0$. The subscript labels time. At each step the controller removes a fraction
+$\kappa$ of the current displacement and then a disturbance arrives:
 
 $$
-x_{t+1} \;=\; \underbrace{(1-\kappa)\,x_t}_{\text{pull back}}
-\;+\; \underbrace{\sigma\,\xi_t}_{\text{noise}},
-\qquad \xi_t \sim \mathcal{N}(0, I_2)
-\ \text{independently at each step},
+x_{t+1}=(1-\kappa)x_t+\sigma\xi_t,
+\qquad \xi_t\sim\mathcal N(0,I_2)
+\quad\text{independently across steps}.
 $$ {#homeostat}
 
-absorbed the moment $\lVert x_t \rVert > 1$.
+Here $I_2$ is the identity matrix: each coordinate of $\xi_t$ has variance one,
+and the two coordinates are independent. The **noise standard deviation**
+$\sigma$ sets the size of a disturbance in each coordinate, in the units of $x$.
+The **feedback gain** $\kappa$ is dimensionless. It is the fraction of the present
+displacement removed per step. A gain of $0.15$ removes fifteen per cent, leaving
+eighty-five per cent before the next disturbance arrives.
 
-Two parameters, and it pays to be exact about both. $\sigma$ is the size of one
-step of noise, in whatever units $x$ is measured in. $\kappa$ is dimensionless:
-it is the **fraction of the current displacement that the organism removes per
-step**. At $\kappa = 0.15$ the body cancels fifteen per cent of its error each
-step and lets the remaining eighty-five per cent stand. Biologically it is the
-gain of whatever loop does the regulating, whether that is shivering,
-vasoconstriction, or walking into the shade; a large $\kappa$ is a strong, fast
-correction.
+For the survival simulation, stop the trajectory when $\lVert x_t\rVert>1$.
+This is an **absorbing boundary**: crossing ends the run, even if the recursion
+would subsequently return inside. We will also study the recursion without that
+boundary to understand its spread. These are two different processes.
 
-Written that way the parameter has a range worth exploring, and the figure's
-slider now covers it.
+::: widget homeostasis-drift | Two regulated coordinates, measured relative to their targets. The solid circle is the absorbing boundary at radius one. The dashed circle shows the root-mean-square radius $\sqrt{2v}$ of the unabsorbed stationary process, with $v$ defined below; it is not a safety guarantee. The right panel records the entropy of the empirical visit histogram on a ${{hs_bins:d}}\times{{hs_bins:d}}$ grid. Its reference maximum is $\ln {{hs_bin_cells:d}}={{hs_max_entropy:.3f}}$ nats for uniform occupancy of the whole square grid. The absorbing circle prevents this run from exploring the whole square. A nat is an information unit based on natural logarithms, defined in the entropy section.
+:::
 
-**Why $\kappa = 0$ is fatal.** With no restoring term the increments are
-independent and mean-zero, so the variances add. After $t$ steps each coordinate
-has variance $t\sigma^2$, and
+### Without feedback
+
+At $\kappa=0$, repeated substitution in [eq:homeostat] gives
 
 $$
-\mathbb{E}\big[\lVert x_t \rVert^2\big] \;=\; 2t\sigma^2 ,
+x_t=\sigma\sum_{j=0}^{t-1}\xi_j.
+$$
+
+The increments are independent and have mean zero. Thus each coordinate has mean
+zero and variance $t\sigma^2$. Adding the second moments of the coordinates gives
+
+$$
+\mathbb E[\lVert x_t\rVert^2]=2t\sigma^2.
 $$ {#diffusion}
 
-which grows without bound. There is no equilibrium to settle into: the walk has
-no preferred location, and the region it typically occupies swells like
-$\sqrt{t}$. Setting [eq:diffusion] equal to $1$ gives a rough crossing time of
-$t \approx 1/(2\sigma^2)$, which at $\sigma = {{hs_sigma}}$ is about
-{{hs_diffusive_steps:.0f}} steps. More carefully: for a driftless walk the
-probability of still being inside any fixed radius tends to zero, so the boundary
-is crossed with probability one and the only question is when. Diffusion does not
-need to be malicious to be fatal. It needs to be given enough time.
+This calculation concerns the unabsorbed walk. Equating its mean squared radius
+to the squared boundary radius gives the rough timescale
+$t\approx1/(2\sigma^2)$. At $\sigma={{hs_sigma}}$, that is about
+{{hs_diffusive_steps:.0f}} steps. It is not an exact expected first-crossing time:
+a path can cross the boundary earlier and return before time $t$.
 
-**What $\kappa > 0$ buys.** Now the variance stops adding. Write $v$ for the variance of one coordinate once the process has settled,
-the **stationary variance**. Taking variances of both sides of [eq:homeostat]
-and asking for a value that reproduces itself,
+The boundary is eventually crossed with probability one when $\sigma>0$.
+One way to see this is to look at the unabsorbed position: it is Gaussian with
+covariance $t\sigma^2I_2$, so the probability of being inside the unit circle
+tends to zero. The event of never having left by time $t$ is contained in the
+event of being inside at time $t$. Its probability must therefore tend to zero
+too.
+
+### With feedback
+
+::: derivation The stationary variance
+Let $v_t$ be the variance of one coordinate of the unabsorbed process. The new
+noise is independent of the existing displacement, so there is no covariance
+term when we take the variance of [eq:homeostat]:
 
 $$
-v \;=\; (1-\kappa)^2 v + \sigma^2
-\qquad\Longrightarrow\qquad
-v \;=\; \frac{\sigma^2}{1 - (1-\kappa)^2} \;=\; \frac{\sigma^2}{2\kappa - \kappa^2}.
+v_{t+1}=(1-\kappa)^2v_t+\sigma^2.
+$$
+
+A stationary variance $v$ must reproduce itself:
+
+$$
+v=(1-\kappa)^2v+\sigma^2,
+\qquad
+[1-(1-\kappa)^2]v=\sigma^2.
+$$
+
+Expanding the square gives $1-(1-\kappa)^2=2\kappa-\kappa^2$, hence
+
+$$
+v=\frac{\sigma^2}{\kappa(2-\kappa)}.
 $$ {#stationary-var}
 
-The walk has acquired a stationary distribution. At $\sigma = {{hs_sigma}}$ and
-$\kappa = {{hs_kappa}}$ this is $v = {{hs_var_per_coord:.5f}}$, a standard
-deviation of {{hs_sd_per_coord:.4f}} per coordinate, which puts the boundary at
-$\lVert x \rVert = 1$ about {{hs_boundary_in_sd:.0f}} standard deviations away.
-
-### The range of stable gains
-
-Strip the noise from [eq:homeostat] and the displacement is multiplied by
-$1 - \kappa$ each step. Whether the organism returns to the centre therefore
-depends on nothing more than whether that factor is smaller than one in
-magnitude, which requires
+For this value to be attracting, the multiplier of $v_t$ must be below one:
+$(1-\kappa)^2<1$. Solving that inequality gives
 
 $$
-0 < \kappa < 2 .
+0<\kappa<2.
 $$ {#stability}
 
-Below zero the correction pushes the wrong way. Above two it overcorrects so
-violently that each step lands further out than the last. Between those bounds
-the behaviour changes character twice:
+Under this condition, repeated substitution shows that the initial variance is
+multiplied by $(1-\kappa)^{2t}$ and tends to zero, while the accumulated noise
+variance is a convergent geometric sum. The stationary distribution is Gaussian,
+with independent coordinates of variance $v$.
+:::
 
-| $\kappa$ | $1-\kappa$ | what the organism does | stationary variance |
-|---|---|---|---|
-| $0$ | $1$ | nothing; the walk diffuses away | unbounded |
-| $0 < \kappa < 1$ | positive | eases back towards the centre from one side | $\sigma^2/\kappa(2-\kappa)$ |
-| $1$ | $0$ | erases the whole error in a single step | $\sigma^2$ |
-| $1 < \kappa < 2$ | negative | overshoots, landing on the far side each time | $\sigma^2/\kappa(2-\kappa)$ |
-| $2$ | $-1$ | oscillates forever without settling | unbounded |
+At $\sigma={{hs_sigma}}$ and $\kappa={{hs_kappa}}$, the variance is
+${{hs_var_per_coord:.5f}}$ per coordinate, giving standard deviation
+${{hs_sd_per_coord:.4f}}$. Since the mean is zero,
+$\mathbb E[\lVert x\rVert^2]=2v$, which explains the dashed circle in the widget.
 
-The middle column explains the qualitative change. For $\kappa < 1$ the factor
-$1-\kappa$ is positive, so a body above the setpoint stays above it while
-approaching. For $\kappa > 1$ the factor is negative, so a body above the
-setpoint arrives below it and has to come back: the correction was too large.
+| Gain | Response without noise | Stationary variance with noise |
+|---|---|---|
+| $\kappa=0$ | Displacement is unchanged | No finite stationary variance |
+| $0<\kappa<1$ | Displacement decreases without changing sign | $\sigma^2/[\kappa(2-\kappa)]$ |
+| $\kappa=1$ | Displacement is removed in one step | $\sigma^2$ |
+| $1<\kappa<2$ | Displacement decreases while alternating in sign | $\sigma^2/[\kappa(2-\kappa)]$ |
+| $\kappa=2$ | Displacement alternates without decreasing | No finite stationary variance |
 
-That gives the variance in [eq:stationary-var] a shape. Its denominator
-$\kappa(2-\kappa)$ is largest at $\kappa = 1$, so
+The denominator satisfies $\kappa(2-\kappa)=1-(\kappa-1)^2$, so it is largest
+at $\kappa=1$. Therefore
 
 $$
-v_{\min} \;=\; \sigma^2 ,
+v_{\min}=\sigma^2.
 $$ {#best-gain}
 
-attained by correcting the error exactly once, completely. No regulation scheme
-of this form does better. Even a perfect controller carries one step's worth of
-noise, because the noise arrives *after* the correction and there is nothing to
-be done about it until the next step.
+Even that controller cannot remove the disturbance which arrives after its
+correction. Gains $\kappa$ and $2-\kappa$ give the same stationary variance,
+although the sign of the temporal correlation differs. A gain of $0.5$ and one
+of $1.5$ therefore produce equally broad stationary distributions but visibly
+different trajectories.
 
-::: keyidea
-Two things follow, and the second is easy to miss. **Too little regulation is
-fatal**, which is the point the figure opens with. But **too much regulation is
-also fatal**, and symmetrically so: since $\kappa(2-\kappa)$ is unchanged when
-$\kappa$ is replaced by $2-\kappa$, a gain of $1.5$ leaves a body exactly as
-spread out as a gain of $0.5$. Overcorrection is not a lesser sin than
-underreaction. It is the same sin measured from the other side, and Week&nbsp;5
-meets it again under a different name. There the gain is set by a precision,
-the inverse of a variance, defined properly in Week&nbsp;2. A large precision is
-a claim that a signal is reliable; a system that believes its measurements are better than they are
-overcorrects to each of them and ends up chasing its own noise.
+::: warning Stationarity and survival
+The stationary calculation removes the absorbing boundary. It describes spread,
+not the distribution of surviving paths, and not a guarantee of indefinite life.
+Gaussian disturbances have unbounded support. From anywhere inside the circle,
+a sufficiently large disturbance can cause an exit; for fixed gain and positive
+noise, there is a positive lower bound on this exit probability over the circle.
+Consequently eventual exit still has probability one. Feedback can make exit
+rare, but estimating its waiting time requires a first-passage calculation.
 :::
 
-Push the figure's slider past $1$ and the trajectory changes visibly: instead of
-drifting back towards the middle it starts zigzagging across it, and past
-$\kappa = 2$ it leaves for good.
+## Entropy and observations
 
-::: warning "Indefinitely" is the wrong word
-Note what [eq:stationary-var] does *not* say. The stationary distribution is
-Gaussian, so it has unbounded support: every state remains reachable and the
-boundary is still crossed eventually, with probability one. Regulation does not
-make death impossible. It converts a certainty on a timescale of hundreds of
-steps into a rare event on a timescale so long the organism will have died of
-something else first. How rare depends on how many standard deviations of the
-stationary distribution fit inside the boundary, which is $1/\sqrt{v}$ per
-coordinate: about {{hs_boundary_in_sd:.0f}} at the figure's default settings, and
-the expected time to cross grows faster than exponentially in that number. That is all any organism gets, and it is enough.
-:::
+The widget's histogram describes physiological positions visited by a trajectory.
+An organism may also observe its own condition. This is **interoception**:
+sensing internal quantities such as temperature or muscle tension. It also
+receives information about its surroundings.
 
-## Staying alive is a statement about entropy
+Write $o$ for an **observation**, with the letter chosen for that word. For now,
+use a finite set of possible observations, such as a sensor reporting one of
+four categories. Write $P^*(o)$ for their actual probability distribution. The
+star will distinguish the process generating observations from a model of it.
 
-Watch the readout in that figure. It measures the entropy of the *physiological*
-states the body has occupied, whereas the quantity defined below is the entropy
-of the *observations* it makes. Section&nbsp;2 explains why the first bounds the
-second: an organism senses its own condition, so a body confined to few
-physiological states cannot report many different interoceptive observations. As the unregulated walk wanders, the entropy
-of the states it has visited climbs steadily. When the walk is regulated, that
-number rises for a while and then flattens out, well below the maximum. This is
-not decoration. It is the quantity we are going to build the entire framework
-on, so it needs stating precisely.
-
-Everything an organism can register about itself and its surroundings arrives at
-a surface: the retina, the skin, the stretch receptors in the gut. Note that the
-list runs inward as well as outward. A body senses its own temperature, its own
-blood chemistry, the tension in its own muscles; that inward-facing sensing is
-called **interoception**, and it is what connects this section to the last one.
-The physiological variables of the figure above are not some separate category of
-thing: they are among the quantities the organism measures.
-
-Call the state of that surface at one moment an **observation**, and write it $o$. The letter
-stands for *observation*. An organism has no access to the world; it has access
-only to what its senses report of the world, and those are not the same thing. [lesson:1.2] makes that distinction precise and
-gives the world's own states a different letter. Until then, $o$ is simply
-whatever the organism can actually measure.
-
-Over a long life the organism makes some observations often and others never, and
-that occupancy defines a probability distribution over observations, written
-$P(o)$. Its **entropy** is
+The **Shannon entropy** of a discrete distribution is
 
 $$
-\mathrm{H}[P(o)] \;=\; -\sum_{o} P(o) \ln P(o).
+\mathrm H[P^*]= -\sum_o P^*(o)\ln P^*(o).
 $$ {#sensory-entropy}
 
-Two notational points, since both recur for twelve weeks. The square brackets are
-deliberate: $\mathrm{H}$ takes an entire distribution as its argument rather than
-a single value, so it is a functional, not a function. And the logarithm is
-natural, here and everywhere in this course, which fixes the units as **nats**.
-A nat is the unit you get when the logarithm is natural rather than base two;
-divide by $\ln 2 \approx 0.693$ to convert a figure in nats to bits.
+We use the convention $0\ln0=0$, obtained by taking the limit as the probability
+approaches zero. The brackets indicate that entropy takes a whole distribution
+as its argument. For a finite outcome set this is a function of the probability
+vector. A **nat** is the unit obtained using natural logarithms; base-two
+logarithms instead give bits.
 
-Two numbers make the scale concrete. Take four possible observations. If the
-organism reports the first almost always, $P(o) = (0.94, 0.02, 0.02, 0.02)$, then
+For the chosen distribution $(0.94,0.02,0.02,0.02)$,
 
 $$
-\mathrm{H}[P(o)] = -\big[0.94\ln 0.94 + 3 \times 0.02\ln 0.02\big]
-= {{ent_peaked:.4f}}\ \text{nats}.
+\mathrm H[P^*]=-[0.94\ln0.94+3(0.02\ln0.02)]
+={{ent_peaked:.4f}}\text{ nats}.
 $$
 
-If instead all four are equally likely, every term is $-\tfrac14 \ln \tfrac14$ and
-the entropy is $\ln 4 = {{ent_uniform4:.4f}}$ nats, which is the largest value
-four outcomes admit. The surprise of the common observation in the first case is
-$-\ln 0.94 = {{surprise_common:.4f}}$ nats and of a rare one
-$-\ln 0.02 = {{surprise_rare:.4f}}$ nats; weight those by how often each occurs
-and you recover {{ent_peaked_check:.4f}} nats, the entropy again, as
-[eq:ergodic] requires.
+For four equally likely categories, each contribution is
+$-\tfrac14\ln\tfrac14$, and their sum is
+$\ln4={{ent_uniform4:.4f}}$ nats. This is the largest entropy on four categories.
+Entropy describes how probability is distributed across the categories. It does
+not say whether any of those categories is safe or desirable.
 
-An organism whose observations are spread thinly over everything possible has
-high entropy here. An organism that spends its whole life reporting *warm,
-fed, upright, unbroken* has low entropy. Being alive, measured in nats, is equation [eq:sensory-entropy] being small.
-
-::: mn Why entropy and not variance
-Variance needs a metric on the state space and privileges the mean. Entropy
-needs only a probability. For a creature whose states include "which arm of the
-maze" and "is the predator visible", there is no sensible mean to take.
+::: exercise A constant body and a noisy sensor
+Suppose a physiological variable stays exactly at its target, but a faulty sensor
+reports four categories independently and with equal probability. What are the
+entropy of the physiological state and the entropy of the sensor report?
+---solution---
+The physiological variable has one possible value, so its discrete entropy is
+$-1\ln1=0$. The report has entropy $\ln4={{ent_uniform4:.4f}}$ nats.
+Thus narrow physiology alone does not bound observation entropy. For a
+deterministic discrete observation $o=h(x)$, we do have $\mathrm H[o]\le\mathrm H[x]$;
+sensor noise removes the premise of that statement. The entropy of external
+observations need not be small either: a well-regulated animal can look at a
+highly variable scene.
 :::
 
-Now the step that makes the framework possible. Write $o_t$ for the observation
-made at time step $t$, and let $T$ count the steps of a life. If the organism's
-sensory statistics settle down over time, the long-run average of
-$-\ln P(o_t)$ along its actual trajectory converges to the entropy of the
-distribution it is sampling:
+## Surprise and its average
+
+Given a distribution $P(o)$, the **surprise** or **surprisal** of an observation
+is $-\ln P(o)$. This measures its improbability under that distribution, not an
+emotional response. A certain event has zero surprise, and a less probable event
+has greater surprise. For the preceding example, the common category has surprise
+${{surprise_common:.4f}}$ nats and a rare category has
+${{surprise_rare:.4f}}$ nats.
+
+::: derivation Entropy is expected surprise
+If observations are independent draws from $P^*$, and entropy is finite, the
+strong law of large numbers gives
 
 $$
-\mathrm{H}[P(o)] \;=\; \lim_{T\to\infty} \frac{1}{T}\sum_{t=1}^{T} \big[-\ln P(o_t)\big].
+\frac1T\sum_{t=1}^T[-\ln P^*(o_t)]
+\longrightarrow\mathbb E_{P^*}[-\ln P^*(o)]
+= -\sum_oP^*(o)\ln P^*(o)=\mathrm H[P^*]
 $$ {#ergodic}
 
-The quantity in the brackets, $-\ln P(o)$, is called the **surprise** of an
-observation, or sometimes its surprisal, to keep it clear that we are not
-talking about anybody's emotional state. It is large when $o$ is something the
-organism rarely sees and small when $o$ is business as usual.
-
-::: derivation Where [eq:ergodic] comes from
-The page has just called this the step that makes the framework possible, so it
-should not be left as an assertion. Take the easy case first, where the
-observations are independent and identically distributed. Then
-$-\ln P(o_1), -\ln P(o_2), \dots$ are themselves independent and identically
-distributed random variables, and the strong law of large numbers says their
-running average converges almost surely to their expectation:
-
-$$
-\frac{1}{T}\sum_{t=1}^{T}\big[-\ln P(o_t)\big]
-\ \xrightarrow{\ \text{a.s.}\ }\
-\mathbb{E}_{P(o)}\big[-\ln P(o)\big].
-$$
-
-Now look at what that expectation is. Writing it out,
-
-$$
-\mathbb{E}_{P(o)}\big[-\ln P(o)\big]
-\;=\; \sum_{o} P(o)\,\big[-\ln P(o)\big]
-\;=\; -\sum_{o} P(o)\ln P(o)
-\;=\; \mathrm{H}[P(o)],
-$$
-
-which is [eq:sensory-entropy] exactly. So entropy is not merely *related to*
-average surprise; it **is** average surprise, and the middle line is the whole
-proof. Nothing deeper is happening in the independent case.
-
-The organism's observations are of course not independent: what you see now
-depends on what you saw a moment ago. The claim needed is therefore the stronger
-one, that the time average along a single trajectory converges to the average
-over the distribution being sampled. A process for which that holds is called
-**ergodic**. Roughly: one long trajectory eventually visits states in the same
-proportions as the underlying distribution assigns them, so following one
-organism for a long time tells you what the ensemble looks like.
+almost surely. Here $T$ counts observations and $t$ indexes them. Independence
+is sufficient but not necessary. A stationary ergodic process also supports this
+time-average identity under the appropriate integrability condition. In this
+use, **ergodicity** means that time averages along almost every trajectory agree
+with the corresponding distributional averages. Stationarity by itself is not
+enough.
 :::
 
-::: keyidea
-[eq:ergodic] converts a statement about a whole lifetime into a statement about
-this instant. Keeping the entropy of your observations low over a lifetime is
-the same thing as keeping your surprise low at each moment. A goal you could
-never act on becomes a goal you can act on now.
-:::
+An identity about an average does not prescribe a choice at every instant. A
+controller may accept an unusual observation now to prevent a dangerous outcome
+later. Nor does the identity identify a preferred distribution: a sensor that
+always reports failure has low entropy too.
 
-::: warning What this step assumes
-[eq:ergodic] holds if the process is ergodic, and whether living systems are
-ergodic in the required sense is exactly the point at which several careful
-critics plant their flag. (The **free energy principle** is the name for the
-whole claim being assembled here, that self-organising systems minimise a bound
-on their surprise. Active inference is what you get when you take that principle
-and ask how an agent should act. Week&nbsp;4 constructs the bound; Week&nbsp;12
-weighs the objections.) We will take the
-identification as given for eleven weeks because it is the assumption the
-framework is built on, and then in Week&nbsp;12 we will come back and ask what
-it costs.
-:::
+There is another distinction. An agent's model assigns probabilities $P(o)$,
+which can differ from the actual probabilities $P^*(o)$. Its expected surprise is
+then $\sum_oP^*(o)[-\ln P(o)]$, rather than the entropy of $P^*$.
+[lesson:1.2] works through a lamp example showing the difference.
 
-## Surprise is not a property of the world
+## Inference, learning and action
 
-Here is the difficulty that generates everything else in this course.
+An animal hears a sound but cannot directly measure the source's distance. It can
+use a model linking possible distances to possible sounds to infer the distance.
+A generative model specifies a joint distribution over observations and
+hypothesised hidden causes. [lesson:1.2] constructs one explicitly.
 
-Nothing in the sentence "minimise $-\ln P(o)$" tells you what $P$ is. Probability
-is not a quantity you can read off the world with an instrument. There is no
-surprise-meter. An observation is surprising only *relative to some set of
-expectations*, and those expectations have to live somewhere.
+We will distinguish three operations:
 
-They live inside the organism. To be able to evaluate its own surprise, a system
-must carry an internal model of what its observations are usually like and what
-produces them.
+| Operation | What changes | Example |
+|---|---|---|
+| Inference | Beliefs about a hidden state, with the generative model fixed | Revising the likely distance after hearing a sound |
+| Learning | Parameters or structure of the generative model | Revising how noisy the hearing channel is |
+| Action | The process producing subsequent observations | Moving closer and listening again |
 
-This means the $P$ of [eq:sensory-entropy] and the $P$ of "minimise
-$-\ln P(o)$" are not quite the same object, and they need separating now rather than later. The first is the distribution the organism's
-observations *actually* follow over a lifetime, which no organism has access to.
-The second is the distribution its model *says* they follow, which is the only
-one it can evaluate. The framework proceeds by using the second as a stand-in for
-the first. Where the model is good, the two are close and minimising one
-minimises the other. Where the model is bad, an organism can be serenely
-unsurprised while its actual sensory statistics wander off, which is one of the
-more interesting ways for a thing to die. We will keep writing $P$ for both, as
-the literature does, and say which is meant whenever it matters. Such a model is called a *generative model*; [lesson:1.2] defines
-it properly and says what it is generative of. Building one, running it, and
-correcting it is what the rest of this course is about.
+In particular, inference about a fixed observation does not change the probability
+that the fixed model assigned to it. It changes beliefs about its cause.
+[lesson:1.2] gives a small interactive calculation of this distinction.
 
-So the argument so far runs:
+Active inference uses a quantity called variational free energy to construct
+inference and, with further assumptions, learning and action rules. For a fixed
+observation it bounds surprise from above; changing the approximate belief can
+reduce the gap without changing surprise itself. [week:4] derives this bound.
+Planning also needs preferences over outcomes and predictions of the consequences
+of actions. These do not follow just from the existence of a stable feedback loop.
 
-1. To persist is to occupy a small set of physiological states.
-2. Those states are sensed, so occupying few of them means the organism's
-   observations are also confined to a small set: low entropy over observations.
-3. Low entropy over a lifetime means low surprise at each moment.
-4. Surprise is only defined relative to a model.
-5. Therefore anything that persists must carry a model of the world it persists in.
-
-Step 2 is the one to watch. It runs in only one direction. Narrow physiology
-forces narrow interoceptive observations, but the converse fails: an organism
-could in principle keep its observations narrow by sensing very little, which is
-not the same as staying alive. That gap has a name, the dark-room problem, and
-Week&nbsp;12 asks whether the standard reply to it works.
-
-That is a strong claim and it deserves the scrutiny we will give it in
-Week&nbsp;12. But notice what it does not claim. It says nothing about the model
-being conscious, accurate, or even any good. A thermostat has one. The claim is
-only that having one is what persistence looks like from the inside.
-
-## Two ways to be less surprised
-
-Suppose you have such a model, and an observation arrives that it did not
-expect. The mismatch is between two things, the model and the world, so there are
-two places to intervene.
-
-You can **change the model** so that the observation is no longer surprising.
-This is perception: the world is telling you something and you update
-accordingly. What you thought was a shadow was a leopard, and now you believe it
-was a leopard.
-
-Or you can **change the world** so that your next observation is one the model
-did expect. This is action: you are cold, your model expects to be warm, and
-instead of revising the expectation you move into the sun.
-
-::: mn Where the name comes from
-Perception is inference over states. Action is inference carried out by moving.
-Doing both at once, with one quantity governing both, is what puts the
-*active* in active inference.
-:::
-
-Both reduce the mismatch between model and world. They are the same operation
-applied to the two different halves of the coupling, and in the mathematics they
-will turn out to be gradient descent on the same scalar quantity. That quantity
-is the **variational free energy**, shortened to just "the free energy" once
-there is no risk of confusing it with the thermodynamic quantity of the same
-name. Week&nbsp;4 constructs it properly.
-
-## Brains and sea squirts
-
-There is a story that gets repeated whenever anyone argues that brains exist for
-movement. The sea squirt, it goes, swims about as a larva with a little brain,
-finds a rock, cements itself to it, and then, having no further use for the
-thing, digests its own brain.
-
-It is a good story and it is not true. The larval tunicate does resorb its
-larval nervous system at metamorphosis, but what the adult builds afterwards is
-a cerebral ganglion *larger* than the one the larva had, wired for a completely
-different problem: filtering, siphon control,
-and responding to things that touch you when you cannot run away.
-
-Which is the better lesson anyway. Nervous systems are not a luxury that
-movement pays for. They are shaped by the control problem the animal actually
-faces, and a sessile animal faces a real one. Hold onto that, because a
-recurring temptation in this field is to assume that the interesting agents are
-the ones that look like us. The mathematics does not care.
+The task for the course is to build these ingredients and show what follows from
+them. Claims that organisms implement the resulting equations require evidence
+in addition to the equations themselves.
 
 ::: checkpoint
-Before going on, make sure you could answer these without looking back.
-
-- Why does an unbiased random walk kill the organism in the figure above, given
-  that it has no bias towards the boundary?
-- What is the difference between the entropy of $P(o)$ and the surprise of a
-  particular observation $o$?
-- Why can surprise not be measured directly from the environment?
-- Name the two places you can intervene when model and world disagree. Which of
-  them changes the model, and which changes the observations that arrive next?
+- Derive the stationary variance and state which process it describes.
+- Why can an unabsorbed process have a stationary distribution while a run with an absorbing boundary eventually ends?
+- Give an example where physiological state entropy and observation entropy differ.
+- Why does low average surprise not require low surprise at each moment?
+- Which quantities change during inference, learning and action?
 :::

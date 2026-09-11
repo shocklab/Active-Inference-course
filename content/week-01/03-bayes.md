@@ -1,6 +1,6 @@
 ---
 title: Bayes with states and observations
-deck: The posterior is the belief an ideal agent would hold. Writing it down is easy; the trouble is entirely in one denominator.
+deck: Deriving Bayes’ theorem, computing a posterior, and distinguishing information from surprise.
 week: 1
 time: 30 min
 scripts: [w01.js]
@@ -26,12 +26,9 @@ P(s \mid o) \;=\; \frac{P(o \mid s)\,P(s)}{P(o)}, \qquad
 P(o) \;=\; \sum_{s} P(o \mid s)\,P(s).
 $$ {#bayes}
 
-Everything in this course is a consequence of not being able to compute the
-denominator. This page is mostly about why, because if you leave
-this lesson thinking Bayes' theorem is hard, you have taken away the wrong
-lesson. Bayes' theorem is trivial. The sum underneath it is not.
+Bayes' theorem specifies the posterior for this fixed model and observation. Computing the required probabilities is a separate question. We will first carry out a small calculation, then examine how its cost changes with the model.
 
-## The four quantities, named
+## Four probability distributions
 
 ::: notation
 $P(s)$, the prior :: What the agent expects before it looks. In this framework a prior is read as the agent's own commitment rather than as a measured frequency in the world. That reading is a choice, and Week&nbsp;12 returns to what it costs.
@@ -42,29 +39,22 @@ $P(s \mid o)$, the posterior :: The updated belief. Prior reweighted by how well
 
 Two of these deserve a moment.
 
-The likelihood is a **column** of a matrix, not a row. If you tabulate
+To distinguish the two directions, tabulate
 $P(o \mid s)$ with observations down the side and states across the top, then
 each column is a probability distribution over observations and sums to one.
 When an observation arrives you pick out the corresponding row and read it
 across the states. That row is not a distribution and there is no reason at all
-for it to sum to one. Students trip over this constantly; the matrix does not
-care which way you read it, but the normalisation does.
+for it to sum to one. The axes determine which variable is fixed and which varies.
 
 ::: mn Rows and columns
 From Week&nbsp;9 this matrix is written $\mathbf{A}$, with
 $A_{ij} = P(o = i \mid s = j)$, and the problems at the end of this week already
-use that name. Columns sum to one. Remember it now and the
-discrete half of the course will cost you much less pain.
+use that name. Columns sum to one. The discrete chapters use the same convention.
 :::
 
-The evidence is the odd one out, because it is the only term that requires you
-to know about states you did not observe and are not asking about. To evaluate
-$P(o)$ you must visit every state the model admits, ask what each would have
-predicted, weight by how plausible each was, and add. Nothing about the question
-"was that a leopard?" suggests that answering it should require an inventory of
-everything else that exists. And yet.
+The evidence averages the likelihood of the observation across the model's possible states, weighted by the prior. Direct enumeration visits each state, although a factorisation can let an algorithm reuse partial calculations.
 
-## A worked example, with all the arithmetic
+## A discrete worked example
 
 You are on a mountain path at dusk. Three states of the world concern you:
 there is a **leopard** in the scrub, there is a **baboon** in the scrub, or
@@ -114,16 +104,13 @@ ${{post_tawny_leopard:.4f}} + {{post_tawny_baboon:.4f}} + {{post_tawny_nothing:.
 divided by the wrong thing, which in practice means you forgot a state.
 :::
 
-Read what happened. The leopard hypothesis started at {{prior_leopard_pct:.0f}}% and finished at {{post_tawny_leopard_pct:.0f}}%,
+The observation changes the balance between hypotheses. The leopard hypothesis started at {{prior_leopard_pct:.0f}}% and finished at {{post_tawny_leopard_pct:.0f}}%,
 a factor of nearly seven. It did not get there by being likely; it got there by
 being the only state that predicts tawny flashes well. Meanwhile "nothing"
 started as the overwhelming favourite at {{prior_nothing_pct:.0f}}% and was demoted to {{post_tawny_nothing_pct:.0f}}%, because
-whatever else is true, empty scrub does not flash tawny.
+a tawny flash is unlikely under the empty-scrub hypothesis.
 
-Two derived quantities, while the numbers are in front of us.
-
-The section promised all the arithmetic, so here are the other two observations
-worked the same way. Multiply the relevant row elementwise by the prior, add:
+The other observations are computed in the same way: multiply their likelihood rows by the prior, then add.
 
 Surprise is measured in nats throughout, the unit that comes with natural logarithms; divide by $\ln 2$ for bits.
 
@@ -147,13 +134,10 @@ D_{\mathrm{KL}}\big[P(s\mid o)\,\|\,P(s)\big]
 \;=\; \sum_{s} P(s \mid o)\,\ln \frac{P(s\mid o)}{P(s)} .
 $$ {#info-gain}
 
-Read the notation carefully, because it runs backwards from the name. In
-$D_{\mathrm{KL}}[Q\,\|\,P]$ the distribution written *first* is the one the
-expectation is taken under, and the convention is to say this out loud as "the
-divergence from $P$ to $Q$". So the posterior appears first above even though we
-describe it as measuring how far the prior moved. It is not symmetric,
-$D_{\mathrm{KL}}[Q\,\|\,P] \neq D_{\mathrm{KL}}[P\,\|\,Q]$, so the order is
-never decorative; Week&nbsp;4 turns on getting it right.
+In $D_{\mathrm{KL}}[Q\|P]$, the first argument is the distribution used for
+the expectation. Descriptions such as "from the prior to the posterior" vary
+between sources, so use the displayed argument order to determine the quantity.
+In general $D_{\mathrm{KL}}[Q\|P]\ne D_{\mathrm{KL}}[P\|Q]$.
 
 Worked out term by term for the tawny flash, using the posterior
 [eq:worked-posterior] and the prior:
@@ -177,7 +161,7 @@ which is intuitive and, as the exercises will show, not a theorem.
 ::: widget bayes-discrete | The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.
 :::
 
-## What the ambiguity slider shows
+## Varying the observation channel
 
 The figure's third slider is a dimensionless parameter $\alpha \in [0,1]$ that
 blends the likelihood towards a uniform one. Writing $U$ for the matrix every one
@@ -194,21 +178,20 @@ $0.7 \times (0.70, 0.25, 0.05) + 0.3 \times (\tfrac13,\tfrac13,\tfrac13)$. Each
 column still sums to one, because both $\mathbf{A}$'s columns and $U$'s do, and a
 convex combination of two distributions is a distribution.
 
-Call $\alpha$ the **ambiguity** of the channel: it is the single number this
-figure uses to dial how informative the senses are, from perfectly to not at all.
+The widget calls $\alpha$ a **channel-noise mixture weight**. At zero it retains the original noisy channel; at one every column is uniform. It is not itself the expected conditional entropy called ambiguity in [week:10].
 
 Push $\alpha$ towards 1 in that figure. The likelihood bars flatten until every
 state predicts every observation equally well. Watch the posterior: it slides
 back onto the prior and stays there. The information-gain readout goes to zero.
 
-Name it, because it returns as a term in an equation in
-Week&nbsp;10. When $P(o \mid s)$ is close to uniform in $o$ for every $s$, the
-sensory channel is **ambiguous**: observations do not discriminate between
-states, so observing costs you effort and buys you nothing. When $P(o \mid s)$ is
-close to a permutation matrix, an observation pins the state down exactly.
-
-An agent that can choose where to look has an interest in looking where the
-likelihood is sharp. Hold that thought for nine weeks.
+A uniform likelihood column has high conditional entropy: knowing the state
+still leaves uncertainty about the observation. Identical columns also make the
+observation uninformative about the state. These are distinct properties.
+For example, a deterministic sensor that gives the same report for every state
+has zero conditional entropy and conveys no information about the state.
+A permutation matrix, by contrast, identifies each state with a distinct report.
+We will separate conditional entropy from information gain when deriving
+expected free energy in [week:10].
 
 ## Where the difficulty is
 
@@ -224,39 +207,20 @@ $n$ factors with $k$ values each, the sum in [eq:bayes] has $k^n$ terms.
 ::: widget evidence-blowup | The number of terms in the evidence sum, $k^n$, against the number of state factors $n$. The three fixed curves are $k = 2, 4$ and $8$ values per factor; the sliders set your own $n$ and $k$. The vertical axis is logarithmic, so a straight line is exponential growth, and its slope is $\log_{10} k$.
 :::
 
-Nothing about this is fixable by better hardware, and here is why rather than on faith. Hardware buys you a constant factor: twice the
-speed, twice the sums per second. The cost here is $k^n$, so a doubling of speed
-buys exactly one more state factor before you are back where you started. The
-gap between what improves multiplicatively and what grows exponentially does not
-close.
+Under direct enumeration, each additional state factor multiplies the number
+of terms by $k$. A fixed speed increase permits only a fixed increase in the
+number of factors at a given time budget. This establishes a limitation of
+brute force, not a lower bound on all inference algorithms.
 
-::: warning Where this argument does not apply
-A mathematician will already have objected, and correctly. Exact inference is
-perfectly tractable in several important cases: conjugate models, where the
-posterior stays in a family closed under updating; linear Gaussian systems, where
-the Kalman filter gives exact answers in closed form; and graphical models whose
-dependency structure is a tree or close to one, where belief propagation is
-exact and cheap. The blow-up above is the *generic* case, densely coupled and
-without exploitable structure.
+[lesson:1.5] computes an observed chain by variable elimination, reusing sums
+that enumeration repeats. Exact inference is practical for many structured
+models, including linear Gaussian models and finite trees with small factors.
+For other models an approximation can be preferable.
 
-So the claim has to be narrower than "exact inference is impossible". It is that
-the structure which rescues those special cases cannot be assumed for an agent
-modelling an open-ended world, and that a framework claiming to describe such
-agents cannot rest on it. Week&nbsp;2 uses conjugacy where it is available and
-says exactly where it runs out.
-
-Narrower still than that, in fact. Counting the terms is the weakest of the
-arguments available here and, taken alone, it does not survive contact with a
-model that factorises: [lesson:1.5] exhibits a sum of ${{den_terms:sci0}}$ terms
-computed exactly in {{den_chain_ops}} operations. That lesson separates the four
-distinct reasons the denominator is out of reach and says which methods escape
-which. Read it before deciding how much the count above proves. Adding one more thing to keep
-track of multiplies the work by $k$, and brains manage this in a few tens of
-milliseconds using about twenty watts.
-
-So the exact posterior is not available. This is not a temporary engineering
-inconvenience; it is a structural feature of being a finite thing embedded in a
-large world. Everything from Week&nbsp;4 onwards is a response to it: rather than computing $P(s \mid o)$, we will posit an approximation $Q(s)$ and work out how to make it as close to the posterior as possible without ever evaluating the posterior. $Q$ is a probability distribution over the same states as $P(s\mid o)$, so its values are non-negative and sum to one; what makes it useful is that we get to *choose* its shape, picking one we can compute with.
+Write $Q(s)$ for an **approximate posterior**, a probability distribution on the
+same states as $P(s\mid o)$. Choosing its representation and objective is part
+of designing an algorithm. [lesson:1.4] shows what a factorised representation
+loses; [week:4] develops the variational objective.
 
 ::: exercise Bayes with a hostile prior
 Using the same likelihood matrix, suppose you are a nervous hiker with prior
@@ -335,6 +299,6 @@ distinction becomes the two terms of expected free energy in Week&nbsp;10.
 
 ::: checkpoint
 - Why does a row of the likelihood matrix not sum to one, while a column does?
-- Which single term in Bayes' theorem is responsible for the intractability, and why does the intractability grow multiplicatively rather than additively?
+- What does the denominator sum over? Why does a large number of joint states make enumeration costly without proving that every exact method is costly?
 - If the likelihood is uniform in $o$ for every $s$, what is the posterior, and what is the information gain?
 :::

@@ -7,7 +7,7 @@
    * 1. homeostasis-drift
    *    A body in a two-dimensional physiological space. Noise pushes it out
    *    of the viable set. Action pulls it back. The readout that matters is
-   *    the entropy of the visited states: staying alive IS staying low.
+   *    the entropy of the empirical visit histogram, not a survival objective.
    * ═════════════════════════════════════════════════════════════════════ */
   A.register('homeostasis-drift', function (mount) {
     var NB = 26;                              /* histogram bins per axis */
@@ -216,16 +216,10 @@
         A.button('Clear', function () { ghosts = []; reset(false); }, true)
       ]),
       out,
-      A.note('Run once with <b>&kappa; = 0</b> until the boundary is crossed. Then press '
-        + '<b>New run</b>, raise <b>&kappa;</b>, and go again: the previous curve stays on the '
-        + 'right panel as a dashed line, so the comparison is direct. Same noise, same physics. '
-        + 'The unregulated curve climbs towards uniform occupancy and stops only because the '
-        + 'organism does; the regulated one flattens out well below it and stays there. '
-        + 'Then try three more settings. At <b>&kappa; = 1</b> the error is erased every step '
-        + 'and the cloud is as tight as it can get. Past <b>&kappa; = 1</b> the trajectory starts '
-        + 'zigzagging across the centre instead of easing towards it, and at <b>&kappa; = 1.5</b> '
-        + 'it is exactly as spread out as it was at 0.5. Past <b>&kappa; = 2</b> the correction '
-        + 'overshoots so badly that it kills the organism on its own, with no help from the noise.')
+      A.note('Compare independent runs at different gains. The dashed trace retains an earlier histogram. '
+        + 'Histogram entropy depends on bins and sample history; it need not increase monotonically. '
+        + 'The stationary spread belongs to the recursion without absorption and does not guarantee survival. '
+        + 'Try gains below and above one to compare the trajectories.')
     ]));
     reset(false);              /* state must exist before anything can draw */
     plot.attach(body);
@@ -259,7 +253,7 @@
   A.register('bayes-discrete', function (mount) {
     var pLeo = A.slider({ label: 'Prior on leopard', min: 0.01, max: 0.60, step: 0.01, value: 0.08 });
     var pBab = A.slider({ label: 'Prior on baboon', min: 0.01, max: 0.60, step: 0.01, value: 0.22 });
-    var amb = A.slider({ label: 'Ambiguity &alpha;', min: 0, max: 0.95, step: 0.05, value: 0 });
+    var amb = A.slider({ label: 'Channel-noise mixture &alpha;', min: 0, max: 1, step: 0.05, value: 0 });
     var obsIdx = 0;
 
     var tabs = el('div', { class: 'wtabs' });
@@ -317,7 +311,7 @@
       tabs, body,
       A.row([pLeo.el, pBab.el, amb.el]),
       out,
-      A.note('The likelihood bars are one <em>column</em> of the matrix: what each state predicts '
+      A.note('The likelihood bars are one row of the matrix: what each state predicts '
         + 'about the observation you actually got. The posterior is prior times likelihood, divided by '
         + 'the number in the readout. Push <b>&alpha;</b> up and the three likelihood bars level out: '
         + 'every state explains the data equally well, so the posterior collapses back onto the prior '

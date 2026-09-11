@@ -469,6 +469,14 @@ def render(raw, *, number_sections=True, numbers=None, prefix=""):
     html = _to_html(body, doc)
     html = _restore_raw(html, doc)
     html = _restore_math(html, doc)
+    # Directives render recursively, so their counters can precede earlier prose.
+    # Assign final equation numbers in rendered reading order before resolving refs.
+    equation_ids = re.findall(r'<div class="eqn" id="eq-([^"]+)">', html)
+    for i, label in enumerate(equation_ids, 1):
+        number = f"{doc.prefix}.{i}" if doc.prefix else str(i)
+        doc.labels[label] = number
+        pattern = r'(<a href="#eq-' + re.escape(label) + r'" title="Link to equation )[^"]+(">)\([^)]+\)(</a>)'
+        html = re.sub(pattern, lambda m, n=number: m[1]+n+m[2]+"("+n+")"+m[3], html)
     html = _resolve_refs(html, doc)
     html = _number_headings(html, doc, number_sections)
     html = _wrap_tables(html)

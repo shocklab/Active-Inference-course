@@ -3,7 +3,7 @@
 
     python3 build/check_prose.py
 
-Wraps the calibrated census at ~/.claude/skills/writing-review/census.py rather
+Wraps the calibrated census at ~/.agents/skills/writing-review/census.py rather
 than reinventing it: that script already measures the tell families per zone,
 per 1,000 words, on the BUILT pages, and knows that per-paragraph counting
 reports a false clean. Adds the rules specific to this course on top.
@@ -18,7 +18,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCS = os.path.join(ROOT, "docs")
-CENSUS = os.path.expanduser("~/.claude/skills/writing-review/census.py")
+CENSUS = os.path.expanduser("~/.agents/skills/writing-review/census.py")
 
 # From CLAUDE.md. The plainer word wins; a flagged word is fine when it is
 # genuinely the right one, so these are candidates, not automatic failures.

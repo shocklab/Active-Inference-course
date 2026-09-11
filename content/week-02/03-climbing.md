@@ -1,16 +1,14 @@
 ---
-title: Climbing the log joint
-deck: Give up on the distribution and chase its peak instead. The intractable term drops out, and what is left is a difference between two locally available quantities.
+title: MAP estimation by gradient ascent
+deck: Deriving an update for a posterior mode, and checking its local stability.
 week: 2
 time: 45 min
 scripts: [w02.js]
 ---
 
-Last lesson left two obstacles. The normaliser $P(u)$ is an integral over the
-whole state space, and the shape of the posterior belongs to no convenient
-family. This lesson removes both, at a price that will be named exactly.
+The preceding lesson computed a reference posterior numerically. We now derive an update for its mode, then compare what this point estimate retains and what it omits.
 
-## Ask only for the peak
+## The posterior mode
 
 The animal does not obviously need the whole posterior. If it must act, one
 number might do: the single distance the evidence most supports.
@@ -44,9 +42,8 @@ The intractable term has vanished, and not by approximating it. Asking *where*
 the posterior peaks rather than *what value* it takes there is a question the
 normaliser has no bearing on, so it cancels exactly.
 
-This is the single most useful structural fact in the course, and every method
-from here to Week&nbsp;11 is a variation on it: arrange the question so that the
-quantity you cannot compute does not appear in the answer.
+The same cancellation is useful in other algorithms, including MCMC acceptance ratios. Whether finding a mode is sufficient depends on the task.
+
 :::
 
 The product $P(u \mid d)P(d)$ is the joint density $P(u, d)$, by the product
@@ -56,41 +53,44 @@ comparing.
 
 ## Take the logarithm
 
-Two reasons, one practical and one that matters later.
-
-The practical one: both factors are exponentials, and a logarithm turns the
-product into a sum and strips the exponentials off. The one that matters later:
-the log of a probability is the negative surprise from Week&nbsp;1, so working in
-logs keeps the connection to that quantity visible instead of buried.
+Taking logarithms turns a product into a sum and exposes the quadratic
+penalties in the Gaussian factors. It also avoids multiplying very small
+densities. The log joint still depends on the density's coordinate convention,
+as the change-of-variables exercise will show.
 
 The logarithm is increasing, so it does not move the maximum either. Define
 
 ::: definition The log joint
 $$
-\mathcal{F}(d, u) \;=\; \ln P(d) \;+\; \ln P(u \mid d).
+\ell(d, u) \;=\; \ln P(d) \;+\; \ln P(u \mid d).
 $$ {#logjoint}
-Maximising $\mathcal{F}$ over $d$ gives the MAP estimate.
+Maximising $\ell$ over $d$ gives the MAP estimate.
 :::
 
-::: warning This is not yet free energy
-$\mathcal{F}$ is written with a script letter because it is going to become the
-central object of the course, but it is not that object yet. Variational free
-energy, defined in Week&nbsp;4, is a functional of a whole distribution
-$Q(d)$. What is written here is the log joint evaluated at a single point.
+::: warning The log joint and variational free energy
+The log joint $\ell(d,u)$ is a function of a candidate state and a fixed
+observation. Variational free energy $\mathcal F[Q,u]$ is a functional of a
+probability distribution. We use different symbols because their arguments and
+optimisation directions differ.
 
-The relationship, stated now and derived in Week&nbsp;4: the negative variational
-free energy reduces to [eq:logjoint] exactly when $Q$ is a point mass at $d$.
-Everything in this week is therefore the special case in which the agent's
-beliefs carry no uncertainty at all. Week&nbsp;3 puts the uncertainty back.
+For a continuous posterior, substituting a point mass for $Q$ does not give a
+finite free energy equal to $-\ell$: the point mass is singular relative to the
+posterior and its KL divergence is infinite. For suitable distributions with a
+small fixed width, $\mathbb E_Q[\ell]$ can approximate the log joint at their
+centre. Comparing centres then approximates MAP when the entropy term is fixed.
+The width cannot be set to zero as an ordinary substitution. [week:4] develops
+the distributional approximation.
 :::
 
-## Write it out
 
-Substitute the two Gaussians. Taking the prior first:
+
+## Expanding the log joint
+
+Substitute the Gaussian likelihood and the truncated Gaussian prior. On $d>0$, taking the prior first:
 
 $$
-\ln P(d) \;=\; \ln\!\left[\frac{1}{\sqrt{2\pi\Sigma_p}}\exp\!\left(-\frac{(d - d_p)^2}{2\Sigma_p}\right)\right]
-\;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \tfrac{1}{2}\ln(2\pi\Sigma_p),
+\ln P(d) \;=\; \ln\!\left[\frac{1}{Z_p\sqrt{2\pi\Sigma_p}}\exp\!\left(-\frac{(d - d_p)^2}{2\Sigma_p}\right)\right]
+\;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \tfrac{1}{2}\ln(2\pi\Sigma_p) - \ln Z_p,
 $$
 
 using $\ln(ab) = \ln a + \ln b$ and $\ln e^{x} = x$. The likelihood goes the same
@@ -105,25 +105,26 @@ and no $d$. Since we are only ever going to differentiate with respect to $d$,
 they will die at the first derivative, and we may drop them now:
 
 $$
-\mathcal{F} \;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \frac{(u - g(d))^2}{2\Sigma_u} \;+\; \text{const}.
+\ell \;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \frac{(u - g(d))^2}{2\Sigma_u} \;+\; \text{const}.
 $$ {#F-explicit}
 
-Read what this says before differentiating it. $\mathcal{F}$ is large when both
+Read what this says before differentiating it. $\ell$ is large when both
 squared terms are small: when $d$ is near what the prior expected, *and* when the
 intensity that $d$ predicts is near the intensity actually heard. It is a
 scoring rule with two ways to lose marks, and the variances set the exchange
 rate between them.
 
-Cash that out with this week's numbers. Dividing by $\Sigma_p = {{var_prior}}$ and
-$\Sigma_u = {{var_obs}}$ means a squared error in intensity is charged
-{{var_ratio:.0f}} times as heavily as a squared error in distance is. So the
-animal will accept being a fair way from what it expected in order to avoid
-mispredicting the loudness by much, and the ratio {{var_ratio:.0f}} is the entire
-content of "how much". Neither variance matters on its own: multiply both by any
-constant and every term in $\mathcal{F}$ scales together, leaving the maximum
-where it was.
+The two residuals have different units: distance and intensity. Dividing each
+square by its own variance makes each penalty dimensionless. Their numerical
+coefficients alone do not say that one source is a fixed multiple "more reliable"
+than the other; the observation function also determines sensitivity to distance.
 
-## Differentiate
+Multiplying both variance parameters by the same positive constant leaves the
+MAP location unchanged, because it rescales the distance-dependent terms together.
+It does change the posterior's spread. The prior normalisation remains constant
+with respect to $d$ during this state-inference calculation.
+
+## Differentiating the log joint
 
 ::: derivation The gradient of the log joint
 Differentiate [eq:F-explicit] term by term.
@@ -138,8 +139,8 @@ $$
 = \frac{d_p - d}{\Sigma_p}.
 $$
 
-The sign flip in the last step is worth pausing on. It makes the term positive
-when $d$ is below the prior mean, so the gradient pushes $d$ up towards $d_p$,
+The sign makes the term positive
+when $d$ is below the prior location, so the gradient pushes $d$ up towards $d_p$,
 and negative when $d$ is above it. The term always points at the prior's
 expectation.
 
@@ -159,7 +160,7 @@ from differentiating $-g(d)$.
 Adding them, and noting the constant contributes nothing:
 
 $$
-\frac{\partial \mathcal{F}}{\partial d}
+\frac{\partial \ell}{\partial d}
 \;=\; \underbrace{\frac{d_p - d}{\Sigma_p}}_{\text{prior term}}
 \;+\; \underbrace{\frac{u - g(d)}{\Sigma_u}\,g'(d)}_{\text{sensory term}} .
 $$ {#gradient}
@@ -167,8 +168,7 @@ $$ {#gradient}
 
 ## Two prediction errors
 
-Both terms in [eq:gradient] have the same shape: something observed minus
-something predicted, divided by a variance. Name them.
+Both terms contain a residual divided by a variance. One compares the estimate with the prior location; the other compares the predicted and observed intensity.
 
 ::: definition Precision-weighted prediction error
 $$
@@ -202,7 +202,7 @@ and the subscripts become level indices.
 In this notation the gradient is short:
 
 $$
-\frac{\partial \mathcal{F}}{\partial d} \;=\; \varepsilon_p \;+\; g'(d)\,\varepsilon_u .
+\frac{\partial \ell}{\partial d} \;=\; \varepsilon_p \;+\; g'(d)\,\varepsilon_u .
 $$ {#gradient-eps}
 
 Now check [eq:gradient-eps] against the constraints from [lesson:2.1]. To
@@ -211,49 +211,41 @@ is a prediction sent to it. To compute $\varepsilon_p$ it needs $d_p$, held
 locally, and $d$, the current estimate. Nothing has to be fetched from across the
 network and nothing is summed over the state space. The rule is local.
 
-That is a real result, and it was not arranged. We differentiated the log joint
-because that is what maximising a function requires, and a locally computable
-quantity came out.
+For this scalar model, the gradient can therefore be evaluated from these signals. The result specifies the information an implementation must provide; it does not establish that a biological circuit provides it.
 
-## Climb
+## Updating the estimate
 
 Having the gradient, move in the direction it points:
 
 $$
-\dot{d} \;=\; \eta \, \frac{\partial \mathcal{F}}{\partial d}
-\;=\; \eta\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),
+\dot{d} \;=\; \nu \, \frac{\partial \ell}{\partial d}
+\;=\; \nu\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),
 $$ {#ascent}
 
-with $\eta > 0$ a rate constant setting how large a step to take, in units of
-distance per unit of gradient. In discrete steps,
-$d_{k+1} = d_k + \eta\,\partial\mathcal{F}/\partial d\big|_{d_k}$, which is the
-forward-Euler integration of the flow with the time step absorbed into $\eta$.
-That is a numerical choice and not a restatement: a different integrator would
-give a different stability condition from the one derived below.
+Here $\nu>0$ is a mobility, with units of squared distance per unit time.
+The gradient has units of inverse distance. A forward-Euler step of duration
+$\Delta t$ is
 
-::: mn Why not Newton's method
-The faster move, and a mathematician's first instinct, is
-$d_{k+1} = d_k - \mathcal{F}'(d_k)/\mathcal{F}''(d_k)$, which on a quadratic lands
-on the peak in one step and converges quadratically near any smooth maximum. We
-have $\mathcal{F}''$ available; the last section of this lesson computes it.
+$$
+d_{k+1}=d_k+\eta\ell'(d_k),\qquad \eta=\nu\Delta t.
+$$
 
-It is ruled out by [lesson:2.1]. With one hidden variable $\mathcal{F}''$ is a
-number, but with $n$ of them it is the $n \times n$ matrix of second derivatives,
-and its $(i,j)$ entry couples variable $i$ to variable $j$. Newton's step needs
-that matrix inverted, which mixes information from every variable into every
-component of the update. No unit computing from its own inputs can assemble it.
+The discrete step parameter $\eta$ has units of squared distance. The widget
+varies this parameter. Euler integration approximates the flow; it is not exact
+sampling of the continuous trajectory. Its stability condition therefore belongs
+to the numerical iteration.
 
-So gradient ascent is not the obvious choice, it is the choice the constraints
-leave. The price is paid in the next section: without curvature information, the
-step size has to be chosen in advance and can be wrong.
+::: mn Other optimisation methods
+Newton's method uses the gradient and curvature. Near a nondegenerate smooth
+maximum it can converge faster than fixed-step gradient ascent, but its direction
+and step may need safeguards away from the maximum. In many dimensions it requires
+solving a linear system involving the Hessian. This creates communication and
+computational requirements; locality alone does not prove it impossible.
+We use gradient ascent here to examine a simple update, not because every
+alternative has been excluded.
 :::
 
-::: mn Why $\dot{d}$ and not $\Delta d$
-The dot is Newton's notation for a time derivative. Writing the update as a flow
-rather than a jump anticipates Weeks&nbsp;5 to 8, where the estimate genuinely is
-a continuous physical quantity relaxing in real time, and the discrete version is
-what you get by sampling it.
-:::
+
 
 Where does it stop? At any point where the gradient vanishes, which by
 [eq:gradient-eps] means
@@ -265,9 +257,9 @@ $$ {#balance}
 The estimate settles where the two errors balance. Not where either is zero:
 where the pull towards the prior exactly offsets the pull towards the data.
 
-## The numbers
+## A worked trajectory
 
-Run it. Start the animal at its prior expectation, $d = {{d_prior}}$, and take
+Run it. Start the animal at its prior location, $d = {{d_prior}}$, and take
 $\eta = {{ascent_rate}}$.
 
 At the start the prior error is exactly zero, because the estimate *is* the prior
@@ -279,15 +271,13 @@ contributes ${{err_obs_weighted_at_start:.3f}}$. The gradient is negative, so th
 estimate moves down: the sound was louder than expected, therefore the source is
 closer than expected.
 
-::: fig The estimate climbing the log joint from the prior mean. Left, the trajectory against the exact posterior mode. Right, the two terms of [eq:gradient-eps] over the same steps, meeting where their sum is zero.
+::: fig The estimate climbing the log joint from the prior location. Left, the trajectory against the exact posterior mode. Right, the two terms of [eq:gradient-eps] over the same steps, meeting where their sum is zero.
 <div class="widget" data-widget="ascent-errors"></div>
 :::
 
 It settles at $d = {{ascent_final:.4f}}$, reaching within one per cent of the
 exact mode after {{ascent_steps_to_1pct}} steps. The mode computed by quadrature
-in [lesson:2.2] was ${{post_mode:.4f}}$. The two agree, which they must: gradient
-ascent on the log joint finds the peak of the posterior, and the peak is what
-quadrature located.
+in [lesson:2.2] was ${{post_mode:.4f}}$. They agree for this starting point and step size. Gradient ascent can also converge to another local maximum or fail to converge, as the exercises demonstrate.
 
 At that point the two terms are
 
@@ -297,8 +287,7 @@ $$
 g'(\hat d)\,\varepsilon_u = {{err_obs_weighted:+.6f}},
 $$
 
-summing to ${{err_sum:sci2}}$, which is zero to the tolerance the iteration was
-run to. Note what is *not* zero: the raw sensory error is
+summing to ${{err_sum:sci2}}$, when evaluated at the grid-based mode; the remaining mismatch reflects that numerical location. Note what is *not* zero: the raw sensory error is
 $\varepsilon_u = {{err_obs:.4f}}$, and the estimate still predicts an intensity
 of ${{g_at_mode:.4f}}$ against the ${{u_obs}}$ heard. The animal has not moved far
 enough to account for the whole of what it heard. It has stopped where accounting
@@ -315,61 +304,62 @@ between two terms, which is not the same phenomenon and should not borrow its
 name.
 :::
 
-## Choosing the rate
+## Choosing the step parameter
 
 $\eta$ was set to ${{ascent_rate}}$ without comment. It cannot be set freely, and
 the bound on it turns out to depend on the precisions, which is the first sign of
 something the rest of the course keeps running into.
 
-::: derivation The largest stable rate
+::: derivation Local stability of an Euler step
 Write $d^{*}$ for the peak, the same point the earlier sections called $\hat d$,
-and $e_k = d_k - d^{*}$ for the error at step $k$. The star is used here only to
-keep the algebra readable while a hat is already doing work on other symbols. Near
-the peak, expand the gradient to first order. Since $\mathcal{F}'(d^{*}) = 0$ by
+and $e_k = d_k - d^{*}$ for the error at step $k$. Both symbols refer to the same local maximum. Near
+the peak, expand the gradient to first order. Since $\ell'(d^{*}) = 0$ by
 definition of the peak,
 
 $$
-\mathcal{F}'(d_k) \;\approx\; \mathcal{F}'(d^{*}) + \mathcal{F}''(d^{*})\,e_k
-\;=\; \mathcal{F}''(d^{*})\,e_k .
+\ell'(d_k) \;\approx\; \ell'(d^{*}) + \ell''(d^{*})\,e_k
+\;=\; \ell''(d^{*})\,e_k .
 $$
 
-Substituting into the discrete update $d_{k+1} = d_k + \eta\,\mathcal{F}'(d_k)$
+Substituting into the discrete update $d_{k+1} = d_k + \eta\,\ell'(d_k)$
 and subtracting $d^{*}$ from both sides:
 
 $$
-e_{k+1} \;=\; e_k + \eta\,\mathcal{F}''(d^{*})\,e_k \;=\; \big(1 + \eta\,\mathcal{F}''(d^{*})\big)\,e_k .
+e_{k+1} \;\approx\; e_k + \eta\,\ell''(d^{*})\,e_k \;=\; \big(1 + \eta\,\ell''(d^{*})\big)\,e_k .
 $$
 
 The error is multiplied by a fixed factor each step, so it shrinks precisely when
 that factor is less than one in magnitude:
 
 $$
-\big|\,1 + \eta\,\mathcal{F}''(d^{*})\,\big| \;<\; 1 .
+\big|\,1 + \eta\,\ell''(d^{*})\,\big| \;<\; 1 .
 $$
 
-At a maximum $\mathcal{F}'' < 0$, so writing $|\mathcal{F}''|$ for its magnitude the
-condition is $-1 < 1 - \eta|\mathcal{F}''| < 1$, and the right inequality holds for
+At a maximum $\ell'' < 0$, so writing $|\ell''|$ for its magnitude the
+condition is $-1 < 1 - \eta|\ell''| < 1$, and the right inequality holds for
 any $\eta > 0$. The left one gives
 
 $$
-\eta \;<\; \frac{2}{|\mathcal{F}''(d^{*})|} .
+\eta \;<\; \frac{2}{|\ell''(d^{*})|} .
 $$ {#eta-bound}
 :::
 
-Read the three regimes off [eq:eta-bound]. Below the bound the error decays and
-the estimate approaches the peak from one side. Above it the factor
-$1 + \eta\mathcal{F}''$ is less than $-1$, so the error flips sign and grows: the
-estimate jumps over the peak, further each time, until the nonlinearity catches
-it. Exactly at $\eta = 2/|\mathcal{F}''|$ the factor is $-1$ and the error neither
-grows nor shrinks.
+This is a local condition near a nondegenerate maximum. If
+$0<\eta|\ell''|<1$, the linearised error decreases without changing sign.
+If $1<\eta|\ell''|<2$, it alternates in sign while decreasing. At the boundary
+$\eta|\ell''|=2$, the linearisation has multiplier $-1$, and higher-order terms
+are needed to determine the nonlinear behaviour. Above it the fixed point is
+locally unstable.
 
-For the run above, $\mathcal{F}''(\hat d) = {{curv_at_mode:.3f}}$, so any rate below
-${{eta_max:.3f}}$ converges and ${{ascent_rate}}$ is comfortably inside it.
+For the worked mode, the curvature is ${{curv_at_mode:.3f}}$ and the local upper
+bound is ${{eta_max:.3f}}$. The chosen rate ${{ascent_rate}}$ satisfies it.
+That does not guarantee convergence from every starting point or keep every step
+inside $d>0$. Both need checking separately.
 
 The numbers here come from differentiating [eq:gradient-eps] a second time, which
 is done in full as the first exercise of [lesson:2.4], once the notation for the
 precisions is in place. What matters now is not the formula but that
-$\mathcal{F}''$ depends on $\Sigma_u$, so the bound moves when the ear changes.
+$\ell''$ depends on $\Sigma_u$, so the bound moves when the ear changes.
 
 Now sharpen the ear. Take $\Sigma_u = {{var_obs_sharp}}$, ten times more precise.
 The peak moves to ${{mode_sharp:.4f}}$, nearer what the data alone would say, and
@@ -380,22 +370,15 @@ ${{ascent_rate}}$: the estimate stops converging and cycles between
 ${{osc_lo:.4f}}$ and ${{osc_hi:.4f}}$, straddling the peak at ${{mode_sharp:.4f}}$
 and never landing on it.
 
-::: keyidea
-A more precise sensor makes the log joint more sharply peaked, and a more sharply
-peaked function demands smaller steps. Trusting your senses more is not free:
-it makes the inference stiffer.
-
-This is not a numerical footnote. Weeks&nbsp;5 to 8 build a physical system whose
-relaxation rate is a property of the tissue, not a parameter to be retuned per
-observation, and Week&nbsp;8 has to say what such a system does when precision
-changes underneath it.
-:::
+A sharper posterior can require smaller Euler steps. This is a numerical
+stability issue. It is not, by itself, evidence that a continuous biological
+inference process becomes unstable when sensory precision increases.
 
 ::: exercise Reading the balance condition
 [eq:balance] says the estimate settles where $\varepsilon_p = -g'(d)\varepsilon_u$.
 Here $g' < 0$ everywhere, since intensity falls with distance. Use this to
 determine, without computing anything, whether the MAP estimate lies above or
-below the prior mean, given that the animal heard a louder sound than the prior
+below the prior location, given that the animal heard a louder sound than the prior
 predicted.
 ---solution---
 Louder than predicted means $u > g(d_p)$, so at $d = d_p$ we have
@@ -407,9 +390,9 @@ It keeps decreasing while the gradient stays negative. At the resting point
 $\varepsilon_u$ still positive the right-hand side is positive, so
 $\varepsilon_p > 0$, which means $d_p - \hat d > 0$, so $\hat d < d_p$.
 
-The estimate ends below the prior mean, as it must: a loud sound is evidence of a
+The estimate ends below the prior location, as it must: a loud sound is evidence of a
 near source. Confirming with the figures, $\hat d = {{post_mode:.4f}}$ against a
-prior mean of ${{d_prior}}$.
+prior location of ${{d_prior}}$.
 :::
 
 ::: checkpoint

@@ -35,6 +35,7 @@ import mdx  # noqa: E402
 # Numbers that are inputs or conventions rather than results. Each is a claim
 # that someone checked it by eye; keep the reasons.
 ALLOW = {
+    "0.20", "0.80",  # chosen chain transitions and lamp sensor probabilities
     "0.70", "0.15", "0.02", "0.25", "0.75", "0.08", "0.05", "0.10", "0.90",
     "0.22",                       # the likelihood matrix and prior we chose
     "0.40", "0.30",               # the nervous hiker's prior, also chosen

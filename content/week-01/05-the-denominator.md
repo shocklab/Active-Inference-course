@@ -1,391 +1,307 @@
 ---
-title: What makes the denominator hard
-deck: The claim that exact inference is intractable is four claims, not one. They fail in different places, are escaped by different methods, and only one of them is about the size of a sum.
+title: Computing the marginal likelihood
+deck: Enumeration, variable elimination, numerical integration and sampling, with an explicit calculation of what each method needs.
 week: 1
-time: 45 min
-scripts: [w01.js]
+time: 50 min
+scripts: [w01.js, review-widgets.js]
 ---
 
-[lesson:1.3] counted the terms in
+Bayes' theorem requires the marginal likelihood
 
 $$
-P(o) \;=\; \sum_s P(o \mid s)\,P(s)
+P(o)=\sum_s P(o\mid s)P(s).
 $$ {#denom}
 
-and found $k^n$ of them for a model with $n$ state factors of $k$ values each.
-[lesson:1.4] took that as settled and moved on. Almost every treatment of active
-inference does the same, in a sentence or two, and the sentence is usually some
-version of "the sum is intractable".
+For $n$ state variables with $k$ possible values each, direct enumeration visits
+$k^n$ joint assignments. This counts the work of one algorithm. It does not prove
+that every algorithm must do that work. To decide whether a marginal is expensive,
+we need the model's factorisation, the quantity being requested, and the accuracy
+required.
 
-That sentence is doing more work than it can carry. There are at least four
-distinct reasons the denominator is out of reach, they are not the same reason,
-they fail at different points, and the methods that escape one often do nothing
-about another. Worse, the reason most often given is the weakest of the four.
-This lesson separates them.
+## An observed chain
 
-## The count is not the reason
-
-Start by demolishing the standard explanation, because it is wrong as stated.
-
-Here is a model with $n = {{den_n}}$ binary-ish factors, $k = {{den_k}}$ values
-each. Its state space has
+Take three binary hidden states, $s_1,s_2,s_3\in\{0,1\}$, and observe a binary
+sensor attached to the last state. Let
 
 $$
-k^n \;=\; {{den_k}}^{{{den_n}}} \;\approx\; {{den_terms:sci3}}
+P(s_1)=(0.40,0.60),\qquad
+T=\begin{pmatrix}0.70&0.20\\0.30&0.80\end{pmatrix},
+\qquad
+P(o=1\mid s_3=0)=0.10,\quad P(o=1\mid s_3=1)=0.90.
 $$
 
-states, so [eq:denom] has that many terms. More states than there are atoms in a
-mountain. Surely nothing can add them.
-
-Now suppose the factors form a **chain**: factor 1 influences factor 2, which
-influences factor 3, and so on, with no other dependencies. The joint is
+The transition matrix uses the course's column convention:
+$T_{ij}=P(s_{t+1}=i\mid s_t=j)$. Each column sums to one. The joint with the
+observed event is
 
 $$
-P(s_1, \dots, s_n) \;=\; P(s_1)\prod_{i=1}^{n-1} P(s_{i+1} \mid s_i),
-$$
+P(s_1,s_2,s_3,o=1)=P(s_1)T_{s_2s_1}T_{s_3s_2}P(o=1\mid s_3).
+$$ {#chain-joint}
 
-and the observation attaches to the chain somewhere. The sum still has
-${{den_terms:sci3}}$ terms. Nothing about the count has changed.
+The last likelihood factor must remain in the calculation. Without it we would
+be summing the hidden-state prior, whose total is one, rather than computing the
+probability of the observation.
 
-::: derivation Summing a trillion trillion terms in linear time
-Write the sum out and push each factor as far right as it will go:
+::: derivation Enumeration
+List the assignments and multiply their factors:
 
-$$
-\sum_{s_1}\sum_{s_2}\cdots\sum_{s_n} P(s_1)\,P(s_2\mid s_1)\,P(s_3 \mid s_2)\cdots P(s_n \mid s_{n-1}).
-$$
+| $s_1s_2s_3$ | $P(s_1)$ | $T_{s_2s_1}$ | $T_{s_3s_2}$ | $P(o=1\mid s_3)$ | Product |
+|---|---|---|---|---|---|
+| 000 | 0.40 | 0.70 | 0.70 | 0.10 | {{chain_000:.4f}} |
+| 001 | 0.40 | 0.70 | 0.30 | 0.90 | {{chain_001:.4f}} |
+| 010 | 0.40 | 0.30 | 0.20 | 0.10 | {{chain_010:.4f}} |
+| 011 | 0.40 | 0.30 | 0.80 | 0.90 | {{chain_011:.4f}} |
+| 100 | 0.60 | 0.20 | 0.70 | 0.10 | {{chain_100:.4f}} |
+| 101 | 0.60 | 0.20 | 0.30 | 0.90 | {{chain_101:.4f}} |
+| 110 | 0.60 | 0.80 | 0.20 | 0.10 | {{chain_110:.4f}} |
+| 111 | 0.60 | 0.80 | 0.80 | 0.90 | {{chain_111:.4f}} |
 
-Only the last factor contains $s_n$, so the innermost sum can be done on its own:
-
-$$
-\sum_{s_n} P(s_n \mid s_{n-1}) \;=\; m_{n}(s_{n-1}),
-$$
-
-a function of $s_{n-1}$ alone, and computing it for every value of $s_{n-1}$
-costs $k^2$ multiply-adds. Substitute it back and the expression is a sum over
-$n-1$ variables of the same shape as before. Repeat.
-
-After $n-1$ eliminations, each costing $k^2$, one sum over $s_1$ remains. Total
-cost:
-
-$$
-(n-1)\,k^2 \;=\; {{den_chain_ops}} \text{ operations},
-$$ {#chain-cost}
-
-against ${{den_terms:sci3}}$ terms in the sum being computed. The answer is exact.
-Not approximated, not sampled: the same number brute force would have produced.
+Adding the product column gives $P(o=1)={{chain_evidence:.4f}}$.
 :::
 
-The distributive law did that, and nothing else. $ab + ac = a(b+c)$ turns two
-multiplications into one, and applied recursively it turns an exponential sum
-into a linear one.
-
-Run both and compare. At $n = {{den_measured_n}}$, where brute force is still
-just possible, the sum has ${{den_measured_terms:,}}$ terms. Brute force takes
-about {{den_brute_s_n12}} seconds; elimination takes a fraction of a
-millisecond, some five orders of magnitude less, and the two agree to the last
-bit. Those are wall-clock times on one machine and yours will differ; the
-notebook runs the comparison so you can watch it on your own. What does not vary
-is the operation count, and that is what the argument rests on.
-
-At $n = {{den_n}}$ brute force would take longer than the universe has existed.
-Elimination still takes {{den_chain_ops}} operations.
-
-::: keyidea
-**A sum having $k^n$ terms tells you almost nothing about whether it can be
-computed.** The count is a property of how the sum is *written*; the cost is a
-property of how it *factorises*.
-
-Every treatment that stops at "the sum has exponentially many terms" has stopped
-one step before the argument starts. It is the step this course exists to take.
-:::
-
-## Structure is the reason
-
-So what did the chain have that a general model does not?
-
-Elimination worked because at each step there was a variable appearing in only
-one remaining factor, so summing it out produced a function of one other
-variable. In a general model, summing out $s_i$ produces a function of *every
-variable that shared a factor with it*, and that function has to be tabulated
-over all of them. If $s_i$ was coupled to $w$ others, that table has $k^w$
-entries and the step costs $k^{w+1}$.
-
-::: definition Treewidth
-Eliminate the variables in some order. At each step, record how many variables
-the newly created function depends on. The largest such number, minimised over
-all elimination orders, is the **treewidth** $w$ of the model.
-
-Exact inference by elimination costs about $n\,k^{\,w+1}$. The treewidth, not the
-number of variables, is what sits in the exponent.
-:::
-
-::: mn Why "tree"
-A tree has treewidth 1: at every stage there is a leaf whose elimination touches
-only its parent. The definition measures how far a graph is from being a tree,
-and elimination is exactly as expensive as that distance.
-:::
-
-Three models, same $k = {{den_k}}$, and the difference is entirely in the wiring.
-
-<table>
-<thead><tr><th>Structure</th><th>Variables</th><th>Treewidth</th><th>Elimination cost</th><th>Brute force</th></tr></thead>
-<tbody>
-<tr><td>chain or any tree</td><td>{{den_n}}</td><td>1</td><td>{{den_chain_ops}}</td><td>${{den_terms:sci1}}$</td></tr>
-<tr><td>square grid</td><td>{{den_grid_n}}</td><td>{{den_grid_w}}</td><td>{{den_grid_ops:,}}</td><td>${{den_grid_brute:sci1}}$</td></tr>
-<tr><td>densely coupled</td><td>{{den_n}}</td><td>{{den_dense_w}}</td><td>no better than brute force</td><td>${{den_terms:sci1}}$</td></tr>
-</tbody>
-</table>
-
-The grid is the interesting row. Its treewidth grows like $\sqrt{n}$, so exact
-inference is still exponential, but in $\sqrt{n}$ rather than $n$, and that is
-the difference between hopeless and merely expensive.
-
-The last row is the honest one for an agent. Nothing entitles a creature
-modelling an open world to a sparse dependency graph, and [lesson:1.4] showed a
-mechanism that actively destroys sparsity: **explaining away** couples causes
-that were independent in the prior the moment a shared effect is observed. A
-model may be built out of independent parts and still have a densely coupled
-posterior. Conditioning is what fills the graph in.
-
-::: keyidea
-The obstacle is not $n$. It is $w$. Restate the claim of [lesson:1.3] accordingly:
-exact inference is cheap when the model is nearly a tree, expensive when it is
-not, and the world does not supply trees.
-:::
-
-## No algorithm does better
-
-Everything so far is about one algorithm. Elimination is defeated by high
-treewidth, but that leaves the obvious question: might some cleverer method
-succeed where elimination fails? Most treatments never ask. The answer is known,
-and it is stronger than "not so far".
-
-Computing [eq:denom] for a general model is at least as hard as counting the
-satisfying assignments of a Boolean formula, the canonical
-$\#\mathrm{P}$-complete problem
-([Valiant 1979](https://doi.org/10.1016/0304-3975(79)90044-6)). Deciding a much
-weaker question, whether a particular posterior probability exceeds a threshold,
-is already NP-hard
-([Cooper 1990](https://doi.org/10.1016/0004-3702(90)90060-D)). So a
-polynomial-time exact algorithm would give $\mathrm{P} = \mathrm{NP}$.
-
-The result that actually closes the door is about approximation. It is tempting
-to concede exactness and hope for a good estimate instead. But approximating the
-denominator to within any fixed relative factor is *also* NP-hard
-([Dagum & Luby 1993](https://doi.org/10.1016/0004-3702(93)90036-B)), and the
-hardness survives when you ask only for a crude answer with high probability
-([Roth 1996](https://doi.org/10.1016/0004-3702(94)00092-1)). There is no
-polynomial-time scheme, deterministic or randomised, exact or approximate, unless
-P and NP coincide.
-
-::: warning What these results do and do not say
-They are worst-case statements about the general problem. They do not say your
-particular model is hard, and real models are often far from worst case, which
-is why approximate inference works as well as it does in practice.
-
-What they do establish is that no *general-purpose* method can exist. Any
-working scheme must be exploiting something about the particular model it is
-applied to, and is therefore obliged to say what. This is the standard the rest
-of the course holds itself to: every time an approximation is made, the structure
-being assumed gets named.
-:::
-
-Note also what these results are not. They are not the hardware argument of
-[lesson:1.3]. That argument showed a faster machine cannot help, because a
-constant factor cannot beat an exponent. This one shows a cleverer *algorithm*
-cannot help either. Two different claims, and the second is the one that matters.
-
-## The continuous case fails differently
-
-Everything above concerns counting and structure. Now take the smallest possible
-continuous problem: **one** hidden variable, no dimension to speak of, no
-structure to exploit, nothing to count.
-
-Write $x$ for the hidden variable and $u$ for what is measured. Let the prior over
-$x$ be Gaussian with mean $x_p$ and variance $\Sigma_p$; let a **link function**
-$g$ say what value of $u$ each $x$ predicts; and let the measurement carry
-Gaussian noise of variance $\Sigma_u$ about that prediction. Then
+::: derivation Eliminate one variable at a time
+Write the same sum with brackets showing the dependencies:
 
 $$
-P(u) \;=\; \int_{-\infty}^{\infty} \mathcal{N}\big(u;\ g(x),\ \Sigma_u\big)\,\mathcal{N}\big(x;\ x_p,\ \Sigma_p\big)\,\mathrm{d}x .
+P(o=1)=\sum_{s_1}P(s_1)\sum_{s_2}T_{s_2s_1}
+\left[\sum_{s_3}T_{s_3s_2}P(o=1\mid s_3)\right].
+$$
+
+The bracket depends on $s_2$, but no longer on $s_3$. Call it $m_2(s_2)$.
+It is a **message**: a function summarising the eliminated part of the model,
+indexed by the variable at its boundary.
+
+$$
+\begin{aligned}
+m_2(0)&=0.70(0.10)+0.30(0.90)={{chain_m20:.4f}},\\
+m_2(1)&=0.20(0.10)+0.80(0.90)={{chain_m21:.4f}}.
+\end{aligned}
+$$
+
+These entries are $P(o=1\mid s_2)$ under the chain model. They need not sum to
+one over $s_2$: they concern the same event under different conditions.
+
+Next eliminate $s_2$:
+
+$$
+\begin{aligned}
+m_1(0)&=0.70m_2(0)+0.30m_2(1)={{chain_m10:.4f}},\\
+m_1(1)&=0.20m_2(0)+0.80m_2(1)={{chain_m11:.4f}}.
+\end{aligned}
+$$
+
+Finally average over the initial state:
+
+$$
+P(o=1)=0.40m_1(0)+0.60m_1(1)={{chain_evidence:.4f}}.
+$$ {#chain-evidence}
+
+The answer is the same because we only regrouped finite sums and products.
+Intermediate calculations shared by several assignments are now performed once.
+:::
+
+For a chain of $n$ states with $k$ values, each message has $k$ entries, each
+formed by summing $k$ terms. The transition messages therefore cost
+$O(nk^2)$ arithmetic operations, plus the cost of evaluating the factors. Direct
+enumeration costs exponentially many terms. Here **big-O notation** describes
+how cost grows as the problem size increases; it is not an exact instruction
+count or a measured running time.
+
+::: widget chain-messages | Change the chain length and sensor reliability. The table displays backward messages and the final evidence. For short chains the widget also enumerates every assignment and compares the answers. Message entries are probabilities of the selected observation conditional on a boundary state, not a probability distribution over that state.
+:::
+
+This calculation is an instance of the sum-product algorithm. Its messages are
+local: a node uses its adjacent factors and incoming messages. Local computation
+therefore does not forbid marginalisation or normalisation. It constrains the
+communication and storage needed to perform them.
+[The factor-graph tutorial by Kschischang, Frey and Loeliger (2001)](https://doi.org/10.1109/18.910572)
+develops this connection.
+
+## When intermediate tables grow
+
+The chain stays cheap because each elimination leaves a function of one other
+state. To see what can change, take pairwise factors connecting $s_1$ to $s_2$
+and $s_3$. Eliminating $s_1$ creates
+
+$$
+m(s_2,s_3)=\sum_{s_1}\psi_{12}(s_1,s_2)\psi_{13}(s_1,s_3).
+$$
+
+Here $\psi_{12}$ and $\psi_{13}$ denote non-negative factors. The new message may
+require a table over both remaining variables. Its $k^2$ entries each require a
+sum over $k$ values. If an elimination touches $w$ remaining variables, a generic
+tabular implementation takes $k^{w+1}$ work at that step.
+
+::: definition Treewidth for tabular elimination
+Join variables that appear in a common factor to form the model's undirected
+interaction graph. For an elimination order, record the largest number of
+remaining neighbours of any variable when it is eliminated, adding the edges
+created by elimination. Minimise that number over all orders. The result is the
+graph's **treewidth**, $w$.
+
+For bounded state cardinality $k$, a suitable tabular elimination order has cost
+of order $nk^{w+1}$. This is a structural bound for this representation and
+algorithm. Special algebraic structure can permit other methods.
+:::
+
+A chain or tree has treewidth one. A densely connected graph can require large
+intermediate factors. Posterior dependence alone is not enough to diagnose this
+cost: neighbouring states of an observed chain can be dependent while the
+messages above remain small. Likewise, explaining away does not establish that
+every resulting inference problem is hard.
+
+## Worst-case complexity
+
+Could an algorithm efficiently solve every finite Bayesian network, including
+those without a useful factorisation? Complexity theory provides conditional
+limits on that ambition. Posterior inference in general Bayesian networks is
+NP-hard: a polynomial-time exact solution to all such instances would imply
+$\mathrm P=\mathrm{NP}$.
+[Cooper (1990)](https://doi.org/10.1016/0004-3702(90)90060-D)
+establishes this worst-case result.
+
+A counting construction explains why evidence calculations can encode difficult
+problems. Give Boolean input variables independent uniform priors and let
+deterministic nodes compute a Boolean formula. The probability that its output is
+true is the number of satisfying assignments divided by the number of input
+assignments. Exact evidence therefore determines that count.
+
+These results do not classify an arbitrary applied model as difficult. Nor do
+they establish that no useful approximation exists. Approximation guarantees
+require their own conditions, including whether error is additive or relative,
+whether randomisation is allowed, and whether probabilities may be zero. We
+will not infer a universal impossibility claim from an unspecified guarantee.
+
+## Continuous marginals
+
+For a continuous hidden state $d$, sums become integrals:
+
+$$
+P(u)=\int_{\mathcal S}P(u\mid d)P(d)\,\mathrm d d,
 $$ {#cont-denom}
 
-That is the notation Week&nbsp;2 uses throughout, and it works this exact model
-through with a concrete $g$. Here only the shape of the integral matters.
+where $\mathcal S$ is its domain and $u$ is the observed value. The number of
+points in a continuum does not determine the computational cost of this integral.
+There are several separate questions: can it be expressed analytically, evaluated
+numerically to the required accuracy, or approximated within a useful family?
 
-It is tempting to say this is hard because an integral is a sum with uncountably
-many terms. That explanation is worthless: $\int_0^1 x\,\mathrm{d}x$ has
-uncountably many terms too and is not hard. Something else is going on, and it
-can be seen exactly.
+For an untruncated Gaussian prior and the linear measurement $u=d+$ Gaussian
+noise, multiplying the densities produces an exponential with a quadratic
+exponent. Completing the square evaluates its integral. [lesson:2.4] shows all
+the intermediate lines.
 
-::: derivation Why one link function integrates and another does not
-Multiply the two Gaussians and collect the exponent. Constants that do not
-contain $x$ come outside the integral and may be ignored.
-
-**Take $g(x) = x$ first.** The exponent is
-
-$$
--\frac{(x - x_p)^2}{2\Sigma_p} - \frac{(u - x)^2}{2\Sigma_u},
-$$
-
-and expanding it gives terms in $x^2$, $x^1$ and $x^0$ and nothing else. It is a
-quadratic. Complete the square, as in Week&nbsp;2, and the integral becomes
-$\int e^{-a(x-b)^2}\mathrm{d}x = \sqrt{\pi/a}$, the one nontrivial integral
-everyone knows.
-
-**Now take $g(x) = 1/x^2$.** The exponent is
+For the inverse-square observation function of [lesson:2.2], $g(d)=1/d^2$ with
+$d>0$, the exponent contains
 
 $$
--\frac{(x - x_p)^2}{2\Sigma_p} - \frac{\big(u - x^{-2}\big)^2}{2\Sigma_u},
+-\frac{(d-d_p)^2}{2\Sigma_p}
+-\frac{(u-d^{-2})^2}{2\Sigma_u}.
 $$
 
-and expanding the second bracket produces $u^2$, $-2u\,x^{-2}$ and $x^{-4}$. The
-powers of $x$ present are now
+The prior location $d_p$ and variance $\Sigma_p$ describe distance; $\Sigma_u$
+is the measurement-noise variance. Expanding the second square gives
+$u^2-2ud^{-2}+d^{-4}$. Completing a quadratic square in $d$ no longer solves
+this integral. That observation does not prove the absence of every special-function
+expression or change of variables. Many non-Gaussian models also admit analytic
+marginals.
+
+For this one-dimensional example, numerical integration is practical. A fine-grid
+answer is a numerical reference with discretisation and truncation error, not an
+exact symbolic result. We should refine the grid and extend the domain to check
+that the quantities being reported have stabilised.
+
+## Quadrature and sampling
+
+**Quadrature** replaces an integral by a weighted sum of function values. For a
+rectangular tensor grid with $m$ points on each of $n$ axes, there are $m^n$
+grid points. This exact count explains why directly extending a dense
+one-dimensional grid becomes expensive. It does not set the cost of every
+quadrature rule: adaptive methods, smoothness and low-dimensional structure can
+change the calculation substantially.
+
+**Importance sampling** estimates the integral by drawing from a proposal
+density $q(d)$. The proposal must be positive wherever the integrand has positive
+mass. Define the weight
 
 $$
-\{\,-4,\ -2,\ 0,\ 1,\ 2\,\}.
+W(d)=\frac{P(u\mid d)P(d)}{q(d)}.
 $$
 
-That is not a quadratic and no substitution makes it one, because a substitution
-that clears $x^{-4}$ reintroduces trouble at the other end. There is no square to
-complete, so the one closed form available does not apply.
+Then, for independent draws $d^{(j)}\sim q$,
+
+$$
+\widehat{P(u)}=\frac1N\sum_{j=1}^NW(d^{(j)}),
+\qquad
+\mathbb E_q[\widehat{P(u)}]=P(u).
+$$
+
+The expectation follows by cancelling $q$ inside the integral. If the weight
+variance is finite, independence also gives
+
+$$
+\operatorname{Var}_q[\widehat{P(u)}]=\frac{\operatorname{Var}_q[W]}{N}.
+$$
+
+Thus the standard deviation falls as $N^{-1/2}$, but its multiplier is the
+standard deviation of the weights. A poor proposal can make this enormous or
+infinite. Dimension enters through that mismatch, even though it does not appear
+in the exponent $-1/2$.
+
+To describe the mismatch precisely, let $p(d)=P(d\mid u)$ and write
+$R(d)=p(d)/q(d)$. Its mean under $q$ is one. Consequently
+
+$$
+\mathbb E_q[R^2]=1+\mathbb E_q[(R-1)^2]
+=1+\chi^2(p\|q).
+$$
+
+The last equality defines the **chi-squared divergence**. A common diagnostic is
+the empirical **effective sample size**,
+
+$$
+N_{\mathrm{eff}}=\frac{(\sum_{j=1}^N W_j)^2}{\sum_{j=1}^N W_j^2}.
+$$
+
+Equal weights give $N_{\mathrm{eff}}=N$. If just one weight is nonzero, it gives
+$N_{\mathrm{eff}}=1$. It measures concentration of weights; it is not a guarantee
+that a particular estimate is accurate. Divide numerator and denominator by
+$N^2$ to see its large-sample behaviour:
+
+$$
+\frac{N_{\mathrm{eff}}}{N}
+=\frac{(N^{-1}\sum_jW_j)^2}{N^{-1}\sum_jW_j^2}
+\longrightarrow\frac{(\mathbb E_q W)^2}{\mathbb E_q W^2}
+=\frac{1}{\mathbb E_q R^2}
+=\frac{1}{1+\chi^2(p\|q)}.
+$$
+
+The law of large numbers justifies this limit for independent draws when the
+second moment is finite. In the middle equality, $W=P(u)R$, so the unknown
+evidence cancels from the ratio.
+[Agapiou et al. (2017)](https://doi.org/10.1214/17-STS611)
+relate these quantities to the computational cost of importance sampling.
+
+## Comparing methods on the same posterior
+
+The two-cause posterior in [lesson:1.4] is small enough to enumerate. That makes
+it a useful reference for methods intended for larger problems.
+
+::: widget inference-comparison | The exact noisy-OR posterior is compared with an empirical distribution from repeated posterior draws and the reverse-KL mean-field approximation. Set the sample count and repeat the draws to see sampling variation. Sampling here uses the enumerated posterior so that the representation error can be isolated; it is not a scalable sampler and makes no claim about MCMC mixing speed. The mean-field values are obtained by coordinate updates.
 :::
 
-The point generalises, and it is worth stating plainly because the literature
-rarely does. **The catalogue of integrals we can do in closed form is tiny.** The
-Gaussian is essentially the only continuous marginal that comes out, and
-conjugacy is the study of exactly which prior-likelihood pairs land back inside
-that catalogue. A nonlinear $g$ takes you outside it immediately, and once
-outside there is nothing to fall back on. This has nothing to do with dimension,
-nothing to do with treewidth, and nothing to do with complexity classes. One
-variable is already enough.
+The empirical distribution fluctuates between runs and can represent dependence.
+A factorised approximation cannot represent that dependence, however long its
+optimisation runs. These are different sources of error. Comparing them requires
+both an accuracy measure and the computation used to obtain it.
 
-::: mn A caution about "no closed form"
-Failing to find an antiderivative is not proof that none exists, and definite
-integrals sometimes have closed forms when the indefinite ones do not:
-$\int e^{-x^2}\mathrm{d}x$ is not elementary, yet
-$\int_{-\infty}^{\infty} e^{-x^2}\mathrm{d}x = \sqrt{\pi}$ exactly. The claim
-here is the narrower and safer one: the technique that works is completing the
-square, it applies only to quadratic exponents, and [eq:cont-denom] with a
-nonlinear $g$ has a non-quadratic exponent. No general method replaces it.
-
-For what it is worth as evidence rather than proof, a computer algebra system
-returns [eq:cont-denom] unevaluated for [lesson:2.2]'s inverse-square link, both
-as a definite integral and as an antiderivative, while returning
-$\sqrt{2\pi/11}\,e^{-45/44}$ for the linear case in a second. Its value to
-twenty digits is ${{nl_marginal_20:.19f}}$, and an integer-relation search finds
-nothing among $\pi$, $\sqrt{\pi}$, $e$, $\sqrt{2}$ and $\ln 2$: the coefficients
-it returns grow from ${{pslq_coeff_20:,}}$ to ${{pslq_coeff_36:,}}$ as the
-precision fed to it rises from 20 digits to 36, which is what a search returns
-when there is no relation to find.
-:::
-
-## Where quadrature and sampling break
-
-Two obvious escapes from [eq:cont-denom], and each fails in a way that is worth
-knowing, because both reappear in later weeks.
-
-**Put down a grid.** With $m$ sample points and an integrand having $\rho$ bounded
-derivatives in $n$ dimensions, the best error any deterministic rule can achieve
-is of order $m^{-\rho/n}$. Holding the error at $\delta$ therefore needs about
-$\delta^{-n/\rho}$ points, with $\delta$ the error we are willing to tolerate and
-$\rho$ the count of derivatives. Neither letter is used elsewhere in the course.
-The obvious letter for an error tolerance is reserved from Week&nbsp;2 for a
-prediction error, which this is not. With $\rho = {{quad_r}}$ and a one per cent
-target:
-
-<table>
-<thead><tr><th>Dimensions $n$</th><th>Grid points for {{quad_eps:.0%}} error</th></tr></thead>
-<tbody>
-<tr><td>1</td><td>{{quad_pts_n1:.0f}}</td></tr>
-<tr><td>2</td><td>{{quad_pts_n2:.0f}}</td></tr>
-<tr><td>5</td><td>${{quad_pts_n5:sci0}}$</td></tr>
-<tr><td>10</td><td>${{quad_pts_n10:sci0}}$</td></tr>
-<tr><td>20</td><td>${{quad_pts_n20:sci0}}$</td></tr>
-</tbody>
-</table>
-
-The exponent $n$ is back, and it is in the same place it was for the discrete
-sum. Grids convert the counting problem into a different counting problem of the
-same size. Week&nbsp;2 uses one anyway, because with a single variable the first
-row of that table is the one that applies.
-
-**Sample instead.** Draw $x^{(1)}, \dots, x^{(N)}$ from some proposal $q$ and
-average the ratio $P(u\mid x)P(x)/q(x)$. The error of a Monte Carlo estimate
-falls like $N^{-1/2}$ *regardless of dimension*, which looks like an escape and
-is genuinely one, but only from the rate.
-
-The constant hidden in that rate is the estimator's variance, and it degrades as
-the proposal mismatches the target. A serviceable measure is the effective sample
-size, which behaves like $N\exp(-D_{\mathrm{KL}}[P\,\|\,q])$. Divergences add over
-independent coordinates, so a per-coordinate mismatch of
-{{is_kl_per_coord}} nats compounds:
-
-<table>
-<thead><tr><th>Coordinates $n$</th><th>Divergence, nats</th><th>Useful fraction of samples</th><th>Draws for {{is_target_ess:,}} effective</th></tr></thead>
-<tbody>
-<tr><td>1</td><td>{{is_kl_n1}}</td><td>{{is_ess_frac_n1:.3f}}</td><td>{{is_samples_n1:,.0f}}</td></tr>
-<tr><td>10</td><td>{{is_kl_n10}}</td><td>${{is_ess_frac_n10:sci2}}$</td><td>{{is_samples_n10:,.0f}}</td></tr>
-<tr><td>20</td><td>{{is_kl_n20}}</td><td>${{is_ess_frac_n20:sci2}}$</td><td>{{is_samples_n20:,.0f}}</td></tr>
-<tr><td>50</td><td>{{is_kl_n50}}</td><td>${{is_ess_frac_n50:sci2}}$</td><td>${{is_samples_n50:sci2}}$</td></tr>
-</tbody>
-</table>
-
-The exponential did not go away; it moved from the number of terms into the
-number of samples. This is the honest reading of "Monte Carlo beats the curse of
-dimensionality": the *rate* is dimension-free, and the *constant* is not.
-
-## Locality
-
-Three reasons so far, all of them about difficulty of computation. The fourth is
-different in kind, and for this course it is the one that bites first.
-
-Suppose the sum were short. Suppose the model had ten states and [eq:denom] had
-ten terms, addable by hand. An agent still could not evaluate it, because
-evaluating it requires something that can see all ten states at once, and a
-device built from units that read only their own inputs contains no such thing.
-
-Week&nbsp;2 states this as a constraint and builds on it. Note that it is
-logically independent of everything above: a short sum can be unavailable for
-want of anyone to do it, and a long sum can be available to a machine that
-happens to have global memory. The complexity results apply to computers; this
-one applies to bodies, and an account of biological inference needs both.
-
-## Four reasons, four escapes
-
-They come apart, and seeing which method dodges which is the fastest way to see
-that they are genuinely different claims.
-
-<table>
-<thead><tr><th>Reason</th><th>Bites when</th><th>Escaped by</th><th>Not helped by</th></tr></thead>
-<tbody>
-<tr><td>Too many terms to enumerate</td><td>always, on paper</td><td>the distributive law: elimination, belief propagation</td><td>faster hardware</td></tr>
-<tr><td>High treewidth</td><td>densely coupled models, and after explaining away</td><td>assuming structure that is not there, which is what mean-field does</td><td>any exact method</td></tr>
-<tr><td>No closed form</td><td>any nonlinear link, even in one variable</td><td>conjugacy where available; otherwise approximation</td><td>more dimensions being small</td></tr>
-<tr><td>No unit can see the state space</td><td>always, for an embodied agent</td><td>local message passing</td><td>every method above</td></tr>
-</tbody>
-</table>
-
-Read the second row again, because it is the one the rest of the course turns on.
-The escape from high treewidth is to *pretend the coupling is not there*: to
-replace the true posterior with a product of independent factors and optimise
-within that restricted family. That is the mean-field approximation of
-Week&nbsp;4, and the table says plainly what it is buying and with what. It buys
-tractability, and it pays in exactly the dependencies that explaining away
-created.
-
-Every subsequent week is an attempt on one or more of these four rows. It is
-worth knowing which.
+[week:4] derives one useful optimisation objective. Its availability motivates
+studying it; it does not make sampling, exact structured inference or other
+approximation families obsolete.
 
 ::: checkpoint
-- A colleague says the denominator is intractable because the sum has $2^{100}$
-  terms. Give the one-sentence counterexample.
-- What quantity actually sits in the exponent of the cost of exact inference,
-  and what does it measure?
-- The hardware argument of [lesson:1.3] and the complexity results of this
-  lesson rule out two different things. Which two?
-- Give a problem that is hard for reason three but trivial for reasons one and
-  two.
-- Which of the four reasons would remain if an agent had unlimited time and a
-  perfect computer, and why?
+- Why would removing the observation factor make the observed-chain example trivial?
+- Reproduce the backward messages and explain what each entry means.
+- Why does a dependent posterior not necessarily require a large elimination table?
+- Separate lack of a closed form from numerical intractability.
+- Derive the sampling variance and identify the condition under which it is finite.
 :::

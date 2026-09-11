@@ -1,21 +1,18 @@
 ---
 title: Problems and code
-deck: Seven problems with full solutions, two of which show the method of this week failing, and the notebook that rebuilds every figure.
+deck: Worked problems on inference, approximation error, parameterisation and decisions.
 week: 2
 time: 100 min
-scripts: [w02.js]
+scripts: [w02.js, review-widgets.js]
 number_sections: false
 ---
 
 Work the problems before opening the solutions. The ones marked with a dagger
 are used again later in the course.
 
-Two of these, the last two, are attacks on the method rather than exercises in
-it. They belong here rather than in Week&nbsp;12 because the objections are
-already visible from what has been derived, and saving them up would mean
-teaching the method for ten weeks before admitting what is wrong with it.
+The problems include cases where a point estimate or a numerical update fails. Work those cases alongside the successful ones so that the assumptions remain visible.
 
-## The notebook
+## The notebooks
 
 | Notebook | What it does | Run it |
 |---|---|---|
@@ -44,12 +41,12 @@ absorption length.
 does it become negligible? Compare with the inverse-square case.
 
 (c) Show that for this link the MAP estimate can be written in closed form when
-the prior is flat, and say why that stops being true as soon as the prior is not.
+the prior is flat, and explain how a Gaussian prior changes the stationary equation. Treat the flat-prior calculation as maximum likelihood unless you can normalise the posterior.
 ---solution---
 (a) $g'(d) = -\tfrac{1}{L}e^{-d/L}$, so substituting into the general rule,
 
 $$
-\dot d = \eta\Big(\Pi_p (d_p - d) - \frac{\Pi_u}{L}e^{-d/L}\big(u - e^{-d/L}\big)\Big).
+\dot d = \nu\Big(\Pi_p (d_p - d) - \frac{\Pi_u}{L}e^{-d/L}\big(u - e^{-d/L}\big)\Big).
 $$
 
 (b) The sensory gain is $|g'| = e^{-d/L}/L$, largest at $d = 0$ and decaying with
@@ -59,18 +56,15 @@ the estimate barely changes it.
 
 The contrast with the inverse square is in the rate, not the direction. There
 $|g'| = 2/d^3$ also decays, but as a power, so it retains some sensitivity at
-every finite distance. Exponential absorption has a horizon; geometric spreading
-does not.
+every finite distance. Both remain nonzero at every finite positive distance, although their rates of decay differ.
 
 (c) With a flat prior the first term is absent and the resting point needs
 $e^{-d/L}(u - e^{-d/L}) = 0$. The exponential is never zero, so $e^{-d/L} = u$,
-giving $\hat d = -L\ln u$ provided $0 < u < 1$. The estimate simply inverts the
-link, which is what a flat prior means: believe the measurement.
+giving $\hat d = -L\ln u$ provided $0 < u < 1$. This is a maximum-likelihood estimate. A uniform prior over the positive half-line is improper and, here, does not produce a normalisable posterior because the likelihood tends to a positive constant.
 
 With a Gaussian prior the condition becomes
 $\Pi_p(d_p - d) = \tfrac{\Pi_u}{L}e^{-d/L}(u - e^{-d/L})$, which sets a linear
-function of $d$ equal to a combination of $e^{-d/L}$ and $e^{-2d/L}$. That is a
-transcendental equation, and it has no solution in elementary functions.
+function of $d$ equal to a combination of $e^{-d/L}$ and $e^{-2d/L}$. A numerical method can solve the resulting transcendental equation; we do not claim that every non-flat prior prevents an analytic solution.
 :::
 
 ::: exercise Implement it
@@ -81,9 +75,7 @@ $\eta = {{ascent_rate}}$ for the values of this week. Confirm you reach
 ${{post_mode:.4f}}$.
 
 (b) Now find the same number a completely different way: evaluate the
-unnormalised posterior on a fine grid and take its largest entry. The two methods
-share no code. Agreement is therefore evidence; if you had reused the same
-function for both, it would not be.
+unnormalised posterior on a fine grid and take its largest entry. Use a separately written objective for the grid calculation. Agreement checks some implementation errors, but both methods can still share a modelling mistake.
 
 (c) Add a line that records $\varepsilon_p$ and $g'\varepsilon_u$ at every step
 and confirm their sum goes to zero while neither does.
@@ -118,7 +110,7 @@ method. The final line shows ${{err_prior_ascent:+.6f}}$ and
 ${{err_obs_weighted_ascent:+.6f}}$, summing to ${{err_sum_ascent:sci2}}$.
 
 That residual is smaller than the ${{err_sum:sci2}}$ quoted in [lesson:2.3], and
-the difference is worth understanding rather than ignoring. [lesson:2.3]
+the difference comes from the discretisation. [lesson:2.3]
 evaluates the two errors at the mode found by quadrature; this code evaluates
 them where its own ascent stopped. The two locations agree to five decimal
 places, but the quantity being reported is a cancellation between two numbers of
@@ -127,12 +119,12 @@ the answer. A cancellation magnifies whatever disagreement its inputs had, which
 is a general fact about floating point and the reason the sum is a poor way to
 measure how well either method has converged.
 
-On (b): the point is not that grids are trustworthy. It is that two methods
-sharing no code and resting on different ideas, one climbing a gradient and one
-enumerating, have no common way to be wrong. If they agree, the ways each could
-fail would both have to fail identically, which is unlikely enough to count as
-evidence.
+On (b), the two implementations exercise different parts of the calculation,
+so agreement is useful evidence. Both can still share a wrong likelihood, domain
+or parameter value. Check those against the model specification as well.
 :::
+
+
 
 ::: exercise Repeated listening &dagger;
 The animal listens $n$ times, getting independent readings $u_1, \dots, u_n$ from
@@ -176,7 +168,7 @@ washes out, which is the usual asymptotic story and here it is visible directly
 in the gradient.
 
 For the step size, the curvature acquires a term $-n\Pi_u g'^2$, growing linearly
-in $n$, so the bound $\eta < 2/|\mathcal{F}''|$ falls off like $1/n$. More data
+in $n$, so the bound $\eta < 2/|\ell''|$ falls off like $1/n$. More data
 makes the peak sharper and the ascent stiffer, which is the same trade the
 precision slider showed in [lesson:2.3].
 :::
@@ -214,12 +206,11 @@ precision throws information away, and feeding that summary forward as the next
 prior propagates the loss. Process both at once and the approximation is made
 once; process them in sequence and it is made twice.
 
-This is the difference between exact recursive filtering and the extended Kalman
-filter, and Week&nbsp;7 meets it again in continuous time.
+This illustrates how an approximate recursive representation can lose information. The extended Kalman filter makes additional linearisation assumptions; [week:7] develops a dynamical comparison.
 :::
 
 ::: exercise Two peaks
-Change the setting: prior mean $d_p = {{bi_dp}}$ with $\Sigma_p = {{bi_vp}}$, and
+Change the setting: prior location $d_p = {{bi_dp}}$ with $\Sigma_p = {{bi_vp}}$, and
 the animal hears $u = {{bi_u}}$ with $\Sigma_u = {{bi_vu}}$.
 
 (a) Plot the log joint on $0.05 \le d \le 10$. How many maxima are there?
@@ -266,7 +257,7 @@ though a unimodal $Q$ will turn out to have its own version of the problem.
 The animal could equally well estimate $\rho = \ln d$, the log-distance, which
 describes the same physical situation in different coordinates.
 
-(a) The prior over $d$ is $\mathcal{N}(d_p, \Sigma_p)$. Write the density over
+(a) Use the positive-distance prior from [lesson:2.2]. Write the density over
 $\rho$ that it induces, remembering the Jacobian.
 
 (b) Find the MAP estimate in $\rho$, then convert back with $e^{\hat\rho}$.
@@ -292,25 +283,25 @@ maximising in $d$ gives ${{map_in_d:.4f}}$, while maximising in $\rho$ and
 transforming back gives $e^{\hat\rho} = {{map_via_logd:.4f}}$, higher by
 {{map_reparam_pct:.1f}}%.
 
-(c) The posterior mean is unaffected. It is
-$\mathbb{E}[d] = \int d\,p(d)\,\mathrm{d}d$, and a change of variables in that
-integral carries the Jacobian in the measure as well as in the density, so the
-two cancel and the number is the same. Both routes give ${{post_mean:.4f}}$.
+(c) Specify the observable being averaged. The expected distance is
 
-The conclusion is uncomfortable. A density is not invariant under
-reparameterisation, because it is a quantity per unit of something and the unit
-changed. So the location of its peak is a property of the coordinates as much as
-of the belief, and "the most probable distance" is not well defined until you say
-which variable you measured probability per unit of. Nothing distinguishes
-distance from log-distance physically; the animal is not told which one it is
-estimating.
+$$
+\mathbb E[d]=\int_0^\infty d\,p_d(d)\,\mathrm d d
+=\int_{-\infty}^\infty e^\rho p_\rho(\rho)\,\mathrm d\rho.
+$$
 
-Two things follow. First, MAP is a convention rather than a canonical answer, and
-the convention is usually invisible because nobody writes down the alternative
-coordinates. Second, quantities defined by expectation, the mean, the variance,
-the free energy of Week&nbsp;4, do not have this problem, which is a reason to
-prefer methods built on them. Week&nbsp;12 returns to this; it is one of the more
-serious objections to the framework, and it does not go away by being ignored.
+These are equal by change of variables. But $\exp(\mathbb E[\rho])$ is a
+different summary and generally differs from $\mathbb E[d]$. The same warning
+applies to variances: the variance of distance is not the variance of log-distance.
+An expectation of a specified physical observable is independent of the coordinate
+used to calculate its integral.
+
+MAP depends on the reference coordinate of a density. This is a limitation of
+MAP as a summary, not an objection unique to active inference. KL divergence and
+variational free energy are invariant under an invertible latent-coordinate change
+when both distributions and their Jacobians are transformed consistently.
+Approximation families and optimisation trajectories need not be invariant.
+
 :::
 
 ::: exercise Where the ear stops being informative
@@ -328,7 +319,7 @@ measures $\ln u$ rather than $u$, with Gaussian noise of fixed variance in the
 new units. What happens to the sensitivity?
 ---solution---
 (a) The curvature exercise of [lesson:2.4] gave
-$\mathcal{F}'' = -\Pi_p - \Pi_u g'^2 + \Pi_u g''(u - g)$, and dropping the last
+$\ell'' = -\Pi_p - \Pi_u g'^2 + \Pi_u g''(u - g)$, and dropping the last
 term leaves $-(\Pi_p + \Pi_u g'^2)$. Since curvature at a peak is minus a
 precision, the sensory channel contributes $\Pi_u g'^2$.
 
@@ -350,21 +341,75 @@ $\Pi_u = {{prec_obs}}$:
 
 Across a factor of four in distance, the information the ear carries about that
 distance falls by a factor of $4^6 = {{sensprec_ratio_1_to_4:.0f}}$. Far away, the animal is nearly blind
-however good its ear, and no amount of sensory precision compensates, because
-$\Pi_u$ enters multiplied by a number heading to zero.
+however good its ear, for fixed sensory precision. At any finite positive distance, increasing $\Pi_u$ can compensate; maintaining fixed state precision here requires it to grow as $d^6$.
 
 (c) The measurement becomes $\ln u$, whose predicted value is
 $\ln g(d) = -2\ln d$, with derivative $-2/d$. The sensitivity is now $4\Pi/d^2$
 rather than $4\Pi_u/d^6$: it still decays, but as an inverse square rather than
 an inverse sixth power.
 
-Compressing the sensory scale has spread the discriminable range out. This is a
-real design principle rather than an artefact, and it is one reason sensory
-systems are so often logarithmic. Note what it is not: it is not extra
-information. The same intensities arrive. What changed is where the fixed noise
-budget sits relative to the signal, so a channel with constant noise in log units
-is a channel whose noise scales with the signal in linear units.
+Compressing the sensory scale has spread the discriminable range out. This is a different noise model: constant noise in log intensity corresponds to signal-dependent noise in linear intensity. Merely transforming an already-recorded observation invertibly would not create information; changing the physical measurement noise can change it.
 :::
+
+## From a posterior to a decision
+
+A belief about the world does not specify an action until the consequences of
+mistakes are supplied. Consider a binary hazard with posterior probability
+$P(\mathrm{hazard}\mid o)=0.30$. Two animals have that same posterior.
+Staying costs ten units if the hazard is present and zero otherwise. Leaving
+costs two units for animal A and five for animal B, whatever the hidden state.
+These are chosen losses in a common unit, not probabilities.
+
+::: derivation Expected loss
+The **expected loss** of an action is its loss in each state, weighted by the
+posterior probability of that state. Thus
+
+$$
+L(\mathrm{stay})=P(\mathrm{hazard}\mid o)\,10
++[1-P(\mathrm{hazard}\mid o)]\,0={{decision_stay:.1f}}.
+$$
+
+For leaving, the loss is state-independent, so its expectation is its fixed
+cost: two for A and five for B. Minimising expected loss makes A leave and B
+stay. Their beliefs agree; their action costs differ.
+
+More generally, let $p$ be the hazard probability, $c_H>0$ the loss of staying
+in the hazardous state and $c_L$ the fixed cost of leaving. Leaving is preferable
+when $c_L<pc_H$, or $p>c_L/c_H$. For these animals the thresholds are
+${{decision_threshold_a:.2f}}$ and ${{decision_threshold_b:.2f}}$.
+:::
+
+::: widget posterior-decisions | Both animals share the hazard probability. Move it and compare expected losses for staying and leaving. Equal expected losses are displayed as a tie. This is a Bayesian decision example, not yet an expected-free-energy policy rule.
+:::
+
+The same distinction applies to distance estimation. If a reported distance $b$
+is penalised by squared error, expand its expected loss:
+
+$$
+\mathbb E[(d-b)^2]=\operatorname{Var}(d)+(\mathbb E[d]-b)^2.
+$$
+
+To obtain this identity, write $d-b=(d-\mathbb E[d])+(\mathbb E[d]-b)$,
+expand the square and use $\mathbb E[d-\mathbb E[d]]=0$ to remove the cross term.
+The variance does not depend on $b$, so the posterior mean minimises squared
+error when the second moment is finite. That provides a reason to choose the
+mean which does not apply to every loss. Absolute-error loss instead admits a
+posterior median as a minimiser.
+
+::: exercise The cost of an underestimate
+Suppose underestimating distance is more costly than overestimating by the same
+amount. Why is reporting the mode not automatically justified?
+---solution---
+The mode identifies a high-density location. It does not average the consequences
+of the report across possible true distances. We must specify the asymmetric
+loss, average it under the posterior, and minimise that expected loss. Changing
+the cost of underestimation can change the optimal report while leaving the
+posterior unchanged.
+:::
+
+[week:10] introduces a particular objective for policies, involving preferences
+and expected information gain. Its relation to decision losses must be derived;
+it cannot be inferred merely from using Bayesian beliefs.
 
 ::: checkpoint
 - Two of these problems show the method failing. Name each failure in one

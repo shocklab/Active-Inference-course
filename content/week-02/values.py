@@ -6,7 +6,7 @@ hidden variable to the observation is nonlinear, which is the whole point.
 
 Run standalone to see the values:  python3 content/week-02/values.py
 """
-from math import log, pi, sqrt
+from math import log, pi, sqrt, erf
 
 import numpy as np
 
@@ -335,6 +335,19 @@ for _d in (1.0, 4.0):
     V[f"sensprec_at_{_tag}"] = g_prime(_d) ** 2 / VAR_OBS
 V["sensprec_ratio_1_to_4"] = V["sensprec_at_1"] / V["sensprec_at_4"]
 
+# Explicit positive-domain prior and numerical refinement check.
+V["prior_positive_mass"]=0.5*(1+erf(D_PRIOR/sqrt(2*VAR_PRIOR)))
+V["prior_peak_density"]/=V["prior_positive_mass"]
+_rg=np.linspace(0.025,12.0,1800000)
+_rp=np.exp(-(_rg-D_PRIOR)**2/(2*VAR_PRIOR)-(U_OBS-g(_rg))**2/(2*VAR_OBS))
+_rp/=np.trapezoid(_rp,_rg)
+_rm=float(np.trapezoid(_rg*_rp,_rg))
+_rs=float(np.sqrt(np.trapezoid((_rg-_rm)**2*_rp,_rg)))
+V["post_mean_refinement"]=abs(_rm-V["post_mean"])
+V["post_sd_refinement"]=abs(_rs-V["post_sd"])
+V["decision_stay"]=0.30*10
+V["decision_threshold_a"]=2/10
+V["decision_threshold_b"]=5/10
 VALUES = V
 
 if __name__ == "__main__":

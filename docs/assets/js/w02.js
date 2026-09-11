@@ -6,7 +6,7 @@
   /* The model of Week 2, in one place. Changing it here changes every widget
    * on the week, which is the point: the reader should be able to see that the
    * same three lines drive all of them. */
-  var DP = 2.0;                                    /* the prior mean, fixed */
+  var DP = 2.0;                                    /* the prior location, fixed */
   function g(d) { return 1 / (d * d); }
   function gp(d) { return -2 / (d * d * d); }
 
@@ -25,7 +25,7 @@
 
   /* ══════════════════════════════════════════════════════════════════════
    * 1. ascent-errors
-   *    Left: the estimate climbing the log joint from the prior mean.
+   *    Left: the estimate climbing the log joint from the prior location.
    *    Right: the two terms of the gradient, meeting where their sum is zero.
    *    The second panel is the one that matters. The trajectory shows THAT it
    *    converges; the error panel shows WHY it stops where it does.
@@ -37,7 +37,7 @@
     var sU = A.slider({ label: 'intensity heard, <i>u</i>', min: 0.05, max: 1.2, step: 0.01, value: 0.5 });
     var sVp = A.slider({ label: 'prior variance, &Sigma;<sub>p</sub>', min: 0.05, max: 3, step: 0.05, value: 1 });
     var sVu = A.slider({ label: 'sensory variance, &Sigma;<sub>u</sub>', min: 0.005, max: 1, step: 0.005, value: 0.1, decimals: 3 });
-    var sEta = A.slider({ label: 'rate, &eta;', min: 0.005, max: 0.3, step: 0.005, value: 0.05, decimals: 3 });
+    var sEta = A.slider({ label: 'step parameter, &eta;', min: 0.005, max: 0.3, step: 0.005, value: 0.05, decimals: 3 });
 
     function run() {
       var u = sU.get(), vp = sVp.get(), vu = sVu.get(), eta = sEta.get();
@@ -116,7 +116,7 @@
       };
       c.strokeStyle = C.rule2; c.lineWidth = 1;
       c.strokeRect(lx + 0.5, ty + 0.5, pw, ph);
-      p.text(lx, ty - 8, 'the log joint F(d)',
+      p.text(lx, ty - 8, 'log joint ℓ(d), up to a constant',
         { pixel: true, align: 'left', size: 10.5, colour: C.ink2, weight: '600' });
 
       c.strokeStyle = C.ink2; c.lineWidth = 2;
@@ -168,7 +168,7 @@
         k ? c.lineTo(X, Y) : c.moveTo(X, Y);
       });
       c.stroke();
-      p.text(Lp.X(0) + 3, Lp.Y(DP) - 9, 'starts at the prior mean',
+      p.text(Lp.X(0) + 3, Lp.Y(DP) - 9, 'starts at the prior location',
         { pixel: true, align: 'left', size: 9.5, colour: C.muted });
 
       /* ── right: the two gradient terms ────────────────────────────────── */
@@ -223,11 +223,11 @@
     mount.appendChild(A.panel([
       A.row([sU.el, sVp.el, sVu.el, sEta.el]),
       body, out,
-      A.note('Left is the hill being climbed: <i>F</i> as a function of <i>d</i>, with the walk '
-        + 'drawn on it and later steps fainter. Its bottom is cut off, because <i>F</i> runs to '
+      A.note('Left is the hill being climbed: <i>ℓ</i> as a function of <i>d</i>, with the walk '
+        + 'drawn on it and later steps fainter. Its bottom is cut off, because <i>ℓ</i> runs to '
         + 'minus infinity as <i>d</i> approaches zero and plotting that flattens everything else. '
         + 'The other two panels show the same walk against step number. '
-        + 'The prior mean is held at <i>d</i><sub>p</sub> = 2 throughout, and the estimate '
+        + 'The prior location is held at <i>d</i><sub>p</sub> = 2 throughout, and the estimate '
         + 'always starts there, so the prior error begins at exactly zero. Watch the right-hand '
         + 'panel: the two terms are not driven to zero, they are driven to cancel. Lower the '
         + 'sensory variance and the gold curve dominates, pulling the estimate towards what the '
@@ -252,12 +252,12 @@
   /* ══════════════════════════════════════════════════════════════════════
    * 2. precision-posterior
    *    The posterior itself, as the two precisions move. Two things to see:
-   *    the peak sliding between the prior mean and what the data alone say,
+   *    the peak sliding between the prior location and what the data alone say,
    *    and the mode parting company with the mean as the curve goes lopsided.
    *    The update of Lesson 4 finds the first of those and not the second.
    * ═════════════════════════════════════════════════════════════════════ */
   A.register('precision-posterior', function (mount) {
-    var N = 1600, DMAX = 6;
+    var N = 40000, DMAX = 16;
     var st;
 
     var sVp = A.slider({ label: 'prior variance, &Sigma;<sub>p</sub>', min: 0.05, max: 4, step: 0.05, value: 1 });
@@ -277,7 +277,7 @@
       var xs = [], pr = [], lk = [], po = [];
       var h = DMAX / N;
       for (var i = 1; i <= N; i++) {
-        var d = i * h;
+        var d = (i - 0.5) * h;
         var a = Math.exp(-(d - DP) * (d - DP) / (2 * vp));
         var b = Math.exp(-(U - link(d)) * (U - link(d)) / (2 * vu));
         xs.push(d); pr.push(a); lk.push(b); po.push(a * b);
@@ -292,6 +292,11 @@
         mean += xs[i] * (v / Z) * h;
         if (v > best) { best = v; mode = xs[i]; }
       });
+      var peak = Math.round(mode / h - 0.5);
+      if (peak > 0 && peak < N - 1 && po[peak-1] > 0 && po[peak+1] > 0) {
+        var left = Math.log(po[peak-1]), centre = Math.log(po[peak]), right = Math.log(po[peak+1]);
+        mode += 0.5 * h * (left-right) / (left-2*centre+right);
+      }
       var sd = 0;
       po.forEach(function (v, i) { sd += (xs[i] - mean) * (xs[i] - mean) * (v / Z) * h; });
       sd = Math.sqrt(sd);
@@ -329,6 +334,7 @@
         c.strokeStyle = col; c.lineWidth = wid; c.setLineDash(dash || []);
         c.beginPath();
         arr.forEach(function (v, i) {
+          if (st.xs[i] > 6) return;
           var x = X(st.xs[i]), y = oy + ph - (v / m) * ph * 0.94;
           i ? c.lineTo(x, y) : c.moveTo(x, y);
         });
@@ -366,14 +372,7 @@
     mount.appendChild(A.panel([
       A.row([sVp.el, sVu.el, sLin]),
       body, out,
-      A.note('Each curve is scaled to its own peak. Switch the link to <i>g</i>(<i>d</i>) = <i>d</i> '
-        + 'and the skew collapses by most of its value and the two markers nearly coincide: with a '
-        + 'linear link the posterior is exactly Gaussian, whatever the precisions. What is left is '
-        + 'not the link. The axis starts at zero because a negative distance is meaningless, and at '
-        + 'these settings the linear posterior sits close enough to zero that cutting it there '
-        + 'removes a slice of its left tail, which is what the residual skew is measuring. Widen '
-        + 'the prior or sharpen the ear and watch that residual change without the link changing '
-        + 'at all.')
+      A.note('Each curve is scaled to its own peak. This widget keeps a positive-distance domain for both observation functions. With g(d) = d, the posterior is a truncated Gaussian, so residual skew can remain. The analytic comparison in the lesson uses the whole real line and an untruncated Gaussian. Readouts use numerical integration on 0 < d < 16; the plotted axis shows the central region.')
     ]));
     build();
     plot.attach(body);

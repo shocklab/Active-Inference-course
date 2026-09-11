@@ -58,13 +58,13 @@ reading finds. Update this table as sources are read, and do not delete it.
 
 ### Week 1 · The hypothesis-testing agent — **built**
 1. A soft body in a hard world · persistence, viability sets, the entropy of sensory states, surprise, the two routes to reducing it. Widget: `homeostasis-drift`.
-2. Two models, not one · generative process vs generative model, the Markov blanket, why the intractability is the agent's problem. SVG diagram.
+2. Generative process and generative model · generative process vs generative model, the Markov blanket, why the intractability is the agent's problem. SVG diagram.
 3. Bayes with states and observations · the four terms, rows vs columns, a fully worked numerical example, ambiguity. Widgets: `bayes-discrete`.
 4. The inverse problem · many-to-one, the normaliser, ill-posedness, explaining away, the three solution families. Widgets: `forward-inverse`, `evidence-blowup`.
 5. What makes the denominator hard · added 2026-08-27, because "the sum is
    intractable" was doing more work than one sentence can carry. Four distinct
    reasons, separated: the term count (which proves almost nothing, since a chain
-   sums $4^{40}$ terms in 624 operations); treewidth, which is what actually sits
+   uses backward messages to compute the likelihood of an observed outcome); treewidth, which is what actually sits
    in the exponent, and which explaining away destroys; the complexity results,
    which rule out cleverer algorithms and not merely slower machines; and the
    analytic failure of the continuous case, visible with one variable and nothing
@@ -96,15 +96,15 @@ five lessons, two widgets, two notebooks.*
   against the prior, one against the data, the second passed back through $g'$.
   Predictive coding arrives here, in Week 2, out of nothing more than gradient
   ascent on a log joint. → forward to Week 5, which is this result generalised.
-- **Careful: $F$ here is not yet the free energy.** It is the log joint, and equals
-  the negative variational free energy only when the approximate posterior is a
-  point mass. Say so at the point of use; Week 4 says what the point mass costs.
+- **Distinguish objectives.** Write the log joint as $\ell$, not variational free
+  energy. A point mass in a continuous state space has infinite KL divergence
+  relative to a smooth posterior. A narrow fixed-entropy approximation can
+  motivate MAP, but is not a finite-free-energy point mass.
 - **Two things the drafting turned up that were not planned.** The step size is
   bounded by $2/|\mathcal{F}''|$, and a sharper sensor stiffens the curvature, so
   trusting your senses more makes the inference harder to run. And the MAP estimate
   is not invariant under reparameterisation: estimating $\ln d$ instead of $d$ moves
-  the answer by 21% on this week's numbers, while the posterior mean does not move
-  at all. Both are in the lessons rather than saved for Week 12.
+  the answer by 21% on this week's numbers, while the expectation of the same physical distance is invariant when transformed correctly. Both are in the lessons rather than saved for Week 12.
   → forward to Week 12, which collects the objections.
 - Widgets: `ascent-errors`, gradient ascent with the two error terms drawn
   separately so the reader watches them cancel rather than vanish; and

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Climbing the log joint · Active Inference</title><meta name="description" content="Give up on the distribution and chase its peak instead. The intractable term drops out, and what is left is a difference between two locally available quantities."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MAP estimation by gradient ascent · Active Inference</title><meta name="description" content="Deriving an update for a posterior mode, and checking its local stability."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
 :root{
   --paper:#fdfcf9; --card:#ffffff;
   --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
@@ -350,10 +350,8 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Two rules a brain has to obey</a><a class="" href="../week-02/exact.html">A problem small enough to solve exactly</a><a class="cur" href="../week-02/climbing.html">Climbing the log joint</a><a class="" href="../week-02/reading-the-update.html">Reading the update</a><a class="" href="../week-02/exercises.html">Problems and code</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Climbing the log joint</h1><p class="deck">Give up on the distribution and chase its peak instead. The intractable term drops out, and what is left is a difference between two locally available quantities.</p><div class="meta"><span>Week 2</span><span>&#167;3</span><span>45 min</span></div></header><article class="abody"><p>Last lesson left two obstacles. The normaliser $P(u)$ is an integral over the
-whole state space, and the shape of the posterior belongs to no convenient
-family. This lesson removes both, at a price that will be named exactly.</p>
-<h2 id="ask-only-for-the-peak"><span class="secno">1</span>Ask only for the peak</h2>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Local computation and learning</a><a class="" href="../week-02/exact.html">Inferring distance from a sound</a><a class="cur" href="../week-02/climbing.html">MAP estimation by gradient ascent</a><a class="" href="../week-02/reading-the-update.html">Precision and prediction errors</a><a class="" href="../week-02/exercises.html">Problems and code</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>MAP estimation by gradient ascent</h1><p class="deck">Deriving an update for a posterior mode, and checking its local stability.</p><div class="meta"><span>Week 2</span><span>&#167;3</span><span>45 min</span></div></header><article class="abody"><p>The preceding lesson computed a reference posterior numerically. We now derive an update for its mode, then compare what this point estimate retains and what it omits.</p>
+<h2 id="the-posterior-mode"><span class="secno">1</span>The posterior mode</h2>
 <p>The animal does not obviously need the whole posterior. If it must act, one
 number might do: the single distance the evidence most supports.</p>
 <div class="box definition"><div class="boxhd">Definition 2.3.1<span class="bt">Maximum a posteriori estimate</span></div><p>The <strong>MAP estimate</strong> is the value of the hidden variable at which the posterior
@@ -366,68 +364,68 @@ differ substantially.</p></div>
 <p>The denominator does not contain $d$. It is a single fixed number, whatever it
 happens to be, and dividing every value of a function by the same positive
 constant does not move where that function peaks. So it goes:</p>
-<div class="eqn" id="eq-argmax-joint"><div class="eqbody">$$\hat{d} \;=\; \operatorname*{arg\,max}_{d} \; P(u \mid d)\,P(d).$$</div><div class="eqno"><a href="#eq-argmax-joint" title="Link to equation 2.3.5">(2.3.5)</a></div></div>
+<div class="eqn" id="eq-argmax-joint"><div class="eqbody">$$\hat{d} \;=\; \operatorname*{arg\,max}_{d} \; P(u \mid d)\,P(d).$$</div><div class="eqno"><a href="#eq-argmax-joint" title="Link to equation 2.3.1">(2.3.1)</a></div></div>
 <div class="box keyidea"><div class="boxhd">The idea</div><p>The intractable term has vanished, and not by approximating it. Asking <em>where</em>
 the posterior peaks rather than <em>what value</em> it takes there is a question the
 normaliser has no bearing on, so it cancels exactly.</p>
-<p>This is the single most useful structural fact in the course, and every method
-from here to Week&nbsp;11 is a variation on it: arrange the question so that the
-quantity you cannot compute does not appear in the answer.</p></div>
+<p>The same cancellation is useful in other algorithms, including MCMC acceptance ratios. Whether finding a mode is sufficient depends on the task.</p></div>
 <p>The product $P(u \mid d)P(d)$ is the joint density $P(u, d)$, by the product
 rule. So the agent maximises the joint. Both factors are things it has: a prior
 it holds and a likelihood it can evaluate by predicting an intensity and
 comparing.</p>
 <h2 id="take-the-logarithm"><span class="secno">2</span>Take the logarithm</h2>
-<p>Two reasons, one practical and one that matters later.</p>
-<p>The practical one: both factors are exponentials, and a logarithm turns the
-product into a sum and strips the exponentials off. The one that matters later:
-the log of a probability is the negative surprise from Week&nbsp;1, so working in
-logs keeps the connection to that quantity visible instead of buried.</p>
+<p>Taking logarithms turns a product into a sum and exposes the quadratic
+penalties in the Gaussian factors. It also avoids multiplying very small
+densities. The log joint still depends on the density's coordinate convention,
+as the change-of-variables exercise will show.</p>
 <p>The logarithm is increasing, so it does not move the maximum either. Define</p>
-<div class="box definition"><div class="boxhd">Definition 2.3.2<span class="bt">The log joint</span></div><p><div class="eqn" id="eq-logjoint"><div class="eqbody">$$\mathcal{F}(d, u) \;=\; \ln P(d) \;+\; \ln P(u \mid d).$$</div><div class="eqno"><a href="#eq-logjoint" title="Link to equation 2.3.1">(2.3.1)</a></div></div>
-Maximising $\mathcal{F}$ over $d$ gives the MAP estimate.</p></div>
-<div class="box warning"><div class="boxhd">Careful<span class="bt">This is not yet free energy</span></div><p>$\mathcal{F}$ is written with a script letter because it is going to become the
-central object of the course, but it is not that object yet. Variational free
-energy, defined in Week&nbsp;4, is a functional of a whole distribution
-$Q(d)$. What is written here is the log joint evaluated at a single point.</p>
-<p>The relationship, stated now and derived in Week&nbsp;4: the negative variational
-free energy reduces to <a class="eqref" href="#eq-logjoint">(2.3.1)</a> exactly when $Q$ is a point mass at $d$.
-Everything in this week is therefore the special case in which the agent's
-beliefs carry no uncertainty at all. Week&nbsp;3 puts the uncertainty back.</p></div>
-<h2 id="write-it-out"><span class="secno">3</span>Write it out</h2>
-<p>Substitute the two Gaussians. Taking the prior first:</p>
-<div class="eqn"><div class="eqbody">$$\ln P(d) \;=\; \ln\!\left[\frac{1}{\sqrt{2\pi\Sigma_p}}\exp\!\left(-\frac{(d - d_p)^2}{2\Sigma_p}\right)\right]
-\;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \tfrac{1}{2}\ln(2\pi\Sigma_p),$$</div></div>
+<div class="box definition"><div class="boxhd">Definition 2.3.2<span class="bt">The log joint</span></div><p><div class="eqn" id="eq-logjoint"><div class="eqbody">$$\ell(d, u) \;=\; \ln P(d) \;+\; \ln P(u \mid d).$$</div><div class="eqno"><a href="#eq-logjoint" title="Link to equation 2.3.2">(2.3.2)</a></div></div>
+Maximising $\ell$ over $d$ gives the MAP estimate.</p></div>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">The log joint and variational free energy</span></div><p>The log joint $\ell(d,u)$ is a function of a candidate state and a fixed
+observation. Variational free energy $\mathcal F[Q,u]$ is a functional of a
+probability distribution. We use different symbols because their arguments and
+optimisation directions differ.</p>
+<p>For a continuous posterior, substituting a point mass for $Q$ does not give a
+finite free energy equal to $-\ell$: the point mass is singular relative to the
+posterior and its KL divergence is infinite. For suitable distributions with a
+small fixed width, $\mathbb E_Q[\ell]$ can approximate the log joint at their
+centre. Comparing centres then approximates MAP when the entropy term is fixed.
+The width cannot be set to zero as an ordinary substitution. Week&nbsp;4 develops
+the distributional approximation.</p></div>
+<h2 id="expanding-the-log-joint"><span class="secno">3</span>Expanding the log joint</h2>
+<p>Substitute the Gaussian likelihood and the truncated Gaussian prior. On $d>0$, taking the prior first:</p>
+<div class="eqn"><div class="eqbody">$$\ln P(d) \;=\; \ln\!\left[\frac{1}{Z_p\sqrt{2\pi\Sigma_p}}\exp\!\left(-\frac{(d - d_p)^2}{2\Sigma_p}\right)\right]
+\;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \tfrac{1}{2}\ln(2\pi\Sigma_p) - \ln Z_p,$$</div></div>
 <p>using $\ln(ab) = \ln a + \ln b$ and $\ln e^{x} = x$. The likelihood goes the same
 way, with $g(d)$ in place of the mean:</p>
 <div class="eqn"><div class="eqbody">$$\ln P(u \mid d) \;=\; -\frac{(u - g(d))^2}{2\Sigma_u} \;-\; \tfrac{1}{2}\ln(2\pi\Sigma_u).$$</div></div>
 <p>Both trailing terms are constants: they contain the variances, which are fixed,
 and no $d$. Since we are only ever going to differentiate with respect to $d$,
 they will die at the first derivative, and we may drop them now:</p>
-<div class="eqn" id="eq-F-explicit"><div class="eqbody">$$\mathcal{F} \;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \frac{(u - g(d))^2}{2\Sigma_u} \;+\; \text{const}.$$</div><div class="eqno"><a href="#eq-F-explicit" title="Link to equation 2.3.6">(2.3.6)</a></div></div>
-<p>Read what this says before differentiating it. $\mathcal{F}$ is large when both
+<div class="eqn" id="eq-F-explicit"><div class="eqbody">$$\ell \;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \frac{(u - g(d))^2}{2\Sigma_u} \;+\; \text{const}.$$</div><div class="eqno"><a href="#eq-F-explicit" title="Link to equation 2.3.3">(2.3.3)</a></div></div>
+<p>Read what this says before differentiating it. $\ell$ is large when both
 squared terms are small: when $d$ is near what the prior expected, <em>and</em> when the
 intensity that $d$ predicts is near the intensity actually heard. It is a
 scoring rule with two ways to lose marks, and the variances set the exchange
 rate between them.</p>
-<p>Cash that out with this week's numbers. Dividing by $\Sigma_p = 1.0$ and
-$\Sigma_u = 0.1$ means a squared error in intensity is charged
-10 times as heavily as a squared error in distance is. So the
-animal will accept being a fair way from what it expected in order to avoid
-mispredicting the loudness by much, and the ratio 10 is the entire
-content of "how much". Neither variance matters on its own: multiply both by any
-constant and every term in $\mathcal{F}$ scales together, leaving the maximum
-where it was.</p>
-<h2 id="differentiate"><span class="secno">4</span>Differentiate</h2>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The gradient of the log joint</span></div><p>Differentiate <a class="eqref" href="#eq-F-explicit">(2.3.6)</a> term by term.</p>
+<p>The two residuals have different units: distance and intensity. Dividing each
+square by its own variance makes each penalty dimensionless. Their numerical
+coefficients alone do not say that one source is a fixed multiple "more reliable"
+than the other; the observation function also determines sensitivity to distance.</p>
+<p>Multiplying both variance parameters by the same positive constant leaves the
+MAP location unchanged, because it rescales the distance-dependent terms together.
+It does change the posterior's spread. The prior normalisation remains constant
+with respect to $d$ during this state-inference calculation.</p>
+<h2 id="differentiating-the-log-joint"><span class="secno">4</span>Differentiating the log joint</h2>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The gradient of the log joint</span></div><p>Differentiate <a class="eqref" href="#eq-F-explicit">(2.3.3)</a> term by term.</p>
 <p>The first term. Write $A = -(d - d_p)^2 / (2\Sigma_p)$. By the chain rule, with
 the outer function $(\cdot)^2$ and the inner $d - d_p$ whose derivative is $1$:</p>
 <div class="eqn"><div class="eqbody">$$\frac{\partial A}{\partial d}
 = -\frac{1}{2\Sigma_p} \cdot 2(d - d_p) \cdot 1
 = -\frac{d - d_p}{\Sigma_p}
 = \frac{d_p - d}{\Sigma_p}.$$</div></div>
-<p>The sign flip in the last step is worth pausing on. It makes the term positive
-when $d$ is below the prior mean, so the gradient pushes $d$ up towards $d_p$,
+<p>The sign makes the term positive
+when $d$ is below the prior location, so the gradient pushes $d$ up towards $d_p$,
 and negative when $d$ is above it. The term always points at the prior's
 expectation.</p>
 <p>The second term. Write $B = -(u - g(d))^2 / (2\Sigma_u)$. Now the inner function
@@ -439,15 +437,14 @@ fixed number the animal has already heard:</p>
 <p>Two minus signs cancelled: one from the leading $-\tfrac{1}{2\Sigma_u}$ and one
 from differentiating $-g(d)$.</p>
 <p>Adding them, and noting the constant contributes nothing:</p>
-<div class="eqn" id="eq-gradient"><div class="eqbody">$$\frac{\partial \mathcal{F}}{\partial d}
+<div class="eqn" id="eq-gradient"><div class="eqbody">$$\frac{\partial \ell}{\partial d}
 \;=\; \underbrace{\frac{d_p - d}{\Sigma_p}}_{\text{prior term}}
-\;+\; \underbrace{\frac{u - g(d)}{\Sigma_u}\,g'(d)}_{\text{sensory term}} .$$</div><div class="eqno"><a href="#eq-gradient" title="Link to equation 2.3.2">(2.3.2)</a></div></div></div>
+\;+\; \underbrace{\frac{u - g(d)}{\Sigma_u}\,g'(d)}_{\text{sensory term}} .$$</div><div class="eqno"><a href="#eq-gradient" title="Link to equation 2.3.4">(2.3.4)</a></div></div></div>
 <h2 id="two-prediction-errors"><span class="secno">5</span>Two prediction errors</h2>
-<p>Both terms in <a class="eqref" href="#eq-gradient">(2.3.2)</a> have the same shape: something observed minus
-something predicted, divided by a variance. Name them.</p>
+<p>Both terms contain a residual divided by a variance. One compares the estimate with the prior location; the other compares the predicted and observed intensity.</p>
 <div class="box definition"><div class="boxhd">Definition 2.3.3<span class="bt">Precision-weighted prediction error</span></div><p><div class="eqn" id="eq-errors"><div class="eqbody">$$\varepsilon_p \;=\; \frac{d_p - d}{\Sigma_p},
 \qquad
-\varepsilon_u \;=\; \frac{u - g(d)}{\Sigma_u}.$$</div><div class="eqno"><a href="#eq-errors" title="Link to equation 2.3.3">(2.3.3)</a></div></div>
+\varepsilon_u \;=\; \frac{u - g(d)}{\Sigma_u}.$$</div><div class="eqno"><a href="#eq-errors" title="Link to equation 2.3.5">(2.3.5)</a></div></div>
 $\varepsilon_p$ is the <strong>prior prediction error</strong>: how far the current estimate
 sits from what was expected before any data arrived. $\varepsilon_u$ is the
 <strong>sensory prediction error</strong>: how far the intensity actually heard sits from the
@@ -463,48 +460,39 @@ Lesson&nbsp;4 onwards.</p></div>
 observation $u$. Weeks&nbsp;5 onwards will have a chain of these, one per level,
 and the subscripts become level indices.</p></aside>
 <p>In this notation the gradient is short:</p>
-<div class="eqn" id="eq-gradient-eps"><div class="eqbody">$$\frac{\partial \mathcal{F}}{\partial d} \;=\; \varepsilon_p \;+\; g'(d)\,\varepsilon_u .$$</div><div class="eqno"><a href="#eq-gradient-eps" title="Link to equation 2.3.7">(2.3.7)</a></div></div>
-<p>Now check <a class="eqref" href="#eq-gradient-eps">(2.3.7)</a> against the constraints from <a href="../week-02/two-rules.html">Lesson&nbsp;1</a>. To
+<div class="eqn" id="eq-gradient-eps"><div class="eqbody">$$\frac{\partial \ell}{\partial d} \;=\; \varepsilon_p \;+\; g'(d)\,\varepsilon_u .$$</div><div class="eqno"><a href="#eq-gradient-eps" title="Link to equation 2.3.6">(2.3.6)</a></div></div>
+<p>Now check <a class="eqref" href="#eq-gradient-eps">(2.3.6)</a> against the constraints from <a href="../week-02/two-rules.html">Lesson&nbsp;1</a>. To
 compute $\varepsilon_u$ a unit needs $u$, which arrives at it, and $g(d)$, which
 is a prediction sent to it. To compute $\varepsilon_p$ it needs $d_p$, held
 locally, and $d$, the current estimate. Nothing has to be fetched from across the
 network and nothing is summed over the state space. The rule is local.</p>
-<p>That is a real result, and it was not arranged. We differentiated the log joint
-because that is what maximising a function requires, and a locally computable
-quantity came out.</p>
-<h2 id="climb"><span class="secno">6</span>Climb</h2>
+<p>For this scalar model, the gradient can therefore be evaluated from these signals. The result specifies the information an implementation must provide; it does not establish that a biological circuit provides it.</p>
+<h2 id="updating-the-estimate"><span class="secno">6</span>Updating the estimate</h2>
 <p>Having the gradient, move in the direction it points:</p>
-<div class="eqn" id="eq-ascent"><div class="eqbody">$$\dot{d} \;=\; \eta \, \frac{\partial \mathcal{F}}{\partial d}
-\;=\; \eta\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),$$</div><div class="eqno"><a href="#eq-ascent" title="Link to equation 2.3.8">(2.3.8)</a></div></div>
-<p>with $\eta > 0$ a rate constant setting how large a step to take, in units of
-distance per unit of gradient. In discrete steps,
-$d_{k+1} = d_k + \eta\,\partial\mathcal{F}/\partial d\big|_{d_k}$, which is the
-forward-Euler integration of the flow with the time step absorbed into $\eta$.
-That is a numerical choice and not a restatement: a different integrator would
-give a different stability condition from the one derived below.</p>
-<aside class="mn"><span class="mnl">Why not Newton's method</span><p>The faster move, and a mathematician's first instinct, is
-$d_{k+1} = d_k - \mathcal{F}'(d_k)/\mathcal{F}''(d_k)$, which on a quadratic lands
-on the peak in one step and converges quadratically near any smooth maximum. We
-have $\mathcal{F}''$ available; the last section of this lesson computes it.</p>
-<p>It is ruled out by Lesson&nbsp;1. With one hidden variable $\mathcal{F}''$ is a
-number, but with $n$ of them it is the $n \times n$ matrix of second derivatives,
-and its $(i,j)$ entry couples variable $i$ to variable $j$. Newton's step needs
-that matrix inverted, which mixes information from every variable into every
-component of the update. No unit computing from its own inputs can assemble it.</p>
-<p>So gradient ascent is not the obvious choice, it is the choice the constraints
-leave. The price is paid in the next section: without curvature information, the
-step size has to be chosen in advance and can be wrong.</p></aside>
-<aside class="mn"><span class="mnl">Why $\dot{d}$ and not $\Delta d$</span><p>The dot is Newton's notation for a time derivative. Writing the update as a flow
-rather than a jump anticipates Weeks&nbsp;5 to 8, where the estimate genuinely is
-a continuous physical quantity relaxing in real time, and the discrete version is
-what you get by sampling it.</p></aside>
+<div class="eqn" id="eq-ascent"><div class="eqbody">$$\dot{d} \;=\; \nu \, \frac{\partial \ell}{\partial d}
+\;=\; \nu\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),$$</div><div class="eqno"><a href="#eq-ascent" title="Link to equation 2.3.7">(2.3.7)</a></div></div>
+<p>Here $\nu>0$ is a mobility, with units of squared distance per unit time.
+The gradient has units of inverse distance. A forward-Euler step of duration
+$\Delta t$ is</p>
+<div class="eqn"><div class="eqbody">$$d_{k+1}=d_k+\eta\ell'(d_k),\qquad \eta=\nu\Delta t.$$</div></div>
+<p>The discrete step parameter $\eta$ has units of squared distance. The widget
+varies this parameter. Euler integration approximates the flow; it is not exact
+sampling of the continuous trajectory. Its stability condition therefore belongs
+to the numerical iteration.</p>
+<aside class="mn"><span class="mnl">Other optimisation methods</span><p>Newton's method uses the gradient and curvature. Near a nondegenerate smooth
+maximum it can converge faster than fixed-step gradient ascent, but its direction
+and step may need safeguards away from the maximum. In many dimensions it requires
+solving a linear system involving the Hessian. This creates communication and
+computational requirements; locality alone does not prove it impossible.
+We use gradient ascent here to examine a simple update, not because every
+alternative has been excluded.</p></aside>
 <p>Where does it stop? At any point where the gradient vanishes, which by
-<a class="eqref" href="#eq-gradient-eps">(2.3.7)</a> means</p>
-<div class="eqn" id="eq-balance"><div class="eqbody">$$\varepsilon_p \;=\; -\,g'(d)\,\varepsilon_u .$$</div><div class="eqno"><a href="#eq-balance" title="Link to equation 2.3.9">(2.3.9)</a></div></div>
+<a class="eqref" href="#eq-gradient-eps">(2.3.6)</a> means</p>
+<div class="eqn" id="eq-balance"><div class="eqbody">$$\varepsilon_p \;=\; -\,g'(d)\,\varepsilon_u .$$</div><div class="eqno"><a href="#eq-balance" title="Link to equation 2.3.8">(2.3.8)</a></div></div>
 <p>The estimate settles where the two errors balance. Not where either is zero:
 where the pull towards the prior exactly offsets the pull towards the data.</p>
-<h2 id="the-numbers"><span class="secno">7</span>The numbers</h2>
-<p>Run it. Start the animal at its prior expectation, $d = 2.0$, and take
+<h2 id="a-worked-trajectory"><span class="secno">7</span>A worked trajectory</h2>
+<p>Run it. Start the animal at its prior location, $d = 2.0$, and take
 $\eta = 0.05$.</p>
 <p>At the start the prior error is exactly zero, because the estimate <em>is</em> the prior
 mean. The sensory error is not: the estimate predicts an intensity of
@@ -514,18 +502,15 @@ Weighted by $g'(2.0) = -0.250$, the sensory term
 contributes $-0.625$. The gradient is negative, so the
 estimate moves down: the sound was louder than expected, therefore the source is
 closer than expected.</p>
-<figure id="fig-2-3-1"><div class="widget" data-widget="ascent-errors"></div><figcaption><span class="fno">Figure 2.3.1.</span> The estimate climbing the log joint from the prior mean. Left, the trajectory against the exact posterior mode. Right, the two terms of <a class="eqref" href="#eq-gradient-eps">(2.3.7)</a> over the same steps, meeting where their sum is zero.</figcaption></figure>
+<figure id="fig-2-3-1"><div class="widget" data-widget="ascent-errors"></div><figcaption><span class="fno">Figure 2.3.1.</span> The estimate climbing the log joint from the prior location. Left, the trajectory against the exact posterior mode. Right, the two terms of <a class="eqref" href="#eq-gradient-eps">(2.3.6)</a> over the same steps, meeting where their sum is zero.</figcaption></figure>
 <p>It settles at $d = 1.5500$, reaching within one per cent of the
 exact mode after 29 steps. The mode computed by quadrature
-in Lesson&nbsp;2 was $1.5500$. The two agree, which they must: gradient
-ascent on the log joint finds the peak of the posterior, and the peak is what
-quadrature located.</p>
+in Lesson&nbsp;2 was $1.5500$. They agree for this starting point and step size. Gradient ascent can also converge to another local maximum or fail to converge, as the exercises demonstrate.</p>
 <p>At that point the two terms are</p>
 <div class="eqn"><div class="eqbody">$$\varepsilon_p = +0.449965,
 \qquad
 g'(\hat d)\,\varepsilon_u = -0.449962,$$</div></div>
-<p>summing to $3.44 \times 10^{-6}$, which is zero to the tolerance the iteration was
-run to. Note what is <em>not</em> zero: the raw sensory error is
+<p>summing to $3.44 \times 10^{-6}$, when evaluated at the grid-based mode; the remaining mismatch reflects that numerical location. Note what is <em>not</em> zero: the raw sensory error is
 $\varepsilon_u = 0.8379$, and the estimate still predicts an intensity
 of $0.4162$ against the $0.5$ heard. The animal has not moved far
 enough to account for the whole of what it heard. It has stopped where accounting
@@ -538,39 +523,40 @@ evidence against the other. It needs at least two causes and there is only one
 here. What is happening in this paragraph is a residual left by a compromise
 between two terms, which is not the same phenomenon and should not borrow its
 name.</p></div>
-<h2 id="choosing-the-rate"><span class="secno">8</span>Choosing the rate</h2>
+<h2 id="choosing-the-step-parameter"><span class="secno">8</span>Choosing the step parameter</h2>
 <p>$\eta$ was set to $0.05$ without comment. It cannot be set freely, and
 the bound on it turns out to depend on the precisions, which is the first sign of
 something the rest of the course keeps running into.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The largest stable rate</span></div><p>Write $d^{*}$ for the peak, the same point the earlier sections called $\hat d$,
-and $e_k = d_k - d^{*}$ for the error at step $k$. The star is used here only to
-keep the algebra readable while a hat is already doing work on other symbols. Near
-the peak, expand the gradient to first order. Since $\mathcal{F}'(d^{*}) = 0$ by
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Local stability of an Euler step</span></div><p>Write $d^{*}$ for the peak, the same point the earlier sections called $\hat d$,
+and $e_k = d_k - d^{*}$ for the error at step $k$. Both symbols refer to the same local maximum. Near
+the peak, expand the gradient to first order. Since $\ell'(d^{*}) = 0$ by
 definition of the peak,</p>
-<div class="eqn"><div class="eqbody">$$\mathcal{F}'(d_k) \;\approx\; \mathcal{F}'(d^{*}) + \mathcal{F}''(d^{*})\,e_k
-\;=\; \mathcal{F}''(d^{*})\,e_k .$$</div></div>
-<p>Substituting into the discrete update $d_{k+1} = d_k + \eta\,\mathcal{F}'(d_k)$
+<div class="eqn"><div class="eqbody">$$\ell'(d_k) \;\approx\; \ell'(d^{*}) + \ell''(d^{*})\,e_k
+\;=\; \ell''(d^{*})\,e_k .$$</div></div>
+<p>Substituting into the discrete update $d_{k+1} = d_k + \eta\,\ell'(d_k)$
 and subtracting $d^{*}$ from both sides:</p>
-<div class="eqn"><div class="eqbody">$$e_{k+1} \;=\; e_k + \eta\,\mathcal{F}''(d^{*})\,e_k \;=\; \big(1 + \eta\,\mathcal{F}''(d^{*})\big)\,e_k .$$</div></div>
+<div class="eqn"><div class="eqbody">$$e_{k+1} \;\approx\; e_k + \eta\,\ell''(d^{*})\,e_k \;=\; \big(1 + \eta\,\ell''(d^{*})\big)\,e_k .$$</div></div>
 <p>The error is multiplied by a fixed factor each step, so it shrinks precisely when
 that factor is less than one in magnitude:</p>
-<div class="eqn"><div class="eqbody">$$\big|\,1 + \eta\,\mathcal{F}''(d^{*})\,\big| \;<\; 1 .$$</div></div>
-<p>At a maximum $\mathcal{F}'' < 0$, so writing $|\mathcal{F}''|$ for its magnitude the
-condition is $-1 < 1 - \eta|\mathcal{F}''| < 1$, and the right inequality holds for
+<div class="eqn"><div class="eqbody">$$\big|\,1 + \eta\,\ell''(d^{*})\,\big| \;<\; 1 .$$</div></div>
+<p>At a maximum $\ell'' < 0$, so writing $|\ell''|$ for its magnitude the
+condition is $-1 < 1 - \eta|\ell''| < 1$, and the right inequality holds for
 any $\eta > 0$. The left one gives</p>
-<div class="eqn" id="eq-eta-bound"><div class="eqbody">$$\eta \;<\; \frac{2}{|\mathcal{F}''(d^{*})|} .$$</div><div class="eqno"><a href="#eq-eta-bound" title="Link to equation 2.3.4">(2.3.4)</a></div></div></div>
-<p>Read the three regimes off <a class="eqref" href="#eq-eta-bound">(2.3.4)</a>. Below the bound the error decays and
-the estimate approaches the peak from one side. Above it the factor
-$1 + \eta\mathcal{F}''$ is less than $-1$, so the error flips sign and grows: the
-estimate jumps over the peak, further each time, until the nonlinearity catches
-it. Exactly at $\eta = 2/|\mathcal{F}''|$ the factor is $-1$ and the error neither
-grows nor shrinks.</p>
-<p>For the run above, $\mathcal{F}''(\hat d) = -3.013$, so any rate below
-$0.664$ converges and $0.05$ is comfortably inside it.</p>
-<p>The numbers here come from differentiating <a class="eqref" href="#eq-gradient-eps">(2.3.7)</a> a second time, which
+<div class="eqn" id="eq-eta-bound"><div class="eqbody">$$\eta \;<\; \frac{2}{|\ell''(d^{*})|} .$$</div><div class="eqno"><a href="#eq-eta-bound" title="Link to equation 2.3.9">(2.3.9)</a></div></div></div>
+<p>This is a local condition near a nondegenerate maximum. If
+$0<\eta|\ell''|<1$, the linearised error decreases without changing sign.
+If $1<\eta|\ell''|<2$, it alternates in sign while decreasing. At the boundary
+$\eta|\ell''|=2$, the linearisation has multiplier $-1$, and higher-order terms
+are needed to determine the nonlinear behaviour. Above it the fixed point is
+locally unstable.</p>
+<p>For the worked mode, the curvature is $-3.013$ and the local upper
+bound is $0.664$. The chosen rate $0.05$ satisfies it.
+That does not guarantee convergence from every starting point or keep every step
+inside $d>0$. Both need checking separately.</p>
+<p>The numbers here come from differentiating <a class="eqref" href="#eq-gradient-eps">(2.3.6)</a> a second time, which
 is done in full as the first exercise of Lesson&nbsp;4, once the notation for the
 precisions is in place. What matters now is not the formula but that
-$\mathcal{F}''$ depends on $\Sigma_u$, so the bound moves when the ear changes.</p>
+$\ell''$ depends on $\Sigma_u$, so the bound moves when the ear changes.</p>
 <p>Now sharpen the ear. Take $\Sigma_u = 0.01$, ten times more precise.
 The peak moves to $1.4261$, nearer what the data alone would say, and
 the curvature there stiffens to $-47.34$. The bound collapses to
@@ -579,27 +565,23 @@ Set the widget's sensory variance to $0.01$ and leave the rate at
 $0.05$: the estimate stops converging and cycles between
 $1.3493$ and $1.5824$, straddling the peak at $1.4261$
 and never landing on it.</p>
-<div class="box keyidea"><div class="boxhd">The idea</div><p>A more precise sensor makes the log joint more sharply peaked, and a more sharply
-peaked function demands smaller steps. Trusting your senses more is not free:
-it makes the inference stiffer.</p>
-<p>This is not a numerical footnote. Weeks&nbsp;5 to 8 build a physical system whose
-relaxation rate is a property of the tissue, not a parameter to be retuned per
-observation, and Week&nbsp;8 has to say what such a system does when precision
-changes underneath it.</p></div>
-<div class="box exercise"><div class="boxhd">Exercise 2.3.1<span class="bt">Reading the balance condition</span></div><p><a class="eqref" href="#eq-balance">(2.3.9)</a> says the estimate settles where $\varepsilon_p = -g'(d)\varepsilon_u$.
+<p>A sharper posterior can require smaller Euler steps. This is a numerical
+stability issue. It is not, by itself, evidence that a continuous biological
+inference process becomes unstable when sensory precision increases.</p>
+<div class="box exercise"><div class="boxhd">Exercise 2.3.1<span class="bt">Reading the balance condition</span></div><p><a class="eqref" href="#eq-balance">(2.3.8)</a> says the estimate settles where $\varepsilon_p = -g'(d)\varepsilon_u$.
 Here $g' < 0$ everywhere, since intensity falls with distance. Use this to
 determine, without computing anything, whether the MAP estimate lies above or
-below the prior mean, given that the animal heard a louder sound than the prior
+below the prior location, given that the animal heard a louder sound than the prior
 predicted.</p><details><summary>Solution</summary><p>Louder than predicted means $u > g(d_p)$, so at $d = d_p$ we have
 $\varepsilon_u > 0$. Since $g' < 0$, the sensory term $g'(d)\varepsilon_u$ is
 negative, and the gradient at the starting point is negative, so $d$ decreases.</p>
 <p>It keeps decreasing while the gradient stays negative. At the resting point
-<a class="eqref" href="#eq-balance">(2.3.9)</a> gives $\varepsilon_p = -g'\varepsilon_u$, and with $g' < 0$ and
+<a class="eqref" href="#eq-balance">(2.3.8)</a> gives $\varepsilon_p = -g'\varepsilon_u$, and with $g' < 0$ and
 $\varepsilon_u$ still positive the right-hand side is positive, so
 $\varepsilon_p > 0$, which means $d_p - \hat d > 0$, so $\hat d < d_p$.</p>
-<p>The estimate ends below the prior mean, as it must: a loud sound is evidence of a
+<p>The estimate ends below the prior location, as it must: a loud sound is evidence of a
 near source. Confirming with the figures, $\hat d = 1.5500$ against a
-prior mean of $2.0$.</p></details></div>
+prior location of $2.0$.</p></details></div>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
 <li>Why does $P(u)$ drop out of the MAP problem, and why is that not an
   approximation?</li>
@@ -607,8 +589,8 @@ prior mean of $2.0$.</p></details></div>
   dividing by a variance do?</li>
 <li>The resting point has $\varepsilon_u \neq 0$. Say in one sentence why the animal
   does not keep moving to drive it to zero.</li>
-<li>What would <a class="eqref" href="#eq-gradient-eps">(2.3.7)</a> look like if $g$ were the identity, $g(d) = d$?</li>
-</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/exact.html"><span class="dir">Previous</span><span class="ttl">A problem small enough to solve exactly</span></a><a class="nx" href="../week-02/reading-the-update.html"><span class="dir">Next</span><span class="ttl">Reading the update</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+<li>What would <a class="eqref" href="#eq-gradient-eps">(2.3.6)</a> look like if $g$ were the identity, $g(d) = d$?</li>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/exact.html"><span class="dir">Previous</span><span class="ttl">Inferring distance from a sound</span></a><a class="nx" href="../week-02/reading-the-update.html"><span class="dir">Next</span><span class="ttl">Precision and prediction errors</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w02.js"></script>
 </body>
 </html>

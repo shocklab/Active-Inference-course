@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two models, not one · Active Inference</title><meta name="description" content="The world's causal machinery and the agent's picture of it are separate objects. Almost every confusion in this field starts by conflating them."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Generative process and generative model · Active Inference</title><meta name="description" content="Distinguishing the process that produces observations from the model used to interpret them."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
 :root{
   --paper:#fdfcf9; --card:#ffffff;
   --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
@@ -350,14 +350,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">A soft body in a hard world</a><a class="cur" href="../week-01/process-and-model.html">Two models, not one</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="" href="../week-01/the-denominator.html">What makes the denominator hard</a><a class="" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>Two models, not one</h1><p class="deck">The world's causal machinery and the agent's picture of it are separate objects. Almost every confusion in this field starts by conflating them.</p><div class="meta"><span>Week 1</span><span>&#167;2</span><span>20 min</span></div></header><article class="abody"><p>An agent is coupled to a world. Both of them generate things. The world
-generates the sense data that arrive at the agent's surface. The agent generates
-predictions about what those data are going to be. These are two different
-generative structures, they live in two different places, and they are written
-with two different letters for a reason.</p>
-<p>Getting this distinction wrong is the commonest way to become confused
-about active inference, so we will fix it now and then hold to that notation
-for twelve weeks.</p>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">Regulation and inference</a><a class="cur" href="../week-01/process-and-model.html">Generative process and generative model</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="" href="../week-01/the-denominator.html">Computing the marginal likelihood</a><a class="" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>Generative process and generative model</h1><p class="deck">Distinguishing the process that produces observations from the model used to interpret them.</p><div class="meta"><span>Week 1</span><span>&#167;2</span><span>20 min</span></div></header><article class="abody"><p>An agent receives observations and uses them to infer something about its surroundings. We need to distinguish the process producing the observations from the model used to interpret them. The model may omit variables, use different categories, or describe the observation process incorrectly.</p>
 <h2 id="the-generative-process"><span class="secno">1</span>The generative process</h2>
 <p>The <strong>generative process</strong> is what the world actually does. There are states of
 affairs out there, evolving according to whatever physics, chemistry and other
@@ -365,38 +358,33 @@ agents dictate, and some of what they do impinges on the agent's sensory
 surface.</p>
 <p>Write $\vartheta$ for the true state of the world and $o$ for what arrives at the
 sensory surface. The generative process specifies how $\vartheta$ evolves, and how
-$\vartheta$ gives rise to $o$. Write $a$ for the agent's <strong>actions</strong>, drawn from whatever set of things the agent can do: for a thermostat $a \in \{\text{heat}, \text{idle}\}$, for an animal a continuous space of muscle commands. Week&nbsp;9 makes the discrete case concrete; the lamp example below has no actions at all, being about perception alone. The process also specifies how $a$ feeds
-back into $\vartheta$, and it has to: an agent that could only watch would have no
-way of staying in the small region of <a href="../week-01/soft-body.html">Lesson&nbsp;1</a>, since staying there is
-something a body does rather than something that happens to it.</p>
-<p>The agent does not have access to $\vartheta$. Not partially, not noisily: not at
-all. Everything the agent will ever know about the world it must extract from
-$o$, and later from the consequences of its own $a$.</p>
+$\vartheta$ gives rise to $o$. Write $a$ for the agent's <strong>actions</strong>, drawn from whatever set of things the agent can do: for a thermostat $a \in \{\text{heat}, \text{idle}\}$, for an animal a continuous space of muscle commands. Week&nbsp;9 makes the discrete case concrete; the lamp example below has no actions at all, being about perception alone. If actions affect the environment, the process must specify that effect too.
+For example, moving a sensor changes the observations it receives. The lamp
+example below holds actions fixed so that we can examine perception alone.</p>
+<p>The agent observes $o$, not $\vartheta$ directly. This does not mean $o$ carries
+no information about $\vartheta$: that information is what inference uses.
+It means the agent must infer the hidden state through its observations.</p>
 <aside class="mn"><span class="mnl">On the notation</span><p>Much of the free energy principle literature writes $\eta$, or sometimes
 $\vartheta$, for external states of the generative process, keeping the letter
 $s$ for states inside the agent's model. We follow that; $s$ is defined in the
 next section. When you meet a paper that writes $s$ for both, read carefully:
 the ambiguity is not always harmless.</p>
-<p>We do not use $\eta$ for external states ourselves, and from Week&nbsp;2 the
-letter is doing an unrelated job as the rate constant on a gradient ascent. That
-is a genuine clash with the literature and there is no way round it: both uses
-are too standard to rename.</p></aside>
+<p>This course uses $\vartheta$ for external process states. Later, $\eta$ denotes
+an inference rate; check the convention when moving between sources.</p></aside>
 <h2 id="the-generative-model"><span class="secno">2</span>The generative model</h2>
 <p>The <strong>generative model</strong> is the agent's account of where its observations come
 from. It is a joint probability distribution over observations and a set of
 quantities the agent treats as their causes:</p>
 <div class="eqn" id="eq-gen-model"><div class="eqbody">$$P(o, s) \;=\; \underbrace{P(o \mid s)}_{\text{likelihood}} \;
              \underbrace{P(s)}_{\text{prior}} .$$</div><div class="eqno"><a href="#eq-gen-model" title="Link to equation 1.2.1">(1.2.1)</a></div></div>
-<p>Here $s$ is a <strong>hidden state</strong> <em>of the model</em>. It is a variable in the agent's
-head. It is not $\vartheta$, it need not correspond to anything in $\vartheta$,
+<p>Here $s$ is a <strong>hidden state</strong> <em>of the model</em>. It labels a possible state of affairs in the model. It is not $\vartheta$, it need not correspond to anything in $\vartheta$,
 and there is no requirement that the two even have the same dimension or the
 same type.</p>
 <p>The likelihood $P(o \mid s)$ says what observations the agent expects when the
-model-state is $s$. Note the phrasing: not <em>when the world is in state $s$</em>,
-because the world is not in any model-state at all. The model-state is a variable
-inside the agent. The prior $P(s)$ says which model-states the agent
-expects before looking. Together they specify a joint distribution, and from a
-joint distribution every marginal and every conditional follows in principle.</p>
+model-state is $s$. The likelihood is a conditional prediction within the model. When $s$ describes
+the lamp as on, it predicts what the sensor would report under that hypothesis.
+The prior $P(s)$ assigns probabilities before the new observation. Their product
+specifies the joint, from which marginal and conditional distributions follow.</p>
 <figure id="fig-1-2-1"><svg viewBox="0 0 720 268" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: the generative process on the left, the agent's generative model on the right, coupled only through sensory states o and active states a.">
   <defs>
     <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -416,8 +404,8 @@ joint distribution every marginal and every conditional follows in principle.</p
   <text x="137" y="188" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#90909a">true external state</text>
 
   <circle cx="583" cy="134" r="35" fill="#ffffff" stroke="#0f5f57" stroke-width="1.5"/>
-  <text x="583" y="140" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="21" fill="#0f5f57">s</text>
-  <text x="583" y="188" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#14837a">believed state</text>
+  <text x="583" y="140" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="21" fill="#0f5f57">&#956;</text>
+  <text x="583" y="188" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#14837a">internal state encoding beliefs</text>
 
   <rect x="322" y="60" width="76" height="42" fill="#ffffff" stroke="#8a6d1f" stroke-width="1.5"/>
   <text x="360" y="87" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="19" fill="#8a6d1f">o</text>
@@ -439,67 +427,52 @@ joint distribution every marginal and every conditional follows in principle.</p
 
   <line x1="300" y1="26" x2="300" y2="242" stroke="#d3cfc4" stroke-dasharray="3 4"/>
   <line x1="420" y1="26" x2="420" y2="242" stroke="#d3cfc4" stroke-dasharray="3 4"/>
-</svg><figcaption><span class="fno">Figure 1.2.1.</span> The two structures and the surface between them. Everything to the left of the sensory and active states belongs to the world. Everything to the right belongs to the agent. The two never touch directly.</figcaption></figure>
-<p>The two dashed lines mark the only place the world and the agent meet. The
-variables sitting on them have names. The <strong>sensory states</strong> are the observations
-$o$ of Lesson&nbsp;1, seen now as one half of an interface rather than as a bare
-measurement; they carry information inward. The <strong>active states</strong> $a$ carry
-influence outward. Nothing crosses except through the two. That interface is
-called a <strong>Markov blanket</strong>. The name is borrowed from graphical models, and it
-carries the usual meaning: conditioned on the blanket, what is inside is
-independent of what is outside. Here that reads</p>
-<div class="eqn" id="eq-blanket"><div class="eqbody">$$P(\vartheta, \mu \mid o, a) \;=\; P(\vartheta \mid o, a)\; P(\mu \mid o, a),$$</div><div class="eqno"><a href="#eq-blanket" title="Link to equation 1.2.2">(1.2.2)</a></div></div>
-<p>writing $\mu$ for the agent's <strong>internal states</strong>: the physical variables that
-carry the model, such as the firing rates or synaptic weights that encode
-$P(s)$. So $\mu$ and $s$ are not the same kind of thing. $s$ is a variable <em>in</em>
-the model, a label for a possible state of affairs; $\mu$ is the stuff the model
-is made of. Week&nbsp;5 gives $\mu$ a job of its own; until then $s$ does the
-work and $\mu$ appears only here, to state the blanket. Knowing the sensory and active
-states renders the world and the inside of the agent conditionally independent:
-any influence one has on the other has already passed through the blanket. That
-is the formal version of the claim that you never perceive the world, only your
-own surface.</p>
-<p>Whether real organisms have blankets in this sense, and whether the ones drawn in
-the literature are found or imposed, is a live argument. Week&nbsp;12 takes it up.</p>
-<p>The four-way partition into external, sensory, active and internal states is
-standard in this literature, and you will meet all four names again in
-Week&nbsp;5, where the internal states acquire a letter of their own.</p>
+</svg><figcaption><span class="fno">Figure 1.2.1.</span> The two structures and the surface between them. Everything to the left of the sensory and active states belongs to the world. The right-hand node denotes the physical internal state carrying beliefs about model states. The arrows are a schematic of interaction, not a proof of conditional independence.</figcaption></figure>
+<p>The <strong>sensory states</strong> are the observations $o$, described here as part of the
+agent's interface. The <strong>active states</strong> $a$ describe how it influences the
+surroundings. Write $\mu$ for its <strong>internal states</strong>, such as physical variables
+encoding beliefs about $s$. Thus $s$ labels a hypothesis; $\mu$ is a physical
+state of a system representing beliefs about that hypothesis.</p>
+<div class="box definition"><div class="boxhd">Definition 1.2.1<span class="bt">Markov blanket</span></div><p>A set of variables is a Markov blanket separating internal from external states
+when conditioning on that set makes the two groups independent. For the proposed
+partition, the required statement is</p>
+<div class="eqn" id="eq-blanket"><div class="eqbody">$$P^*(\vartheta,\mu\mid o,a)=P^*(\vartheta\mid o,a)P^*(\mu\mid o,a).$$</div><div class="eqno"><a href="#eq-blanket" title="Link to equation 1.2.2">(1.2.2)</a></div></div>
+<p>The star marks the joint distribution of the physical process. This is an
+additional statistical condition to establish in a model. Drawing a sensory
+surface and action arrows does not establish it. The equality says that, once
+$o,a$ are known, learning $\mu$ adds no information about $\vartheta$ under
+this joint distribution.</p></div>
+<p>For a simple example, suppose $\vartheta$ generates $o$, which generates $\mu$,
+and $a$ is fixed. The joint factorises as
+$P^*(\vartheta)P^*(o\mid\vartheta)P^*(\mu\mid o)$. Conditioning on $o$
+and normalising the first two factors gives
+$P^*(\vartheta\mid o)P^*(\mu\mid o)$, which has the required independence.
+Adding feedback or other dependencies requires checking the condition again;
+a static factorisation does not settle a dynamical model.</p>
+<p>Week&nbsp;12 examines when such partitions are appropriate for organisms.</p>
 <div class="box warning"><div class="boxhd">Careful<span class="bt">A model can be wrong and still be a model</span></div><p>Nothing above requires $P(o \mid s)$ to be the true likelihood, or $P(s)$ to be
 the true distribution over anything. The agent's model is a hypothesis. Much of
 what makes active inference interesting comes from watching what happens when the
 model and the process disagree in structured ways, which is also the route by
 which the framework has been applied to psychiatric conditions.</p></div>
-<h2 id="what-follows-from-keeping-them-apart"><span class="secno">3</span>What follows from keeping them apart</h2>
-<p>Three things become clear once you keep the two apart, and stay muddy if you do not.</p>
-<p><strong>Where the intractability lives.</strong> To use the model you need the probability of
-an observation on its own, $P(o) = \sum_s P(o \mid s) P(s)$, and that sum runs
-over the agent's $s$, not the world's $\vartheta$. <a href="../week-01/bayes.html">Lesson&nbsp;3</a> says why you need
-it, as the denominator of Bayes' theorem, and gives the first argument that it is
-out of reach; <a href="../week-01/the-denominator.html">Lesson&nbsp;5</a> gives the rest, including the reason that first
-argument is the weakest one available. Avoiding it occupies the next three weeks.
-The world does not compute anything. It has no marginalisation problem. The difficulty is
-entirely on the agent's side of the blanket. That is a useful place for it to be:
-it makes the problem one of algorithm rather than physics, so it can be attacked
-by choosing a better approximation scheme, which is what Week&nbsp;4 does.</p>
-<p><strong>What "surprise" refers to.</strong> An observation is surprising relative to
-$P(o)$ computed from the agent's model. The world does not find anything
-surprising. Two agents receiving identical sense data can be surprised to
-completely different degrees, and that is not a paradox: they have different
-models.</p>
-<p><strong>What action does.</strong> Action does not change $P(o \mid s)$ or $P(s)$; those are
-the agent's own commitments. Action changes $\vartheta$, and therefore changes
-which $o$ shows up next. Perception moves the model towards the data; action
-moves the data towards the model. They act on opposite sides of the blanket. That is what lets a single quantity,
-the free energy of Week&nbsp;4, govern both: perception cannot cheat by simply
-deciding the data are whatever the model wanted, because the data are on the far
-side of the interface and only action can reach them.</p>
-<div class="box remark"><div class="boxhd">Remark<span class="bt">One more confusion</span></div><p>The agent is often said to hold "beliefs", and the word is technical here. The belief is the <em>distribution</em>, $P(s)$ or later $Q(s)$, not the state $s$ itself: $s$ is a possible state of affairs, and the belief is how much weight the agent puts on it. Calling $s$ a belief, as people often do and as the diagram's label does, is shorthand for that. A Kalman filter holds beliefs in exactly this sense, its mean and covariance being a Gaussian over states. It carries no
-implication of awareness. A Kalman filter has beliefs in exactly this sense; an
-ordinary bimetallic thermostat does not, since it holds no distribution over
-anything, which means the word is not vacuous.</p></div>
-<h2 id="a-worked-case-two-agents-and-a-lamp"><span class="secno">4</span>A worked case: two agents and a lamp</h2>
-<p>Everything above has been structural. Here is the smallest example that makes it
-concrete, and it will do more work than its size suggests.</p>
+<h2 id="using-and-changing-the-model"><span class="secno">3</span>Using and changing the model</h2>
+<p>The model evidence is $P(o)=\sum_sP(o\mid s)P(s)$. <a href="../week-01/bayes.html">Lesson&nbsp;3</a> derives its
+role in Bayes' theorem, and <a href="../week-01/the-denominator.html">Lesson&nbsp;5</a> examines algorithms for computing it.
+The sum runs over the model's hypotheses. Physically producing a sensor reading
+and calculating its probability are different operations.</p>
+<p>An observation's surprise is $-\ln P(o)$ under the chosen model. Two agents
+can therefore assign different surprise to the same reading.</p>
+<p>Inference holds the generative model fixed and changes beliefs about hidden
+states. Learning changes the model's parameters or structure. Action affects the
+process that generates later observations. Some models let action also change
+the observation channel, for example by turning a sensor. The consequences have
+to be specified rather than inferred from a slogan about perception and action.</p>
+<p>A <strong>belief</strong> here is a probability distribution over possible states. It need
+not involve awareness. A Kalman filter's state estimate and covariance specify a
+Gaussian belief. A bimetallic thermostat need not explicitly represent any such
+distribution, even though we can model its feedback mathematically.</p>
+<h2 id="two-agents-and-a-lamp"><span class="secno">4</span>Two agents and a lamp</h2>
+<p>Consider a lamp behind a frosted screen and two agents interpreting its sensor.</p>
 <p>A lamp sits behind a frosted screen. The true state $\vartheta$ is <strong>on</strong> or
 <strong>off</strong>, each equally likely, and a light sensor reports <strong>bright</strong> or <strong>dim</strong>.
 The sensor is imperfect: when the lamp is on it reads bright with probability
@@ -512,7 +485,7 @@ prior $P(s) = (0.5, 0.5)$, and a likelihood equal to the
 true one. Its evidence for a bright reading is</p>
 <div class="eqn" id="eq-lamp-evidence"><div class="eqbody">$$P(\text{bright}) = 0.5 \times 0.8 + 0.5 \times 0.1 = 0.45,$$</div><div class="eqno"><a href="#eq-lamp-evidence" title="Link to equation 1.2.3">(1.2.3)</a></div></div>
 <p>so a bright reading carries $-\ln 0.45 = 0.7985$
-nats of surprise, in the natural-log units of Lesson&nbsp;1,
+nats of surprise, in the natural-log units of <a href="../week-01/soft-body.html">Lesson&nbsp;1</a>,
 and by Bayes the posterior on the lamp being on is
 $0.5 \times 0.8 / 0.45 = 0.8889$.</p>
 <p><strong>Agent B</strong> has the same states and the same prior but believes its sensor is far
@@ -520,7 +493,7 @@ better than it is: $0.99$ and $0.01$ in place of
 $0.8$ and $0.1$. Its evidence for bright is
 $0.50$, its surprise $0.6931$ nats,
 and its posterior $0.9900$.</p>
-<p>Three things follow, and each one makes something earlier on this page checkable.</p>
+<p>We can now compare their predictions and beliefs.</p>
 <p><strong>Surprise belongs to the model.</strong> The two agents received the same reading from
 the same lamp and were surprised by different amounts,
 $0.7985$ against $0.6931$
@@ -543,16 +516,27 @@ really turns up,</p>
 <div class="eqn" id="eq-avg-surprise"><div class="eqbody">$$\bar{S}_X \;=\; \sum_{o} P^{*}(o)\,\big[-\ln P_X(o)\big].$$</div><div class="eqno"><a href="#eq-avg-surprise" title="Link to equation 1.2.4">(1.2.4)</a></div></div>
 <p>For agent A this is $0.688139$ nats, which is exactly
 $\mathrm{H}[P^{*}(o)]$: the entropy of Lesson&nbsp;1 applied to the world's own
-frequencies. That is the floor, because an agent whose $P_X$ already equals
-$P^{*}$ has nothing left to get wrong. Agent B averages
+frequencies. The non-negativity calculation below shows why this is a lower bound on average surprise. Agent B averages
 $0.693147$ nats. The excess is
-$0.005008$ nats, and</p>
+$0.005008$ nats.</p>
+<p>The <strong>Kullback&ndash;Leibler divergence</strong> of a finite distribution $p$ relative to $q$
+is $D_{\mathrm{KL}}[p\|q]=\sum_o p(o)\ln[p(o)/q(o)]$.
+Terms with $p(o)=0$ contribute zero; if $p(o)>0$ but $q(o)=0$, the divergence
+is infinite. Here both model probabilities are positive.</p>
 <div class="eqn" id="eq-lamp-kl"><div class="eqbody">$$D_{\mathrm{KL}}\big[P^{*}(o) \,\|\, P_B(o)\big] = 0.005008\ \text{nats},$$</div><div class="eqno"><a href="#eq-lamp-kl" title="Link to equation 1.2.5">(1.2.5)</a></div></div>
-<p>the same number. The extra surprise a mismodelling agent pays, per observation
-and on average, <em>is</em> the divergence between the world's statistics and its own.
-That is the precise version of Lesson&nbsp;1's remark that the two meanings of
-$P(o)$ coincide when the model is good and part company when it is not, and it
-is why the framework can get away with using one as a stand-in for the other.</p>
+<p>Subtracting the actual
+entropy from the average surprise gives</p>
+<div class="eqn"><div class="eqbody">$$\bar S_X-\mathrm H[P^*]
+=\sum_o P^*(o)[-\ln P_X(o)+\ln P^*(o)]
+=D_{\mathrm{KL}}[P^*\|P_X].$$</div></div>
+<p>Why is this nonnegative? The elementary inequality $\ln z\le z-1$ for $z>0$
+gives</p>
+<div class="eqn"><div class="eqbody">$$-\sum_o p(o)\ln\frac{q(o)}{p(o)}
+\ge\sum_{o:p(o)>0}[p(o)-q(o)]\ge0.$$</div></div>
+<p>The final inequality allows $q$ to put mass where $p$ is zero. Equality requires
+$p=q$. Thus a model matching the observation frequencies minimises average
+surprise, but matching those frequencies alone need not identify the correct
+hidden causes.</p>
 <div class="box exercise"><div class="boxhd">Exercise 1.2.1<span class="bt">Verify the excess surprise</span></div><p>Verify <a class="eqref" href="#eq-lamp-kl">(1.2.5)</a> by hand: compute $P^{*}(\text{dim})$ and
 $P_B(\text{dim})$, then evaluate
 $\sum_o P^{*}(o)\ln\big[P^{*}(o)/P_B(o)\big]$.</p><details><summary>Solution</summary><p>The true marginals are $0.45$ and
@@ -571,28 +555,86 @@ Week&nbsp;12 asks whether that should worry us.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 1.2.2<span class="bt">Break the blanket</span></div><p>Take four binary variables $\vartheta, o, a, \mu$ and build a joint distribution
 in which $\vartheta$ influences $\mu$ only through $o$. Verify <a class="eqref" href="#eq-blanket">(1.2.2)</a>
 numerically. Then add a direct dependence of $\mu$ on $\vartheta$ and show the
-equality fails.</p><details><summary>Solution</summary><p>Let $\vartheta$ be a fair coin, let $o = \vartheta$ with probability $0.9$ and
-$o = 1 - \vartheta$ otherwise, and let $\mu$ depend on $o$ alone, say
-$\mu = o$ with probability $0.8$. Fix $a$ constant so it plays no role. Then for
-each value of $o$,</p>
-<div class="eqn"><div class="eqbody">$$P(\vartheta, \mu \mid o) = P(\vartheta \mid o)\,P(\mu \mid o)$$</div></div>
-<p>holds by construction, because $\mu$ was generated from $o$ without ever
-consulting $\vartheta$: conditioning on $o$ leaves nothing for the two to share.</p>
-<p>Now let $\mu$ peek: with probability $0.3$ set $\mu = \vartheta$ directly,
-ignoring $o$. Condition on $o = 1$ and the two are no longer independent, because
-learning $\mu = 1$ now raises the probability that $\vartheta = 1$ by a route
-that does not pass through $o$. The blanket has a hole in it, and <a class="eqref" href="#eq-blanket">(1.2.2)</a>
-reports the hole.</p>
-<p>The general point: a Markov blanket is not a wall, it is a claim about which
-paths exist. Whether real organisms have one in this sense is the argument
-Week&nbsp;12 takes up.</p></details></div>
-<h2 id="notation-to-carry-forward"><span class="secno">5</span>Notation to carry forward</h2>
+equality fails.</p><details><summary>Solution</summary><p>Let $\vartheta$ be a fair coin and let the sensor copy it with probability
+$0.9$, flipping it otherwise. Let $\mu$ copy $o$ with probability $0.8$,
+flipping it otherwise, independently of $\vartheta$ conditional on $o$.
+Fix $a$ constant. Given $o=1$, the conditional probabilities are
+$P(\vartheta=1\mid o=1)=0.9$ and $P(\mu=1\mid o=1)=0.8$.
+The joint table is</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>$\vartheta$</th>
+<th>$\mu$</th>
+<th>$P(\vartheta,\mu\mid o=1)$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>0.0200</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>0.0800</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>0.1800</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>0.7200</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each entry is the corresponding product of marginals. Complementing both
+binary labels gives the same verification for $o=0$.</p>
+<p>Now change the generation of $\mu$: with probability $0.3$ copy $\vartheta$
+directly; otherwise use the previous noisy copy of $o$. Given $o=1$,</p>
+<div class="eqn"><div class="eqbody">$$P(\mu=1\mid\vartheta=1,o=1)=0.3+0.7(0.8)=0.8600,$$</div></div>
+<p>whereas for $\vartheta=0$ it is $0.7(0.8)=0.5600$.
+Consequently the joint entry and the product of marginals differ:</p>
+<div class="eqn"><div class="eqbody">$$P(\vartheta=1,\mu=1\mid o=1)=0.7740,
+\qquad
+P(\vartheta=1\mid o=1)P(\mu=1\mid o=1)=0.7470.$$</div></div>
+<p>This explicit distribution fails conditional independence. A direct edge can
+permit such a failure; its presence alone would not prove failure for every
+possible parameter setting.</p></details></div>
+<h2 id="changing-beliefs-while-holding-evidence-fixed"><span class="secno">5</span>Changing beliefs while holding evidence fixed</h2>
+<p>Take a binary lamp model with prior probability $P(s=\mathrm{on})=1/2$.
+Let $P(\mathrm{bright}\mid\mathrm{off})=0.20$ and write $\theta$ for
+$P(\mathrm{bright}\mid\mathrm{on})$, initially $0.80$. The parameter $\theta$
+is a probability in $[0,1]$ describing sensor reliability. A bright reading
+arrives. Its evidence is $0.500$ and the exact posterior probability
+of on is $0.800$.</p>
+<p>Represent an approximate belief by $Q(\mathrm{on})=q$ and
+$Q(\mathrm{off})=1-q$. Here $q\in[0,1]$ is a probability, not a state or a
+sensor parameter. Define</p>
+<div class="eqn" id="eq-belief-free-energy"><div class="eqbody">$$F(q)=\sum_s Q(s)\ln\frac{Q(s)}{P(s,\mathrm{bright})}.$$</div><div class="eqno"><a href="#eq-belief-free-energy" title="Link to equation 1.2.6">(1.2.6)</a></div></div>
+<p>This is the finite-state <strong>variational free energy</strong>. Terms with $Q(s)=0$ are
+interpreted by their limit. Substituting
+$P(s,\mathrm{bright})=P(s\mid\mathrm{bright})P(\mathrm{bright})$ gives</p>
+<div class="eqn" id="eq-belief-gap"><div class="eqbody">$$F(q)=D_{\mathrm{KL}}[Q\|P(s\mid\mathrm{bright})]-\ln P(\mathrm{bright}).$$</div><div class="eqno"><a href="#eq-belief-gap" title="Link to equation 1.2.7">(1.2.7)</a></div></div>
+<p>The logarithm splits a product into a sum, and the evidence term comes outside
+the expectation because $\sum_sQ(s)=1$. KL divergence is non-negative and is
+zero when the beliefs equal the exact posterior. Lesson&nbsp;3 examines it in detail.</p>
+<p>At $q=1/2$, free energy is $0.9163$ nats. Setting
+$q=0.800$ reduces it to $0.6931$ nats. The evidence
+has stayed at $0.500$ throughout: inference has reduced the gap,
+not the surprise of this observation under the model.</p>
+<figure class="widget" id="fig-1-2-2"><div class="wmount" data-widget="belief-evidence"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.2.2.</span> Move the belief probability q while holding the sensor parameter fixed. The evidence and surprise remain constant, while the free-energy gap changes. Changing the sensor parameter changes the generative model and can change the evidence. The parameter slider demonstrates a model change; it does not implement a learning algorithm or change the physical lamp.</figcaption></figure>
+<h2 id="notation-to-carry-forward"><span class="secno">6</span>Notation to carry forward</h2>
 <div class="tablewrap"><table class="notation"><tbody><tr><th>$\vartheta$</th><td>True states of the world. The generative <em>process</em>. The agent never sees these.</td></tr><tr><th>$s$</th><td>Hidden states in the agent's generative <em>model</em>. Latent variables the agent infers.</td></tr><tr><th>$o$</th><td>Observations, the sensory states on the blanket. Shared by both sides.</td></tr><tr><th>$a$</th><td>Actions, the active states on the blanket. Chosen by the agent, felt by the world.</td></tr><tr><th>$\mu$</th><td>Internal states: the physical variables carrying the model. Not the same as $s$, which is a variable inside it. Returns in Week&nbsp;5.</td></tr><tr><th>$P(o \mid s)$</th><td>The likelihood. What the model says each state predicts.</td></tr><tr><th>$P(s)$</th><td>The prior over states, before any observation.</td></tr><tr><th>$P(o)$</th><td>The model evidence, or marginal likelihood. The quantity whose logarithm is minus the surprise.</td></tr><tr><th>$P(s \mid o)$</th><td>The posterior. What the agent should believe after seeing $o$. The object of the next two lessons.</td></tr><tr><th>$P(o, s)$</th><td>The joint distribution over observations and model states. The generative model itself, <a class="eqref" href="#eq-gen-model">(1.2.1)</a>.</td></tr><tr><th>$P^{*}(\cdot)$</th><td>A star marks a distribution belonging to the <em>process</em>: the frequencies the world actually produces. No agent can evaluate it.</td></tr><tr><th>$P_A(\cdot),\ P_B(\cdot)$</th><td>A subscript marks the same distribution computed under a named agent's <em>model</em>.</td></tr><tr><th>$D_{\mathrm{KL}}[Q \,\|\, P]$</th><td>Kullback&ndash;Leibler divergence, $\sum_x Q(x)\ln[Q(x)/P(x)]$. Non-negative, zero only when $Q = P$, and not symmetric. Lesson&nbsp;3.</td></tr><tr><th>$\mathrm{H}[P]$</th><td>Shannon entropy, $-\sum_x P(x)\ln P(x)$, in nats. Lesson&nbsp;1.</td></tr></tbody></table></div>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
 <li>If an agent's model contains a hidden state called "predator" and there is no predator in the world, is the model's likelihood $P(o \mid s)$ ill-defined? Why not?</li>
 <li>Which of $\vartheta$, $s$, $o$, $a$ appear on both sides of the Markov blanket?</li>
 <li>Explain in one sentence why the marginalisation problem belongs to the agent rather than the world.</li>
-</ul></div></article><nav class="pagenav"><a class="pv" href="../week-01/soft-body.html"><span class="dir">Previous</span><span class="ttl">A soft body in a hard world</span></a><a class="nx" href="../week-01/bayes.html"><span class="dir">Next</span><span class="ttl">Bayes with states and observations</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
-<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-01/soft-body.html"><span class="dir">Previous</span><span class="ttl">Regulation and inference</span></a><a class="nx" href="../week-01/bayes.html"><span class="dir">Next</span><span class="ttl">Bayes with states and observations</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script><script defer src="../assets/js/review-widgets.js"></script>
 </body>
 </html>

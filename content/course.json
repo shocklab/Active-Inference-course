@@ -1,26 +1,26 @@
 {
   "title": "Active Inference",
-  "subtitle": "A twelve-week course that does the algebra the textbooks leave out, and lets you turn every knob.",
-  "eyebrow": "Open course \u00b7 University of Cape Town",
+  "subtitle": "A twelve-week course with worked derivations, interactive examples and Python notebooks.",
+  "eyebrow": "Open course · University of Cape Town",
   "parts": {
-    "I. Inference": "From Bayes\u2019 theorem to the variational bound",
+    "I. Inference": "From Bayes’ theorem to the variational bound",
     "II. Continuous time": "Predictive coding, generalised coordinates, filtering",
     "III. Discrete time": "POMDPs, expected free energy, policy selection",
-    "IV. Perspective": "Extensions, connections, and honest objections"
+    "IV. Perspective": "Extensions, connections and objections"
   },
   "weeks": [
     {
       "n": 1,
       "part": "I. Inference",
       "title": "The hypothesis-testing agent",
-      "summary": "Why anything that persists must carry a model of what it persists in, and why running that model backwards is the hard direction.",
+      "summary": "Feedback regulation, generative models, Bayesian inference and the computational cost of marginalisation.",
       "status": "built"
     },
     {
       "n": 2,
       "part": "I. Inference",
       "title": "Hidden state estimation",
-      "summary": "Two rules a physical nervous system has to obey, and a nonlinear inference problem that breaks exact methods. Maximum a posteriori by gradient ascent on the log joint, whose gradient turns out to be two precision-weighted prediction errors: predictive coding, derived rather than assumed. Then what the mode costs you."
+      "summary": "Inferring a hidden distance from a noisy measurement. Numerical integration, MAP estimation, precision-weighted prediction errors and the decisions supported by a posterior."
     },
     {
       "n": 3,
@@ -32,7 +32,7 @@
       "n": 4,
       "part": "I. Inference",
       "title": "Variational free energy",
-      "summary": "The heart of the course. Jensen\u2019s inequality, the bound on surprise, and the three decompositions of free energy written out line by line."
+      "summary": "The heart of the course. Jensen’s inequality, the bound on surprise, and the three decompositions of free energy written out line by line."
     },
     {
       "n": 5,
@@ -62,7 +62,7 @@
       "n": 9,
       "part": "III. Discrete time",
       "title": "Discrete generative models",
-      "summary": "Partially observable Markov decision processes, and the matrices A, B, C, D and E that specify one. State inference by variational message passing."
+      "summary": "Partially observable Markov decision processes, their defining matrices, and comparisons of variational, belief and marginal message passing."
     },
     {
       "n": 10,

@@ -197,9 +197,7 @@ so $P(s_1 = 1 \mid o = 1) = {{noisy3_joint_mass:.5f}} / {{noisy3_ev:.5f}} = {{no
 The answer *falls* from ${{noisy_marg_gust:.3f}}$ to ${{noisy3_marg:.3f}}$. With more candidate explanations
 available, the evidence is spread more thinly across them: the observation still
 says "something did this", but there are now three somethings to choose from and
-each individually gets less of the credit. Explaining away gets stronger as the
-number of competing causes grows, which is precisely why a factorised
-approximation gets worse in exactly the regime where you most want to use it.
+each individually gets less of the credit. This comparison concerns these two specified models. It does not establish a general monotonic relation between cause count and approximation error.
 :::
 
 ::: exercise The survival curve &dagger;
@@ -208,8 +206,7 @@ to zero, $\kappa = 0$. It is then a two-dimensional random walk with independent
 $\sigma$ per step in each coordinate, starting at the origin, absorbed when
 $\|x\| > 1$.
 
-(a) Argue from dimensional analysis alone that the expected number of steps
-before absorption scales as $\sigma^{-2}$.
+(a) Use a small-step diffusion approximation to motivate an expected absorption time proportional to $\sigma^{-2}$. Why need this not be exact for a discrete walk?
 
 (b) The notebook measures this by simulation. Predict the ratio of survival
 times at $\sigma = 0.09$ and $\sigma = 0.035$ before you run it.
@@ -217,20 +214,18 @@ times at $\sigma = 0.09$ and $\sigma = 0.035$ before you run it.
 (a) After $n$ steps the walk's displacement has variance $n\sigma^2$ in each
 coordinate, so the typical distance from the origin is of order
 $\sigma\sqrt{n}$. Absorption happens when this reaches the boundary at radius
-$1$, so $\sigma\sqrt{n} \sim 1$ and $n \sim \sigma^{-2}$. There is no other
-length or time scale in the problem: the radius is fixed at one and the only
-parameter is $\sigma$, so the scaling is forced.
+$1$, so $\sigma\sqrt{n} \sim 1$ and $n \sim \sigma^{-2}$. This estimates the scaling, not an exact discrete first-passage time. A finite
+step can overshoot the boundary; the approximation improves as the step size
+becomes small relative to the radius.
 
 (b) The ratio is $({{sigma_hi}} / {{sigma_lo}})^{-2} = ({{sigma_lo}}/{{sigma_hi}})^2 = {{lifetime_ratio:.3f}}$. Halving the
 noise should quadruple the lifetime, and the roughly {{sigma_ratio:.1f}}-fold increase in
 $\sigma$ here should cut it by a factor of about ${{lifetime_factor:.1f}}$.
 
-Register this as intuition about what regulation is
-buying. Without action, lifetime scales as the inverse square of the noise: a
-punishing dependence. With action, as the figure in [lesson:1.1] shows, the
-walk does not diffuse at all, and lifetime is no longer set by $\sigma$ in the
-same way. That is a qualitative change in the character of the dynamics, not
-merely a better constant.
+For stable regulation the unabsorbed process has a stationary variance, but an
+absorbing boundary can still be crossed. Compare survival distributions at
+fixed observation horizons rather than inferring indefinite survival from
+bounded variance.
 :::
 
 ## Further reading

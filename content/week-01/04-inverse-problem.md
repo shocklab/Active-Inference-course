@@ -1,6 +1,6 @@
 ---
 title: The inverse problem
-deck: Running a model forwards is a lookup. Running it backwards is a global computation over everything the model admits, and it does not decompose.
+deck: Inferring hidden causes, explaining away, and the dependence that a factorised approximation cannot represent.
 week: 1
 time: 30 min
 scripts: [w01.js]
@@ -11,13 +11,12 @@ state, it hands you a distribution over observations. That direction is cheap:
 it is what the model is *for*, and the answer is sitting in a column of a matrix.
 
 Perception needs the other direction. Given the consequence, what was the cause?
-This is called **model inversion**, and the asymmetry between the two directions
-is not a matter of degree.
+This is called **model inversion**, and its cost and uniqueness depend on the model.
 
 ::: widget forward-inverse | One likelihood matrix, read two ways. Click any cell to change the selection. In forward mode you read a column and stop. In inverse mode you read a row, weight it by the prior, and then owe a sum over every state in the model.
 :::
 
-## Why the inverse direction is structurally harder
+## What inversion requires
 
 Three separate things go wrong at once. Keep them apart, because different techniques attack different ones.
 
@@ -34,17 +33,11 @@ and that sum ranges over every state the model admits, including all the ones
 that had nothing to do with the observation. The cost of answering a local
 question is global.
 
-**It is unstable.** Where the likelihood is nearly flat, small changes in the
-data produce large swings in the posterior. This is the classical signature of
-an ill-posed problem in the sense of Hadamard, and it is why the prior is not
-optional. The prior is what regularises the inversion.
-
-::: mn Ill-posedness
-Hadamard called a problem well-posed if a solution exists, is unique, and
-depends continuously on the data. Model inversion routinely fails the second
-and third. Every practical method for solving it is, at bottom, a way of
-smuggling in enough prior structure to restore well-posedness.
-:::
+**It may be poorly determined.** If the likelihood varies little across states,
+the data may leave the prior almost unchanged. This is weak information, not by
+itself instability of the posterior. In continuous inverse problems, an inverse
+map can instead be sensitive to small measurement changes. Prior assumptions can
+regularise that problem, but their effect has to be checked for the chosen model.
 
 ## Explaining away
 
@@ -56,8 +49,7 @@ factors, do not reason about the joint state at all. Reason about each part sepa
 your model has $n$ factors with $k$ values each, that turns $k^n$ into $nk$, and
 the problem evaporates.
 
-It does not work, and why it does not work is what the rest of this lesson is about, because Week&nbsp;4 is going to do it anyway
-and you need to know what is being given up.
+Independent prior factors need not remain independent after observing data. We can test that possibility with two competing causes.
 
 Take two independent causes. This is a new and smaller model than the three-
 state one of Lesson 3, chosen because two competing causes are the fewest that
@@ -68,9 +60,8 @@ $$
 P(s_{\text{gust}} = 1) = P(s_{\text{bab}} = 1) = 0.1,
 $$
 
-and, importantly, they are independent *a priori*: wind does not summon baboons.
-Now the likelihood. Rather than write a formula down and check it works, build
-it from the causal story, because the shape then explains itself.
+and they are independent *a priori*: wind does not summon baboons.
+We can construct the likelihood from independent attempts to produce the observation.
 
 Suppose each cause, when present, makes its own independent attempt to shake the
 branch, and succeeds with probability $w$. Suppose also the branch sometimes
@@ -110,7 +101,7 @@ $$
 P(s_{\text{gust}} = 1 \mid o) \;=\; P(s_{\text{bab}} = 1 \mid o) \;=\; {{noisy_marg_gust:.3f}},
 $$
 
-up from $0.1$. So far so unremarkable. Now look at the joint. If the posterior
+up from $0.1$. Now compare the joint probability with the product of these marginals. If the posterior
 factorised, the probability of *both* causes being present would be the product
 of the marginals, ${{noisy_marg_gust:.3f}}^2 = {{noisy_prod_marginals:.3f}}$. The actual value in the table is ${{noisy_post_11:.3f}}$, smaller by a factor
 of {{noisy_collapse_ratio:.1f}}.
@@ -131,9 +122,7 @@ away** the shaking branch, and the baboon is no longer needed.
 ::: keyidea
 Independent priors plus a shared observation gives a coupled posterior. This is
 not a quirk of noisy-OR; it happens whenever two causes compete to account for
-the same data. The consequence is blunt: you cannot invert a model factor by
-factor, because the posterior over one factor depends on the posterior over the
-others. The intractable sum does not decompose.
+the same data. A calculation that updates the prior factors independently would miss that dependence. This does not rule out exact message passing or other ways to exploit structure, as [lesson:1.5] shows.
 :::
 
 ### Why it happens
@@ -164,22 +153,13 @@ of a single cause, because one cause already does nearly all the work available.
 A second cause adds almost nothing, so the evidence has almost nothing extra to
 buy with it, and the two causes end up competing for the same credit.
 
-The sign is not universal either. Explaining away
-depends on the causes being **sufficient**: either alone can produce the effect.
-Reverse that, so both are jointly *necessary* and neither alone suffices, and the
-correlation flips: learning one cause is present makes the other **more** likely,
-since the effect still needs explaining and only the second cause can supply it.
-Competition and collaboration are both available; which you get is set by the
-structure of the likelihood, not by anything about priors.
+The sign depends on the likelihood. It is not enough to call causes
+"necessary" or "sufficient". For a deterministic AND observation, learning the
+effect occurred fixes both binary causes to one, leaving no residual uncertainty
+or nontrivial correlation. For noisy alternatives, inspect the conditional
+probability table and calculate the dependence explicitly.
 
-Explaining away also has a life outside mathematics. It is a real property of perception, it is what
-makes a plausible alternative explanation reduce your confidence in the first
-one, and it is one of the sharper tests of whether a candidate neural circuit is
-really doing inference: a circuit that merely accumulates evidence for each
-cause separately cannot produce it, because the effect requires the causes to
-see one another.
-
-## Three families of response
+## Methods for inference
 
 There are three families of response, and the entire structure of Part&nbsp;I is
 a tour of them.
@@ -187,27 +167,26 @@ a tour of them.
 **Solve it exactly, where the model lets you.** Some pairings of prior and
 likelihood have posteriors in closed form. If the likelihood is Gaussian with
 known variance and the prior over the mean is Gaussian, the posterior is
-Gaussian and you can write down its parameters in two lines. This is **conjugacy**: a prior family and a likelihood family are conjugate when the posterior always lands back in the prior's family, so updating changes the parameters and never the form. That is stronger than merely having a closed form, and it is what lets the update be applied over and over without the expression growing. It is the backbone of Week&nbsp;2, and it works right up until your model has any structure you actually wanted.
+Gaussian and you can write down its parameters in two lines. This is **conjugacy**: a prior family and a likelihood family are conjugate when the posterior always lands back in the prior's family, so updating changes the parameters and never the form. That is stronger than merely having a closed form, and it is what lets the update be applied over and over without the expression growing. It is the backbone of Week&nbsp;2, and remains useful for models whose assumptions match the task.
 
 **Sample from it.** Do not compute $P(s\mid o)$; draw from it. Markov chain
 Monte Carlo needs only ratios of posterior values, and the intractable $P(o)$
-cancels in every ratio. This is the correct method for a statistician with a
-week to spare, and the wrong one for an animal deciding whether to run, because
-it converges in the limit and offers few guarantees before then.
+cancels in every ratio. Finite sampling has error, and an MCMC chain can mix slowly or fail to explore
+separated modes on the available timescale. These are properties to measure for
+the model and sampler, not reasons to exclude sampling from biological accounts.
+Sampling methods and optimisation methods can both provide evolving estimates.
 
 **Turn it into optimisation.** Give up on the exact posterior. Choose a family
 of distributions $Q(s)$ you can compute with, define a measure of how far $Q$ is
 from the true posterior, and descend it. Because the measure can be arranged so
 that the intractable term drops out, you can minimise a distance to something
-you cannot evaluate. That trick is variational inference, and the quantity you descend is the **free energy**. Week&nbsp;4 builds it, but the shape is already visible from [eq:two-kls]: it is the reverse divergence with the intractable $\ln P(o)$ added back, which makes it computable from $Q$ and the generative model alone, and an upper bound on the surprise. It occupies Week&nbsp;4 and everything after.
+you cannot evaluate. That trick is variational inference, and the quantity you descend is the **free energy**. Week&nbsp;4 builds it, but the shape is already visible from [eq:two-kls]: it is the reverse divergence minus $\ln P(o)$, which makes it computable from $Q$ and the generative model alone, and an upper bound on the surprise. It occupies Week&nbsp;4 and everything after.
 
-::: remark Why optimisation suits an embodied agent
-The optimisation route is the only one of the three that offers a partial answer
-at every instant, improves continuously with more time, and turns inference into
-a dynamical system. An animal does not get to say "my chain has not mixed yet".
-It gets to have a current best guess that is being continuously corrected, which
-is exactly what gradient descent on a free energy gives you.
-:::
+A variational distribution gives a current approximation during optimisation.
+That approximation may be useful before convergence, but convergence and accuracy
+are separate: even an optimised member of a restricted family can be far from
+the posterior. [lesson:1.5] compares the representation errors of sampling and
+factorisation on this example.
 
 ::: warning What the third option costs
 The family of distributions $Q$ has to be one you can compute with, and by far
@@ -218,7 +197,7 @@ or $Q(s_1, s_2) = Q(s_1)Q(s_2)$ once we stop naming them. Look back at
 the true posterior is correlated and no product of marginals is.
 :::
 
-## How far off is the best factorised approximation?
+## Comparing factorised approximations
 
 That question hides a choice, and the choice decides the answer. Make it explicit now, because Week&nbsp;4 rests on it.
 
@@ -264,22 +243,66 @@ ${{noisy_gap_forward:.4f}}$ nats. This is a lemma, not an accident of these
 numbers: forward KL over a product family always returns the marginals.
 :::
 
-Variational inference does not use that direction, and the reason is not aesthetic. The forward divergence takes its expectation under $P$, and $P$ is precisely
-what we cannot compute. The reverse takes its expectation under $Q$, which we
-chose and therefore know. The direction is forced on us by tractability, not
-chosen for its properties, and its properties turn out to matter.
+The usual variational free-energy objective uses the reverse direction. Its
+expectations are taken under $Q$, which we choose to make manageable. The forward
+direction instead involves expectations under the target posterior. This motivates
+the usual choice, but does not prohibit other objectives or sampling-based
+estimates of their gradients.
 
 ::: derivation The reverse direction picks a side
-Minimise the right of [eq:two-kls] instead. Vary $q_1$ with $q_2$ held fixed,
-impose normalisation with a Lagrange multiplier, and the stationary condition is
+Write $x=s_{\mathrm{gust}}$, $y=s_{\mathrm{bab}}$ temporarily, and hold $q_2$
+fixed. The part of the reverse KL that depends on $q_1$ is
 
 $$
-\ln q_1(s_{\text{gust}}) \;=\; \mathbb{E}_{q_2}\big[\ln P(s_{\text{gust}}, s_{\text{bab}})\big] + \text{const},
+J(q_1)=\sum_x q_1(x)\ln q_1(x)
+-\sum_xq_1(x)\sum_yq_2(y)\ln P(x,y)+\text{const}.
+$$
+
+The $q_2\ln q_2$ term is constant because $\sum_xq_1(x)=1$. Define
+$B(x)=\sum_yq_2(y)\ln P(x,y)$, an expected log probability. Add a Lagrange
+multiplier $c$ for the constraint $\sum_xq_1(x)=1$. Differentiating with respect
+to each entry $q_1(x)$ gives
+
+$$
+\ln q_1(x)+1-B(x)+c=0.
+$$
+
+Thus $\ln q_1(x)=B(x)-1-c$. Exponentiating and normalising removes the unknown
+constant:
+
+$$
+q_1(x)=\frac{\exp B(x)}{\sum_{x'}\exp B(x')}.
+$$
+
+Returning to the original labels,
+
+$$
+\ln q_1(s_{\mathrm{gust}})
+=\mathbb E_{q_2}[\ln P(s_{\mathrm{gust}},s_{\mathrm{bab}})]+\text{const}.
 $$ {#cavi}
 
-with the mirror equation for $q_2$. Alternating them until nothing moves is
-**coordinate ascent**, and [eq:cavi] is the update Week&nbsp;4 derives in general.
-Run on the table above it converges to
+The entropy term has second derivative $1/q_1(x)>0$ in each positive entry;
+the remaining term is linear. This is the minimiser for one factor with the
+other held fixed. Alternating the two updates is coordinate descent on reverse
+KL, equivalently **coordinate ascent** on the negative free energy. It need not
+find the global optimum jointly; the result can depend on initialisation.
+
+
+
+Start with $q_1(1)=9/20$ and $q_2(1)=11/20$, updating the gust factor first.
+For example, the log-score difference for its first update is
+
+$$
+B(1)-B(0)=\frac9{20}\ln\frac{P(1,0)}{P(0,0)}
++\frac{11}{20}\ln\frac{P(1,1)}{P(0,1)}.
+$$
+
+Normalisation gives $q_1(1)=1/[1+\exp(B(0)-B(1))]$, which evaluates to
+${{cavi_first_gust:.4f}}$. Using this new factor in the second update gives
+$q_2(1)={{cavi_first_bab:.4f}}$. Repeat in this order; a practical stopping
+criterion is that the largest change in either probability is below a chosen
+tolerance. The displayed calculation uses 400 sweeps and checks its fixed-point
+residual. It converges to
 
 $$
 q_1(s_{\text{gust}}\!=\!1) = {{noisy_mf_gust:.4f}},
@@ -291,11 +314,10 @@ a gap of ${{noisy_gap_reverse:.4f}}$ nats. The two causes entered the model
 interchangeably and the answer has stopped treating them that way.
 :::
 
-The symmetry breaking is not numerical noise. Score the *symmetric* product, both
+For comparison, score the product of the true posterior marginals, both
 marginals at ${{noisy_marg_gust:.4f}}$, under the reverse divergence and you get
-${{noisy_gap_reverse_symmetric:.4f}}$ nats, genuinely worse than the lopsided
-${{noisy_gap_reverse:.4f}}$. Under this objective, committing to one story beats
-splitting the difference.
+${{noisy_gap_reverse_symmetric:.4f}}$ nats, higher than the asymmetric
+${{noisy_gap_reverse:.4f}}$. This compares two particular products; it does not establish that every symmetric product is worse.
 
 The reason is visible in the table. The true posterior puts its mass on the two
 states where exactly one cause fired, and almost none on $(1,1)$ or $(0,0)$. A
@@ -308,7 +330,7 @@ altogether than put mass where $P$ has none. Forward KL has the opposite
 instinct, since there the offending term is $P\ln(P/Q)$, which blows up where
 $P$ is large and $Q$ is small, so it insists on covering everything $P$ covers.
 
-::: fig The same posterior, two ways. Area is probability. The true posterior puts its mass on the two states where exactly one cause fired; no product of marginals has that shape, so the best product commits to one of them and inflates the corners.
+::: fig The same posterior, two ways. The cells have equal area; labels give probabilities and shading indicates their relative size. The true posterior puts its mass on the two states where exactly one cause fired; no product of marginals has that shape, so the best product commits to one of them and inflates the corners.
 <svg viewBox="0 0 660 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two two-by-two grids comparing the true posterior with the best factorised approximation.">
   <rect x="1" y="1" width="658" height="248" fill="#fdfcf9" stroke="#e4e1d9"/>
   <text x="150" y="30" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="12" font-weight="600" fill="#0f5f57">true posterior</text>
@@ -369,18 +391,14 @@ An agent tracks $n = 15$ binary state factors. Give the number of terms in the
 evidence sum, and state how many factors could be added before the sum exceeds
 the number of nanoseconds since the Big Bang, roughly $4.4 \times 10^{26}$.
 ---solution---
-With $k = 2$ and $n = 15$ the sum has $2^{15} = {{terms_15_binary:,}}$ terms, which is
-nothing: a modern processor does this in microseconds.
+With $k = 2$ and $n = 15$ the sum has $2^{15} = {{terms_15_binary:,}}$ terms, before counting the cost of evaluating each term.
 
 For the second part, $2^n > 4.4\times10^{26}$ requires
 $n > \log_2(4.4\times10^{26}) = {{log2_universe:.2f}}$, so
 $n = {{factors_to_exceed_universe:d}}$ factors. Working in base ten instead,
 $\log_{10}(4.4\times10^{26}) = {{log10_universe:.3f}}$, and dividing by
 $\log_{10}2$ gives the same answer. Keep the third decimal: rounding that to
-$26.6$ before dividing costs you more than a tenth of a factor. Adding {{factors_to_add:d}} binary variables to a tractable problem makes it impossible
-for any physical computer, ever. This is what is meant by saying the difficulty
-is structural rather than an engineering matter, and it is why the response has
-to be a different algorithm rather than a bigger machine.
+$26.6$ before dividing costs you more than a tenth of a factor. Adding {{factors_to_add:d}} binary variables exceeds this illustrative enumeration budget. A structured model may still admit a much cheaper exact algorithm; [lesson:1.5] provides one.
 :::
 
 ::: checkpoint

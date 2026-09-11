@@ -4,7 +4,7 @@ The prose refers to these by key, as {{ev_tawny:.4f}}, and build_site.py
 substitutes the computed value. A number that appears in a lesson but not here
 is a number nobody has checked; build/check_numbers.py reports those.
 
-Run standalone to see the values:  python3 content/week-01/numbers.py
+Run standalone to see the values:  python3 content/week-01/values.py
 """
 import itertools
 from decimal import Decimal
@@ -294,78 +294,48 @@ V["lamp_kl"] = sum(_star[o] * log(_star[o] / _QB[o]) for o in _star)
 # ── the cost of the denominator, Lesson 5 ────────────────────────────────
 # Everything here is an exact count except the four wall-clock figures, which
 # are measurements and are labelled as such.
-DEN_K, DEN_N = 4, 40
-V["den_k"], V["den_n"] = DEN_K, DEN_N
-V["den_terms"] = DEN_K ** DEN_N
-V["den_chain_ops"] = (DEN_N - 1) * DEN_K ** 2
+# Superseded denominator timings and exp(-KL) ESS keys are not exported.
+from fractions import Fraction as Fr
+from itertools import product as assignments
+_cp=[Fr(2,5),Fr(3,5)]
+_ct=[[Fr(7,10),Fr(2,10)],[Fr(3,10),Fr(8,10)]]
+_cl=[Fr(1,10),Fr(9,10)]
+_ce=Fr(0)
+for _a,_b,_c in assignments(range(2),repeat=3):
+    _v=_cp[_a]*_ct[_b][_a]*_ct[_c][_b]*_cl[_c]
+    V[f"chain_{_a}{_b}{_c}"]=float(_v)
+    _ce+=_v
+_m2=[sum(_ct[j][i]*_cl[j] for j in range(2)) for i in range(2)]
+_m1=[sum(_ct[j][i]*_m2[j] for j in range(2)) for i in range(2)]
+assert sum(_cp[i]*_m1[i] for i in range(2))==_ce
+V.update(chain_evidence=float(_ce),chain_m20=float(_m2[0]),chain_m21=float(_m2[1]),chain_m10=float(_m1[0]),chain_m11=float(_m1[1]))
+_lj=[0.5*0.8,0.5*0.2]
+V["lab_evidence"]=sum(_lj)
+V["lab_posterior"]=_lj[0]/sum(_lj)
+V["lab_surprise"]=-log(V["lab_evidence"])
+V["lab_F_initial"]=sum(0.5*log(0.5/j) for j in _lj)
 
-# Elimination costs k^(w+1) per bucket, with w the treewidth of the model's
-# graph: 1 for a chain or any tree, about sqrt(n) for a square grid, n-1 when
-# every variable touches every other.
-V["den_grid_n"] = 36
-V["den_grid_w"] = 6
-V["den_grid_ops"] = V["den_grid_n"] * DEN_K ** (V["den_grid_w"] + 1)
-V["den_grid_brute"] = DEN_K ** V["den_grid_n"]
-V["den_dense_w"] = DEN_N - 1
+# First CAVI sweep, using the same asymmetric start as the worked solver.
+_q20 = [0.45, 0.55]
+_logq1 = [sum(_q20[j] * log(_P[i][j]) for j in range(2)) for i in range(2)]
+_firstq1 = [exp(v) for v in _logq1]
+_firstq1 = [v/sum(_firstq1) for v in _firstq1]
+_logq2 = [sum(_firstq1[i] * log(_P[i][j]) for i in range(2)) for j in range(2)]
+_firstq2 = [exp(v) for v in _logq2]
+_firstq2 = [v/sum(_firstq2) for v in _firstq2]
+_check1, _check2 = _cavi(_P, 401)
+assert max(abs(a-b) for a,b in zip(_q1+_q2, _check1+_check2)) < 1e-12
+V['cavi_first_gust'] = _firstq1[1]
+V['cavi_first_bab'] = _firstq2[1]
 
-# Measured on this machine (Apple M-series, CPython 3.13, single core,
-# 2026-08-27) by the timing cell of the Week 1 notebook. Recorded rather than
-# derived: they are observations of one computer, not properties of the problem,
-# and the operation counts above are what the argument actually rests on.
-# Two runs on the same machine gave 34969 ms and 34133 ms for brute force, and
-# 0.31 ms and 0.07 ms for elimination. The brute-force figure is stable to a
-# couple of per cent; the elimination figure is sub-millisecond and dominated by
-# timer noise, so it is quoted to one significant figure and the ratio only to
-# an order of magnitude. Quoting either to five figures, as a first draft did,
-# would be reporting the noise.
-V["den_brute_s_n12"] = 35
-V["den_elim_ms_n12"] = 0.1
-V["den_measured_n"] = 12
-V["den_measured_terms"] = DEN_K ** 12
-V["den_speedup_order"] = 5   # log10 of the ratio, which is all it supports
-
-# Quadrature: with r bounded derivatives in n dimensions the best possible
-# deterministic error from m points is of order m^(-r/n), so holding the error
-# at eps needs m ~ eps^(-n/r) points. Bakhvalov's bound; r = 2 taken here.
-V["quad_eps"] = 0.01
-V["quad_r"] = 2
-for _n in (1, 2, 5, 10, 20):
-    V[f"quad_pts_n{_n}"] = V["quad_eps"] ** (-_n / V["quad_r"])
-
-# Importance sampling escapes the dimension in its rate but not its constant.
-# Effective sample size falls like exp(-KL), and over n independent coordinates
-# the divergence adds, so the sample count needed grows exponentially again.
-V["is_kl_per_coord"] = 0.5
-V["is_target_ess"] = 1000
-for _n in (1, 10, 20, 50):
-    _kl = _n * V["is_kl_per_coord"]
-    V[f"is_kl_n{_n}"] = _kl
-    V[f"is_ess_frac_n{_n}"] = exp(-_kl)
-    V[f"is_samples_n{_n}"] = V["is_target_ess"] * exp(_kl)
-
-# ── the continuous marginal, from Mathematica ────────────────────────────
-# Recorded results, not derivations: wolframscript 14.3 returns the integral
-# unevaluated for the inverse-square link and Sqrt[2 Pi/11] Exp[-45/44] for the
-# linear one. The value below is NIntegrate at WorkingPrecision 50, quoted to
-# 20 digits, of Integrate[Exp[-5(1/2 - 1/d^2)^2 - (d-2)^2/2], {d, 0, Infinity}]
-# with Week 2's numbers. Verified against Python quadrature to 12 digits.
-# A Decimal, not a float. A float carries about 17 significant digits, so
-# formatting one to 20 places does not fail, it INVENTS the last three: the
-# first version of this line published 1.40110530805058952630 for a number
-# whose true value is 1.4011053080505894180. Anything quoted beyond 17 digits
-# has to be carried as text or Decimal all the way to the page.
-V["nl_marginal_20"] = Decimal("1.4011053080505894180")
-
-# FindIntegerNullVector against {value, 1, Pi, Sqrt[Pi], E, Sqrt[2], Log[2]}.
-# A genuine relation keeps its coefficients as precision rises; these do not,
-# and the 28-digit relation's residual sits at 7.9e-28, exactly the precision it
-# was fitted to. There is no relation in that basis.
-V["pslq_coeff_20"] = 17944
-V["pslq_coeff_36"] = 2255543
-
-# ── constants quoted in prose ────────────────────────────────────────────
-V["ln2"] = log(2)
-V["nats_to_bits"] = 1 / log(2)
+# Conditional-independence example, conditioned on the positive report.
+for external in (0, 1):
+    for internal in (0, 1):
+        V[f'blanket_{external}{internal}'] = (0.9 if external else 0.1) * (0.8 if internal else 0.2)
+V['blanket_direct'] = 0.3 + 0.7 * 0.8
+V['blanket_other'] = 0.7 * 0.8
+V['blanket_joint'] = 0.9 * V['blanket_direct']
+V['blanket_product'] = 0.9 * (0.9*V['blanket_direct'] + 0.1*V['blanket_other'])
 
 VALUES = V
 

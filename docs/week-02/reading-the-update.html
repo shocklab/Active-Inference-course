@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reading the update · Active Inference</title><meta name="description" content="The rule from Lesson 3 has three moving parts. Each one has a job, and together they are a circuit that has been proposed as a model of cortex."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Precision and prediction errors · Active Inference</title><meta name="description" content="Interpreting the gradient, deriving the linear Gaussian case, and specifying a prediction-error circuit."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
 :root{
   --paper:#fdfcf9; --card:#ffffff;
   --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
@@ -350,19 +350,19 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Two rules a brain has to obey</a><a class="" href="../week-02/exact.html">A problem small enough to solve exactly</a><a class="" href="../week-02/climbing.html">Climbing the log joint</a><a class="cur" href="../week-02/reading-the-update.html">Reading the update</a><a class="" href="../week-02/exercises.html">Problems and code</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Reading the update</h1><p class="deck">The rule from Lesson 3 has three moving parts. Each one has a job, and together they are a circuit that has been proposed as a model of cortex.</p><div class="meta"><span>Week 2</span><span>&#167;4</span><span>40 min</span></div></header><article class="abody"><p>The result of <a href="../week-02/climbing.html">Lesson&nbsp;3</a> was</p>
-<div class="eqn" id="eq-recall"><div class="eqbody">$$\dot{d} \;=\; \eta\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Local computation and learning</a><a class="" href="../week-02/exact.html">Inferring distance from a sound</a><a class="" href="../week-02/climbing.html">MAP estimation by gradient ascent</a><a class="cur" href="../week-02/reading-the-update.html">Precision and prediction errors</a><a class="" href="../week-02/exercises.html">Problems and code</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Precision and prediction errors</h1><p class="deck">Interpreting the gradient, deriving the linear Gaussian case, and specifying a prediction-error circuit.</p><div class="meta"><span>Week 2</span><span>&#167;4</span><span>40 min</span></div></header><article class="abody"><p>The result of <a href="../week-02/climbing.html">Lesson&nbsp;3</a> was</p>
+<div class="eqn" id="eq-recall"><div class="eqbody">$$\dot{d} \;=\; \nu\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),
 \qquad
 \varepsilon_p = \frac{d_p - d}{\Sigma_p},
 \qquad
-\varepsilon_u = \frac{u - g(d)}{\Sigma_u}.$$</div><div class="eqno"><a href="#eq-recall" title="Link to equation 2.4.3">(2.4.3)</a></div></div>
+\varepsilon_u = \frac{u - g(d)}{\Sigma_u}.$$</div><div class="eqno"><a href="#eq-recall" title="Link to equation 2.4.1">(2.4.1)</a></div></div>
 <p>Three moving parts: two errors and a factor multiplying one of them. This lesson
 takes them one at a time, then puts the pieces back together as a circuit.</p>
 <h2 id="precisions"><span class="secno">1</span>Precisions</h2>
 <p>Dividing by a variance appears twice, so give it a name.</p>
 <p>Lesson&nbsp;3 defined the precision of a Gaussian channel as the reciprocal of
 its variance. Give the two of them symbols:</p>
-<div class="eqn" id="eq-precisions"><div class="eqbody">$$\Pi_p \;=\; \frac{1}{\Sigma_p}, \qquad \Pi_u \;=\; \frac{1}{\Sigma_u}.$$</div><div class="eqno"><a href="#eq-precisions" title="Link to equation 2.4.4">(2.4.4)</a></div></div>
+<div class="eqn" id="eq-precisions"><div class="eqbody">$$\Pi_p \;=\; \frac{1}{\Sigma_p}, \qquad \Pi_u \;=\; \frac{1}{\Sigma_u}.$$</div><div class="eqno"><a href="#eq-precisions" title="Link to equation 2.4.2">(2.4.2)</a></div></div>
 <p>Their units are the inverse of a squared measurement, so $\Pi_u$ is in inverse
 squared intensity and $\Pi_p$ in inverse squared distance. They are therefore not
 comparable numbers, and adding them directly would be adding a length to a
@@ -371,62 +371,60 @@ because the link has been made the identity, so that $u$ and $d$ carry the same
 units and the two precisions become the same kind of quantity. With a general
 $g$ the conversion costs a factor of $g'^2$, which the curvature exercise at the
 end works out.</p>
-<aside class="mn"><span class="mnl">Why not just say variance</span><p>Because every rule in the rest of the course multiplies by a precision rather
-than dividing by a variance, and the multiplicative form is the one that reads as
-a gain on a signal. Weeks&nbsp;5 to 8 make that gain a physical quantity that the
+<aside class="mn"><span class="mnl">Why not just say variance</span><p>Writing inverse variance as precision makes the multiplicative gain on an error signal explicit. Weeks&nbsp;5 to 8 make that gain a physical quantity that the
 system can adjust.</p></aside>
-<p>Rewriting <a class="eqref" href="#eq-recall">(2.4.3)</a>:</p>
-<div class="eqn" id="eq-precision-form"><div class="eqbody">$$\dot{d} \;=\; \eta\Big(\Pi_p\,(d_p - d) \;+\; \Pi_u\,g'(d)\,\big(u - g(d)\big)\Big).$$</div><div class="eqno"><a href="#eq-precision-form" title="Link to equation 2.4.5">(2.4.5)</a></div></div>
+<p>Rewriting <a class="eqref" href="#eq-recall">(2.4.1)</a>:</p>
+<div class="eqn" id="eq-precision-form"><div class="eqbody">$$\dot{d} \;=\; \nu\Big(\Pi_p\,(d_p - d) \;+\; \Pi_u\,g'(d)\,\big(u - g(d)\big)\Big).$$</div><div class="eqno"><a href="#eq-precision-form" title="Link to equation 2.4.3">(2.4.3)</a></div></div>
 <p>Now the structure is visible. Each term is a raw error multiplied by a gain. The
 gain says how seriously to take that error, and nothing else in the expression
 says anything about seriousness.</p>
 <p>With the numbers of this week, $\Pi_p = 1.0$ and
-$\Pi_u = 10.0$: the animal treats its ear as ten times more reliable
-than its expectations, in their respective units.</p>
-<h2 id="the-four-corners"><span class="secno">2</span>The four corners</h2>
-<p>Push each precision to an extreme and read off what the rule does. These are not
-edge cases to be handled; they are the whole behaviour of the rule, seen at its
-limits.</p>
+$\Pi_u = 10.0$: these numbers have different units and cannot directly rank the two sources. The factor $g'(d)$ converts the sensory contribution into a gradient with respect to distance.</p>
+<h2 id="limits-of-the-precisions"><span class="secno">2</span>Limits of the precisions</h2>
+<p>Push each precision to an extreme and read off what the rule does. These limits describe stationary conditions, provided the solution remains in the domain. They do not give global convergence guarantees.</p>
 <p><div class="tablewrap"><table>
 <thead><tr><th>Limit</th><th>What the rule does</th><th>Reading</th></tr></thead>
 <tbody>
 <tr><td>$\Pi_u \to 0$</td><td>only the prior term survives; $d \to d_p$</td><td>A useless ear. The animal ignores what it heard and rests on what it expected.</td></tr>
 <tr><td>$\Pi_u \to \infty$</td><td>the sensory term dominates; $d$ moves until $g(d) = u$</td><td>A perfect ear. The animal believes the measurement exactly and the prior stops mattering.</td></tr>
 <tr><td>$\Pi_p \to 0$</td><td>only the sensory term survives</td><td>No expectations at all. A flat prior, and the estimate is whatever the data alone say.</td></tr>
-<tr><td>$\Pi_p \to \infty$</td><td>$d$ is pinned at $d_p$</td><td>Certainty. No evidence can move the estimate, which is what makes an infinitely precise prior a description of a delusion rather than of knowledge.</td></tr>
+<tr><td>$\Pi_p \to \infty$</td><td>$d$ is pinned at $d_p$</td><td>A limiting prior concentrated at its location. This mathematical limit alone is not a diagnosis of a psychiatric condition.</td></tr>
 </tbody>
 </table></div>
 
-The last of those needs a word more than the others, because "dominates" does
-not by itself mean "pinned". The argument is that $\dot d$ has to stay finite:
-the animal's estimate is a physical quantity and cannot move infinitely fast. In
-$\Pi_p(d_p - d)$ the first factor is growing without bound, so the product stays
-finite only if the second goes to zero at the matching rate. The single
-configuration compatible with that is $d = d_p$ exactly, so the estimate is
-pinned there and no finite sensory term can shift it.</p>
-<p>The other three limits need no such argument: in each, one term simply vanishes
-and you read off the survivor.</p>
-<p>Only the ratio matters, not the individual values. Multiplying both precisions by
-the same constant multiplies the whole bracket in <a class="eqref" href="#eq-precision-form">(2.4.5)</a> by that
-constant, which rescales $\eta$ and moves the resting point not at all. The
-resting point is set by $\Pi_u/\Pi_p$, and the rate is set by their overall size:
-the same distinction the step-size bound of Lesson&nbsp;3 ran into from the other
-direction.</p>
+To derive these limits, set the gradient to zero:</p>
+<div class="eqn"><div class="eqbody">$$0=\Pi_p(d_p-d)+\Pi_u g'(d)[u-g(d)].$$</div></div>
+<p>For $\Pi_p\to\infty$ with fixed $\Pi_u$, divide by $\Pi_p$:</p>
+<div class="eqn"><div class="eqbody">$$d-d_p=\frac{\Pi_u}{\Pi_p}g'(d)[u-g(d)].$$</div></div>
+<p>If the stationary solutions stay near the positive location $d_p$, the right-hand
+side tends to zero, so they approach $d_p$. At a finite precision the sensory
+term can still shift the solution. For $\Pi_u\to\infty$, divide instead by
+$\Pi_u$. An interior limit with $g'(d)\ne0$ must satisfy $g(d)=u$.
+Our positive observation and inverse-square map have such a solution. For a
+non-invertible map or an observation outside its range, this conclusion would
+need reconsidering. Taking either precision to zero removes its term from the
+stationary equation. A zero prior precision here means a limiting optimisation
+problem with a flat prior; that prior on the positive half-line is improper.</p>
+<p>Multiplying both precisions by the same positive constant leaves these
+stationary points unchanged. It changes the speed of the continuous dynamics
+at fixed mobility $\nu$, and can change the stability of a discrete update at
+fixed step parameter $\eta$. The stationary estimate and the numerical method
+used to reach it must therefore be considered separately.</p>
 <p>Between the corners, the estimate slides. With $\Sigma_u = 1.0$ the
-mode sits at $1.9357$, close to the prior mean of $2.0$. With
+mode sits at $1.9357$, close to the prior location of $2.0$. With
 $\Sigma_u = 0.01$ it sits at $1.4261$, close to the
 $1.4142$ the data alone would give. At the
 $\Sigma_u = 0.1$ used throughout, $1.5500$, in between.</p>
-<h2 id="what-g-is-doing"><span class="secno">3</span>What $g'$ is doing</h2>
+<h2 id="sensitivity-to-the-hidden-state"><span class="secno">3</span>Sensitivity to the hidden state</h2>
 <p>The factor $g'(d)$ appears on the sensory term and not on the prior term. It has
 two jobs, and they are the same job seen twice.</p>
-<p><strong>It converts units.</strong> $\varepsilon_u$ is an error in intensity, and $\dot d$ is a
-rate of change of distance. Something has to carry intensity into distance, and
-$g'$ has units of intensity per distance, so $g'\varepsilon_u$ comes out in
-inverse distance, matching $\varepsilon_p$. Without it the equation would be
-adding quantities of different kinds, which is how you know the chain rule was
-not optional.</p>
-<p><strong>It gates by sensitivity.</strong> $g'(d)$ measures how much the predicted intensity
+<p>The units explain why the derivative is needed. The raw residual $u-g(d)$ has
+units of intensity, but $\varepsilon_u=\Pi_u[u-g(d)]$ has units of inverse
+intensity. Multiplying by $g'(d)$, whose units are intensity per distance,
+gives inverse distance. This matches $\varepsilon_p=\Pi_p(d_p-d)$.
+The mobility $\nu$, in squared distance per unit time, converts their sum to
+$\dot d$, in distance per unit time.</p>
+<p>It also accounts for sensitivity. $g'(d)$ measures how much the predicted intensity
 would change if the estimate moved. Where it is large, a small change in the
 estimate produces a large change in prediction, so a sensory error is strong
 evidence about the estimate. Where it is small, the observation barely
@@ -444,17 +442,15 @@ so a positive sensory error, louder than predicted, drives the estimate <em>down
 Had the link been $g(d) = d^2$, the same error would drive it up. The rule needs
 no separate knowledge of which way round the world works; the derivative carries
 it.</p>
-<h2 id="the-case-where-it-is-all-exact"><span class="secno">4</span>The case where it is all exact</h2>
-<p>Replace the inverse square with the identity, $g(d) = d$, so that the animal
-measures distance directly with Gaussian noise. Then $g' = 1$ and the whole
-apparatus collapses to something recognisable.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The linear case gives a precision-weighted average</span></div><p>Set the gradient to zero in <a class="eqref" href="#eq-precision-form">(2.4.5)</a> with $g(d) = d$, $g'(d) = 1$:</p>
+<h2 id="the-linear-gaussian-comparison"><span class="secno">4</span>The linear Gaussian comparison</h2>
+<p>For comparison, let $d$ be a signed coordinate on the whole real line, give it an untruncated Gaussian prior, and measure it directly: $g(d)=d$. The observation now has units of distance. This changes the observation model and domain. We choose it because the Gaussian calculation is analytic. Returning to a positive-distance domain would truncate the resulting posterior.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The linear case gives a precision-weighted average</span></div><p>Set the gradient to zero in <a class="eqref" href="#eq-precision-form">(2.4.3)</a> with $g(d) = d$, $g'(d) = 1$:</p>
 <div class="eqn"><div class="eqbody">$$\Pi_p (d_p - \hat d) + \Pi_u (u - \hat d) \;=\; 0 .$$</div></div>
 <p>Expand and collect the terms in $\hat d$:</p>
 <div class="eqn"><div class="eqbody">$$\Pi_p d_p + \Pi_u u \;=\; \hat d\,(\Pi_p + \Pi_u),$$</div></div>
 <p>so</p>
-<div class="eqn" id="eq-linear-map"><div class="eqbody">$$\hat d \;=\; \frac{\Pi_p\,d_p + \Pi_u\,u}{\Pi_p + \Pi_u} .$$</div><div class="eqno"><a href="#eq-linear-map" title="Link to equation 2.4.1">(2.4.1)</a></div></div>
-<p>The estimate is the average of the prior mean and the measurement, each weighted
+<div class="eqn" id="eq-linear-map"><div class="eqbody">$$\hat d \;=\; \frac{\Pi_p\,d_p + \Pi_u\,u}{\Pi_p + \Pi_u} .$$</div><div class="eqno"><a href="#eq-linear-map" title="Link to equation 2.4.4">(2.4.4)</a></div></div>
+<p>The estimate is the average of the prior location and the measurement, each weighted
 by its precision, and the weights sum to one because they have been divided by
 their total.</p></div>
 <p>Setting the gradient to zero located the peak. It did not show that the whole
@@ -467,27 +463,22 @@ written down in two lines. Here are the two lines.</p>
 <div class="eqn"><div class="eqbody">$$=\;-\tfrac{1}{2}\Big[(\Pi_p + \Pi_u)\,d^2 \;-\; 2(\Pi_p d_p + \Pi_u u)\,d\Big] \;+\; \text{const},$$</div></div></p>
 <p>the last bracket having swallowed $\Pi_p d_p^2 + \Pi_u u^2$, which carries no $d$.</p>
 <p>Write $\Pi = \Pi_p + \Pi_u$ for the total and $m = (\Pi_p d_p + \Pi_u u)/\Pi$ for
-the weighted average of <a class="eqref" href="#eq-linear-map">(2.4.1)</a>. Then $\Pi_p d_p + \Pi_u u = \Pi m$, and the
+the weighted average of <a class="eqref" href="#eq-linear-map">(2.4.4)</a>. Then $\Pi_p d_p + \Pi_u u = \Pi m$, and the
 bracket is $\Pi d^2 - 2\Pi m d = \Pi(d^2 - 2md)$. Complete the square by adding and
 subtracting $m^2$ inside it:</p>
 <div class="eqn"><div class="eqbody">$$\Pi\big(d^2 - 2md\big) \;=\; \Pi\big[(d - m)^2 - m^2\big] \;=\; \Pi (d-m)^2 \;-\; \Pi m^2 ,$$</div></div>
 <p>and $\Pi m^2$ has no $d$ either, so it joins the constant. What is left is</p>
-<div class="eqn" id="eq-completed-square"><div class="eqbody">$$\ln P(d)P(u \mid d) \;=\; -\tfrac{1}{2}\,\Pi\,(d - m)^2 \;+\; \text{const}.$$</div><div class="eqno"><a href="#eq-completed-square" title="Link to equation 2.4.2">(2.4.2)</a></div></div>
+<div class="eqn" id="eq-completed-square"><div class="eqbody">$$\ln P(d)P(u \mid d) \;=\; -\tfrac{1}{2}\,\Pi\,(d - m)^2 \;+\; \text{const}.$$</div><div class="eqno"><a href="#eq-completed-square" title="Link to equation 2.4.5">(2.4.5)</a></div></div>
 <p>Exponentiate. The posterior is proportional to $\exp\!\big[-\tfrac{1}{2}\Pi(d-m)^2\big]$,
 which is the Gaussian $\mathcal{N}(d;\, m,\, 1/\Pi)$ once normalised. Reading its two
-parameters straight off <a class="eqref" href="#eq-completed-square">(2.4.2)</a>: the mean is the precision-weighted
+parameters straight off <a class="eqref" href="#eq-completed-square">(2.4.5)</a>: the mean is the precision-weighted
 average $m$, and the precision is $\Pi = \Pi_p + \Pi_u$. Precisions of independent
 sources add.</p>
-<p>Being Gaussian, it has no skew and its mode and mean coincide. That is the
-opposite of what <a href="../week-02/exact.html">Lesson&nbsp;2</a> found for the same problem with the inverse-square
-link, and the contrast is the point: swapping the link is the only change, so the
-link is what was responsible.</p></div>
-<aside class="mn"><span class="mnl">Conjugacy, named</span><p>This is what Week&nbsp;1 called <strong>conjugacy</strong>: the posterior landed back in the
+<p>Being Gaussian, it has no skew and its mode and mean coincide. The inverse-square example has a non-quadratic exponent. Restricting a Gaussian to a half-line can also introduce skewness; the widget shows this boundary effect separately.</p></div>
+<aside class="mn"><span class="mnl">Conjugacy, named</span><p>This is what Week&nbsp;1 called conjugacy: the posterior landed back in the
 prior's family, so the update changed two numbers and not the form. It is what
 lets the same update run over and over without the expression growing, and
-<a class="eqref" href="#eq-completed-square">(2.4.2)</a> is the whole of why it works here. Nothing survives the
-move to a nonlinear $g$, because then the exponent is not quadratic and there is
-no square to complete.</p></aside>
+<a class="eqref" href="#eq-completed-square">(2.4.5)</a> is the whole of why it works here. For the inverse-square $g$, the exponent is not quadratic in $d$, so this Gaussian calculation no longer applies.</p></aside>
 <p>Completing a square is an identity, so it can be checked rather than trusted.
 Divide the exact linear posterior by the claimed Gaussian on a fine grid: the
 quotient must be <em>constant</em> in $d$, not merely small. Over the whole grid that
@@ -504,31 +495,26 @@ $d_p = 2.0$, $u = 0.5$:</p>
 <p>with variance $1/(\Pi_p + \Pi_u) = 0.090909$.</p>
 <p>Checking that against quadrature on the same wide grid: the mode comes out at
 $0.636361$, the mean at $0.636364$, and the skew at
-$-8.8 \times 10^{-16}$, which is zero to machine precision. Mode and mean agree
+$1.3 \times 10^{-15}$, which is zero to machine precision. Mode and mean agree
 to five figures and part in the sixth. The algebra says they are equal exactly;
 the disagreement is the spacing of the grid the mode was read off, which the mean
 does not suffer because it is an integral over every point rather than the
 location of one.</p>
-<div class="box keyidea"><div class="boxhd">The idea</div><p>Compare that with Lesson&nbsp;2, where the mode and mean of the same problem
-differed by 35%. The ingredients were Gaussian in both cases
-and the only difference is the link function. So the entire gap is the
-nonlinearity, and none of it is the choice of prior.</p>
-<p>That also explains why the answer had to be found by climbing rather than by
-formula. <a class="eqref" href="#eq-linear-map">(2.4.1)</a> is a closed form because setting a <em>linear</em> gradient to
-zero is a linear equation. With $g(d) = 1/d^{2}$, setting <a class="eqref" href="#eq-precision-form">(2.4.5)</a> to
-zero gives a polynomial in $d$ of degree five, and there is no general formula
-for its roots. Iteration is not laziness; it is what is left.</p></div>
-<aside class="mn"><span class="mnl">The bill for the Gaussian prior</span><p>Lesson&nbsp;2 flagged that a Gaussian over a distance puts mass below zero. Here
-is the size of it. In the linear case the posterior is centred at
-$0.6364$ with a standard deviation of $0.3015$, so
-1.7% of its mass sits at negative distances, which is
-small but not nothing. In the nonlinear case the same prior is harmless: as $d$
-falls towards zero, $g(d)$ runs to infinity and the squared sensory error with
-it, so the likelihood suppresses the region entirely. The mass below
-$d = 0.5$ is about $1 \times 10^{-30}$. The inverse square cleans up
-after the prior.</p></aside>
+<p>For the inverse-square model, the stationary equation is nonlinear. Multiply
+$\Pi_p(d_p-d)-2\Pi_ud^{-3}(u-d^{-2})=0$ by $d^5$, valid on $d>0$, to obtain</p>
+<div class="eqn"><div class="eqbody">$$\Pi_p(d_pd^5-d^6)-2\Pi_uud^2+2\Pi_u=0.$$</div></div>
+<p>This polynomial has degree six. That does not prevent numerical root finding,
+and an optimisation method must still distinguish maxima from minima and check
+for multiple stationary points. <a href="../week-02/exercises.html">Lesson&nbsp;5</a> exhibits two modes for another
+choice of parameters.</p>
+<p>The nonlinear example uses a positive-distance prior from the outset. The linear
+comparison here has support on the real line, including negative values. Its
+negative mass is 1.7% for the chosen parameters. If we
+restrict it to $d>0$, it becomes a truncated Gaussian with different moments.
+The widget uses that positive domain, which explains why its linear mode and
+mean need not coincide.</p>
 <h2 id="the-circuit"><span class="secno">5</span>The circuit</h2>
-<p>Now assemble <a class="eqref" href="#eq-precision-form">(2.4.5)</a> as a diagram, taking seriously the constraints
+<p>Now assemble <a class="eqref" href="#eq-precision-form">(2.4.3)</a> as a diagram, taking seriously the constraints
 of <a href="../week-02/two-rules.html">Lesson&nbsp;1</a>. Give each quantity a unit and each multiplication a connection.</p>
 <figure id="fig-2-4-1"><svg viewBox="0 0 660 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A predictive coding circuit: an estimate unit sends a prediction down to a sensory error unit and receives a weighted error back, while a prior error unit compares the estimate with the prior expectation.">
   <rect x="1" y="1" width="658" height="258" fill="#fdfcf9" stroke="#e4e1d9"/>
@@ -575,21 +561,19 @@ of <a href="../week-02/two-rules.html">Lesson&nbsp;1</a>. Give each quantity a u
   <text x="232" y="150" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#8a6d1f">&#215; g&#8242;(d)</text>
 
   <path d="M76 196 L124 196" fill="none" stroke="#3c3c42" stroke-width="1.6" marker-end="url(#ah)"/>
-  <path d="M392 187 L176 193" fill="none" stroke="#3c3c42" stroke-width="1.2" stroke-dasharray="3 3"/>
 
   <path d="M176 70 L394 70" fill="none" stroke="#0f5f57" stroke-width="1.8" marker-end="url(#ah)"/>
   <path d="M420 172 L420 96" fill="none" stroke="#3c3c42" stroke-width="1.6" marker-end="url(#ah)"/>
   <path d="M400 92 C330 126 240 100 176 78" fill="none" stroke="#2c5f8a" stroke-width="1.8" marker-end="url(#ahb)"/>
   <text x="306" y="112" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#2c5f8a">&#215; 1</text>
-</svg><figcaption><span class="fno">Figure 2.4.1.</span> The update of <a class="eqref" href="#eq-precision-form">(2.4.5)</a> drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. Arrow labels give what multiplies a signal in transit, so the sensory error returns scaled by $g'(d)$ and the prior error returns unchanged. Every arrow carries one number from one place to one place, and none needs a quantity from anywhere else.</figcaption></figure>
+</svg><figcaption><span class="fno">Figure 2.4.1.</span> The update of <a class="eqref" href="#eq-precision-form">(2.4.3)</a> drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. Arrow labels give what multiplies a signal in transit, so the sensory error returns scaled by $g'(d)$ and the prior error returns unchanged. The diagram assumes the required derivative and precisions are available. The final sum is multiplied by the mobility ν to give the continuous update.</figcaption></figure>
 <p>Trace it. The estimate $d$ sends a prediction $g(d)$ down to the sensory error
 unit, which subtracts it from what the ear delivered. That unit's activity is the
 precision-weighted error $\varepsilon_u = \Pi_u(u - g(d))$, the weighting being
 part of what the unit computes rather than something applied in transit. On the
 way back up the connection multiplies by $g'(d)$, so what arrives is
 $g'(d)\,\varepsilon_u$. The prior branch works the same way: the error unit holds
-$\varepsilon_p = \Pi_p(d_p - d)$, and its connection back has weight one. The
-estimate changes at a rate given by the sum of what arrives.</p>
+$\varepsilon_p = \Pi_p(d_p - d)$, and its connection back has weight one. The estimate changes at mobility $\nu$ times the sum of the incoming terms.</p>
 <aside class="mn"><span class="mnl">Where the precision lives</span><p>Nothing forces the precision to be computed at the error unit rather than applied
 on the connection; the product is the same either way. Putting it at the unit is
 the convention Weeks&nbsp;5 to&nbsp;8 follow, because there the precision becomes
@@ -609,50 +593,25 @@ means the same thing, and the choice of word is a matter of emphasis: "state" is
 what the world is in, "cause" is what the world did to the senses. Week&nbsp;1's
 $s$, Week&nbsp;2's $d$ and the literature's causes are one object under three
 names.</p></div>
-<p>That is what has been derived, and it was not the goal. The goal was to maximise
-$\mathcal{F}$, and the only steps taken were the chain rule and the decision to
-climb a gradient. The circuit is what those steps look like when drawn.</p>
-<div class="box warning"><div class="boxhd">Careful<span class="bt">What has not been shown</span></div><p>Deriving a circuit that could be implemented in tissue is not evidence that it
-is. The argument here establishes that predictive coding is a correct
-gradient-ascent scheme for a particular estimation problem, and nothing about
-whether cortex does it.</p>
-<p>Two gaps. First, the update carries a point estimate and no uncertainty at all:
-this is the point-mass case flagged in Lesson&nbsp;3, and Week&nbsp;4 puts the
-uncertainty back. Second, the precisions and the function $g$ have been treated
-as known, when an animal is given neither. Week&nbsp;3 takes that up.</p></div>
-<div class="box warning"><div class="boxhd">Careful<span class="bt">A contradiction to hold on to</span></div><p>Lesson&nbsp;1 ruled out carrying a whole distribution, and that was the
-justification for spending this entire week on a single point. Lesson&nbsp;3's
-warning then promises that Week&nbsp;4 brings a distribution $Q(d)$ back. Those
-two cannot both stand as written, and a reader who notices is right to be
-suspicious.</p>
-<p>The resolution is in the exact wording of Lesson&nbsp;1: what was ruled out was
-carrying an <em>arbitrary</em> distribution, one whose shape belongs to no family and
-which therefore needs a value stored at every point. Week&nbsp;4's $Q$ is
-restricted to a family with a few parameters, typically a Gaussian, so carrying
-it means carrying a mean and a precision. That is two numbers where this week
-carried one, not infinitely many.</p>
-<p>The bill for that restriction is real and Week&nbsp;4 pays it explicitly: the
-true posterior of Lesson&nbsp;2 is <em>not</em> Gaussian, so no Gaussian $Q$ can equal
-it, and the whole of variational inference is the study of what you lose. This
-week's point estimate is the extreme case of the same trade, a $Q$ with one
-parameter and no width at all.</p>
-<p>A second question is fairer still, and has no comfortable answer yet. With many
-hidden states that depend on one another, the precision is no longer a number but
-a matrix, and its off-diagonal entries couple variables that may sit far apart in
-the network. Whether local computation survives that is exactly the question
-Week&nbsp;5 opens with, and the honest position until then is that this week has
-only shown the single-variable case.</p></div>
+<p>The circuit implements the gradient we derived. It presupposes a way to compute
+$g(d)$ and $g'(d)$, suitable error signals and known precisions. Its mathematical
+form alone is not evidence that cortex implements it.</p>
+<p>The update retains a point estimate. Week&nbsp;4 introduces distributions and asks
+how their uncertainty can be represented. In several dimensions a Gaussian
+requires a covariance matrix, so communication and storage requirements change.
+Week&nbsp;5 examines that extension. Week&nbsp;3 addresses learning model parameters
+rather than treating them as known.</p>
 <figure id="fig-2-4-2"><div class="widget" data-widget="precision-posterior"></div><figcaption><span class="fno">Figure 2.4.2.</span> Vary the two precisions and watch the posterior move. The mode is what the update of this lesson finds; the mean is what it does not.</figcaption></figure>
-<div class="box exercise"><div class="boxhd">Exercise 2.4.1<span class="bt">Where the curvature comes from</span></div><p>Lesson&nbsp;3 needed $\mathcal{F}''$ to bound the step size. Differentiate
-<a class="eqref" href="#eq-precision-form">(2.4.5)</a> once more to get it, and evaluate the pieces at
+<div class="box exercise"><div class="boxhd">Exercise 2.4.1<span class="bt">Where the curvature comes from</span></div><p>Lesson&nbsp;3 needed $\ell''$ to bound the step size. Differentiate
+<a class="eqref" href="#eq-precision-form">(2.4.3)</a> once more to get it, and evaluate the pieces at
 $\hat d = 1.5500$. You will need
-$g''(d) = 6/d^{4} = 1.0394$ there.</p><details><summary>Solution</summary><p>Differentiating $\mathcal{F}'(d) = \Pi_p(d_p - d) + \Pi_u g'(d)(u - g(d))$ with
+$g''(d) = 6/d^{4} = 1.0394$ there.</p><details><summary>Solution</summary><p>Differentiating $\ell'(d) = \Pi_p(d_p - d) + \Pi_u g'(d)(u - g(d))$ with
 respect to $d$, the first term gives $-\Pi_p$. The second needs the product rule
 on $g'(d)$ and $(u - g(d))$:</p>
 <div class="eqn"><div class="eqbody">$$\frac{\mathrm{d}}{\mathrm{d}d}\Big[g'(d)\big(u - g(d)\big)\Big]
 = g''(d)\big(u - g(d)\big) \;+\; g'(d)\cdot\big(-g'(d)\big).$$</div></div>
 <p>So</p>
-<div class="eqn"><div class="eqbody">$$\mathcal{F}''(d) \;=\; -\Pi_p \;-\; \Pi_u\,g'(d)^2 \;+\; \Pi_u\,g''(d)\big(u - g(d)\big).$$</div></div>
+<div class="eqn"><div class="eqbody">$$\ell''(d) \;=\; -\Pi_p \;-\; \Pi_u\,g'(d)^2 \;+\; \Pi_u\,g''(d)\big(u - g(d)\big).$$</div></div>
 <p>The first two terms are always negative and bend the function downwards. The
 third has the sign of the residual sensory error and can be either.</p>
 <p>At $\hat d$: the first pair is
@@ -672,10 +631,10 @@ readings $u_1$ and $u_2$ of the same source, with precisions $\Pi_1$ and $\Pi_2$
 Write down the log joint and derive the update rule. What happens to the
 resting point if the two ears are equally precise?</p><details><summary>Solution</summary><p>Independence given the state means the joint likelihood factorises,
 $P(u_1, u_2 \mid d) = P(u_1 \mid d)P(u_2 \mid d)$, so the logarithm is a sum:</p>
-<div class="eqn"><div class="eqbody">$$\mathcal{F} = \ln P(d) + \ln P(u_1 \mid d) + \ln P(u_2 \mid d).$$</div></div>
+<div class="eqn"><div class="eqbody">$$\ell = \ln P(d) + \ln P(u_1 \mid d) + \ln P(u_2 \mid d).$$</div></div>
 <p>Each new term is the same shape as before, so differentiating gives one more
 sensory term of the same form:</p>
-<div class="eqn"><div class="eqbody">$$\dot d = \eta\Big(\Pi_p(d_p - d) + g'(d)\big[\Pi_1(u_1 - g(d)) + \Pi_2(u_2 - g(d))\big]\Big).$$</div></div>
+<div class="eqn"><div class="eqbody">$$\dot d = \nu\Big(\Pi_p(d_p - d) + g'(d)\big[\Pi_1(u_1 - g(d)) + \Pi_2(u_2 - g(d))\big]\Big).$$</div></div>
 <p>The single $g'(d)$ factors out, because both ears are looking at the same hidden
 variable through the same link. Each channel contributes its own error at its own
 gain, and the estimate responds to the sum. This is the sense in which evidence
@@ -691,11 +650,11 @@ curvature, so by the step-size bound of Lesson&nbsp;3 a smaller step.</p></detai
 <li>Write the update in precision form and say what each gain is doing.</li>
 <li>Why does $g'$ appear on one term and not the other? Give both the units answer
   and the sensitivity answer.</li>
-<li>The posterior in Lesson&nbsp;2 was skewed and the one in this lesson's linear
+<li>The posterior in <a href="../week-02/exact.html">Lesson&nbsp;2</a> was skewed and the one in this lesson's linear
   case is not. What is responsible, and what is not?</li>
 <li>Which two things does this week's rule treat as known that an animal would not
   be given?</li>
-</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/climbing.html"><span class="dir">Previous</span><span class="ttl">Climbing the log joint</span></a><a class="nx" href="../week-02/exercises.html"><span class="dir">Next</span><span class="ttl">Problems and code</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/climbing.html"><span class="dir">Previous</span><span class="ttl">MAP estimation by gradient ascent</span></a><a class="nx" href="../week-02/exercises.html"><span class="dir">Next</span><span class="ttl">Problems and code</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w02.js"></script>
 </body>
 </html>

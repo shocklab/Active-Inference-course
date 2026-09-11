@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The inverse problem · Active Inference</title><meta name="description" content="Running a model forwards is a lookup. Running it backwards is a global computation over everything the model admits, and it does not decompose."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The inverse problem · Active Inference</title><meta name="description" content="Inferring hidden causes, explaining away, and the dependence that a factorised approximation cannot represent."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
 :root{
   --paper:#fdfcf9; --card:#ffffff;
   --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
@@ -350,14 +350,13 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">A soft body in a hard world</a><a class="" href="../week-01/process-and-model.html">Two models, not one</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="cur" href="../week-01/inverse-problem.html">The inverse problem</a><a class="" href="../week-01/the-denominator.html">What makes the denominator hard</a><a class="" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>The inverse problem</h1><p class="deck">Running a model forwards is a lookup. Running it backwards is a global computation over everything the model admits, and it does not decompose.</p><div class="meta"><span>Week 1</span><span>&#167;4</span><span>30 min</span></div></header><article class="abody"><p>A generative model is a machine for going from causes to consequences. Give it a
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">Regulation and inference</a><a class="" href="../week-01/process-and-model.html">Generative process and generative model</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="cur" href="../week-01/inverse-problem.html">The inverse problem</a><a class="" href="../week-01/the-denominator.html">Computing the marginal likelihood</a><a class="" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>The inverse problem</h1><p class="deck">Inferring hidden causes, explaining away, and the dependence that a factorised approximation cannot represent.</p><div class="meta"><span>Week 1</span><span>&#167;4</span><span>30 min</span></div></header><article class="abody"><p>A generative model is a machine for going from causes to consequences. Give it a
 state, it hands you a distribution over observations. That direction is cheap:
 it is what the model is <em>for</em>, and the answer is sitting in a column of a matrix.</p>
 <p>Perception needs the other direction. Given the consequence, what was the cause?
-This is called <strong>model inversion</strong>, and the asymmetry between the two directions
-is not a matter of degree.</p>
+This is called <strong>model inversion</strong>, and its cost and uniqueness depend on the model.</p>
 <figure class="widget" id="fig-1-4-1"><div class="wmount" data-widget="forward-inverse"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.4.1.</span> One likelihood matrix, read two ways. Click any cell to change the selection. In forward mode you read a column and stop. In inverse mode you read a row, weight it by the prior, and then owe a sum over every state in the model.</figcaption></figure>
-<h2 id="why-the-inverse-direction-is-structurally-harder"><span class="secno">1</span>Why the inverse direction is structurally harder</h2>
+<h2 id="what-inversion-requires"><span class="secno">1</span>What inversion requires</h2>
 <p>Three separate things go wrong at once. Keep them apart, because different techniques attack different ones.</p>
 <p><strong>It is many-to-one.</strong> Several states can produce the same observation. In the
 matrix above, a shaking branch is consistent with a leopard, a baboon, and
@@ -370,14 +369,11 @@ distribution. To turn it into one you must divide by $P(o) = \sum_s P(o\mid s)P(
 and that sum ranges over every state the model admits, including all the ones
 that had nothing to do with the observation. The cost of answering a local
 question is global.</p>
-<p><strong>It is unstable.</strong> Where the likelihood is nearly flat, small changes in the
-data produce large swings in the posterior. This is the classical signature of
-an ill-posed problem in the sense of Hadamard, and it is why the prior is not
-optional. The prior is what regularises the inversion.</p>
-<aside class="mn"><span class="mnl">Ill-posedness</span><p>Hadamard called a problem well-posed if a solution exists, is unique, and
-depends continuously on the data. Model inversion routinely fails the second
-and third. Every practical method for solving it is, at bottom, a way of
-smuggling in enough prior structure to restore well-posedness.</p></aside>
+<p><strong>It may be poorly determined.</strong> If the likelihood varies little across states,
+the data may leave the prior almost unchanged. This is weak information, not by
+itself instability of the posterior. In continuous inverse problems, an inverse
+map can instead be sensitive to small measurement changes. Prior assumptions can
+regularise that problem, but their effect has to be checked for the chosen model.</p>
 <h2 id="explaining-away"><span class="secno">2</span>Explaining away</h2>
 <p>Here is the natural idea for beating the cost. Suppose the state breaks into
 several independent parts, one per thing the agent tracks: position, hunger,
@@ -386,26 +382,24 @@ the joint state is one choice from every factor at once. If the state has
 factors, do not reason about the joint state at all. Reason about each part separately. If
 your model has $n$ factors with $k$ values each, that turns $k^n$ into $nk$, and
 the problem evaporates.</p>
-<p>It does not work, and why it does not work is what the rest of this lesson is about, because Week&nbsp;4 is going to do it anyway
-and you need to know what is being given up.</p>
+<p>Independent prior factors need not remain independent after observing data. We can test that possibility with two competing causes.</p>
 <p>Take two independent causes. This is a new and smaller model than the three-
 state one of Lesson 3, chosen because two competing causes are the fewest that
 can compete: a <strong>gust</strong> of wind, and a <strong>baboon</strong>. Either can
 make a branch shake. Each is uncommon on its own:</p>
 <div class="eqn"><div class="eqbody">$$P(s_{\text{gust}} = 1) = P(s_{\text{bab}} = 1) = 0.1,$$</div></div>
-<p>and, importantly, they are independent <em>a priori</em>: wind does not summon baboons.
-Now the likelihood. Rather than write a formula down and check it works, build
-it from the causal story, because the shape then explains itself.</p>
+<p>and they are independent <em>a priori</em>: wind does not summon baboons.
+We can construct the likelihood from independent attempts to produce the observation.</p>
 <p>Suppose each cause, when present, makes its own independent attempt to shake the
 branch, and succeeds with probability $w$. Suppose also the branch sometimes
 shakes for no reason at all, with probability $\lambda$; treat that as a third,
 always-present cause. Then the branch fails to shake only if <strong>every</strong> attempt
 fails, and those failures are independent, so their probabilities multiply:</p>
-<div class="eqn" id="eq-noisy-and"><div class="eqbody">$$P(o = 0 \mid s) \;=\; (1 - w\,s_{\text{gust}})(1 - w\,s_{\text{bab}})(1 - \lambda).$$</div><div class="eqno"><a href="#eq-noisy-and" title="Link to equation 1.4.2">(1.4.2)</a></div></div>
+<div class="eqn" id="eq-noisy-and"><div class="eqbody">$$P(o = 0 \mid s) \;=\; (1 - w\,s_{\text{gust}})(1 - w\,s_{\text{bab}})(1 - \lambda).$$</div><div class="eqno"><a href="#eq-noisy-and" title="Link to equation 1.4.1">(1.4.1)</a></div></div>
 <p>A cause that is absent has $s = 0$ and contributes a factor of $1$, which is
 right: it makes no attempt and so cannot fail. Subtracting from one gives the
 probability that the branch does shake, and with $w = 0.9$ and $\lambda = 0.01$:</p>
-<div class="eqn" id="eq-noisy-or"><div class="eqbody">$$P(o = 1 \mid s) \;=\; 1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).$$</div><div class="eqno"><a href="#eq-noisy-or" title="Link to equation 1.4.3">(1.4.3)</a></div></div>
+<div class="eqn" id="eq-noisy-or"><div class="eqbody">$$P(o = 1 \mid s) \;=\; 1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).$$</div><div class="eqno"><a href="#eq-noisy-or" title="Link to equation 1.4.2">(1.4.2)</a></div></div>
 <p>This construction is called a <strong>noisy-OR</strong>, and it generalises without effort: for
 $m$ causes with strengths $w_i$, the same argument gives
 $P(o=1\mid s) = 1 - (1-\lambda)\prod_{i}(1 - w_i s_i)$. Nothing about it is
@@ -459,7 +453,7 @@ special to two causes or to equal strengths.</p>
 </table></div>
 <p>The evidence is $P(o=1) = 0.1802$, so by the definition from <a href="../week-01/soft-body.html">Lesson&nbsp;1</a> the shake carries $-\ln 0.1802 = 1.714$ nats of surprise, natural-log units throughout. Both marginals move the same way and by a lot:</p>
 <div class="eqn"><div class="eqbody">$$P(s_{\text{gust}} = 1 \mid o) \;=\; P(s_{\text{bab}} = 1 \mid o) \;=\; 0.505,$$</div></div>
-<p>up from $0.1$. So far so unremarkable. Now look at the joint. If the posterior
+<p>up from $0.1$. Now compare the joint probability with the product of these marginals. If the posterior
 factorised, the probability of <em>both</em> causes being present would be the product
 of the marginals, $0.505^2 = 0.255$. The actual value in the table is $0.055$, smaller by a factor
 of 4.6.</p>
@@ -467,15 +461,13 @@ of 4.6.</p>
 now strongly anticorrelated, and you can read the strength directly:</p>
 <div class="eqn" id="eq-explaining-away"><div class="eqbody">$$P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 1,\, o) = 0.109,
 \qquad
-P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 0,\, o) = 0.909.$$</div><div class="eqno"><a href="#eq-explaining-away" title="Link to equation 1.4.4">(1.4.4)</a></div></div>
+P(s_{\text{bab}} = 1 \mid s_{\text{gust}} = 0,\, o) = 0.909.$$</div><div class="eqno"><a href="#eq-explaining-away" title="Link to equation 1.4.3">(1.4.3)</a></div></div>
 <p>Learning that there was a gust drags the baboon's probability from
 $0.505$ all the way back down to $0.109$, a hair above its prior. The gust has <strong>explained
 away</strong> the shaking branch, and the baboon is no longer needed.</p>
 <div class="box keyidea"><div class="boxhd">The idea</div><p>Independent priors plus a shared observation gives a coupled posterior. This is
 not a quirk of noisy-OR; it happens whenever two causes compete to account for
-the same data. The consequence is blunt: you cannot invert a model factor by
-factor, because the posterior over one factor depends on the posterior over the
-others. The intractable sum does not decompose.</p></div>
+the same data. A calculation that updates the prior factors independently would miss that dependence. This does not rule out exact message passing or other ways to exploit structure, as <a href="../week-01/the-denominator.html">Lesson&nbsp;5</a> shows.</p></div>
 <h3 id="why-it-happens">Why it happens</h3>
 <p>The numbers show that it happens. Here is why, and the argument is short enough
 that it belongs in the main text.</p>
@@ -485,68 +477,61 @@ $h_1$ and $h_2$, then the posterior is</p>
 <div class="eqn"><div class="eqbody">$$P(s_1, s_2 \mid E) \;\propto\; \underbrace{P(s_1)h_1(s_1)}_{\text{depends on } s_1 \text{ alone}} \;\cdot\; \underbrace{P(s_2)h_2(s_2)}_{s_2 \text{ alone}},$$</div></div>
 <p>which is again a product, so the two stay independent. Conditioning on a
 factorising event reweights each variable separately and never introduces a link.</p>
-<p>Now look at <a class="eqref" href="#eq-noisy-and">(1.4.2)</a>. The event $o = 0$, the branch <em>not</em> shaking, has
+<p>Now look at <a class="eqref" href="#eq-noisy-and">(1.4.1)</a>. The event $o = 0$, the branch <em>not</em> shaking, has
 exactly that form: it is a product of one factor per cause. So learning the
 branch stayed still would leave the causes independent. But we conditioned on the
 complement, $o = 1$, and one minus a product is not a product. That single
 algebraic fact is the whole mechanism.</p>
-<p>Read causally it is the diminishing return in <a class="eqref" href="#eq-noisy-or">(1.4.3)</a>: the state $(1,1)$
+<p>Read causally it is the diminishing return in <a class="eqref" href="#eq-noisy-or">(1.4.2)</a>: the state $(1,1)$
 has likelihood $0.9901$, barely more than the $0.9010$
 of a single cause, because one cause already does nearly all the work available.
 A second cause adds almost nothing, so the evidence has almost nothing extra to
 buy with it, and the two causes end up competing for the same credit.</p>
-<p>The sign is not universal either. Explaining away
-depends on the causes being <strong>sufficient</strong>: either alone can produce the effect.
-Reverse that, so both are jointly <em>necessary</em> and neither alone suffices, and the
-correlation flips: learning one cause is present makes the other <strong>more</strong> likely,
-since the effect still needs explaining and only the second cause can supply it.
-Competition and collaboration are both available; which you get is set by the
-structure of the likelihood, not by anything about priors.</p>
-<p>Explaining away also has a life outside mathematics. It is a real property of perception, it is what
-makes a plausible alternative explanation reduce your confidence in the first
-one, and it is one of the sharper tests of whether a candidate neural circuit is
-really doing inference: a circuit that merely accumulates evidence for each
-cause separately cannot produce it, because the effect requires the causes to
-see one another.</p>
-<h2 id="three-families-of-response"><span class="secno">3</span>Three families of response</h2>
+<p>The sign depends on the likelihood. It is not enough to call causes
+"necessary" or "sufficient". For a deterministic AND observation, learning the
+effect occurred fixes both binary causes to one, leaving no residual uncertainty
+or nontrivial correlation. For noisy alternatives, inspect the conditional
+probability table and calculate the dependence explicitly.</p>
+<h2 id="methods-for-inference"><span class="secno">3</span>Methods for inference</h2>
 <p>There are three families of response, and the entire structure of Part&nbsp;I is
 a tour of them.</p>
 <p><strong>Solve it exactly, where the model lets you.</strong> Some pairings of prior and
 likelihood have posteriors in closed form. If the likelihood is Gaussian with
 known variance and the prior over the mean is Gaussian, the posterior is
-Gaussian and you can write down its parameters in two lines. This is <strong>conjugacy</strong>: a prior family and a likelihood family are conjugate when the posterior always lands back in the prior's family, so updating changes the parameters and never the form. That is stronger than merely having a closed form, and it is what lets the update be applied over and over without the expression growing. It is the backbone of Week&nbsp;2, and it works right up until your model has any structure you actually wanted.</p>
+Gaussian and you can write down its parameters in two lines. This is <strong>conjugacy</strong>: a prior family and a likelihood family are conjugate when the posterior always lands back in the prior's family, so updating changes the parameters and never the form. That is stronger than merely having a closed form, and it is what lets the update be applied over and over without the expression growing. It is the backbone of Week&nbsp;2, and remains useful for models whose assumptions match the task.</p>
 <p><strong>Sample from it.</strong> Do not compute $P(s\mid o)$; draw from it. Markov chain
 Monte Carlo needs only ratios of posterior values, and the intractable $P(o)$
-cancels in every ratio. This is the correct method for a statistician with a
-week to spare, and the wrong one for an animal deciding whether to run, because
-it converges in the limit and offers few guarantees before then.</p>
+cancels in every ratio. Finite sampling has error, and an MCMC chain can mix slowly or fail to explore
+separated modes on the available timescale. These are properties to measure for
+the model and sampler, not reasons to exclude sampling from biological accounts.
+Sampling methods and optimisation methods can both provide evolving estimates.</p>
 <p><strong>Turn it into optimisation.</strong> Give up on the exact posterior. Choose a family
 of distributions $Q(s)$ you can compute with, define a measure of how far $Q$ is
 from the true posterior, and descend it. Because the measure can be arranged so
 that the intractable term drops out, you can minimise a distance to something
-you cannot evaluate. That trick is variational inference, and the quantity you descend is the <strong>free energy</strong>. Week&nbsp;4 builds it, but the shape is already visible from <a class="eqref" href="#eq-two-kls">(1.4.5)</a>: it is the reverse divergence with the intractable $\ln P(o)$ added back, which makes it computable from $Q$ and the generative model alone, and an upper bound on the surprise. It occupies Week&nbsp;4 and everything after.</p>
-<div class="box remark"><div class="boxhd">Remark<span class="bt">Why optimisation suits an embodied agent</span></div><p>The optimisation route is the only one of the three that offers a partial answer
-at every instant, improves continuously with more time, and turns inference into
-a dynamical system. An animal does not get to say "my chain has not mixed yet".
-It gets to have a current best guess that is being continuously corrected, which
-is exactly what gradient descent on a free energy gives you.</p></div>
+you cannot evaluate. That trick is variational inference, and the quantity you descend is the <strong>free energy</strong>. Week&nbsp;4 builds it, but the shape is already visible from <a class="eqref" href="#eq-two-kls">(1.4.4)</a>: it is the reverse divergence minus $\ln P(o)$, which makes it computable from $Q$ and the generative model alone, and an upper bound on the surprise. It occupies Week&nbsp;4 and everything after.</p>
+<p>A variational distribution gives a current approximation during optimisation.
+That approximation may be useful before convergence, but convergence and accuracy
+are separate: even an optimised member of a restricted family can be far from
+the posterior. Lesson&nbsp;5 compares the representation errors of sampling and
+factorisation on this example.</p>
 <div class="box warning"><div class="boxhd">Careful<span class="bt">What the third option costs</span></div><p>The family of distributions $Q$ has to be one you can compute with, and by far
 the commonest choice is the family that factorises across state factors,
 $Q(s_{\text{gust}}, s_{\text{bab}}) = Q(s_{\text{gust}})\,Q(s_{\text{bab}})$,
 or $Q(s_1, s_2) = Q(s_1)Q(s_2)$ once we stop naming them. Look back at
-<a class="eqref" href="#eq-explaining-away">(1.4.4)</a>. That family cannot represent the true posterior, because
+<a class="eqref" href="#eq-explaining-away">(1.4.3)</a>. That family cannot represent the true posterior, because
 the true posterior is correlated and no product of marginals is.</p></div>
-<h2 id="how-far-off-is-the-best-factorised-approximation"><span class="secno">4</span>How far off is the best factorised approximation?</h2>
+<h2 id="comparing-factorised-approximations"><span class="secno">4</span>Comparing factorised approximations</h2>
 <p>That question hides a choice, and the choice decides the answer. Make it explicit now, because Week&nbsp;4 rests on it.</p>
 <p>The Kullback&ndash;Leibler divergence is not symmetric, so there are two ways to
 ask how far a factorised $Q$ sits from the true posterior $P$:</p>
 <div class="eqn" id="eq-two-kls"><div class="eqbody">$$D_{\mathrm{KL}}\big[P \,\|\, Q\big] = \sum_{s} P(s)\ln\frac{P(s)}{Q(s)},
 \qquad
-D_{\mathrm{KL}}\big[Q \,\|\, P\big] = \sum_{s} Q(s)\ln\frac{Q(s)}{P(s)},$$</div><div class="eqno"><a href="#eq-two-kls" title="Link to equation 1.4.5">(1.4.5)</a></div></div>
+D_{\mathrm{KL}}\big[Q \,\|\, P\big] = \sum_{s} Q(s)\ln\frac{Q(s)}{P(s)},$$</div><div class="eqno"><a href="#eq-two-kls" title="Link to equation 1.4.4">(1.4.4)</a></div></div>
 <p>with $s$ running over the four joint states of the table. Call the first the
 <strong>forward</strong> direction and the second the <strong>reverse</strong>. They disagree, and not by a
 little.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The forward direction matches the marginals</span></div><p>Minimise the left of <a class="eqref" href="#eq-two-kls">(1.4.5)</a> over products, writing $q_1$ and $q_2$ for the
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The forward direction matches the marginals</span></div><p>Minimise the left of <a class="eqref" href="#eq-two-kls">(1.4.4)</a> over products, writing $q_1$ and $q_2$ for the
 two factors so that $Q(s) = q_1(s_{\text{gust}})\,q_2(s_{\text{bab}})$. Split the
 logarithm:</p>
 <div class="eqn"><div class="eqbody">$$D_{\mathrm{KL}}[P \,\|\, Q]
@@ -563,26 +548,50 @@ distribution $q$ maximising $\sum_x p(x)\ln q(x)$". By <strong>Gibbs' inequality
 $0.5050 $ for each cause, and leaves a gap of
 $0.3687$ nats. This is a lemma, not an accident of these
 numbers: forward KL over a product family always returns the marginals.</p></div>
-<p>Variational inference does not use that direction, and the reason is not aesthetic. The forward divergence takes its expectation under $P$, and $P$ is precisely
-what we cannot compute. The reverse takes its expectation under $Q$, which we
-chose and therefore know. The direction is forced on us by tractability, not
-chosen for its properties, and its properties turn out to matter.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The reverse direction picks a side</span></div><p>Minimise the right of <a class="eqref" href="#eq-two-kls">(1.4.5)</a> instead. Vary $q_1$ with $q_2$ held fixed,
-impose normalisation with a Lagrange multiplier, and the stationary condition is</p>
-<div class="eqn" id="eq-cavi"><div class="eqbody">$$\ln q_1(s_{\text{gust}}) \;=\; \mathbb{E}_{q_2}\big[\ln P(s_{\text{gust}}, s_{\text{bab}})\big] + \text{const},$$</div><div class="eqno"><a href="#eq-cavi" title="Link to equation 1.4.1">(1.4.1)</a></div></div>
-<p>with the mirror equation for $q_2$. Alternating them until nothing moves is
-<strong>coordinate ascent</strong>, and <a class="eqref" href="#eq-cavi">(1.4.1)</a> is the update Week&nbsp;4 derives in general.
-Run on the table above it converges to</p>
+<p>The usual variational free-energy objective uses the reverse direction. Its
+expectations are taken under $Q$, which we choose to make manageable. The forward
+direction instead involves expectations under the target posterior. This motivates
+the usual choice, but does not prohibit other objectives or sampling-based
+estimates of their gradients.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The reverse direction picks a side</span></div><p>Write $x=s_{\mathrm{gust}}$, $y=s_{\mathrm{bab}}$ temporarily, and hold $q_2$
+fixed. The part of the reverse KL that depends on $q_1$ is</p>
+<div class="eqn"><div class="eqbody">$$J(q_1)=\sum_x q_1(x)\ln q_1(x)
+-\sum_xq_1(x)\sum_yq_2(y)\ln P(x,y)+\text{const}.$$</div></div>
+<p>The $q_2\ln q_2$ term is constant because $\sum_xq_1(x)=1$. Define
+$B(x)=\sum_yq_2(y)\ln P(x,y)$, an expected log probability. Add a Lagrange
+multiplier $c$ for the constraint $\sum_xq_1(x)=1$. Differentiating with respect
+to each entry $q_1(x)$ gives</p>
+<div class="eqn"><div class="eqbody">$$\ln q_1(x)+1-B(x)+c=0.$$</div></div>
+<p>Thus $\ln q_1(x)=B(x)-1-c$. Exponentiating and normalising removes the unknown
+constant:</p>
+<div class="eqn"><div class="eqbody">$$q_1(x)=\frac{\exp B(x)}{\sum_{x'}\exp B(x')}.$$</div></div>
+<p>Returning to the original labels,</p>
+<div class="eqn" id="eq-cavi"><div class="eqbody">$$\ln q_1(s_{\mathrm{gust}})
+=\mathbb E_{q_2}[\ln P(s_{\mathrm{gust}},s_{\mathrm{bab}})]+\text{const}.$$</div><div class="eqno"><a href="#eq-cavi" title="Link to equation 1.4.5">(1.4.5)</a></div></div>
+<p>The entropy term has second derivative $1/q_1(x)>0$ in each positive entry;
+the remaining term is linear. This is the minimiser for one factor with the
+other held fixed. Alternating the two updates is coordinate descent on reverse
+KL, equivalently <strong>coordinate ascent</strong> on the negative free energy. It need not
+find the global optimum jointly; the result can depend on initialisation.</p>
+<p>Start with $q_1(1)=9/20$ and $q_2(1)=11/20$, updating the gust factor first.
+For example, the log-score difference for its first update is</p>
+<div class="eqn"><div class="eqbody">$$B(1)-B(0)=\frac9{20}\ln\frac{P(1,0)}{P(0,0)}
++\frac{11}{20}\ln\frac{P(1,1)}{P(0,1)}.$$</div></div>
+<p>Normalisation gives $q_1(1)=1/[1+\exp(B(0)-B(1))]$, which evaluates to
+$0.4700$. Using this new factor in the second update gives
+$q_2(1)=0.5578$. Repeat in this order; a practical stopping
+criterion is that the largest change in either probability is below a chosen
+tolerance. The displayed calculation uses 400 sweeps and checks its fixed-point
+residual. It converges to</p>
 <div class="eqn"><div class="eqbody">$$q_1(s_{\text{gust}}\!=\!1) = 0.2579,
 \qquad
 q_2(s_{\text{bab}}\!=\!1) = 0.7627,$$</div></div>
 <p>a gap of $0.4989$ nats. The two causes entered the model
 interchangeably and the answer has stopped treating them that way.</p></div>
-<p>The symmetry breaking is not numerical noise. Score the <em>symmetric</em> product, both
+<p>For comparison, score the product of the true posterior marginals, both
 marginals at $0.5050$, under the reverse divergence and you get
-$0.5130$ nats, genuinely worse than the lopsided
-$0.4989$. Under this objective, committing to one story beats
-splitting the difference.</p>
+$0.5130$ nats, higher than the asymmetric
+$0.4989$. This compares two particular products; it does not establish that every symmetric product is worse.</p>
 <p>The reason is visible in the table. The true posterior puts its mass on the two
 states where exactly one cause fired, and almost none on $(1,1)$ or $(0,0)$. A
 product cannot do that. If $q_1$ and $q_2$ both sit near a half so as to cover
@@ -621,19 +630,19 @@ $P$ is large and $Q$ is small, so it insists on covering everything $P$ covers.<
   <text x="190" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">gust 1</text>
   <text x="430" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">gust 0</text>
   <text x="510" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">gust 1</text>
-</svg><figcaption><span class="fno">Figure 1.4.2.</span> The same posterior, two ways. Area is probability. The true posterior puts its mass on the two states where exactly one cause fired; no product of marginals has that shape, so the best product commits to one of them and inflates the corners.</figcaption></figure>
+</svg><figcaption><span class="fno">Figure 1.4.2.</span> The same posterior, two ways. The cells have equal area; labels give probabilities and shading indicates their relative size. The true posterior puts its mass on the two states where exactly one cause fired; no product of marginals has that shape, so the best product commits to one of them and inflates the corners.</figcaption></figure>
 <p>Which direction you minimise therefore decides whether your approximation hedges
 or commits. Week&nbsp;4 has to say which one active inference uses and why. One word of terminology, since it is easy to attach it to the wrong thing. <strong>Mean-field</strong> names the <em>factorisation</em>, the restriction of $Q$ to products of independent factors. It does not name the choice of divergence direction; those are two separate decisions, and this section has now shown that both of them cost something. Mean-field is the name of the first compromise, and you have just seen what it compromises.</p>
 <div class="box exercise"><div class="boxhd">Exercise 1.4.1<span class="bt">Where does explaining away go?</span></div><p>In the two-cause example, make the observation uninformative by setting both cause strengths (the $0.9$
-coefficients in <a class="eqref" href="#eq-noisy-or">(1.4.3)</a>) to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
+coefficients in <a class="eqref" href="#eq-noisy-or">(1.4.2)</a>) to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
 Without computing anything, say what the posterior is and whether the two causes
-remain independent. Then explain what feature of <a class="eqref" href="#eq-noisy-or">(1.4.3)</a> is responsible
+remain independent. Then explain what feature of <a class="eqref" href="#eq-noisy-or">(1.4.2)</a> is responsible
 for the coupling in the original example.</p><details><summary>Solution</summary><p>With $P(o=1\mid s)$ constant across states, the likelihood is a constant factor
 that pulls out of the product. The posterior equals the prior, which was a
 product of independent marginals, so the causes remain independent and no
 explaining away occurs.</p>
 <p>The coupling comes from the likelihood varying across the <em>joint</em> state in a way
-that does not factorise, as the section above sets out. In <a class="eqref" href="#eq-noisy-or">(1.4.3)</a>, the state $(1,1)$ has likelihood $0.9901$,
+that does not factorise, as the section above sets out. In <a class="eqref" href="#eq-noisy-or">(1.4.2)</a>, the state $(1,1)$ has likelihood $0.9901$,
 which is barely more than the $0.9010$ of $(1,0)$ or $(0,1)$: a second cause
 adds almost nothing once the first is present. That diminishing return is the
 source of the competition. If the likelihood were multiplicatively separable, the
@@ -641,23 +650,19 @@ posterior would inherit the prior's independence exactly and the shortcut would
 be valid.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 1.4.2<span class="bt">Counting the cost</span></div><p>An agent tracks $n = 15$ binary state factors. Give the number of terms in the
 evidence sum, and state how many factors could be added before the sum exceeds
-the number of nanoseconds since the Big Bang, roughly $4.4 \times 10^{26}$.</p><details><summary>Solution</summary><p>With $k = 2$ and $n = 15$ the sum has $2^{15} = 32,768$ terms, which is
-nothing: a modern processor does this in microseconds.</p>
+the number of nanoseconds since the Big Bang, roughly $4.4 \times 10^{26}$.</p><details><summary>Solution</summary><p>With $k = 2$ and $n = 15$ the sum has $2^{15} = 32,768$ terms, before counting the cost of evaluating each term.</p>
 <p>For the second part, $2^n > 4.4\times10^{26}$ requires
 $n > \log_2(4.4\times10^{26}) = 88.51$, so
 $n = 89$ factors. Working in base ten instead,
 $\log_{10}(4.4\times10^{26}) = 26.643$, and dividing by
 $\log_{10}2$ gives the same answer. Keep the third decimal: rounding that to
-$26.6$ before dividing costs you more than a tenth of a factor. Adding 74 binary variables to a tractable problem makes it impossible
-for any physical computer, ever. This is what is meant by saying the difficulty
-is structural rather than an engineering matter, and it is why the response has
-to be a different algorithm rather than a bigger machine.</p></details></div>
+$26.6$ before dividing costs you more than a tenth of a factor. Adding 74 binary variables exceeds this illustrative enumeration budget. A structured model may still admit a much cheaper exact algorithm; Lesson&nbsp;5 provides one.</p></details></div>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
 <li>Name the three separate ways in which model inversion is harder than model evaluation.</li>
 <li>Two causes have independent priors. After a shared observation, are they independent? Under what condition on the likelihood would they remain so?</li>
 <li>Which of the three solution families does not require evaluating $P(o)$, and why?</li>
 <li>What property of the true posterior can a factorised $Q$ never represent?</li>
-</ul></div></article><nav class="pagenav"><a class="pv" href="../week-01/bayes.html"><span class="dir">Previous</span><span class="ttl">Bayes with states and observations</span></a><a class="nx" href="../week-01/the-denominator.html"><span class="dir">Next</span><span class="ttl">What makes the denominator hard</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-01/bayes.html"><span class="dir">Previous</span><span class="ttl">Bayes with states and observations</span></a><a class="nx" href="../week-01/the-denominator.html"><span class="dir">Next</span><span class="ttl">Computing the marginal likelihood</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Problems and code · Active Inference</title><meta name="description" content="Seven problems with full solutions, two of which show the method of this week failing, and the notebook that rebuilds every figure."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Problems and code · Active Inference</title><meta name="description" content="Worked problems on inference, approximation error, parameterisation and decisions."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
 :root{
   --paper:#fdfcf9; --card:#ffffff;
   --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
@@ -350,13 +350,10 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Two rules a brain has to obey</a><a class="" href="../week-02/exact.html">A problem small enough to solve exactly</a><a class="" href="../week-02/climbing.html">Climbing the log joint</a><a class="" href="../week-02/reading-the-update.html">Reading the update</a><a class="cur" href="../week-02/exercises.html">Problems and code</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Problems and code</h1><p class="deck">Seven problems with full solutions, two of which show the method of this week failing, and the notebook that rebuilds every figure.</p><div class="meta"><span>Week 2</span><span>&#167;5</span><span>100 min</span></div></header><article class="abody"><p>Work the problems before opening the solutions. The ones marked with a dagger
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Local computation and learning</a><a class="" href="../week-02/exact.html">Inferring distance from a sound</a><a class="" href="../week-02/climbing.html">MAP estimation by gradient ascent</a><a class="" href="../week-02/reading-the-update.html">Precision and prediction errors</a><a class="cur" href="../week-02/exercises.html">Problems and code</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Problems and code</h1><p class="deck">Worked problems on inference, approximation error, parameterisation and decisions.</p><div class="meta"><span>Week 2</span><span>&#167;5</span><span>100 min</span></div></header><article class="abody"><p>Work the problems before opening the solutions. The ones marked with a dagger
 are used again later in the course.</p>
-<p>Two of these, the last two, are attacks on the method rather than exercises in
-it. They belong here rather than in Week&nbsp;12 because the objections are
-already visible from what has been derived, and saving them up would mean
-teaching the method for ten weeks before admitting what is wrong with it.</p>
-<h2 id="the-notebook">The notebook</h2>
+<p>The problems include cases where a point estimate or a numerical update fails. Work those cases alongside the successful ones so that the assumptions remain visible.</p>
+<h2 id="the-notebooks">The notebooks</h2>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -393,32 +390,27 @@ absorption length.</p>
 <p>(b) Where in the range of $d$ is the sensory term most influential, and where
 does it become negligible? Compare with the inverse-square case.</p>
 <p>(c) Show that for this link the MAP estimate can be written in closed form when
-the prior is flat, and say why that stops being true as soon as the prior is not.</p><details><summary>Solution</summary><p>(a) $g'(d) = -\tfrac{1}{L}e^{-d/L}$, so substituting into the general rule,</p>
-<div class="eqn"><div class="eqbody">$$\dot d = \eta\Big(\Pi_p (d_p - d) - \frac{\Pi_u}{L}e^{-d/L}\big(u - e^{-d/L}\big)\Big).$$</div></div>
+the prior is flat, and explain how a Gaussian prior changes the stationary equation. Treat the flat-prior calculation as maximum likelihood unless you can normalise the posterior.</p><details><summary>Solution</summary><p>(a) $g'(d) = -\tfrac{1}{L}e^{-d/L}$, so substituting into the general rule,</p>
+<div class="eqn"><div class="eqbody">$$\dot d = \nu\Big(\Pi_p (d_p - d) - \frac{\Pi_u}{L}e^{-d/L}\big(u - e^{-d/L}\big)\Big).$$</div></div>
 <p>(b) The sensory gain is $|g'| = e^{-d/L}/L$, largest at $d = 0$ and decaying with
 length scale $L$. So the ear is informative nearby and, beyond a few multiples of
 $L$, says almost nothing: the predicted intensity has flattened out and moving
 the estimate barely changes it.</p>
 <p>The contrast with the inverse square is in the rate, not the direction. There
 $|g'| = 2/d^3$ also decays, but as a power, so it retains some sensitivity at
-every finite distance. Exponential absorption has a horizon; geometric spreading
-does not.</p>
+every finite distance. Both remain nonzero at every finite positive distance, although their rates of decay differ.</p>
 <p>(c) With a flat prior the first term is absent and the resting point needs
 $e^{-d/L}(u - e^{-d/L}) = 0$. The exponential is never zero, so $e^{-d/L} = u$,
-giving $\hat d = -L\ln u$ provided $0 < u < 1$. The estimate simply inverts the
-link, which is what a flat prior means: believe the measurement.</p>
+giving $\hat d = -L\ln u$ provided $0 < u < 1$. This is a maximum-likelihood estimate. A uniform prior over the positive half-line is improper and, here, does not produce a normalisable posterior because the likelihood tends to a positive constant.</p>
 <p>With a Gaussian prior the condition becomes
 $\Pi_p(d_p - d) = \tfrac{\Pi_u}{L}e^{-d/L}(u - e^{-d/L})$, which sets a linear
-function of $d$ equal to a combination of $e^{-d/L}$ and $e^{-2d/L}$. That is a
-transcendental equation, and it has no solution in elementary functions.</p></details></div>
+function of $d$ equal to a combination of $e^{-d/L}$ and $e^{-2d/L}$. A numerical method can solve the resulting transcendental equation; we do not claim that every non-flat prior prevents an analytic solution.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 2.5.2<span class="bt">Implement it</span></div><p>Write the gradient ascent yourself, in about fifteen lines, and check it.</p>
 <p>(a) Code $g$, $g'$ and the update, and run it from $d_0 = 2.0$ with
 $\eta = 0.05$ for the values of this week. Confirm you reach
 $1.5500$.</p>
 <p>(b) Now find the same number a completely different way: evaluate the
-unnormalised posterior on a fine grid and take its largest entry. The two methods
-share no code. Agreement is therefore evidence; if you had reused the same
-function for both, it would not be.</p>
+unnormalised posterior on a fine grid and take its largest entry. Use a separately written objective for the grid calculation. Agreement checks some implementation errors, but both methods can still share a modelling mistake.</p>
 <p>(c) Add a line that records $\varepsilon_p$ and $g'\varepsilon_u$ at every step
 and confirm their sum goes to zero while neither does.</p><details><summary>Solution</summary><pre><code class="language-python">import numpy as np
 
@@ -447,7 +439,7 @@ places, the residual being the grid spacing rather than any error in either
 method. The final line shows $+0.449964$ and
 $-0.449964$, summing to $-1.55 \times 10^{-15}$.</p>
 <p>That residual is smaller than the $3.44 \times 10^{-6}$ quoted in <a href="../week-02/climbing.html">Lesson&nbsp;3</a>, and
-the difference is worth understanding rather than ignoring. Lesson&nbsp;3
+the difference comes from the discretisation. Lesson&nbsp;3
 evaluates the two errors at the mode found by quadrature; this code evaluates
 them where its own ascent stopped. The two locations agree to five decimal
 places, but the quantity being reported is a cancellation between two numbers of
@@ -455,11 +447,9 @@ size $0.45$, so a difference in the fifth decimal of each becomes the whole of
 the answer. A cancellation magnifies whatever disagreement its inputs had, which
 is a general fact about floating point and the reason the sum is a poor way to
 measure how well either method has converged.</p>
-<p>On (b): the point is not that grids are trustworthy. It is that two methods
-sharing no code and resting on different ideas, one climbing a gradient and one
-enumerating, have no common way to be wrong. If they agree, the ways each could
-fail would both have to fail identically, which is unlikely enough to count as
-evidence.</p></details></div>
+<p>On (b), the two implementations exercise different parts of the calculation,
+so agreement is useful evidence. Both can still share a wrong likelihood, domain
+or parameter value. Check those against the model specification as well.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 2.5.3<span class="bt">Repeated listening &dagger;</span></div><p>The animal listens $n$ times, getting independent readings $u_1, \dots, u_n$ from
 the same source, each with precision $\Pi_u$.</p>
 <p>(a) Show the update depends on the readings only through their mean $\bar u$.</p>
@@ -487,7 +477,7 @@ and the estimate approaches whatever satisfies $g(\hat d) = \bar u$: the prior
 washes out, which is the usual asymptotic story and here it is visible directly
 in the gradient.</p>
 <p>For the step size, the curvature acquires a term $-n\Pi_u g'^2$, growing linearly
-in $n$, so the bound $\eta < 2/|\mathcal{F}''|$ falls off like $1/n$. More data
+in $n$, so the bound $\eta < 2/|\ell''|$ falls off like $1/n$. More data
 makes the peak sharper and the ascent stiffer, which is the same trade the
 precision slider showed in Lesson&nbsp;3.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 2.5.4<span class="bt">Sequential listening</span></div><p>Instead of collecting $n$ readings and processing them together, the animal
@@ -512,9 +502,8 @@ posterior after one reading is not Gaussian, so summarising it by a mean and a
 precision throws information away, and feeding that summary forward as the next
 prior propagates the loss. Process both at once and the approximation is made
 once; process them in sequence and it is made twice.</p>
-<p>This is the difference between exact recursive filtering and the extended Kalman
-filter, and Week&nbsp;7 meets it again in continuous time.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 2.5.5<span class="bt">Two peaks</span></div><p>Change the setting: prior mean $d_p = 4.0$ with $\Sigma_p = 0.5$, and
+<p>This illustrates how an approximate recursive representation can lose information. The extended Kalman filter makes additional linearisation assumptions; Week&nbsp;7 develops a dynamical comparison.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 2.5.5<span class="bt">Two peaks</span></div><p>Change the setting: prior location $d_p = 4.0$ with $\Sigma_p = 0.5$, and
 the animal hears $u = 1.5$ with $\Sigma_u = 0.1$.</p>
 <p>(a) Plot the log joint on $0.05 \le d \le 10$. How many maxima are there?</p>
 <p>(b) Run the ascent from $d_0 = d_p$ with $\eta = 0.02$. Which one does it
@@ -547,7 +536,7 @@ Week&nbsp;4's $Q$ is a distribution rather than a point in part for this reason,
 though a unimodal $Q$ will turn out to have its own version of the problem.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 2.5.6<span class="bt">The mode moves when you rename the axis &dagger;</span></div><p>The animal could equally well estimate $\rho = \ln d$, the log-distance, which
 describes the same physical situation in different coordinates.</p>
-<p>(a) The prior over $d$ is $\mathcal{N}(d_p, \Sigma_p)$. Write the density over
+<p>(a) Use the positive-distance prior from <a href="../week-02/exact.html">Lesson&nbsp;2</a>. Write the density over
 $\rho$ that it induces, remembering the Jacobian.</p>
 <p>(b) Find the MAP estimate in $\rho$, then convert back with $e^{\hat\rho}$.
 Compare with the MAP in $d$.</p>
@@ -563,23 +552,19 @@ stationary condition is different and the peak sits somewhere else. Numerically,
 maximising in $d$ gives $1.5500$, while maximising in $\rho$ and
 transforming back gives $e^{\hat\rho} = 1.8787$, higher by
 21.2%.</p>
-<p>(c) The posterior mean is unaffected. It is
-$\mathbb{E}[d] = \int d\,p(d)\,\mathrm{d}d$, and a change of variables in that
-integral carries the Jacobian in the measure as well as in the density, so the
-two cancel and the number is the same. Both routes give $2.0900$.</p>
-<p>The conclusion is uncomfortable. A density is not invariant under
-reparameterisation, because it is a quantity per unit of something and the unit
-changed. So the location of its peak is a property of the coordinates as much as
-of the belief, and "the most probable distance" is not well defined until you say
-which variable you measured probability per unit of. Nothing distinguishes
-distance from log-distance physically; the animal is not told which one it is
-estimating.</p>
-<p>Two things follow. First, MAP is a convention rather than a canonical answer, and
-the convention is usually invisible because nobody writes down the alternative
-coordinates. Second, quantities defined by expectation, the mean, the variance,
-the free energy of Week&nbsp;4, do not have this problem, which is a reason to
-prefer methods built on them. Week&nbsp;12 returns to this; it is one of the more
-serious objections to the framework, and it does not go away by being ignored.</p></details></div>
+<p>(c) Specify the observable being averaged. The expected distance is</p>
+<div class="eqn"><div class="eqbody">$$\mathbb E[d]=\int_0^\infty d\,p_d(d)\,\mathrm d d
+=\int_{-\infty}^\infty e^\rho p_\rho(\rho)\,\mathrm d\rho.$$</div></div>
+<p>These are equal by change of variables. But $\exp(\mathbb E[\rho])$ is a
+different summary and generally differs from $\mathbb E[d]$. The same warning
+applies to variances: the variance of distance is not the variance of log-distance.
+An expectation of a specified physical observable is independent of the coordinate
+used to calculate its integral.</p>
+<p>MAP depends on the reference coordinate of a density. This is a limitation of
+MAP as a summary, not an objection unique to active inference. KL divergence and
+variational free energy are invariant under an invertible latent-coordinate change
+when both distributions and their Jacobians are transformed consistently.
+Approximation families and optimisation trajectories need not be invariant.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 2.5.7<span class="bt">Where the ear stops being informative</span></div><p>In Lesson&nbsp;4, $|g'(d)|$ was called the sensitivity of the observation to the
 state. Make it quantitative.</p>
 <p>(a) Show that under the Gauss-Newton approximation the sensory channel
@@ -589,7 +574,7 @@ $d = 1$, $d = 1.55$ and $d = 4$.</p>
 <p>(c) A colleague proposes putting the animal's ear on a logarithmic scale, so it
 measures $\ln u$ rather than $u$, with Gaussian noise of fixed variance in the
 new units. What happens to the sensitivity?</p><details><summary>Solution</summary><p>(a) The curvature exercise of Lesson&nbsp;4 gave
-$\mathcal{F}'' = -\Pi_p - \Pi_u g'^2 + \Pi_u g''(u - g)$, and dropping the last
+$\ell'' = -\Pi_p - \Pi_u g'^2 + \Pi_u g''(u - g)$, and dropping the last
 term leaves $-(\Pi_p + \Pi_u g'^2)$. Since curvature at a peak is minus a
 precision, the sensory channel contributes $\Pi_u g'^2$.</p>
 <p>Units: $\Pi_u$ is inverse squared intensity and $g'$ is intensity per distance,
@@ -608,18 +593,49 @@ $\Pi_u = 10.0$:</p>
 
 Across a factor of four in distance, the information the ear carries about that
 distance falls by a factor of $4^6 = 4096$. Far away, the animal is nearly blind
-however good its ear, and no amount of sensory precision compensates, because
-$\Pi_u$ enters multiplied by a number heading to zero.</p>
+however good its ear, for fixed sensory precision. At any finite positive distance, increasing $\Pi_u$ can compensate; maintaining fixed state precision here requires it to grow as $d^6$.</p>
 <p>(c) The measurement becomes $\ln u$, whose predicted value is
 $\ln g(d) = -2\ln d$, with derivative $-2/d$. The sensitivity is now $4\Pi/d^2$
 rather than $4\Pi_u/d^6$: it still decays, but as an inverse square rather than
 an inverse sixth power.</p>
-<p>Compressing the sensory scale has spread the discriminable range out. This is a
-real design principle rather than an artefact, and it is one reason sensory
-systems are so often logarithmic. Note what it is not: it is not extra
-information. The same intensities arrive. What changed is where the fixed noise
-budget sits relative to the signal, so a channel with constant noise in log units
-is a channel whose noise scales with the signal in linear units.</p></details></div>
+<p>Compressing the sensory scale has spread the discriminable range out. This is a different noise model: constant noise in log intensity corresponds to signal-dependent noise in linear intensity. Merely transforming an already-recorded observation invertibly would not create information; changing the physical measurement noise can change it.</p></details></div>
+<h2 id="from-a-posterior-to-a-decision">From a posterior to a decision</h2>
+<p>A belief about the world does not specify an action until the consequences of
+mistakes are supplied. Consider a binary hazard with posterior probability
+$P(\mathrm{hazard}\mid o)=0.30$. Two animals have that same posterior.
+Staying costs ten units if the hazard is present and zero otherwise. Leaving
+costs two units for animal A and five for animal B, whatever the hidden state.
+These are chosen losses in a common unit, not probabilities.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Expected loss</span></div><p>The <strong>expected loss</strong> of an action is its loss in each state, weighted by the
+posterior probability of that state. Thus</p>
+<div class="eqn"><div class="eqbody">$$L(\mathrm{stay})=P(\mathrm{hazard}\mid o)\,10
++[1-P(\mathrm{hazard}\mid o)]\,0=3.0.$$</div></div>
+<p>For leaving, the loss is state-independent, so its expectation is its fixed
+cost: two for A and five for B. Minimising expected loss makes A leave and B
+stay. Their beliefs agree; their action costs differ.</p>
+<p>More generally, let $p$ be the hazard probability, $c_H>0$ the loss of staying
+in the hazardous state and $c_L$ the fixed cost of leaving. Leaving is preferable
+when $c_L<pc_H$, or $p>c_L/c_H$. For these animals the thresholds are
+$0.20$ and $0.50$.</p></div>
+<figure class="widget" id="fig-2-5-1"><div class="wmount" data-widget="posterior-decisions"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 2.5.1.</span> Both animals share the hazard probability. Move it and compare expected losses for staying and leaving. Equal expected losses are displayed as a tie. This is a Bayesian decision example, not yet an expected-free-energy policy rule.</figcaption></figure>
+<p>The same distinction applies to distance estimation. If a reported distance $b$
+is penalised by squared error, expand its expected loss:</p>
+<div class="eqn"><div class="eqbody">$$\mathbb E[(d-b)^2]=\operatorname{Var}(d)+(\mathbb E[d]-b)^2.$$</div></div>
+<p>To obtain this identity, write $d-b=(d-\mathbb E[d])+(\mathbb E[d]-b)$,
+expand the square and use $\mathbb E[d-\mathbb E[d]]=0$ to remove the cross term.
+The variance does not depend on $b$, so the posterior mean minimises squared
+error when the second moment is finite. That provides a reason to choose the
+mean which does not apply to every loss. Absolute-error loss instead admits a
+posterior median as a minimiser.</p>
+<div class="box exercise"><div class="boxhd">Exercise 2.5.8<span class="bt">The cost of an underestimate</span></div><p>Suppose underestimating distance is more costly than overestimating by the same
+amount. Why is reporting the mode not automatically justified?</p><details><summary>Solution</summary><p>The mode identifies a high-density location. It does not average the consequences
+of the report across possible true distances. We must specify the asymmetric
+loss, average it under the posterior, and minimise that expected loss. Changing
+the cost of underestimation can change the optimal report while leaving the
+posterior unchanged.</p></details></div>
+<p>Week&nbsp;10 introduces a particular objective for policies, involving preferences
+and expected information gain. Its relation to decision losses must be derived;
+it cannot be inferred merely from using Bayesian beliefs.</p>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
 <li>Two of these problems show the method failing. Name each failure in one
   sentence, and say whether more computation would fix it.</li>
@@ -627,7 +643,7 @@ is a channel whose noise scales with the signal in linear units.</p></details></
   special to $g(d) = d$?</li>
 <li>What is a sufficient statistic, in the sense used in the repeated-listening
   problem?</li>
-</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/reading-the-update.html"><span class="dir">Previous</span><span class="ttl">Reading the update</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
-<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w02.js"></script>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/reading-the-update.html"><span class="dir">Previous</span><span class="ttl">Precision and prediction errors</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Derivations, figures, code and examples are the author&rsquo;s own. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w02.js"></script><script defer src="../assets/js/review-widgets.js"></script>
 </body>
 </html>
