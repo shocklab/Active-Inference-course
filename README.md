@@ -41,6 +41,13 @@ directives, documented in `build/mdx.py`.
 Corrections are genuinely welcome, especially to the derivations. If a step does
 not follow, that is a defect in the course, not in the reader. Open an issue.
 
+## AI use
+
+Developed with substantial assistance from Claude (Anthropic) and revised with
+Codex (OpenAI), under Jonathan Shock's direction. AI contributed to explanations,
+derivations, examples, code and design. See [AI use and attribution](https://shocklab.github.io/Active-Inference-course/ai-use.html)
+for the roles, review process and limits of verification.
+
 ## Licence
 
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

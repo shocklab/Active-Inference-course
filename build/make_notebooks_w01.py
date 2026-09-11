@@ -431,6 +431,11 @@ JAX_CELLS = [('markdown',
   '3. Vectorise the *ambiguity* sweep from the NumPy notebook over both `alpha` and\n'
   '   the prior at once, and plot information gained as a surface.')]
 
+AI_ATTRIBUTION = "\n\n### AI use\n\nThis course notebook was developed with substantial assistance from Claude\n(Anthropic) and revised with Codex (OpenAI), under Jonathan Shock's direction.\nAI contributed to explanations and code. See [AI use and attribution](https://shocklab.github.io/Active-Inference-course/ai-use.html)\nfor the review process and its limits.\n"
+for cells in (NUMPY_CELLS, JAX_CELLS):
+    kind, text = cells[0]
+    cells[0] = (kind, text.rstrip() + AI_ATTRIBUTION)
+
 if __name__ == '__main__':
     for name, cells in [('numpy', NUMPY_CELLS), ('jax', JAX_CELLS)]:
         nb = nbf.v4.new_notebook(cells=[

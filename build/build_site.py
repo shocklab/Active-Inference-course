@@ -128,6 +128,7 @@ def sidenav(weeks, root, cur_week=None, cur_href=None, page_toc=None):
         f'<div class="part">Reference</div>'
         f'<a class="wk" href="{root}notation.html"><span class="n">&#167;</span>Notation</a>'
         f'<a class="wk" href="{root}orientation.html"><span class="n">&#167;</span>How to use this course</a>'
+        f'<a class="wk" href="{root}ai-use.html"><span class="n">&#167;</span>AI use and attribution</a>'
     )
     parts.append("</nav>")
     return "".join(parts)
@@ -139,8 +140,10 @@ FOOT = (
     '<a href="https://www.shocklab.net">Jonathan Shock</a>, '
     "Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p>"
     '<p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. '
-    "Derivations, figures, code and examples are the author&rsquo;s own. "
     'Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p>'
+    '<p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) '
+    'and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. '
+    '<a href="{root}ai-use.html">How AI was used and how the material is checked</a>.</p>'
     "</footer>"
 )
 
@@ -261,7 +264,7 @@ def render_lesson(lesson, week, weeks, flat):
         + "</header>"
         + f'<article class="abody">{html}</article>'
         + pagenav(prev, nxt, root)
-        + FOOT
+        + FOOT.format(root=root)
         + "</main></div>"
     )
 
@@ -320,7 +323,7 @@ def render_week_index(week, weeks, flat):
         + "</header>"
         + f'<article class="abody"><div class="weeklist">{"".join(rows)}</div></article>'
         + "".join(nav_bits)
-        + FOOT
+        + FOOT.format(root=root)
         + "</main></div>"
     )
     return theme.page_shell(
@@ -367,8 +370,8 @@ def render_index(data, weeks):
         '<div class="wide"><article class="abody" style="max-width:none;padding-top:2.4rem">'
         f"{intro}"
         f'<div class="weeklist" style="margin-top:1.5rem">{"".join(parts)}</div>'
-        f"{FOOT}"
-        "</article></div>"
+        + FOOT.format(root="")
+        + "</article></div>"
     )
     return theme.page_shell(
         title="Home", site_title=SITE_TITLE, body=body, root="",
@@ -393,7 +396,7 @@ def render_standalone(name, weeks):
         + f'<h1>{meta.get("title", name)}</h1>'
         + (f'<p class="deck">{meta["deck"]}</p>' if meta.get("deck") else "")
         + "</header>"
-        + f'<article class="abody">{html}</article>{FOOT}</main></div>'
+        + f'<article class="abody">{html}</article>{FOOT.format(root=root)}</main></div>'
     )
     scripts = ["assets/js/aif-core.js"] + [f"assets/js/{s}" for s in (meta.get("scripts") or [])]
     return theme.page_shell(
@@ -434,7 +437,7 @@ def main():
 
     write(os.path.join(OUT, "index.html"), render_index(data, weeks))
     n += 1
-    for name in ("notation", "orientation"):
+    for name in ("notation", "orientation", "ai-use"):
         page = render_standalone(name, weeks)
         if page:
             write(os.path.join(OUT, f"{name}.html"), page)
