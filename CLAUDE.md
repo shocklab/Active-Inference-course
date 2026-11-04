@@ -235,6 +235,19 @@ not, and it is verified by planting three kinds and confirming all three fire.
 Cite as REFERENCES.md does: the author and year as link text, the DOI as the
 href.
 
+### A site macro shadowed a standard command
+
+The KaTeX config in `build/theme.py` defined `\to` as `\tilde{o}`, so every
+$x \to 0$ on the site printed as "x õ 0", including Week 2's table of precision
+limits, published that way since August. Every check passed it: the LaTeX is
+valid and KaTeX raises no error. Found 2026-11-04 by reading the rendered text of
+a new solution. The macro is gone. **Never define a site macro whose name is
+already a LaTeX or KaTeX command**, and check a new macro name against KaTeX's
+supported-functions list first.
+
+Relatedly, `[eq:name]` resolves only within its own page. A problems page that
+cites a lesson's equation must use `[lesson:W.L]` and restate the equation.
+
 ### Check the check by breaking it
 
 `check_definitions.py` reported zero collisions after being rewritten, which is also
@@ -463,9 +476,6 @@ Known outstanding, in order:
    and LaTeX source both, but **not yet read**. The outline calls it the spine of
    those three weeks, and Week 9 went wrong once already by being built from a
    table of contents rather than a source.
-2. Week 1's exercises have gaps: no exercise computes an entropy, mutual information
-   is never independently exercised, the regulated $\kappa > 0$ case is tested only
-   by the widget, there is no rung-zero warm-up, and the reader is never asked to
-   implement anything. Week 2's problem 2 is the first that asks for code.
+2. The revised notebooks have been run locally but never on Colab's free tier.
 3. A glossary built from `::: notation` blocks.
 4. Whether Weeks 6 to 8 need a shared worked continuous example.

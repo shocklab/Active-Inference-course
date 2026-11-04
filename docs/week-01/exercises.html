@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Problems and code · Active Inference</title><meta name="description" content="Six problems with full solutions, and the notebooks that let you rebuild this week's figures yourself."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Problems and code · Active Inference</title><meta name="description" content="Eleven problems with full solutions, and the notebooks that let you rebuild this week's figures yourself."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
 :root{
   --paper:#fdfcf9; --card:#ffffff;
   --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
@@ -338,7 +338,9 @@ document.addEventListener('DOMContentLoaded',function(){
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
       '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}','\\to':'\\tilde{o}'
+      '\\ta':'\\tilde{s}'
+      // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
+      // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
   });
 });
@@ -350,7 +352,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">Regulation and inference</a><a class="" href="../week-01/process-and-model.html">Generative process and generative model</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="" href="../week-01/the-denominator.html">Computing the marginal likelihood</a><a class="cur" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>Problems and code</h1><p class="deck">Six problems with full solutions, and the notebooks that let you rebuild this week's figures yourself.</p><div class="meta"><span>Week 1</span><span>&#167;6</span><span>90 min</span></div></header><article class="abody"><p>Work the problems before opening the solutions. The ones marked with a dagger
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk cur" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><div class="lessons"><a class="" href="../week-01/soft-body.html">Regulation and inference</a><a class="" href="../week-01/process-and-model.html">Generative process and generative model</a><a class="" href="../week-01/bayes.html">Bayes with states and observations</a><a class="" href="../week-01/inverse-problem.html">The inverse problem</a><a class="" href="../week-01/the-denominator.html">Computing the marginal likelihood</a><a class="cur" href="../week-01/exercises.html">Problems and code</a></div><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">The hypothesis-testing agent</div><h1>Problems and code</h1><p class="deck">Eleven problems with full solutions, and the notebooks that let you rebuild this week's figures yourself.</p><div class="meta"><span>Week 1</span><span>&#167;6</span><span>180 min</span></div></header><article class="abody"><p>Work the problems before opening the solutions. The ones marked with a dagger
 are the ones that will be used again later in the course.</p>
 <h2 id="the-notebooks">The notebooks</h2>
 <p>Each week ships a notebook that rebuilds the week's figures from scratch. The
@@ -383,7 +385,78 @@ JAX version too.</p>
 <p>There is no <code>pymdp</code> notebook this week. The library operates on the discrete
 generative models we meet in Week&nbsp;9; there is nothing here for it to do yet.</p>
 <h2 id="problems">Problems</h2>
-<div class="box exercise"><div class="boxhd">Exercise 1.6.1<span class="bt">Normalisation, both ways &dagger;</span></div><p>Let $\mathbf{A}$ be the likelihood matrix with $A_{ij} = P(o = i \mid s = j)$.</p>
+<div class="box exercise"><div class="boxhd">Exercise 1.6.1<span class="bt">A single alarm</span></div><p>An internal temperature sensor reports either an alarm or no alarm. The body is
+in one of two states, overheated or normal. The prior probability of
+overheating is $0.02$. The sensor raises the alarm with probability $0.90$ when
+the body is overheated and with probability $0.05$ when it is normal.</p>
+<p>(a) Write down the likelihood matrix $\mathbf{A}$, with observations down the
+side and states across the top as in <a href="../week-01/bayes.html">Lesson&nbsp;3</a>, and check which of its
+rows and columns sum to one.</p>
+<p>(b) The alarm sounds. Compute the evidence, the posterior probability of
+overheating, and the surprise.</p>
+<p>(c) The <strong>odds</strong> of an event with probability $p$ are $p/(1-p)$. Show that, for
+two states $s_1$ and $s_2$ and an observation with $P(o \mid s_2) > 0$, Bayes'
+theorem can be written as</p>
+<div class="eqn"><div class="eqbody">$$\frac{P(s_1 \mid o)}{P(s_2 \mid o)}
+= \frac{P(o \mid s_1)}{P(o \mid s_2)} \cdot \frac{P(s_1)}{P(s_2)},$$</div></div>
+<p>posterior odds equal the likelihood ratio times the prior odds, and redo (b)
+this way.</p>
+<p>(d) A second alarm sounds, conditionally independent of the first given the
+state. Find the posterior probability of overheating using the odds form.</p><details><summary>Solution</summary><p>(a) With rows (alarm, no alarm) and columns (overheated, normal),</p>
+<div class="eqn"><div class="eqbody">$$\mathbf{A} = \begin{pmatrix} 0.90 & 0.05 \\ 0.10 & 0.95 \end{pmatrix}.$$</div></div>
+<p>The columns sum to one, since each is the distribution of the report given one
+state. The rows do not: the alarm row sums to $0.90 + 0.05$ and the no-alarm row
+to $0.10 + 0.95$, and neither has any reason to sum to one.</p>
+<p>(b) The numerators $P(o \mid s)P(s)$ of Bayes' theorem are</p>
+<div class="eqn"><div class="eqbody">$$0.90 \times 0.02 = 0.018, \qquad
+0.05 \times (1 - 0.02) = 0.049 .$$</div></div>
+<p>Their sum is the evidence, $P(\text{alarm}) = 0.067$, so the posterior
+probability of overheating is $0.018/0.067 = 0.2687$,
+and the surprise is $-\ln 0.067 = 2.703$ nats.</p>
+<p>A sensor that catches nine overheatings in ten leaves overheating less likely
+than not after it fires, at about 27%. The reason is the
+prior: normal states are so common that their occasional false alarms
+outnumber the true ones, $0.049$ against $0.018$.
+In whole numbers: of 10,000 bodies, 200 are overheated and
+180 of those raise the alarm; 9,800 are normal and
+490 of those raise it too. Of the 670 alarms,
+180 come from overheated bodies, and
+$180/670 = 0.2687$.</p>
+<p>(c) Write Bayes' theorem for each state and divide:</p>
+<div class="eqn"><div class="eqbody">$$\frac{P(s_1 \mid o)}{P(s_2 \mid o)}
+= \frac{P(o \mid s_1)P(s_1)/P(o)}{P(o \mid s_2)P(s_2)/P(o)}
+= \frac{P(o \mid s_1)}{P(o \mid s_2)} \cdot \frac{P(s_1)}{P(s_2)} .$$</div></div>
+<p>The evidence cancels. With only two states, $P(s_2) = 1 - P(s_1)$ and
+$P(s_2 \mid o) = 1 - P(s_1 \mid o)$, so the two ratios of state probabilities
+are odds in the sense just defined. Here the prior odds are
+$0.02/(1-0.02) = 1/49$ and the likelihood ratio is
+$0.90/0.05 = 18$, so the posterior odds are
+$18/49 = 0.3673$. To convert
+odds back to a probability, solve $\text{odds} = p/(1-p)$ for $p$, which gives
+$p = \text{odds}/(1+\text{odds})$. Keeping the fraction,
+$p = (18/49)/(1 + 18/49) = 18/(49 + 18) = 18/67 = 0.2687$,
+as in (b).</p>
+<p>(d) The posterior after the first alarm is the prior for the second, so the
+odds are multiplied by the same likelihood ratio again:</p>
+<div class="eqn"><div class="eqbody">$$\frac{ 18^2 }{ 49 } = \frac{ 324 }{ 49 } = 6.612,
+\qquad
+P(\text{overheated} \mid \text{two alarms}) = \frac{6.612}{1 + 6.612} = 0.869 .$$</div></div>
+<p>Bayes' theorem applied directly to both alarms gives the same answer. The
+likelihoods of two alarms are $0.90^2$ and $0.05^2$, so the numerators are
+$0.0162$ and $0.00245$, the evidence is
+$0.01865$, and the posterior is
+$0.0162/0.01865 = 0.869$.</p>
+<p>The odds form never needs the evidence, and each conditionally independent
+observation contributes one multiplicative factor. Taking logarithms turns the
+product into a sum, so in log odds each observation adds its log likelihood
+ratio. Here the prior log odds are $\ln(1/49) = -3.8918$
+and each alarm adds $\ln 18 = 2.8904$, giving
+$-1.0014$ after one alarm and $1.8889$ after two.
+The sign changes between them, which is the moment overheating becomes the
+more probable state. The problem on what the prior decides, below, uses a
+variant of this form, in which the second hypothesis is "not leopard" and its
+likelihood is a prior-weighted mixture of the baboon and nothing columns.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 1.6.2<span class="bt">Normalisation, both ways &dagger;</span></div><p>Let $\mathbf{A}$ be the likelihood matrix with $A_{ij} = P(o = i \mid s = j)$.</p>
 <p>(a) State which of the rows and columns of $\mathbf{A}$ sum to one, and why.</p>
 <p>(b) Show that $\sum_i P(o = i) = 1$ follows from that, for any prior $P(s)$.</p>
 <p>(c) A colleague builds a model in which the <em>rows</em> of $\mathbf{A}$ have been
@@ -405,7 +478,7 @@ distribution, so the surprise $-\ln P(o)$ is not comparable across observations
 and can even be negative. Bayes' theorem still returns a normalised posterior,
 because the division by $P(o)$ hides the error, which is exactly what makes this
 mistake hard to find. Check the column sums.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.6.2<span class="bt">What the prior decides</span></div><p>Using the leopard, baboon and nothing model from <a href="../week-01/bayes.html">Lesson&nbsp;3</a>, write $\rho$ for the prior
+<div class="box exercise"><div class="boxhd">Exercise 1.6.3<span class="bt">What the prior decides</span></div><p>Using the leopard, baboon and nothing model from Lesson&nbsp;3, write $\rho$ for the prior
 probability that a leopard is present, and find the value of $\rho$ at which observing a tawny flash leaves you exactly
 undecided between leopard and not-leopard, that is,
 $P(s = \text{leopard} \mid o) = 1/2$. Keep the baboon and nothing priors in the
@@ -423,7 +496,7 @@ posterior came out at $0.544$ rather than exactly a half. The observation is
 strong, but it is only just strong enough to overturn a prior of that size, and
 a slightly more sceptical hiker would have remained unconvinced by the same
 evidence.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.6.3<span class="bt">Two observations in a row &dagger;</span></div><p>You observe a branch shaking, and then, a moment later, a tawny flash. Assume
+<div class="box exercise"><div class="boxhd">Exercise 1.6.4<span class="bt">Two observations in a row &dagger;</span></div><p>You observe a branch shaking, and then, a moment later, a tawny flash. Assume
 the two observations are conditionally independent given the state, and that the
 state has not changed.</p>
 <p>(a) Compute the posterior after both observations, starting from the
@@ -454,7 +527,7 @@ depends on the first directly, not only through what the animal is. Sequential
 active inference agents create exactly this kind of dependence on purpose, which
 is why Week&nbsp;9 has to be careful about the difference between the time index
 on an observation and the time index on a belief.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.6.4<span class="bt">When does an observation tell you nothing?</span></div><p>Prove that the posterior equals the prior for every prior if and only if
+<div class="box exercise"><div class="boxhd">Exercise 1.6.5<span class="bt">When does an observation tell you nothing?</span></div><p>Prove that the posterior equals the prior for every prior if and only if
 $P(o \mid s)$ does not depend on $s$.</p><details><summary>Solution</summary><p>($\Leftarrow$) Suppose $P(o\mid s) = c$ for all $s$, for the observed $o$. Then
 $P(o) = \sum_s c\,P(s) = c$, and</p>
 <div class="eqn"><div class="eqbody">$$P(s \mid o) = \frac{c\,P(s)}{c} = P(s).$$</div></div>
@@ -464,7 +537,258 @@ to get $P(o\mid s) = P(o)$, a quantity that does not depend on $s$. Taking a
 prior with full support forces this at every $s$.</p>
 <p>This is the formal content of the ambiguity slider. A sensory channel is useful
 exactly to the extent that different states disagree about what it will report.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.6.5<span class="bt">Explaining away with three causes</span></div><p>Extend the noisy-OR example of <a href="../week-01/inverse-problem.html">Lesson&nbsp;4</a> to three independent causes, each
+<div class="box exercise"><div class="boxhd">Exercise 1.6.6<span class="bt">Posterior entropy</span></div><p>Use the leopard, baboon and nothing model of Lesson&nbsp;3, with prior
+$(0.08, 0.22, 0.70)$.</p>
+<p>(a) Compute the entropy of the prior, and the entropy of the posterior after
+each of the three observations. Which observations increase the entropy of the
+agent's beliefs about the state?</p>
+<p>(b) Show that for any finite model</p>
+<div class="eqn"><div class="eqbody">$$\sum_o P(o)\,\mathrm{H}[P(s \mid o)] \;=\; \mathrm{H}[P(s)] \;-\; I(s;o),$$</div></div>
+<p>where $I(s;o)$ is the mutual information defined in Lesson&nbsp;3.</p>
+<p>(c) Check (b) numerically for this model, and explain why your answer to (a)
+does not contradict it.</p><details><summary>Solution</summary><p>(a) The prior entropy is</p>
+<div class="eqn"><div class="eqbody">$$\mathrm{H}[P(s)] = -(0.08 \ln 0.08 + 0.22 \ln 0.22 + 0.70 \ln 0.70) = 0.78484 \text{ nats}.$$</div></div>
+<p>For comparison, the largest entropy on three states is
+$\ln 3 = 1.0986$ nats, reached by the uniform distribution.</p>
+<p>Each posterior is the numerators of Bayes' theorem divided by the evidence, as
+in Lesson&nbsp;3, which gives the tawny-flash case in full and lists the
+numerators and evidence for the other two:</p>
+<div class="eqn"><div class="eqbody">$$\frac{(0.020,\ 0.165,\ 0.056)}{0.241},
+\qquad
+\frac{(0.004,\ 0.022,\ 0.630)}{0.656}$$</div></div>
+<p>for the shaking branch and for quiet. For the tawny flash the entropy is</p>
+<div class="eqn"><div class="eqbody">$$-(0.5437 \ln 0.5437 + 0.3204 \ln 0.3204 + 0.1359 \ln 0.1359) = 0.96724 \text{ nats},$$</div></div>
+<p>and the same formula gives the other two:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>observed</th>
+<th>$P(o)$</th>
+<th>posterior</th>
+<th>entropy, nats</th>
+<th>change, nats</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tawny flash</td>
+<td>0.103</td>
+<td>(0.544, 0.320, 0.136)</td>
+<td>0.96724</td>
+<td>$+0.1824$</td>
+</tr>
+<tr>
+<td>branch shakes</td>
+<td>0.241</td>
+<td>(0.083, 0.685, 0.232)</td>
+<td>0.80507</td>
+<td>$+0.0202$</td>
+</tr>
+<tr>
+<td>quiet</td>
+<td>0.656</td>
+<td>(0.006, 0.034, 0.960)</td>
+<td>0.18380</td>
+<td>$-0.6010$</td>
+</tr>
+</tbody>
+</table></div>
+<p>The tawny flash and the shaking branch both increase the entropy. The prior
+puts most of its mass on "nothing". The tawny flash moves mass from there
+onto leopard and baboon, and the shaking branch moves it almost entirely onto
+baboon; either way the belief ends up less concentrated. After a tawny flash
+the entropy is close to the three-state maximum of $1.0986$. The agent
+is less certain of the state than before, although the observation moved its
+beliefs further than any other: its information gain was $0.940$
+nats. Entropy measures how spread a belief is, and information gain measures
+how far it moved, so a large movement away from a concentrated belief can
+raise both.</p>
+<p>(b) Start from the definition of $I(s;o)$ and split the logarithm of the ratio:</p>
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+I(s;o) &= \sum_o P(o) \sum_s P(s \mid o) \ln \frac{P(s \mid o)}{P(s)} \\
+&= \sum_o P(o) \sum_s P(s \mid o) \ln P(s \mid o) \;-\; \sum_o P(o) \sum_s P(s \mid o) \ln P(s) .
+\end{aligned}$$</div></div>
+<p>The inner sum of the first term is $-\mathrm{H}[P(s \mid o)]$, so the first term
+is $-\sum_o P(o)\,\mathrm{H}[P(s \mid o)]$. In the second term, exchange the two
+finite sums and use the product rule:</p>
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+\sum_o P(o) \sum_s P(s \mid o) \ln P(s)
+&= \sum_s \ln P(s) \sum_o P(o)\,P(s \mid o) \\
+&= \sum_s \ln P(s) \sum_o P(s, o) \\
+&= \sum_s P(s) \ln P(s) = -\mathrm{H}[P(s)] .
+\end{aligned}$$</div></div>
+<p>The sums over $o$ run over observations with $P(o) > 0$, for which the posterior
+is defined. Terms with $P(s \mid o) = 0$ contribute zero under the convention
+$0 \ln 0 = 0$ of <a href="../week-01/soft-body.html">Lesson&nbsp;1</a>, and $P(s) = 0$ forces $P(s \mid o) = 0$, so no
+logarithm of zero survives. Together,</p>
+<div class="eqn"><div class="eqbody">$$I(s;o) = \mathrm{H}[P(s)] - \sum_o P(o)\,\mathrm{H}[P(s \mid o)],$$</div></div>
+<p>which rearranges to the identity asked for. In words: the amount by which an
+observation lowers the entropy of beliefs, averaged over the observations, is
+the mutual information.</p>
+<p>(c) The weighted average of the posterior entropies is</p>
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+&0.103 \times 0.9672 + 0.241 \times 0.8051 + 0.656 \times 0.1838 \\
+&\quad= 0.0996 + 0.1940 + 0.1206 = 0.4142 \text{ nats},
+\end{aligned}$$</div></div>
+<p>and $0.7848 - 0.4142 = 0.3706$. Computing the
+mutual information directly, as the average of the three information gains of
+Lesson&nbsp;3,</p>
+<div class="eqn"><div class="eqbody">$$0.103 \times 0.9396 + 0.241 \times 0.5241 + 0.656 \times 0.2249 = 0.3706 \text{ nats},$$</div></div>
+<p>gives the same value. In the unrounded stored values the two routes differ
+by less than $10^{-12}$.</p>
+<p>Mutual information is an average of KL divergences, each non-negative by the
+argument in <a href="../week-01/process-and-model.html">Lesson&nbsp;2</a>, so $I(s;o) \ge 0$ and the identity gives</p>
+<div class="eqn"><div class="eqbody">$$\sum_o P(o)\,\mathrm{H}[P(s \mid o)] \le \mathrm{H}[P(s)] .$$</div></div>
+<p>On average over the observations the model expects, an observation cannot
+increase the entropy of beliefs about the state. Nothing constrains a single
+observation, and (a) has two of three increasing it. They are outweighed by
+quiet, which the model expects with probability $0.656$ and which
+lowers the entropy by $0.6010$ nats. The average in this
+statement is taken under the model's own $P(o)$. If the world produced
+observations with different frequencies, the average under those frequencies
+could rise: in a world that produced a tawny flash every time, each update
+from this prior would raise it.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 1.6.7<span class="bt">The two forms of mutual information &dagger;</span></div><p>(a) Show that</p>
+<div class="eqn"><div class="eqbody">$$I(s;o) = \sum_{s,o} P(s,o) \ln \frac{P(s,o)}{P(s)\,P(o)}$$</div></div>
+<p>and</p>
+<div class="eqn"><div class="eqbody">$$I(s;o) = \mathrm{H}[P(o)] - \sum_s P(s)\,\mathrm{H}[P(o \mid s)] .$$</div></div>
+<p>Explain why the first form shows that $I(s;o)$ is symmetric in $s$ and $o$,
+although each information gain $D_{\mathrm{KL}}[P(s \mid o)\,\|\,P(s)]$ is a
+statement about states alone.</p>
+<p>(b) Evaluate the second form for the leopard model and compare it with the
+previous problem.</p>
+<p>(c) Show that $0 \le I(s;o) \le \min\big(\mathrm{H}[P(s)],\, \mathrm{H}[P(o)]\big)$.</p>
+<p>(d) The channel-noise weight $\alpha$ of Lesson&nbsp;3 replaces $\mathbf{A}$ by
+$\mathbf{A}(\alpha) = (1-\alpha)\mathbf{A} + \alpha U$, where every entry of $U$
+is $1/3$. Compute $I(s;o)$ for the leopard prior at
+$\alpha = 0.25$, $0.5$ and $0.75$, and compare it with the straight line
+$(1-\alpha)\,I_0$, where $I_0$ is the value at $\alpha = 0$. Prove that
+$I(s;o) \le (1-\alpha)\,I_0$ for every $\alpha \in [0,1]$.</p><details><summary>Solution</summary><p>(a) By the product rule, $P(o)\,P(s \mid o) = P(s,o)$ and
+$P(s \mid o)/P(s) = P(s,o)/[P(s)P(o)]$. Substituting both into the definition,</p>
+<div class="eqn"><div class="eqbody">$$I(s;o) = \sum_o \sum_s P(o)\,P(s \mid o) \ln \frac{P(s \mid o)}{P(s)}
+= \sum_{s,o} P(s,o) \ln \frac{P(s,o)}{P(s)\,P(o)} .$$</div></div>
+<p>Define $I(o;s)$ by the same recipe with the roles exchanged,
+$\sum_s P(s)\,D_{\mathrm{KL}}[P(o \mid s)\,\|\,P(o)]$. The same two substitutions
+turn it into the same double sum, because the joint, the product of marginals
+and the double sum are all unchanged when the names $s$ and $o$ are swapped.
+So $I(s;o) = I(o;s)$. The symmetry belongs to the average: a single
+term $D_{\mathrm{KL}}[P(s \mid o)\,\|\,P(s)]$ has no partner with the roles
+reversed that it must equal.</p>
+<p>For the second form, write the ratio the other way round,
+$P(s,o)/[P(s)P(o)] = P(o \mid s)/P(o)$, write $P(s,o) = P(s)P(o \mid s)$ by the
+product rule in the first term, and split the logarithm:</p>
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+I(s;o) &= \sum_s P(s) \sum_o P(o \mid s) \ln P(o \mid s) \;-\; \sum_o \ln P(o) \sum_s P(s,o) \\
+&= -\sum_s P(s)\,\mathrm{H}[P(o \mid s)] + \mathrm{H}[P(o)] ,
+\end{aligned}$$</div></div>
+<p>using $\sum_s P(s,o) = P(o)$ in the second term. This is the computation of the
+previous problem with the roles of $s$ and $o$ exchanged.</p>
+<p>(b) The evidence vector is $P(o) = (0.103, 0.241, 0.656)$,
+with entropy $0.8536$ nats. The columns of $\mathbf{A}$ have entropies
+$0.7460$ (leopard), $0.7306$ (baboon) and
+$0.3751$ (nothing). Weighting by the prior,</p>
+<div class="eqn"><div class="eqbody">$$0.08 \times 0.7460 + 0.22 \times 0.7306 + 0.70 \times 0.3751 = 0.4830,$$</div></div>
+<p>so $I(s;o) = 0.8536 - 0.4830 = 0.3706$ nats, the
+value found from the state side in the previous problem. No posterior and no
+entropy appears in both routes; they share only the joint distribution and
+the evidence vector computed from it.</p>
+<p>(c) The lower bound holds because $I(s;o)$ is a $P(o)$-weighted average of KL
+divergences, each non-negative by Lesson&nbsp;2. Every entropy is non-negative,
+since each term $-p \ln p$ is non-negative for $p \in [0,1]$. The previous
+problem's identity therefore gives
+$I(s;o) = \mathrm{H}[P(s)] - \sum_o P(o)\,\mathrm{H}[P(s\mid o)] \le \mathrm{H}[P(s)]$,
+and the second form in (a) gives $I(s;o) \le \mathrm{H}[P(o)]$ in the same way.
+For the leopard model, $0.3706$ sits below both
+$0.7848$ and $0.8536$. An observation cannot tell you more
+about the state, on average, than you were uncertain about to begin with, nor
+more than the observation itself varies.</p>
+<p>(d) Computed from the definition with $\mathbf{A}(\alpha)$ in place of $\mathbf{A}$:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>$\alpha$</th>
+<th>$I(s;o)$, nats</th>
+<th>$(1-\alpha)\,I_0$, nats</th>
+<th>$I(s;o)/I_0$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.25</td>
+<td>0.1925</td>
+<td>0.2780</td>
+<td>0.519</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>0.0846</td>
+<td>0.1853</td>
+<td>0.228</td>
+</tr>
+<tr>
+<td>0.75</td>
+<td>0.0218</td>
+<td>0.0927</td>
+<td>0.059</td>
+</tr>
+</tbody>
+</table></div>
+<p>with $I_0 = 0.3706$. For this model the information falls
+faster than the line: mixed halfway towards uniform, the channel keeps
+23% of it. The bound proved below guarantees only that it
+keeps at most half, and other models come closer to that bound.</p>
+<p>The idea of the proof is a chord. At $\alpha = 1$ every column of
+$\mathbf{A}(\alpha)$ is the same, so every observation has the same probability
+under every state and $I = 0$. If $I$ is a convex function of $\alpha$ along the
+segment, its graph lies below the straight line joining $(0, I_0)$ to $(1, 0)$,
+which is $(1-\alpha)I_0$. The log-sum inequality is the tool that supplies the
+convexity of each KL divergence.</p>
+<p>For the proof, use the form of (a) with $P(o \mid s)/P(o)$ in the logarithm and
+$P(s,o) = P(s)P(o \mid s)$:</p>
+<div class="eqn"><div class="eqbody">$$I(s;o) = \sum_s P(s) \sum_o P(o \mid s) \ln \frac{P(o \mid s)}{P(o)} ,$$</div></div>
+<p>whose inner sum is a KL divergence, so</p>
+<div class="eqn"><div class="eqbody">$$I(s;o) = \sum_s P(s)\, D_{\mathrm{KL}}\big[P(o \mid s) \,\|\, P(o)\big] .$$</div></div>
+<p>Write $p_s$ for column $s$ of $\mathbf{A}$, $q = \sum_s P(s)\,p_s$ for the
+evidence vector, and $\bar p = (\tfrac13, \tfrac13, \tfrac13)$. Under
+$\mathbf{A}(\alpha)$ the columns are $(1-\alpha)p_s + \alpha \bar p$, and because the
+prior sums to one the evidence vector is
+$\sum_s P(s)[(1-\alpha)p_s + \alpha \bar p] = (1-\alpha)q + \alpha \bar p$. So it is
+enough to show that, for distributions $p$, $q$ and $\bar p$ on the observations,</p>
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+D_{\mathrm{KL}}\big[(1-\alpha)p + \alpha \bar p \,\big\|\, (1-\alpha)q + \alpha \bar p\big]
+&\le (1-\alpha)\,D_{\mathrm{KL}}[p \,\|\, q] + \alpha\,D_{\mathrm{KL}}[\bar p \,\|\, \bar p] \\
+&= (1-\alpha)\,D_{\mathrm{KL}}[p \,\|\, q] ,
+\end{aligned}$$</div></div>
+<p>and then average over $s$ with weights $P(s)$.</p>
+<p>The inequality follows from the <strong>log-sum inequality</strong>: for non-negative
+$c_1, c_2$ and positive $\phi_1, \phi_2$,</p>
+<div class="eqn"><div class="eqbody">$$(c_1 + c_2) \ln \frac{c_1 + c_2}{\phi_1 + \phi_2} \le c_1 \ln \frac{c_1}{\phi_1} + c_2 \ln \frac{c_2}{\phi_2} .$$</div></div>
+<p>To prove it, let $\zeta(y) = y \ln y$, with $\zeta(0) = 0$. It is convex on
+$y > 0$ because $\zeta''(y) = 1/y > 0$ there, and since it is continuous on
+$y \ge 0$ the convexity inequality extends to $y = 0$ by taking limits. Set
+$\omega = \phi_1/(\phi_1 + \phi_2)$, so that $1 - \omega = \phi_2/(\phi_1+\phi_2)$ and</p>
+<div class="eqn"><div class="eqbody">$$\frac{c_1 + c_2}{\phi_1 + \phi_2} = \omega \frac{c_1}{\phi_1} + (1-\omega)\frac{c_2}{\phi_2} .$$</div></div>
+<p>Convexity gives $\zeta$ of this point at most
+$\omega\, \zeta(c_1/\phi_1) + (1-\omega)\, \zeta(c_2/\phi_2)$.
+Multiplying through by $\phi_1 + \phi_2$,</p>
+<div class="eqn"><div class="eqbody">$$(\phi_1 + \phi_2)\, \zeta\!\left(\frac{c_1 + c_2}{\phi_1 + \phi_2}\right) \le \phi_1\, \zeta\!\left(\frac{c_1}{\phi_1}\right) + \phi_2\, \zeta\!\left(\frac{c_2}{\phi_2}\right),$$</div></div>
+<p>and writing out $\zeta$ gives the log-sum inequality. Now take $0 < \alpha < 1$
+and assume $q(o) > 0$ for every $o$, which holds for the leopard model because
+no row of $\mathbf{A}$ is zero. Apply the inequality for each observation $o$
+with $c_1 = (1-\alpha)p(o)$, $c_2 = \alpha \bar p(o)$, $\phi_1 = (1-\alpha)q(o)$
+and $\phi_2 = \alpha \bar p(o)$. The left side is</p>
+<div class="eqn"><div class="eqbody">$$\big[(1-\alpha)p(o) + \alpha \bar p(o)\big] \ln \frac{(1-\alpha)p(o) + \alpha \bar p(o)}{(1-\alpha)q(o) + \alpha \bar p(o)} ,$$</div></div>
+<p>and summing over $o$ turns it into the divergence between the two mixtures. On the right, the factors $(1-\alpha)$ and $\alpha$
+cancel inside each logarithm, leaving
+$(1-\alpha)\sum_o p(o)\ln[p(o)/q(o)] + \alpha \sum_o \bar p(o) \ln 1$. That is the
+inequality required. At $\alpha = 0$ or $\alpha = 1$ one of the terms is absent
+and the result holds with equality.</p>
+<p>What has been proved is the chord bound along the segment from $\mathbf{A}$ to
+the uniform channel. Replacing $\bar p$ by the columns of a second arbitrary
+channel, the same argument shows that mutual information is convex in the
+channel for a fixed prior, but the problem needs only the special case. The widget's information-gain readout is a single observation's
+KL divergence, not this average, and is not covered by the result.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 1.6.8<span class="bt">Explaining away with three causes</span></div><p>Extend the noisy-OR example of <a href="../week-01/inverse-problem.html">Lesson&nbsp;4</a> to three independent causes, each
 with prior $0.1$ and each firing the observation with probability $0.9$, keeping
 the leak at $0.01$. Compute $P(s_1 = 1 \mid o = 1)$ and compare it with the
 two-cause answer of $0.505$. Explain the direction of the change.</p><details><summary>Solution</summary><p>There are eight joint states. Write $k$ for the number of causes present. The
@@ -483,7 +807,7 @@ such states. So</p>
 available, the evidence is spread more thinly across them: the observation still
 says "something did this", but there are now three somethings to choose from and
 each individually gets less of the credit. This comparison concerns these two specified models. It does not establish a general monotonic relation between cause count and approximation error.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 1.6.6<span class="bt">The survival curve &dagger;</span></div><p>Consider the homeostasis model from <a href="../week-01/soft-body.html">Lesson&nbsp;1</a> with the action strength set
+<div class="box exercise"><div class="boxhd">Exercise 1.6.9<span class="bt">The survival curve &dagger;</span></div><p>Consider the homeostasis model from Lesson&nbsp;1 with the action strength set
 to zero, $\kappa = 0$. It is then a two-dimensional random walk with independent increments of standard deviation
 $\sigma$ per step in each coordinate, starting at the origin, absorbed when
 $\|x\| > 1$.</p>
@@ -502,6 +826,230 @@ $\sigma$ here should cut it by a factor of about $6.6$.</p>
 absorbing boundary can still be crossed. Compare survival distributions at
 fixed observation horizons rather than inferring indefinite survival from
 bounded variance.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 1.6.10<span class="bt">The regulated walk</span></div><p>Take the homeostat $x_{t+1} = (1-\kappa)x_t + \sigma\xi_t$ of Lesson&nbsp;1 with
+$0 < \kappa < 2$ and no absorbing boundary, starting from $x_0 = 0$. Write $v_t$ for the variance of one
+coordinate of $x_t$, and $v = \sigma^2/[\kappa(2-\kappa)]$ for its stationary variance.</p>
+<p>(a) Solve the recursion $v_{t+1} = (1-\kappa)^2 v_t + \sigma^2$ from Lesson&nbsp;1
+exactly, and show that at fixed $t$ the result tends to $t\sigma^2$ as
+$\kappa \to 0$.</p>
+<p>(b) At the lesson's gain $\kappa = 0.15$, after how many steps does
+$v_t$ first reach 95% of $v$?</p>
+<p>(c) Show that the covariance of one coordinate at times $t$ and $t + j$ is
+$(1-\kappa)^j v_t$ for every whole number $j \ge 0$, so that it tends to
+$(1-\kappa)^j v$ once $t$ is large. What does a gain above one do to it?</p>
+<p>(d) For large $t$, when $v_t$ has settled at $v$, find the probability that
+$x_t$ lies outside the unit circle. Evaluate it at $\sigma = 0.035$ and
+$\kappa = 0.15$, and say what it does and does not tell you about
+survival.</p><details><summary>Solution</summary><p>(a) Measure the variance from its stationary value, $v_t = v + \delta_t$.
+Substituting into the recursion,</p>
+<div class="eqn"><div class="eqbody">$$v + \delta_{t+1} = (1-\kappa)^2 (v + \delta_t) + \sigma^2 .$$</div></div>
+<p>The stationary value satisfies $v = (1-\kappa)^2 v + \sigma^2$, and subtracting
+that equation leaves $\delta_{t+1} = (1-\kappa)^2 \delta_t$. So
+$\delta_t = (1-\kappa)^{2t} \delta_0$, with $\delta_0 = v_0 - v = -v$ because the walk starts
+at the origin with no spread. Hence</p>
+<div class="eqn"><div class="eqbody">$$v_t = v\left[1 - (1-\kappa)^{2t}\right] = \frac{\sigma^2\left[1 - (1-\kappa)^{2t}\right]}{\kappa(2-\kappa)} .$$</div></div>
+<p>For the limit, expand the numerator by the binomial theorem,
+$(1-\kappa)^{2t} = 1 - 2t\kappa + O(\kappa^2)$, so
+$1 - (1-\kappa)^{2t} = 2t\kappa + O(\kappa^2)$. The denominator is
+$2\kappa - \kappa^2$. Dividing top and bottom by $\kappa$,</p>
+<div class="eqn"><div class="eqbody">$$v_t = \sigma^2\,\frac{2t + O(\kappa)}{2 - \kappa} \;\longrightarrow\; t\sigma^2
+\quad\text{as } \kappa \to 0 ,$$</div></div>
+<p>which is the variance of the unregulated walk in Lesson&nbsp;1. As a check at a
+small gain, $\kappa = 0.01$ and $t = 10$ give $v_t/\sigma^2 = 9.15$
+against $t = 10$. The limit is taken at fixed $t$. For any fixed $\kappa > 0$ the factor $(1-\kappa)^{2t}$
+eventually becomes negligible, and the variance stops growing and settles at $v$.</p>
+<p>(b) From (a), $v_t \ge 0.95\,v$ exactly when $(1-\kappa)^{2t} \le 0.05$. Taking
+logarithms, and noting that $\ln(1-\kappa) < 0$ reverses the inequality on
+division,</p>
+<div class="eqn"><div class="eqbody">$$t \ge \frac{\ln 0.05}{2\ln(1-\kappa)} = 9.22 ,$$</div></div>
+<p>so the first such step is $t = 10$: after that many steps the
+variance is within 5% of its stationary value. The next problem relies on this
+when it discards the start of a simulated run.</p>
+<p>(c) Applying the homeostat recursion $j$ times, by induction on $j$,</p>
+<div class="eqn"><div class="eqbody">$$x_{t+j} = (1-\kappa)^j x_t + \sigma \sum_{i=0}^{j-1} (1-\kappa)^{j-1-i}\,\xi_{t+i} .$$</div></div>
+<p>The case $j = 1$ is the recursion itself, and substituting the case $j$ into
+$x_{t+j+1} = (1-\kappa)x_{t+j} + \sigma\xi_{t+j}$ gives the case $j+1$. Now
+$x_t$ depends only on $\xi_0, \dots, \xi_{t-1}$, so it is independent of every
+$\xi_{t+i}$ with $i \ge 0$, and all of these have mean zero. Multiply one
+coordinate of each side by the same coordinate of $x_t$ and take expectations.
+Each noise term gives $\mathbb{E}[x_t \xi_{t+i}] = \mathbb{E}[x_t]\,\mathbb{E}[\xi_{t+i}] = 0$
+by independence, so</p>
+<div class="eqn"><div class="eqbody">$$\mathrm{Cov}(x_t, x_{t+j}) = (1-\kappa)^j\,\mathbb{E}[x_t^2] = (1-\kappa)^j v_t ,$$</div></div>
+<p>using that every $x_t$ has mean zero. As $t$ grows this tends to
+$(1-\kappa)^j v$, and the correlation between the two times tends to
+$(1-\kappa)^j$. For $1 < \kappa < 2$ the base $1-\kappa$ is negative, so the
+correlation alternates in sign with the lag. Each step overcorrects and the
+displacement changes side. At lags 1, 2 and 3, a gain of $0.5$ gives correlations
+$0.5$, $0.25$ and $0.125$, and a gain of
+$1.5$ gives $-0.5$, $0.25$ and $-0.125$.
+Gains $\kappa$ and $2-\kappa$ give correlations of
+the same magnitude and opposite sign at odd lags, which is the difference
+between the two equally broad trajectories described in Lesson&nbsp;1.</p>
+<p>(d) Each coordinate of $x_t$ is, by repeated substitution, a fixed linear
+combination of the independent Gaussian variables $\xi_0, \dots, \xi_{t-1}$, and
+so is Gaussian, with mean zero and variance $v_t \to v$. The two coordinates are
+built from separate, independent noise and so are independent. Their joint density
+is $(2\pi v)^{-1}\exp[-\lVert x\rVert^2/(2v)]$, which depends on $x$ only through
+its distance from the origin. Write $R$ for that distance. In polar coordinates
+the area element is $R\,\mathrm{d}R$ times the element of angle, and integrating
+over the angle gives a factor $2\pi$, so</p>
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+P(\lVert x_t\rVert > 1) &= \int_1^\infty \frac{R}{v}\, e^{-R^2/(2v)}\,\mathrm{d}R
+= \Big[-e^{-R^2/(2v)}\Big]_1^\infty \\
+&= e^{-1/(2v)} = \exp\!\left(-\frac{\kappa(2-\kappa)}{2\sigma^2}\right) .
+\end{aligned}$$</div></div>
+<p>At the lesson's settings the exponent is $1/(2v) = 113.3$
+and the probability is $6.45 \times 10^{-50}$. At the larger noise
+$\sigma = 0.09$ of the survival-curve problem, with the same gain, it is
+$3.64 \times 10^{-8}$.</p>
+<p>The circle lies about 15 standard deviations from the
+origin in each coordinate, so this is a statement about the far tail of a
+Gaussian in an idealised model, and nobody could check a number like
+$6.45 \times 10^{-50}$ against a real body. It is the probability that the
+unabsorbed process is outside the circle at one late time. It is not the probability of having died by that time. Survival requires that
+the path never left, which is a statement about the whole path, and (c) shows
+successive positions are correlated, so the per-step probabilities cannot be
+multiplied as if they were independent trials. The waiting time needs the
+first-passage calculation mentioned in the warning in Lesson&nbsp;1. What the
+formula does show is how the noise enters. Without feedback, the survival
+timescale of the previous problem varies as $\sigma^{-2}$. With feedback, the
+probability of being outside varies as
+$\exp[-\kappa(2-\kappa)/(2\sigma^2)]$, exponentially in $\sigma^{-2}$, so a change of noise by a factor of
+2.6 moves it by 42 orders of magnitude.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 1.6.11<span class="bt">An implementation</span></div><p>Work in a new cell of <code>week01_numpy.ipynb</code>, or in any Python session with NumPy.</p>
+<p>(a) Write functions <code>bayes(A, prior, o)</code>, returning the posterior and the
+evidence, <code>entropy(p)</code>, <code>kl(q, p)</code> and <code>mutual_information(A, prior)</code>. Make
+<code>bayes</code> refuse a likelihood matrix whose columns do not sum to one. Check your
+functions against the tawny-flash posterior of Lesson&nbsp;3, its
+information gain $0.940$ nats, and the mutual information of the
+leopard model computed by both forms in the problems above.
+Then confirm that the refusal fires on the leopard matrix with its rows
+normalised instead of its columns, the mistake of the normalisation problem.</p>
+<p>(b) Simulate the unabsorbed homeostat at $\sigma = 0.035$ and
+$\kappa = 0.15$ for 50,000 steps from the origin, discard the first
+100, and estimate the stationary variance per coordinate, pooling
+the two coordinates, and the correlation between successive steps. Compare them with the regulated-walk
+problem. Repeat over 20 seeds. How large is the spread between
+seeds, and is the difference between your average and the formula within it?</p><details><summary>Solution</summary><p>(a) One implementation:</p>
+<pre><code class="language-python">import numpy as np
+
+def bayes(A, prior, o):
+    if not np.allclose(A.sum(axis=0), 1):
+        raise ValueError(&quot;columns of A must sum to one&quot;)
+    joint = A[o] * prior
+    evidence = joint.sum()
+    return joint / evidence, evidence
+
+def entropy(p):
+    p = p[p &gt; 0]
+    return -np.sum(p * np.log(p))
+
+def kl(q, p):
+    keep = q &gt; 0
+    return np.sum(q[keep] * np.log(q[keep] / p[keep]))
+
+def mutual_information(A, prior):
+    evidence = A @ prior
+    return sum(evidence[o] * kl(bayes(A, prior, o)[0], prior)
+               for o in range(A.shape[0]))
+
+A = np.array([[0.70, 0.15, 0.02],
+              [0.25, 0.75, 0.08],
+              [0.05, 0.10, 0.90]])
+prior = np.array([0.08, 0.22, 0.70])
+
+post, ev = bayes(A, prior, 0)
+print(post, ev, kl(post, prior))
+
+state_side = mutual_information(A, prior)
+obs_side = entropy(A @ prior) - sum(prior[s] * entropy(A[:, s]) for s in range(3))
+assert abs(state_side - obs_side) &lt; 1e-12
+
+A_rows = A / A.sum(axis=1, keepdims=True)
+try:
+    bayes(A_rows, prior, 0)
+except ValueError as err:
+    print(&quot;refused:&quot;, err)
+</code></pre>
+<p>The posterior is $(0.5437, 0.3204, 0.1359)$
+with evidence $0.103$ and information gain $0.940$ nats,
+and both forms of the mutual information give $0.3706$ nats.
+The refusal fires on <code>A_rows</code>. The guard is necessary but not sufficient: a
+matrix with a negative entry and unit column sums would pass it. Without it, <code>bayes</code> would return a normalised
+posterior from the wrong matrix, which is the failure the normalisation problem
+describes, where the division by the evidence hides the error.</p>
+<p>(b) Draw all the noise for a run at once, then apply the homeostat recursion step by step:</p>
+<pre><code class="language-python">def run(seed, kappa=0.15, sigma=0.035, T=50_000):
+    xi = np.random.default_rng(seed).standard_normal((T, 2))
+    x = np.zeros(2)
+    path = np.empty((T, 2))
+    for t in range(T):
+        x = (1 - kappa) * x + sigma * xi[t]
+        path[t] = x
+    return path
+
+v = 0.035**2 / (0.15 * (2 - 0.15))
+variances, correlations = [], []
+for seed in range(20):
+    tail = run(seed)[100:]
+    var = np.mean(tail**2)
+    variances.append(var)
+    correlations.append(np.mean(tail[1:] * tail[:-1]) / var)
+
+print(v, np.mean(variances), np.std(variances, ddof=1))
+print(np.mean(correlations), np.std(correlations, ddof=1))
+</code></pre>
+<p>The variance is estimated as the mean square, pooled over both coordinates and
+all steps kept, because the mean is known to be zero. Discarding
+100 steps is 11 times the settling time
+found in the regulated-walk problem; by then the variance deficit
+$(1-\kappa)^{2t}$ is negligible, so the start contributes no visible bias.</p>
+<p>Seed 0 gives a variance of $0.004473$ against the formula's
+$v = 0.004414$, and a successive-step correlation of
+$0.8521$ against $1 - \kappa = 0.85$. Over
+20 seeds the variance estimates have mean $0.004403$
+and standard deviation $5.93 \times 10^{-5}$, which is
+1.3% of $v$. The mean of 20 independent
+estimates has a standard error smaller by $\sqrt{ 20 }$, about
+0.3% of $v$, and the mean lies
+0.25% below $v$, within one standard error. The correlations have mean
+$0.8497$ and standard deviation $0.0021$.</p>
+<p>Each run holds 99,800 numbers, yet one run's variance is
+uncertain at the level of 1.3%. If the $N = 99,800$
+squares were independent, each would have variance
+$\mathbb{E}[x^4] - v^2 = 3v^2 - v^2 = 2v^2$ (the fourth moment of a zero-mean
+Gaussian is $3v^2$), and their mean would have relative standard deviation
+$\sqrt{2/N} = 0.45\%$, smaller than what is observed by a factor of
+3.0.</p>
+<p>The squares are not independent. Write $\rho = 1 - \kappa$ for the correlation
+between successive positions found in (c) of the regulated-walk problem. For
+two zero-mean jointly Gaussian variables $X$ and $Y$,
+$\mathrm{Cov}(X^2, Y^2) = 2\,\mathrm{Cov}(X, Y)^2$. To see it, write
+$Y = cX + W$ with $c = \mathrm{Cov}(X,Y)/\mathbb{E}[X^2]$ and $W$ Gaussian and
+independent of $X$. Then
+$\mathbb{E}[X^2Y^2] = c^2\,\mathbb{E}[X^4] + \mathbb{E}[X^2]\,\mathbb{E}[W^2]$,
+the cross term vanishing because $\mathbb{E}[W] = 0$, while
+$\mathbb{E}[X^2]\,\mathbb{E}[Y^2] = \mathbb{E}[X^2](c^2\,\mathbb{E}[X^2] + \mathbb{E}[W^2])$.
+Subtracting, and using $\mathbb{E}[X^4] = 3\,\mathbb{E}[X^2]^2$, leaves
+$2c^2\,\mathbb{E}[X^2]^2 = 2\,\mathrm{Cov}(X,Y)^2$. So squares $j$ steps apart
+have covariance $2v^2\rho^{2j}$. The variance of a mean of $N$ terms is
+$N^{-2}$ times the sum of all their covariances, which for large $N$ is close
+to $N^{-1}$ times the sum over every lag, positive and negative:</p>
+<div class="eqn"><div class="eqbody">$$\frac{2v^2}{N}\Big(1 + 2\sum_{j=1}^{\infty}\rho^{2j}\Big)
+= \frac{2v^2}{N}\Big(1 + \frac{2\rho^2}{1-\rho^2}\Big)
+= \frac{2v^2}{N}\cdot\frac{1+\rho^2}{1-\rho^2} .$$</div></div>
+<p>At $\rho = 0.85$ the factor $(1+\rho^2)/(1-\rho^2)$ is
+$6.21$, so the predicted relative spread is
+$0.45\% \times \sqrt{ 6.21 } = 1.12\%$.
+The observed 1.34% is 1.2 times
+that. A standard deviation estimated from 20 samples is itself
+uncertain by roughly $1/\sqrt{2(20-1)}$, about
+16%, so the two agree within that uncertainty. The
+correlation between successive positions makes a run worth about
+$6.2$ times fewer independent samples than it has entries. A simulation that
+reports an average over correlated steps should report its spread over
+independent runs, as here, rather than a standard error that treats every step
+as independent.</p></details></div>
 <h2 id="further-reading">Further reading</h2>
 <p>Everything here is freely accessible.</p>
 <ul>
@@ -514,7 +1062,7 @@ bounded variance.</p></details></div>
   MATLAB code.</li>
 <li>Bruineberg, Dolega, Dewhurst and Baltieri, "The Emperor's New Markov Blankets",
   <em>Behavioral and Brain Sciences</em> (2022). A careful criticism of exactly the
-  interface picture drawn in <a href="../week-01/process-and-model.html">Lesson&nbsp;2</a>. Read it now, and again after Week&nbsp;12.</li>
+  interface picture drawn in Lesson&nbsp;2. Read it now, and again after Week&nbsp;12.</li>
 </ul></article><nav class="pagenav"><a class="pv" href="../week-01/the-denominator.html"><span class="dir">Previous</span><span class="ttl">Computing the marginal likelihood</span></a><a class="nx" href="../week-02/two-rules.html"><span class="dir">Next</span><span class="ttl">Local computation and learning</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>
 </body>

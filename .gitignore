@@ -20,3 +20,9 @@ scratch/
 
 # generated books; rebuild with the course-to-pdf skill
 *.pdf
+
+# local working records; they quote Jonathan and stay out of the public repo
+handoffs/
+decision-log.md
+facts-registry.md
+AGENTS.md

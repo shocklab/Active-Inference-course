@@ -52,6 +52,7 @@ ALLOW = {
     "0.8", "0.3",   # chosen probabilities in the blanket-breaking exercise
     "1.5", "0.5",   # illustrative gains either side of the optimum
     "0.7",          # 1 - alpha in the worked blending example
+    "0.95",         # the alarm matrix entry 1 - 0.05, and the 95% settling threshold, both chosen
 }
 
 DECIMAL = re.compile(r"(?<![\w.])(\d+\.\d+)(?![\w.])")

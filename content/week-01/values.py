@@ -337,6 +337,154 @@ V['blanket_other'] = 0.7 * 0.8
 V['blanket_joint'] = 0.9 * V['blanket_direct']
 V['blanket_product'] = 0.9 * (0.9*V['blanket_direct'] + 0.1*V['blanket_other'])
 
+# ── problems added to close the exercise gaps (Lesson 6) ─────────────────
+# Warm-up: one overheating state, one alarm. All three inputs are chosen.
+WU_PRIOR, WU_HIT, WU_FALSE = 0.02, 0.90, 0.05
+V["wu_num_hot"] = WU_HIT * WU_PRIOR
+V["wu_num_normal"] = WU_FALSE * (1 - WU_PRIOR)
+V["wu_ev"] = V["wu_num_hot"] + V["wu_num_normal"]
+V["wu_post"] = V["wu_num_hot"] / V["wu_ev"]
+V["wu_post_pct"] = V["wu_post"] * 100
+V["wu_surprise"] = -log(V["wu_ev"])
+V["wu_prior_odds"] = WU_PRIOR / (1 - WU_PRIOR)
+V["wu_prior_odds_inv"] = round(1 / V["wu_prior_odds"])   # the odds are exactly 1/49
+assert abs(V["wu_prior_odds_inv"] * V["wu_prior_odds"] - 1) < 1e-12
+V["wu_lr_sq"] = round((WU_HIT / WU_FALSE) ** 2)
+# natural frequencies, per ten thousand bodies, and the posterior as an exact fraction
+WU_N = 10_000
+V["wu_N"] = WU_N
+V["wu_n_hot"] = round(WU_N * WU_PRIOR)
+V["wu_n_normal"] = WU_N - V["wu_n_hot"]
+V["wu_n_hot_alarm"] = round(V["wu_n_hot"] * WU_HIT)
+V["wu_n_normal_alarm"] = round(V["wu_n_normal"] * WU_FALSE)
+V["wu_n_alarm"] = V["wu_n_hot_alarm"] + V["wu_n_normal_alarm"]
+assert abs(V["wu_n_hot_alarm"] / V["wu_n_alarm"] - WU_HIT * WU_PRIOR / (WU_HIT * WU_PRIOR + WU_FALSE * (1 - WU_PRIOR))) < 1e-12
+V["wu_post_den"] = V["wu_prior_odds_inv"] + round(WU_HIT / WU_FALSE)    # 18/(49+18)
+# two alarms by Bayes directly, as an independent check of the odds route
+V["wu_two_num_hot"] = WU_HIT ** 2 * WU_PRIOR
+V["wu_two_num_normal"] = WU_FALSE ** 2 * (1 - WU_PRIOR)
+V["wu_two_ev"] = V["wu_two_num_hot"] + V["wu_two_num_normal"]
+V["wu_lr"] = WU_HIT / WU_FALSE
+V["wu_post_odds"] = V["wu_prior_odds"] * V["wu_lr"]
+assert abs(V["wu_post_odds"] - V["wu_post"] / (1 - V["wu_post"])) < 1e-12
+V["wu_two_odds"] = V["wu_prior_odds"] * V["wu_lr"] ** 2
+V["wu_two_post"] = V["wu_two_odds"] / (1 + V["wu_two_odds"])
+V["wu_two_post_pct"] = V["wu_two_post"] * 100
+assert abs(V["wu_two_num_hot"] / V["wu_two_ev"] - V["wu_two_post"]) < 1e-12
+V["wu_logodds_prior"] = log(V["wu_prior_odds"])
+V["wu_log_lr"] = log(V["wu_lr"])
+V["wu_logodds_one"] = V["wu_logodds_prior"] + V["wu_log_lr"]
+V["wu_logodds_two"] = V["wu_logodds_prior"] + 2 * V["wu_log_lr"]
+
+
+def entropy(p):
+    return -sum(x * log(x) for x in p if x > 0)
+
+
+# Entropy of beliefs before and after each observation, leopard model.
+V["pe_prior"] = entropy(PRIOR)
+_pe_avg = 0.0
+_mi = 0.0
+for oi, name in enumerate(OBS):
+    tag = name.split()[0]
+    post, ev = posterior(A, PRIOR, oi)
+    V[f"pe_{tag}"] = entropy(post)
+    V[f"pe_change_{tag}"] = V[f"pe_{tag}"] - V["pe_prior"]
+    V[f"pe_wterm_{tag}"] = ev * V[f"pe_{tag}"]
+    _pe_avg += ev * V[f"pe_{tag}"]
+    _mi += ev * kl(post, PRIOR)
+V["pe_avg"] = _pe_avg
+V["pe_drop_quiet"] = -V["pe_change_quiet"]
+V["pe_max3"] = log(3)
+assert abs(_mi - V["mi_leopard_model"]) < 1e-12
+assert abs((V["pe_prior"] - V["pe_avg"]) - _mi) < 1e-12
+
+# The same mutual information from the observation side.
+_P_o = [sum(A[o][s] * PRIOR[s] for s in range(3)) for o in range(3)]
+V["mi_H_o"] = entropy(_P_o)
+for si, sname in enumerate(STATES):
+    V[f"mi_Hcol_{sname}"] = entropy([A[o][si] for o in range(3)])
+V["mi_Hcond"] = sum(PRIOR[s] * V[f"mi_Hcol_{STATES[s]}"] for s in range(3))
+V["mi_obs_side"] = V["mi_H_o"] - V["mi_Hcond"]
+assert abs(V["mi_obs_side"] - _mi) < 1e-12
+
+
+def _mi_of(Am, prior):
+    total = 0.0
+    for oi in range(len(Am)):
+        post, ev = posterior(Am, prior, oi)
+        total += ev * kl(post, prior)
+    return total
+
+
+# Mutual information along the widget's channel-noise mixture A(alpha).
+for _a, _tag in ((0.25, "25"), (0.5, "50"), (0.75, "75")):
+    _Aa = [[(1 - _a) * A[o][s] + _a / 3 for s in range(3)] for o in range(3)]
+    V[f"mi_alpha_{_tag}"] = _mi_of(_Aa, PRIOR)
+    V[f"mi_line_{_tag}"] = (1 - _a) * _mi
+    V[f"mi_frac_{_tag}"] = V[f"mi_alpha_{_tag}"] / _mi
+    V[f"mi_frac_{_tag}_pct"] = 100 * V[f"mi_frac_{_tag}"]
+    assert V[f"mi_alpha_{_tag}"] <= V[f"mi_line_{_tag}"]   # the convexity bound
+
+# The regulated walk, kappa > 0, at the lesson's settings.
+_v = SIGMA ** 2 / (KAPPA * (2 - KAPPA))
+V["reg_settle_95"] = log(0.05) / (2 * log(1 - KAPPA))      # steps to 95% of v
+V["reg_settle_step"] = int(-(-V["reg_settle_95"] // 1))    # first whole step past it
+V["reg_rho1"] = 1 - KAPPA
+for _kk, _tg in ((0.5, "k05"), (1.5, "k15")):
+    for _lag in (1, 2, 3):
+        V[f"reg_corr_{_tg}_{_lag}"] = (1 - _kk) ** _lag
+V["reg_check_ratio"] = (1 - (1 - 0.01) ** 20) / (0.01 * (2 - 0.01))   # v_t/sigma^2 at kappa=0.01, t=10
+V["reg_outside_exponent"] = 1 / (2 * _v)
+V["reg_outside"] = exp(-1 / (2 * _v))
+_v_hi = V["sigma_hi"] ** 2 / (KAPPA * (2 - KAPPA))
+V["reg_outside_hi"] = exp(-1 / (2 * _v_hi))
+V["reg_outside_orders"] = (1 / (2 * _v) - 1 / (2 * _v_hi)) / log(10)   # log10 of the ratio
+
+# The implementation problem: twenty seeded runs of the unabsorbed walk,
+# drawing the noise exactly as the published solution code does, so these
+# figures are what that code prints.
+import numpy as np  # noqa: E402
+
+IMPL_T, IMPL_BURN, IMPL_SEEDS = 50_000, 100, 20
+_xs = []
+for _seed in range(IMPL_SEEDS):
+    _xi = np.random.default_rng(_seed).standard_normal((IMPL_T, 2))
+    _xs.append(_xi)
+_xi = np.stack(_xs)                          # (seed, t, coordinate)
+_x = np.zeros((IMPL_SEEDS, 2))
+_path = np.empty_like(_xi)
+for _t in range(IMPL_T):
+    _x = (1 - KAPPA) * _x + SIGMA * _xi[:, _t]
+    _path[:, _t] = _x
+_tail = _path[:, IMPL_BURN:]
+_var = (_tail ** 2).mean(axis=(1, 2))
+_rho = (_tail[:, 1:] * _tail[:, :-1]).mean(axis=(1, 2)) / _var
+V["impl_T"], V["impl_burn"], V["impl_seeds"] = IMPL_T, IMPL_BURN, IMPL_SEEDS
+V["impl_var_seed0"] = float(_var[0])
+V["impl_rho_seed0"] = float(_rho[0])
+V["impl_var_mean"] = float(_var.mean())
+V["impl_var_sd"] = float(_var.std(ddof=1))
+V["impl_var_relsd_pct"] = 100 * V["impl_var_sd"] / _v
+V["impl_rho_mean"] = float(_rho.mean())
+V["impl_rho_sd"] = float(_rho.std(ddof=1))
+V["impl_var_err_pct"] = 100 * (V["impl_var_mean"] - _v) / _v
+assert V["impl_var_err_pct"] < 0          # the prose says "below"
+V["impl_var_below_pct"] = -V["impl_var_err_pct"]
+V["impl_n_values"] = 2 * (IMPL_T - IMPL_BURN)
+V["impl_burn_over_settle"] = IMPL_BURN / V["reg_settle_95"]
+# Predicted spread of one run's pooled variance estimate. For a stationary
+# Gaussian AR(1) with correlation rho, x_t^2 has lag-j covariance 2 v^2 rho^(2j),
+# so the variance of a mean of N squares is about (2 v^2 / N)(1 + rho^2)/(1 - rho^2).
+_rho_ar = 1 - KAPPA
+V["impl_naive_relsd_pct"] = 100 * (2 / V["impl_n_values"]) ** 0.5
+V["impl_inflation"] = (1 + _rho_ar ** 2) / (1 - _rho_ar ** 2)
+V["impl_pred_relsd_pct"] = V["impl_naive_relsd_pct"] * V["impl_inflation"] ** 0.5
+V["impl_sd_unc_pct"] = 100 / (2 * (IMPL_SEEDS - 1)) ** 0.5   # rough relative error of a 20-sample SD
+V["impl_obs_over_naive"] = V["impl_var_relsd_pct"] / V["impl_naive_relsd_pct"]
+V["impl_obs_over_pred"] = V["impl_var_relsd_pct"] / V["impl_pred_relsd_pct"]
+V["impl_var_se_pct"] = V["impl_var_relsd_pct"] / IMPL_SEEDS ** 0.5   # of the 20-seed mean
+
 VALUES = V
 
 if __name__ == "__main__":

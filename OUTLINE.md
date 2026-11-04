@@ -72,7 +72,11 @@ reading finds. Update this table as sources are read, and do not delete it.
    breaks. Closes on a table of which escape dodges which reason, which is where
    the mean-field approximation of Week 4 gets its price tag.
    → forward to Week 2 §2 and Week 4.
-6. Problems and code · six problems with solutions, notebooks.
+6. Problems and code · eleven problems with solutions, notebooks. Includes a
+   two-state warm-up in odds form, posterior entropy and the identity
+   $\mathbb{E}_o\mathrm{H}[P(s\mid o)] = \mathrm{H}[P(s)] - I(s;o)$, both forms of
+   mutual information with its convexity in the channel, the regulated walk
+   $\kappa>0$ solved analytically, and an implementation problem.
 
 ### Week 2 · Hidden state estimation
 *Rewritten 2026-08-26 after reading Bogacz (2017) in full. **Drafted 2026-08-27**;
@@ -394,16 +398,12 @@ Done, and recorded so nobody redoes them:
 - [x] Equation refs and widget registration are verified by `build/check_site.py`.
 - [x] Numerical claims are substituted from `numbers.py` at build time, never typed.
 - [x] A depth-audit and definition-sweep brief that works; both are in `CLAUDE.md`.
+- [x] Exercise coverage gaps in Week 1, closed 2026-11-04 by five new problems:
+      a warm-up, entropy, mutual information, $\kappa > 0$ analytically, and code.
 
 Open:
 - [ ] Glossary, built from the `::: notation` blocks the way the sibling course builds `glossary.json`.
 - [ ] Decide whether Weeks 6–8 need a shared worked continuous example carried across all three.
-- [ ] **Exercise coverage gaps in Week 1**, found by the depth audit and not yet closed:
-      no exercise computes an entropy; mutual information is never independently
-      exercised; the regulated case $\kappa > 0$ is tested only by the widget and
-      never analytically; there is no rung-zero warm-up before the first full
-      three-state Bayes update; the reader is never asked to implement anything,
-      despite the week shipping notebooks.
 - [ ] Run the four audits per week **as each week is drafted**, not afterwards.
       Week 1 needed fifteen agent runs to reach its current state; catching the
       same faults at draft time is far cheaper than retrofitting them.
