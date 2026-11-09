@@ -26,7 +26,7 @@
       "n": 3,
       "part": "I. Inference",
       "title": "Learning the model",
-      "summary": "Parameters as another kind of hidden state. Bayesian linear regression, linear Gaussian systems, and expectation maximisation as the bridge to what comes next."
+      "summary": "Learning the parameters of the model by climbing the same log joint as inference, slowly and across trials. Hebbian updates, learned precisions, the bias of rules that read the gradient at the mode, and expectation maximisation as the connection to the evidence."
     },
     {
       "n": 4,

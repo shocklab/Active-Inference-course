@@ -120,6 +120,25 @@ $r,\ w$ :: The activity of a unit and the weight of a connection, in the stylise
 $\Phi$ :: A cumulative distribution function, needed to change variables in a density. Week&nbsp;2.
 :::
 
+## Learning the model, from Week 3
+
+::: notation
+$\theta$ :: The source power, the parameter in the link $g(d, \theta) = \theta/d^2$. Week&nbsp;1 Lesson&nbsp;2 used the letter locally for a sensor probability. Week&nbsp;3.
+$\omega$ :: Whichever of the parameters $d_p, \Sigma_p, \Sigma_u, \theta$ is meant, when a statement holds for all of them. Week&nbsp;3. A Week&nbsp;1 exercise uses the letter locally for a mixing weight in a convexity argument.
+$h(d)$ :: The link shape, the part of a link $g = \theta h(d)$ that depends on the state; $h(d) = 1/d^2$ in the running example. Week&nbsp;3 Lesson&nbsp;3. Unrelated to the generic factor functions $h_1, h_2$ of Week&nbsp;1 Lesson&nbsp;4.
+$n,\ N$ :: A trial index and the number of trials. Week&nbsp;3.
+$\hat d,\ \hat\ell$ :: The settled state of a trial, and the log joint evaluated there, a function of the observation and the parameters. Week&nbsp;3 Lesson&nbsp;1.
+$\mathcal{L}$ :: The total log joint over $N$ trials, a function of every state and the parameters. Week&nbsp;3 Lesson&nbsp;1.
+$\beta$ :: The learning rate, the step size of a parameter update per trial. Week&nbsp;2 Lesson&nbsp;1 used it for the step of a generic weight update. Week&nbsp;3.
+$\zeta_p$ :: The ratio $\mathcal N(0; d_p, \Sigma_p)/Z_p$ that the truncation adds to the prior updates. Week&nbsp;3 Lesson&nbsp;2. A Week&nbsp;1 exercise uses $\zeta$ locally for the function $y\ln y$.
+$\delta_u$ :: The raw sensory residual $u - g(d)$, before division by $\Sigma_u$. Week&nbsp;3 Lesson&nbsp;2. A Week&nbsp;1 exercise uses $\delta_t$ locally for a deviation from a stationary variance.
+$n_0,\ \Sigma_0$ :: The weight, in trials, and the guessed value of an inverse-gamma hyperprior on a variance. Week&nbsp;3 Lesson&nbsp;4.
+$x^{*}$ :: A star on a parameter marks the value the generative process uses, as against the model's value. Extends the starred $P^{*}$ of Week&nbsp;1. Week&nbsp;3.
+$\mathbb E_{P^*},\ \mathbb E_{d\mid u}$ :: An average over trials of the generative process, and an average over the model's posterior on the distance for one observation at the current parameters. Week&nbsp;3 Lesson&nbsp;1.
+$\varphi(\omega)$ :: The drift of a learning rule: its step per unit learning rate, averaged over the process at a fixed parameter value. A rule comes to rest near a zero of it. Week&nbsp;3 Lesson&nbsp;1. A Week&nbsp;1 exercise uses $\phi$ locally.
+$\psi(d)$ :: One trial's derivative of the log joint with respect to a parameter, read as a function of the state, so that the point rule uses $\psi(\hat d)$ and the posterior-averaged rule its posterior average. Week&nbsp;3 Lesson&nbsp;4. Unrelated to the factors $\psi_{12}, \psi_{13}$ of Week&nbsp;1 Lesson&nbsp;5.
+:::
+
 ## Continuous models, from Week 5
 
 ::: notation

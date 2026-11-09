@@ -123,35 +123,73 @@ five lessons, two widgets, two notebooks.*
 - Sources: Bogacz (2017) §1–2 **[read]**; Buckley et al. (2017) §2–4 **[read]**.
 
 ### Week 3 · Learning the model
-*Rewritten 2026-08-26 after reading Bogacz (2017) in full.*
-- **The organising idea: one objective, two timescales.** Week 2 climbed $F$ in
-  $\phi$. Learning climbs the same $F$ in the model's parameters. Inference and
-  learning are not different mechanisms; they are the same ascent on different
-  arguments, fast for states and slow for parameters. Framing it this way makes
-  Week 3 a corollary of Week 2 rather than a fresh topic.
-  → back to Week 2.
-- Why maximise $F$ rather than $p(u)$: the same reason as last week. The marginal is
-  an intractable integral; the joint is a product of two things you already have.
-- **Derive** the updates for the prior mean and for both variances,
-  $\partial F/\partial v_p$, $\partial F/\partial\Sigma_p$,
-  $\partial F/\partial\Sigma_u$, and read off what each is doing: the mean chases
-  the inferred state, a variance grows when its error is persistently larger than it.
-- **Derive the payoff: learning comes out Hebbian.** With a tunable link
-  $g(v,\theta) = \theta v$, the gradient is $\partial F/\partial\theta = \varepsilon\,\phi$,
-  the prediction error times the presynaptic activity. That is exactly the local
-  plasticity constraint Week 2 opened with, satisfied without having been aimed at.
-  This is the moment the framework stops looking like statistics and starts looking
-  like a brain, and it belongs here rather than being deferred to Week 5.
-- Precision as the thing being learned, which is where attention enters; and
-  hyperpriors, meaning priors over the precisions themselves.
-- Expectation maximisation as the classical name for this two-timescale split, for
-  readers who already know it. A connection, not the spine: a mathematics postgraduate
-  does not need a week on linear regression.
-- Widgets: the two timescales running at once, states settling within a trial and
-  parameters drifting across trials; learn a wrong $g$ and watch what the errors do;
-  precision learning under a noisy channel.
-- Notebooks: NumPy, JAX.
-- Sources: Bogacz (2017) §2.4–2.5 and §5 **[read]**; Buckley et al. (2017) §8 **[read]**.
+*Rewritten 2026-08-26 after reading Bogacz (2017) in full. Revised against Bogacz
+§2.4–2.5 and §5.1 and Buckley et al. §1 and §8.4 and **drafted 2026-11-09**; four
+lessons, a problems page, three widgets, two notebooks. Revised the same day against a
+correctness audit and a depth audit (`handoffs/audits/2026-11-09-week03-*.md`).*
+- **One objective, two timescales.** Week 2 climbed the log joint $\ell$ in the state
+  $d$. Learning climbs the same $\ell$ in the parameters $d_p, \Sigma_p, \Sigma_u,
+  \theta$, one small step per trial, at the settled state. **Derive** the envelope
+  theorem, which is why the partial derivative at the mode is the slope of the settled
+  log joint $\hat\ell$, and check numerically that it fails when inference is stopped
+  early. **Derive** the linear case as an exponential running average with
+  $\kappa = \beta/(\Sigma_p + \Sigma_u)$, Week 1's $\kappa$ reused, unbiased for the
+  location in the linear world. **Derive** the yardstick: linearising a rule's drift
+  $\varphi(\omega)$ about its zero gives the same recursion with
+  $\kappa = -\beta\varphi'$, so near an attracting zero of its drift a rule fluctuates by
+  order $\sqrt\beta$, its stationary mean can be displaced by order $\beta$, and one
+  run's average carries its own sampling error. Warn that settling the states is alternating ascent on the same total
+  log joint, which has no global maximum. → back to Week 2.
+- Why $\hat\ell$ and not the evidence $p(u)$: the same reason as last week. The
+  evidence needs the integral; the log joint needs one point.
+- **Derive** the updates for the prior location and both variances, with the
+  truncation normaliser kept: $\partial Z_p/\partial d_p = \mathcal N(0)$ and, through the
+  heat equation, $\partial Z_p/\partial\Sigma_p = -(d_p/2\Sigma_p)\mathcal N(0)$. Each
+  stationary condition matches a moment of the inferred states to the same moment of
+  the model. Variance, precision and log-variance updates share the zero of their
+  drift, not their behaviour near zero or their finite-rate rest point; Bogacz's §5.1
+  interneuron rule is $2\Sigma_u$ times the gradient. Warning: the plain variance step
+  crosses zero below $\sqrt{\beta/2}$; log coordinates keep variances positive but do
+  not bound the steps.
+- **Derive the Hebbian payoff.** With $g = \theta h(d)$,
+  $\partial\ell/\partial\theta = \varepsilon_u h(d)$: postsynaptic error times presynaptic
+  activity, Week 2's local plasticity met (Bogacz §2.5); the prior location's rule is
+  the same pattern plus the truncation correction $-\zeta_p$. Warning: $\theta$ sits on
+  two connections, identical updates preserve any difference between them, and unequal
+  strengths act as a sensory variance $\Sigma_u\theta_\downarrow/\theta_\uparrow$.
+  **Derive** the scale symmetry $(\theta, d_p, \Sigma_p) \to (c^2\theta, c\,d_p, c^2\Sigma_p)$:
+  the three are not identifiable from sound alone, and the settled log joint falls by
+  $\ln c$ along it, so joint point learning has no resting point.
+- **What drafting found.** The point rules, which read the gradient at the mode, are
+  biased even when the model is exactly right: on Week 2's model by
+  $-32\%$ ($d_p$), $-62\%$ ($\Sigma_p$), $-73\%$ ($\Sigma_u$) and $+12\%$ ($\theta$).
+  **Derive** the Fisher identity and the mean-zero score, so the posterior-averaged
+  rule is unbiased; **derive** the linear case exactly, where the learned prior
+  variance collapses to zero unless $\Sigma_p^{*} \geq 3\Sigma_u$, and the missing term
+  is $\tfrac12\ln(2\pi\Sigma_{\text{post}})$. **Derive** the mechanism: a second-order
+  expansion of the per-trial derivative about the mode separates the offset of the mode from the mean
+  from the omitted posterior variance, exact for the prior location and variance; for
+  $\theta$ the two pull opposite ways and the expansion gets the louder world's sign
+  wrong, so the signs come from the full calculation; in general $\hat\ell = \ln p(u) + \ln p(\hat d \mid u)$.
+  → forward to Week 4, whose free energy restores the missing term.
+- Precision as the thing learned: **derive** the ear's share from the linearised mode.
+  Under a channel three times noisier, the point rule's drift vanishes just above the
+  starting variance, so the ear's share barely moves while it should fall by more than half.
+  Hyperpriors as inverse-gamma pseudo-trials, which bound the objective without
+  removing the bias. → forward to Week 8, attention.
+- Expectation maximisation as the classical name for the posterior-averaged rule. A
+  connection, not the spine. Week 4 proves the monotone ascent.
+- Widgets: `two-timescales` (one trial's inner loop beside the prior location across
+  trials); `wrong-link` (a world louder than the model, with window averages of both
+  errors and the learning signal, and learning switchable off); `precision-learning`
+  (point and posterior-averaged rules on the same trials, with the ear's share of the
+  curvature). The widgets run the same seeded engine as `values.py`; readouts agree to
+  about $10^{-10}$.
+- Notebooks: NumPy (the engine, derivative checks, the three experiments, the linear
+  roots); JAX (autodiff against the hand derivatives over ten thousand parameter sets,
+  a thousand learners at once, the expected update swept for both rules). No `pymdp`.
+- Sources: Bogacz (2017) §2.4–2.5, §5.1 **[read]**; Buckley et al. (2017) §1, §8.4
+  **[read]**.
 
 ### Week 4 · Variational free energy — **the pivot of the course**
 - Jensen's inequality and the bound on surprise, in full.

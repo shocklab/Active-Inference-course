@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two timescales · Active Inference</title><meta name="description" content="Learning the parameters of the model by climbing the same log joint as inference, slowly and across many trials."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+:root{
+  --paper:#fdfcf9; --card:#ffffff;
+  --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
+  --rule:#e4e1d9; --rule2:#d3cfc4;
+  --accent:#0f5f57; --accent2:#14837a; --accent-tint:#e9f2f0; --accent-deep:#0a423d;
+  --clay:#9c4d2f; --clay-tint:#f9efe9;
+  --gold:#8a6d1f; --gold-tint:#faf5e6;
+  --tint:#f4f2ec; --code-bg:#f5f4f0;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SF Mono',Menlo,Consolas,monospace;
+  --measure:44rem; --margincol:13rem; --gap:2.5rem; --shell:80rem;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);
+     font-variant-numeric:oldstyle-nums proportional-nums;line-height:1.6}
+::selection{background:var(--accent);color:#fff}
+img,svg,canvas{max-width:100%}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2)}
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.topbar{position:sticky;top:0;z-index:60;background:var(--accent-deep);
+        border-bottom:2px solid var(--accent);}
+.topbar .tin{max-width:var(--shell);margin:0 auto;padding:0 2rem;height:3rem;
+             display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.topbar a.home{font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.13em;
+               text-transform:uppercase;color:rgba(255,255,255,.82)}
+.topbar a.home:hover{color:#fff}
+.topbar .tcode{font-family:var(--sans);font-size:.7rem;font-weight:500;letter-spacing:.2em;
+               text-transform:uppercase;color:rgba(255,255,255,.42)}
+.tocbtn{display:none;font-family:var(--sans);font-size:.75rem;letter-spacing:.1em;
+        text-transform:uppercase;color:rgba(255,255,255,.82);background:none;border:0;cursor:pointer}
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:14rem minmax(0,1fr);gap:0 var(--gap);
+       max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.maincol{min-width:0;max-width:calc(var(--measure) + var(--margincol) + var(--gap))}
+
+/* ── side nav ────────────────────────────────────────────────────────── */
+.sidenav{position:sticky;top:3rem;align-self:start;max-height:calc(100vh - 3rem);
+         overflow-y:auto;padding:2.6rem 0 3rem;scrollbar-width:thin}
+.sidenav::-webkit-scrollbar{width:0}
+.sidenav .part{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--faint);margin:1.6rem 0 .55rem}
+.sidenav .part:first-child{margin-top:0}
+.sidenav a.wk{display:block;font-family:var(--sans);font-size:.83rem;line-height:1.35;
+              color:var(--ink2);padding:.34rem 0 .34rem .8rem;border-left:2px solid var(--rule)}
+.sidenav a.wk:hover{color:var(--accent);border-left-color:var(--rule2)}
+.sidenav a.wk.cur{color:var(--accent);font-weight:500;border-left-color:var(--accent)}
+.sidenav a.wk .n{color:var(--faint);font-variant-numeric:tabular-nums;margin-right:.45rem}
+.sidenav a.wk.cur .n{color:var(--accent2)}
+.sidenav .lessons{margin:.15rem 0 .5rem .8rem;border-left:1px solid var(--rule)}
+.sidenav .lessons a{display:block;font-family:var(--sans);font-size:.76rem;line-height:1.35;
+                    color:var(--muted);padding:.28rem 0 .28rem .75rem;border-left:2px solid transparent;margin-left:-1px}
+.sidenav .lessons a:hover{color:var(--accent)}
+.sidenav .lessons a.cur{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.sidenav .navhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.16em;
+                text-transform:uppercase;color:var(--accent);padding-bottom:.6rem;
+                margin-bottom:1rem;border-bottom:1px solid var(--rule)}
+
+/* ── article head ────────────────────────────────────────────────────── */
+.ahead{padding:3.2rem 0 1.7rem;border-bottom:1px solid var(--rule);max-width:var(--measure)}
+.ahead .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.2em;
+                text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.ahead h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.2vw,2.9rem);
+          line-height:1.08;letter-spacing:-.015em;color:var(--ink);margin-bottom:.85rem;
+          font-variant-numeric:lining-nums}
+.ahead .deck{font-family:var(--serif);font-style:italic;font-size:1.18rem;line-height:1.5;
+             color:var(--muted)}
+.ahead .meta{font-family:var(--sans);font-size:.74rem;letter-spacing:.06em;color:var(--faint);
+             margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap}
+
+/* ── body ────────────────────────────────────────────────────────────── */
+.abody{padding:2rem 0 1rem;font-size:1.115rem;max-width:var(--measure)}
+.abody > *{max-width:var(--measure)}
+.abody p{margin:0 0 1.15rem;color:var(--ink);text-wrap:pretty}
+.abody p.lede{font-size:1.24rem;line-height:1.55;color:var(--ink2)}
+.abody strong{font-weight:600}
+.abody em{font-style:italic}
+.abody a{border-bottom:1px solid var(--rule2)}
+.abody a:hover{border-bottom-color:var(--accent2)}
+.abody h2{font-family:var(--serif);font-weight:500;font-size:1.72rem;line-height:1.16;
+          color:var(--ink);letter-spacing:-.01em;margin:2.9rem 0 .9rem;padding-top:1.6rem;
+          border-top:1px solid var(--rule);scroll-margin-top:4rem}
+.abody h2 .secno{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.6rem;font-weight:400}
+.abody h3{font-family:var(--serif);font-weight:600;font-size:1.24rem;color:var(--ink);
+          margin:2rem 0 .6rem;scroll-margin-top:4rem}
+.abody h4{font-family:var(--sans);font-weight:600;font-size:.78rem;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--accent);margin:1.6rem 0 .5rem}
+.abody ul,.abody ol{margin:0 0 1.25rem;padding-left:1.5rem}
+.abody li{margin-bottom:.45rem;color:var(--ink)}
+.abody ul>li::marker{color:var(--accent)}
+.abody ol>li::marker{color:var(--accent);font-family:var(--sans);font-size:.9em}
+.abody li>ul,.abody li>ol{margin:.45rem 0 .2rem}
+.abody blockquote{border-left:2px solid var(--accent);padding:.15rem 0 .15rem 1.3rem;
+                  margin:1.6rem 0;color:var(--ink2);font-style:italic}
+.abody blockquote p:last-child{margin-bottom:0}
+.abody hr{border:0;border-top:1px solid var(--rule);margin:2.4rem 0}
+
+/* ── code ────────────────────────────────────────────────────────────── */
+.abody code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);
+            padding:.1em .35em;border-radius:2px;border:1px solid var(--rule)}
+.abody pre{background:var(--code-bg);border:1px solid var(--rule);border-left:2px solid var(--accent);
+           padding:1rem 1.15rem;overflow-x:auto;margin:1.5rem 0;line-height:1.55}
+.abody pre code{background:none;border:0;padding:0;font-size:.83rem;color:var(--ink2)}
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.abody .tablewrap{overflow-x:auto;margin:1.7rem 0;
+           width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+.abody table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.86rem}
+.abody th{text-align:left;font-weight:600;color:var(--accent);border-bottom:1.5px solid var(--accent);
+          padding:.5rem .7rem;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;
+          vertical-align:bottom}
+.abody td{padding:.55rem .7rem;border-bottom:1px solid var(--rule);color:var(--ink2);vertical-align:top}
+.abody tbody tr:hover td{background:var(--tint)}
+
+/* ── maths ───────────────────────────────────────────────────────────── */
+.katex{font-size:1.045em}
+.katex-display{margin:0;padding:.15rem 0;overflow-x:auto;overflow-y:hidden}
+.eqn{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;max-width:var(--measure);
+     scroll-margin-top:4.5rem}
+.eqn > .eqbody{flex:1;min-width:0}
+.eqn > .eqno{flex:0 0 auto;font-family:var(--sans);font-size:.8rem;color:var(--faint);
+             font-variant-numeric:tabular-nums}
+.eqn > .eqno a{color:var(--faint);border:0}
+.eqn > .eqno a:hover{color:var(--accent)}
+.eqn:target{background:var(--gold-tint);box-shadow:0 0 0 .7rem var(--gold-tint);border-radius:2px}
+.eqn:target > .eqno a{color:var(--gold)}
+a.eqref{font-variant-numeric:tabular-nums;white-space:nowrap;border-bottom:1px solid var(--rule2)}
+
+/* ── margin notes ────────────────────────────────────────────────────── */
+.mn{float:right;clear:right;width:var(--margincol);
+    margin:.3rem calc(-1 * (var(--margincol) + var(--gap))) 1.1rem var(--gap);
+    font-family:var(--sans);font-size:.775rem;line-height:1.5;color:var(--muted)}
+.mn .mnl{display:block;font-weight:600;font-size:.66rem;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.mn p{margin:0 0 .5rem;font-size:inherit;line-height:inherit;color:inherit}
+.mn p:last-child{margin-bottom:0}
+.mn code{font-size:.85em}
+.mn a{border-bottom:1px solid var(--rule2)}
+
+/* ── boxes ───────────────────────────────────────────────────────────── */
+.box{margin:1.9rem 0;padding:1.15rem 1.35rem;border:1px solid var(--rule);
+     background:var(--card);max-width:var(--measure)}
+.box > :last-child{margin-bottom:0}
+.box .boxhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.15em;
+            text-transform:uppercase;margin-bottom:.6rem;display:flex;gap:.5rem;align-items:baseline}
+.box .boxhd .bt{color:var(--ink2);font-weight:500;letter-spacing:.02em;text-transform:none;
+                font-size:.95rem;font-family:var(--serif);font-style:italic}
+.box p,.box li{font-size:1.03rem}
+
+.box.definition,.box.theorem,.box.proposition,.box.lemma{
+  border-left:2px solid var(--accent);background:var(--card)}
+.box.definition .boxhd,.box.theorem .boxhd,.box.proposition .boxhd,.box.lemma .boxhd{color:var(--accent)}
+
+.box.keyidea{border:0;border-left:2px solid var(--accent);background:var(--accent-tint);
+             padding:1.2rem 1.4rem}
+.box.keyidea .boxhd{color:var(--accent)}
+
+.box.remark,.box.aside{border-left:2px solid var(--rule2);background:var(--tint)}
+.box.remark .boxhd,.box.aside .boxhd{color:var(--muted)}
+
+.box.warning{border-left:2px solid var(--clay);background:var(--clay-tint)}
+.box.warning .boxhd{color:var(--clay)}
+
+.box.derivation{border:1px solid var(--rule);border-left:2px solid var(--gold);background:#fdfcf7;
+                padding:1.25rem 1.45rem}
+.box.derivation .boxhd{color:var(--gold)}
+.box.derivation .eqn{margin:1rem 0}
+.box.derivation p{color:var(--ink2)}
+
+.box.exercise{border-left:2px solid var(--clay)}
+.box.exercise .boxhd{color:var(--clay)}
+.box.exercise details{margin-top:.9rem;border-top:1px solid var(--rule);padding-top:.7rem}
+.box.exercise summary{font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.11em;
+                      text-transform:uppercase;color:var(--clay);cursor:pointer;list-style:none}
+.box.exercise summary::-webkit-details-marker{display:none}
+.box.exercise summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+.box.exercise details[open] summary::before{content:'▾ '}
+.box.exercise details > :nth-child(2){margin-top:.8rem}
+
+.box.checkpoint{border-left:2px solid var(--accent2);background:var(--accent-tint)}
+.box.checkpoint .boxhd{color:var(--accent)}
+.box.checkpoint ul{margin-bottom:0}
+
+/* ── figures & widgets ───────────────────────────────────────────────── */
+.abody figure{margin:2.2rem 0;width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+figure{margin:2.2rem 0}
+figure figcaption{font-family:var(--sans);font-size:.79rem;line-height:1.5;color:var(--muted);
+                  margin-top:.7rem;max-width:var(--measure)}
+figure figcaption .fno{font-weight:600;color:var(--accent);letter-spacing:.03em}
+figure.widget .wmount{border:1px solid var(--rule2);background:var(--card);padding:1rem}
+figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:var(--muted);
+                                 padding:2rem 1rem;text-align:center}
+
+/* widget internals (used by aif-widgets.js) */
+.wpanel{display:grid;gap:1rem}
+.wrow{display:flex;flex-wrap:wrap;gap:1.1rem 1.6rem;align-items:flex-start}
+.wctl{font-family:var(--sans);font-size:.78rem;color:var(--ink2);display:flex;
+      flex-direction:column;gap:.28rem;min-width:11rem;flex:1 1 11rem}
+.wctl .wlab{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline}
+.wctl .wlab b{font-weight:500;color:var(--ink2)}
+.wctl .wlab .wval{font-family:var(--mono);font-size:.76rem;color:var(--accent);
+                  font-variant-numeric:tabular-nums}
+.wctl input[type=range]{width:100%;accent-color:var(--accent);height:1.1rem;cursor:pointer}
+.wbtn{font-family:var(--sans);font-size:.76rem;font-weight:500;letter-spacing:.04em;
+      background:var(--accent);color:#fff;border:0;padding:.42rem .9rem;cursor:pointer;
+      border-radius:2px}
+.wbtn:hover{background:var(--accent2)}
+.wbtn.ghost{background:transparent;color:var(--accent);border:1px solid var(--rule2)}
+.wbtn.ghost:hover{background:var(--accent-tint)}
+.wbtns{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.wnote{font-family:var(--sans);font-size:.78rem;line-height:1.5;color:var(--muted);
+       border-top:1px solid var(--rule);padding-top:.7rem}
+.wnote b{color:var(--accent);font-weight:600}
+.wreadout{font-family:var(--mono);font-size:.78rem;color:var(--ink2);display:flex;
+          flex-wrap:wrap;gap:.4rem 1.3rem;font-variant-numeric:tabular-nums}
+.wreadout span b{color:var(--faint);font-weight:500}
+.wtabs{display:flex;gap:.3rem;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.wtab{font-family:var(--sans);font-size:.75rem;padding:.34rem .75rem;cursor:pointer;
+      color:var(--muted);border:1px solid transparent;border-bottom:0;background:none}
+.wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
+canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
+
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
+
+/* ── footer nav ──────────────────────────────────────────────────────── */
+.pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
+         border-top:1px solid var(--rule);margin-top:3.5rem;padding:1.7rem 0 0;
+         max-width:var(--measure)}
+.pagenav a{display:flex;flex-direction:column;gap:.22rem;max-width:20rem;border:0}
+.pagenav a.nx{text-align:right;margin-left:auto}
+.pagenav .dir{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.16em;
+              text-transform:uppercase;color:var(--accent)}
+.pagenav .ttl{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);line-height:1.3}
+.pagenav a:hover .ttl{color:var(--accent)}
+.sitefoot{border-top:1px solid var(--rule);margin-top:3rem;padding:1.6rem 0 3.5rem;
+          font-family:var(--sans);font-size:.76rem;line-height:1.65;color:var(--faint);
+          max-width:var(--measure)}
+.sitefoot a{color:var(--muted);border-bottom:1px solid var(--rule)}
+.sitefoot a:hover{color:var(--accent)}
+.sitefoot p{margin-bottom:.4rem}
+
+/* ── landing page ────────────────────────────────────────────────────── */
+.cover{background:var(--accent-deep);color:#fff;padding:4.5rem 0 3.6rem;margin-bottom:0}
+.cover .cin{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.cover .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.22em;
+                text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1.3rem}
+.cover h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,6vw,4.2rem);
+          line-height:1.04;letter-spacing:-.02em;max-width:24ch;margin-bottom:1.2rem}
+.cover .sub{font-family:var(--serif);font-style:italic;font-size:1.25rem;line-height:1.5;
+            color:rgba(255,255,255,.72);max-width:44rem}
+.cover .rule{width:3rem;height:2px;background:var(--accent2);margin:0 0 1.2rem}
+.wide{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.weeklist{border-top:1px solid var(--rule)}
+.landing .abody>*{max-width:none}
+.landing .abody .introcopy{max-width:44rem}
+.weekrow{display:flex;gap:2.2rem;padding:1.7rem 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.weekrow .wn{flex:0 0 3.4rem;text-align:right}
+.weekrow .wn .l{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.18em;
+                text-transform:uppercase;color:var(--faint)}
+.weekrow .wn .n{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--accent);
+                line-height:1;font-variant-numeric:lining-nums}
+.weekrow .wc{flex:1 1 20rem;min-width:0}
+.weekrow .wc h3{font-family:var(--serif);font-weight:500;font-size:1.28rem;margin-bottom:.3rem}
+.weekrow .wc h3 a{color:var(--ink);border:0}
+.weekrow .wc h3 a:hover{color:var(--accent)}
+.weekrow .wc p{font-family:var(--sans);font-size:.86rem;line-height:1.6;color:var(--muted);
+               margin-bottom:.55rem;max-width:46rem}
+.weekrow .wc ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+.weekrow .wc ul li{font-family:var(--sans);font-size:.79rem;margin:0}
+.weekrow .wc ul li a{color:var(--ink2);border-bottom:1px solid var(--rule)}
+.weekrow .wc ul li a:hover{color:var(--accent);border-bottom-color:var(--accent2)}
+.partband{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.2em;
+          text-transform:uppercase;color:var(--accent);padding:2.2rem 0 .5rem}
+.partband span{color:var(--faint);font-weight:400;letter-spacing:.04em;text-transform:none;
+               font-family:var(--serif);font-style:italic;font-size:1rem;margin-left:.8rem}
+
+/* ── responsive ──────────────────────────────────────────────────────── */
+@media (max-width:1280px){
+  .shell{grid-template-columns:13rem minmax(0,1fr);gap:0 2rem;padding:0 1.6rem}
+  .maincol{max-width:var(--measure)}
+  .mn{float:none;clear:both;width:auto;margin:1rem 0 1.3rem;padding-left:1rem;
+      border-left:2px solid var(--rule2)}
+  .abody .tablewrap,.abody figure{width:auto;max-width:100%}
+  .cover .cin,.wide{padding:0 1.6rem}
+}
+@media (max-width:860px){
+  html{font-size:97%}
+  .shell{grid-template-columns:minmax(0,1fr);padding:0 1.3rem}
+  .sidenav{position:static;max-height:none;padding:1rem 0 0;display:none;
+           border-bottom:1px solid var(--rule);margin-bottom:1rem}
+  .sidenav.open{display:block}
+  .tocbtn{display:block}
+  .topbar .tin{padding:0 1.3rem}
+  .cover{padding:3rem 0 2.4rem}
+  .cover .cin,.wide{padding:0 1.3rem}
+  .abody{font-size:1.06rem}
+  .weekrow{gap:1rem}
+  .weekrow .wn{flex-basis:2.6rem}
+  .eqn{gap:.5rem}
+  .eqn > .eqno{font-size:.72rem}
+}
+@media print{
+  .topbar,.sidenav,.pagenav,.wbtns,.wctl{display:none}
+  .shell{display:block;max-width:none}
+  body{background:#fff}
+}
+</style><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script><script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(!window.renderMathInElement) return;
+  renderMathInElement(document.body,{
+    delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'\\[',right:'\\]',display:true},
+      {left:'$',right:'$',display:false},
+      {left:'\\(',right:'\\)',display:false}
+    ],
+    ignoredTags:['script','noscript','style','textarea','pre','code','option'],
+    throwOnError:false,
+    macros:{
+      '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
+      '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
+      '\\ta':'\\tilde{s}'
+      // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
+      // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.querySelector('.tocbtn'),n=document.querySelector('.sidenav');
+  if(b&&n){b.addEventListener('click',function(){n.classList.toggle('open');});}
+});
+</script>
+</head>
+<body>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk cur" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><div class="lessons"><a class="cur" href="../week-03/two-timescales.html">Two timescales</a><a class="" href="../week-03/prior-and-noise.html">Learning the prior and the noise</a><a class="" href="../week-03/learning-the-link.html">Learning the link</a><a class="" href="../week-03/what-the-mode-leaves-out.html">What the mode leaves out</a><a class="" href="../week-03/exercises.html">Problems and code</a></div><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Learning the model</div><h1>Two timescales</h1><p class="deck">Learning the parameters of the model by climbing the same log joint as inference, slowly and across many trials.</p><div class="meta"><span>Week 3</span><span>&#167;1</span><span>45 min</span></div></header><article class="abody"><p>Week&nbsp;2 inferred a distance from one sound. Four numbers were fixed throughout:
+the prior location $d_p = 2.0$, the prior variance $\Sigma_p = 1.0$,
+the sensory variance $\Sigma_u = 0.1$ and, less visibly, the power of the
+source, which <a href="../week-02/exact.html">Week&nbsp;2, Lesson&nbsp;2</a> took as one "so that intensity is $1$ at unit distance".
+An animal is not given any of them. It hears many sounds over its life, and those
+sounds carry information about the four numbers as well as about each distance.
+This week the animal uses that information.</p>
+<p>The method is the one Week&nbsp;2 used for the distance: gradient ascent on the log
+joint. Only the argument changes.</p>
+<h2 id="states-and-parameters"><span class="secno">1</span>States and parameters</h2>
+<div class="box definition"><div class="boxhd">Definition 3.1.1<span class="bt">Parameter</span></div><p>A <strong>parameter</strong> of a generative model is a quantity shared by every observation
+the model is used for. A hidden state belongs to one observation; a parameter
+belongs to all of them.</p></div>
+<p>The distance $d$ is a state: each sound comes from a source at its own distance.
+The prior location, the two variances and the source power are parameters: the
+animal uses the same values for every sound it hears. The variances and the source
+power are positive; the prior location may be any real number.</p>
+<p>Write $\theta$ for the source power, $\theta$ being the conventional letter for a
+parameter. The observation function of Week&nbsp;2, Lesson&nbsp;2 becomes</p>
+<div class="eqn" id="eq-link-theta"><div class="eqbody">$$g(d, \theta) \;=\; \frac{\theta}{d^{2}} ,$$</div><div class="eqno"><a href="#eq-link-theta" title="Link to equation 3.1.1">(3.1.1)</a></div></div>
+<p>and Week&nbsp;2's model is the case $\theta = 1.0$. <a href="../week-01/process-and-model.html">Week&nbsp;1, Lesson&nbsp;2</a> used
+$\theta$ locally for a sensor probability in the lamp example; from this week it is
+the source power. When a statement holds for any one of the four parameters
+$d_p, \Sigma_p, \Sigma_u, \theta$, we write $\omega$ for whichever is meant.</p>
+<h2 id="the-world-and-the-model"><span class="secno">2</span>The world and the model</h2>
+<p>Week&nbsp;1, Lesson&nbsp;2 separated the generative process, which produces the sounds, from
+the generative model, which the animal uses to interpret them. Learning only makes
+sense with both in view, because a learning rule is judged by where it takes the
+model's parameters given what the process does.</p>
+<div class="box definition"><div class="boxhd">Definition 3.1.2<span class="bt">Trial</span></div><p>A <strong>trial</strong> is one draw from the generative process followed by one round of
+inference. On trial $n$, for $n = 1, \dots, N$, the process places a source at
+distance $d_n$, drawn independently from a Gaussian with location $d_p^{*}$ and
+variance $\Sigma_p^{*}$ truncated to $d_n > 0$, and the animal hears</p>
+<div class="eqn"><div class="eqbody">$$u_n \;=\; \frac{\theta^{*}}{d_n^{2}} \;+\; z_n ,$$</div></div>
+<p>where $z_n \sim \mathcal N(0, \Sigma_u^{*})$. The noises $z_1, \dots, z_N$ are independent
+of one another and of every source distance, and the distances are independent of
+one another.</p></div>
+<p>The star marks a quantity belonging to the process, following the convention of
+$P^{*}$ in Week&nbsp;1, Lesson&nbsp;2. The animal never sees a starred quantity. Its model has the
+same form with its own unstarred parameters, and when the model's parameters equal
+the starred ones the model is correct. Each experiment this week states its own
+process and the model the animal starts from, and the animal learns one parameter
+at a time while the other three stay where they started.</p>
+<p>Two kinds of average appear from here on, and they are kept apart by their
+subscripts, as the notation page requires. $\mathbb E_{P^*}$ averages over trials of
+the process: over the source distance and the noise, and so over the observation.
+$\mathbb E_{d\mid u}$ averages over the model's posterior on the distance, for one
+observation $u$ and the parameters the animal holds at the time.</p>
+<h2 id="the-log-joint-with-its-constants-restored"><span class="secno">3</span>The log joint with its constants restored</h2>
+<p><a href="../week-02/climbing.html">Week&nbsp;2, Lesson&nbsp;3</a> wrote the log joint for one trial as</p>
+<div class="eqn"><div class="eqbody">$$\ell \;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \frac{(u - g(d))^2}{2\Sigma_u} \;+\; \text{const}$$</div></div>
+<p>and justified dropping the constant because it contained no $d$. The constant does
+contain the parameters. Restoring it from Week&nbsp;2, Lesson&nbsp;3's expansion of the truncated
+prior and the Gaussian likelihood:</p>
+<div class="eqn" id="eq-ell-full"><div class="eqbody">$$\ell(d, u; \omega) \;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \tfrac12\ln(2\pi\Sigma_p) \;-\; \ln Z_p
+\;-\; \frac{\big(u - \theta/d^{2}\big)^2}{2\Sigma_u} \;-\; \tfrac12\ln(2\pi\Sigma_u) ,$$</div><div class="eqno"><a href="#eq-ell-full" title="Link to equation 3.1.2">(3.1.2)</a></div></div>
+<p>for $d > 0$, with $Z_p = \int_0^\infty \mathcal N(x; d_p, \Sigma_p)\,\mathrm dx$ as in
+Week&nbsp;2, Lesson&nbsp;2. $Z_p$ depends on $d_p$ and $\Sigma_p$. At Week&nbsp;2's values it is
+$0.977250$, and at Week&nbsp;2's observation $u = 0.5$ and its mode
+$\hat d = 1.5500$ the full log joint is $-0.7999$.</p>
+<p>Over $N$ trials the joint density of all the states and observations is a product,
+because the trials are independent given the parameters, so its logarithm is a sum:</p>
+<div class="eqn" id="eq-total"><div class="eqbody">$$\mathcal L \;=\; \sum_{n=1}^{N} \ell(d_n, u_n; \omega) .$$</div><div class="eqno"><a href="#eq-total" title="Link to equation 3.1.3">(3.1.3)</a></div></div>
+<p>Here $\mathcal L$ is a function of the $N$ distances and the four parameters. The
+script letter keeps it apart from the expected losses of <a href="../week-02/exercises.html">Week&nbsp;2, Lesson&nbsp;5</a>.</p>
+<h2 id="one-objective-two-kinds-of-argument"><span class="secno">4</span>One objective, two kinds of argument</h2>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The gradient of the total log joint</span></div><p>Differentiate <a class="eqref" href="#eq-total">(3.1.3)</a> with respect to the distance of one trial, $d_m$. Only the
+term $n = m$ contains $d_m$, so every other term differentiates to zero:</p>
+<div class="eqn"><div class="eqbody">$$\frac{\partial \mathcal L}{\partial d_m} \;=\; \frac{\partial \ell(d_m, u_m; \omega)}{\partial d_m}
+\;=\; \varepsilon_{p,m} \;+\; g'(d_m)\,\varepsilon_{u,m} ,$$</div></div>
+<p>which is Week&nbsp;2's gradient for trial $m$ alone, with the prediction errors of
+Week&nbsp;2, Lesson&nbsp;3 evaluated on that trial. Inference on one trial needs nothing from any
+other trial.</p>
+<p>Differentiate instead with respect to a parameter $\omega$. Every term contains
+$\omega$, so none drops:</p>
+<div class="eqn" id="eq-param-sum"><div class="eqbody">$$\frac{\partial \mathcal L}{\partial \omega} \;=\; \sum_{n=1}^{N} \frac{\partial \ell(d_n, u_n; \omega)}{\partial \omega} .$$</div><div class="eqno"><a href="#eq-param-sum" title="Link to equation 3.1.4">(3.1.4)</a></div></div>
+<p>The gradient for a parameter is a sum over every trial the parameter is used in.</p></div>
+<p>The two kinds of argument are treated differently because of this difference, not
+because they are different kinds of object. A state's gradient is available within
+its trial. A parameter's gradient is spread across trials, and an animal that hears
+one sound at a time never holds the whole sum.</p>
+<h2 id="settling-first"><span class="secno">5</span>Settling first</h2>
+<p>Suppose inference on trial $n$ is run until it stops, at the mode $\hat d_n$. The
+log joint at that point is a function of the observation and the parameters alone.</p>
+<div class="box definition"><div class="boxhd">Definition 3.1.3<span class="bt">Settled log joint</span></div><p>The <strong>settled log joint</strong> of one trial is</p>
+<div class="eqn"><div class="eqbody">$$\hat\ell(u; \omega) \;=\; \ell\big(\hat d(u; \omega), u; \omega\big) ,$$</div></div>
+<p>where $\hat d(u; \omega)$ is the mode of Week&nbsp;2, Lesson&nbsp;3 for observation $u$ and
+parameters $\omega$.</p></div>
+<p>The mode moves when a parameter moves, so $\hat\ell$ depends on $\omega$ in two
+ways: directly, and through $\hat d$. Its derivative nevertheless needs only the
+direct one.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The envelope theorem</span></div><p>Assume the mode is a strict local maximum, $\ell'' < 0$ there, so that by the
+implicit function theorem $\hat d$ is a differentiable function of $\omega$ near the
+current value. By the chain rule,</p>
+<div class="eqn"><div class="eqbody">$$\frac{\mathrm d\hat\ell}{\mathrm d\omega}
+\;=\; \frac{\partial \ell}{\partial \omega}\bigg|_{d = \hat d}
+\;+\; \frac{\partial \ell}{\partial d}\bigg|_{d = \hat d}\,\frac{\mathrm d\hat d}{\mathrm d\omega} .$$</div></div>
+<p>The first term is the change in $\ell$ from moving $\omega$ with the state held
+fixed. The second is the change from the state moving in response. The mode is a
+stationary point, so $\partial\ell/\partial d = 0$ at $d = \hat d$, and the second
+term vanishes whatever $\mathrm d\hat d/\mathrm d\omega$ is:</p>
+<div class="eqn" id="eq-envelope"><div class="eqbody">$$\frac{\mathrm d\hat\ell}{\mathrm d\omega} \;=\; \frac{\partial \ell}{\partial \omega}\bigg|_{d = \hat d} .$$</div><div class="eqno"><a href="#eq-envelope" title="Link to equation 3.1.5">(3.1.5)</a></div></div></div>
+<p>So the slope of the settled log joint can be read off without knowing how the mode
+would move. The animal evaluates the partial derivative at the state it has already
+inferred.</p>
+<p>Two cautions about "the mode". Week&nbsp;2's posterior can have more than one local
+maximum, and the envelope theorem holds at whichever one inference stopped on;
+$\hat\ell$ is the log joint on that branch. And a climb with finite steps can reach
+a different local maximum than the continuous ascent would, as Week&nbsp;2, Lesson&nbsp;3 showed.
+The simulations this week run Week&nbsp;2's capped ascent from the prior location
+until a step falls below $10^{-12}$, giving up after 2000 steps. In the
+9 runs whose numbers the lessons quote, every trial met that
+stopping rule, and every settled state agreed with the highest mode of its trial,
+found by a separate grid search, to within $1.9 \times 10^{-11}$. That is a check of
+those runs, not a guarantee for every slider setting; the widgets add a readout row
+if a trial runs out of steps. A trial that runs out of steps changes no parameter, in
+the widgets, the notebooks and <code>values.py</code> alike, so that an unfinished state never
+feeds a learning rule.</p>
+<h2 id="why-the-log-joint-and-not-the-evidence"><span class="secno">6</span>Why the log joint and not the evidence</h2>
+<p>The number that says how well a set of parameters accounts for a sound is the
+evidence, $p(u; \omega) = \int_0^\infty p(d, u; \omega)\,\mathrm dd$, the denominator of
+Bayes' rule that <a href="../week-01/the-denominator.html">Week&nbsp;1, Lesson&nbsp;5</a> examined. A statistician fitting the four parameters to
+recorded sounds would maximise the sum of $\ln p(u_n; \omega)$ over trials. Its
+derivative needs that integral on every trial, or, as <a href="../week-03/what-the-mode-leaves-out.html">Lesson&nbsp;4</a> shows, an average
+over the whole posterior, which is the same integral in another form. Week&nbsp;2
+avoided the integral for the state by climbing the log joint instead, and the animal
+avoids it for the parameters the same way: $\hat\ell$ needs the two factors of the
+joint, evaluated at one point it has already found. The price is that $\hat\ell$ is
+not $\ln p(u; \omega)$, so climbing one need not climb the other. Lesson&nbsp;4
+computes the difference, and Week&nbsp;4 replaces $\hat\ell$ by an objective that
+includes the missing term.</p>
+<p>This is a statement about exact stationary points, so check it. At Week&nbsp;2's
+observation, a finite-difference derivative of $\hat\ell$ with respect to
+$\Sigma_u$, with the mode recomputed at each perturbed value, gives
+$-4.648993$. The partial derivative at the mode, which <a href="../week-03/prior-and-noise.html">Lesson&nbsp;2</a> derives,
+gives $-4.648993$.</p>
+<p>Now stop inference early. After $3$ of Week&nbsp;2's steps from the prior
+location the estimate is at $d = 1.9096$, where
+$\partial\ell/\partial d = -0.5580$, not zero. The total derivative of
+$\ell$ at that point, with the three steps rerun at each perturbed $\Sigma_u$, is
+$-2.9627$, while the partial derivative is $-2.4516$. The
+second term of the chain rule has not vanished. The partial derivative is still the
+slope of $\ell$ with the state held where the three steps left it, which is a
+direction of coordinate ascent, but it is not the slope of the objective the three
+steps define, $\ell$ evaluated wherever three steps from the prior location land.</p>
+<h2 id="the-slow-update"><span class="secno">7</span>The slow update</h2>
+<div class="box definition"><div class="boxhd">Definition 3.1.4<span class="bt">Learning rate</span></div><p>On each trial the animal first settles its state, then changes each parameter by a
+small step along the partial derivative at the settled state:</p>
+<div class="eqn" id="eq-slow"><div class="eqbody">$$\omega \;\leftarrow\; \omega \;+\; \beta\,\frac{\partial \ell(d, u_n; \omega)}{\partial \omega}\bigg|_{d = \hat d_n} .$$</div><div class="eqno"><a href="#eq-slow" title="Link to equation 3.1.6">(3.1.6)</a></div></div>
+<p>The <strong>learning rate</strong> $\beta > 0$ plays the role for parameters that $\eta$ plays for
+the state. Each parameter has its own, with units that make the step carry the
+parameter's units. <a href="../week-02/two-rules.html">Week&nbsp;2, Lesson&nbsp;1</a> used $\beta$ for the step size of a weight update,
+and the meaning is the same.</p></div>
+<p>By <a class="eqref" href="#eq-envelope">(3.1.5)</a>, each step of <a class="eqref" href="#eq-slow">(3.1.6)</a> is a step up the settled log joint of the
+current trial. By <a class="eqref" href="#eq-param-sum">(3.1.4)</a>, the direction that would increase the total is the
+sum of these per-trial directions. Taking one small step per trial, rather than
+summing first, replaces the sum by a running accumulation: after many trials with a
+small $\beta$, the parameter has moved roughly as it would under ascent on the
+average of $\hat\ell$ over the trials it has seen, with fluctuations from the trials
+it happened to see last. The next section makes this exact in a case that can be
+solved.</p>
+<h2 id="a-running-average"><span class="secno">8</span>A running average</h2>
+<p>Take <a href="../week-02/reading-the-update.html">Week&nbsp;2, Lesson&nbsp;4</a>'s linear comparison: $g(d) = d$, a Gaussian prior on the whole
+line, and the prior location as the only parameter being learned. Week&nbsp;2, Lesson&nbsp;4
+derived the mode,</p>
+<div class="eqn"><div class="eqbody">$$\hat d_n \;=\; \frac{\Pi_p d_p + \Pi_u u_n}{\Pi_p + \Pi_u} .$$</div></div>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The slow update for the prior location is an average of observations</span></div><p>On the whole line there is no truncation, so $Z_p = 1$ for every $d_p$ and
+<a class="eqref" href="#eq-ell-full">(3.1.2)</a> gives $\partial\ell/\partial d_p = (d - d_p)/\Sigma_p$. At the mode,</p>
+<div class="eqn"><div class="eqbody">$$\hat d_n - d_p \;=\; \frac{\Pi_p d_p + \Pi_u u_n - (\Pi_p + \Pi_u)\,d_p}{\Pi_p + \Pi_u}
+\;=\; \frac{\Pi_u}{\Pi_p + \Pi_u}\,(u_n - d_p) .$$</div></div>
+<p>Multiply numerator and denominator by $\Sigma_p\Sigma_u$, using
+$\Pi_u\Sigma_p\Sigma_u = \Sigma_p$ and $(\Pi_p + \Pi_u)\Sigma_p\Sigma_u = \Sigma_u + \Sigma_p$:</p>
+<div class="eqn"><div class="eqbody">$$\hat d_n - d_p \;=\; \frac{\Sigma_p}{\Sigma_p + \Sigma_u}\,(u_n - d_p) .$$</div></div>
+<p>Substituting into <a class="eqref" href="#eq-slow">(3.1.6)</a>,</p>
+<div class="eqn" id="eq-ema"><div class="eqbody">$$d_p \;\leftarrow\; d_p + \frac{\beta}{\Sigma_p}\cdot\frac{\Sigma_p}{\Sigma_p + \Sigma_u}\,(u_n - d_p)
+\;=\; (1 - \kappa)\,d_p + \kappa\,u_n,
+\qquad
+\kappa \;=\; \frac{\beta}{\Sigma_p + \Sigma_u} .$$</div><div class="eqno"><a href="#eq-ema" title="Link to equation 3.1.7">(3.1.7)</a></div></div></div>
+<p>The factor $1/\Sigma_p$ in the update cancelled against the $\Sigma_p$ in the
+shrinkage factor, though $\Sigma_p$ is still in $\kappa$. For $0 < \kappa < 1$ the
+prior location is an exponentially weighted average of the raw observations: trial
+$n - k$ carries weight $\kappa(1-\kappa)^{k}$, so older trials fade geometrically.
+(At $\kappa = 1$ the memory is the last trial alone, and for $\kappa > 1$ the weights
+alternate in sign.) The inferred states dropped out of the final expression, but
+only because the mode is linear in $u_n$ here; in the nonlinear model they do not.</p>
+<p>The average of <a class="eqref" href="#eq-ema">(3.1.7)</a> over the process is
+$\mathbb E_{P^*}[d_p'] = (1-\kappa)\,d_p + \kappa\,\mathbb E_{P^*}[u]$, and in this
+linear world $\mathbb E_{P^*}[u]$ is the world's location $d_p^{*}$, because the noise
+has mean zero. The expected step vanishes at $d_p = d_p^{*}$ and nowhere else: in the
+linear world the location is learned without bias. An exercise asks for the
+proof in full, and Lesson&nbsp;4 shows why the nonlinear world is different.</p>
+<p>The letter $\kappa$ is chosen deliberately. <a href="../week-01/soft-body.html">Week&nbsp;1, Lesson&nbsp;1</a>'s regulator removed a
+fraction $\kappa$ of the displacement on each step, and <a class="eqref" href="#eq-ema">(3.1.7)</a> removes a fraction
+$\kappa$ of the gap between $d_p$ and the newest observation. The same algebra
+gives the same answers.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The spread of a learned parameter</span></div><p>Suppose the observations have mean $\bar u$ and variance $\sigma_u^2$, write
+$x_n = d_p - \bar u$ for the deviation after trial $n$, and subtract $\bar u$ from both
+sides of <a class="eqref" href="#eq-ema">(3.1.7)</a>:</p>
+<div class="eqn"><div class="eqbody">$$x_{n+1} \;=\; (1 - \kappa)\,x_n + \kappa\,(u_n - \bar u) .$$</div></div>
+<p>The newest observation is independent of $x_n$, which was built from earlier ones.
+Taking variances, the cross term vanishes:</p>
+<div class="eqn"><div class="eqbody">$$\operatorname{Var}(x_{n+1}) \;=\; (1-\kappa)^2\operatorname{Var}(x_n) + \kappa^2\sigma_u^2 .$$</div></div>
+<p>For $0 < \kappa < 2$ the factor $(1-\kappa)^2$ is below one, the variances settle,
+and at stationarity the two are equal; call them $V_x$. Then
+$V_x\big[1 - (1-\kappa)^2\big] = \kappa^2\sigma_u^2$, and
+$1 - (1-\kappa)^2 = \kappa(2 - \kappa)$, so</p>
+<div class="eqn" id="eq-ema-var"><div class="eqbody">$$V_x \;=\; \frac{\kappa}{2 - \kappa}\,\sigma_u^2 .$$</div><div class="eqno"><a href="#eq-ema-var" title="Link to equation 3.1.8">(3.1.8)</a></div></div></div>
+<p>Here $\sigma_u^2$ is the variance of the observations as the world produces them,
+the sum of the spread of sources and the sensory noise.
+Week&nbsp;1, Lesson&nbsp;1 found the same expression for its regulated walk, with $\kappa^2\sigma_u^2$
+in the role of the noise.</p>
+<p>The learning rate therefore trades speed against steadiness. The half-life of an
+old trial's influence is $\ln 2/[-\ln(1-\kappa)]$ trials, and the standard deviation
+of $d_p$ about its target is $\sqrt{\kappa/(2-\kappa)}$ times that of the
+observations. With Week&nbsp;2's variances in this linear world and $\beta = 0.02$:
+$\kappa = 0.01818$, a half-life of 37.8 trials, and a
+standard deviation of $0.1005$ for $d_p$. A simulation of this linear
+world with the same rate gives $0.1005$. For small $\kappa$, halving
+$\beta$ about doubles the memory and reduces the fluctuation by a factor of about
+$\sqrt 2$.</p>
+<h2 id="where-a-learning-rule-comes-to-rest"><span class="secno">9</span>Where a learning rule comes to rest</h2>
+<p>Every learning rule this week has the form <a class="eqref" href="#eq-slow">(3.1.6)</a>: a step $\beta F(\omega, u_n)$,
+where $F$ is computed from the trial's observation and the current parameter. The
+running average is the one case solved exactly. The general case is judged by one
+function.</p>
+<div class="box definition"><div class="boxhd">Definition 3.1.5<span class="bt">Drift</span></div><p>The <strong>drift</strong> of a learning rule is its step per unit rate averaged over the process
+at a fixed parameter value,</p>
+<div class="eqn"><div class="eqbody">$$\varphi(\omega) \;=\; \mathbb E_{P^*}\big[F(\omega, u)\big] .$$</div></div>
+<p>For the rule <a class="eqref" href="#eq-slow">(3.1.6)</a>, $F(\omega, u) = \partial\ell/\partial\omega$ at $d = \hat d(u; \omega)$.</p></div>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">A learning rule fluctuates about a zero of its drift</span></div><p>Write the step as its average plus a remainder,
+$F(\omega_n, u_n) = \varphi(\omega_n) + \xi_n$, where $\xi_n$ has mean zero over the
+process given $\omega_n$, because $u_n$ is a fresh draw independent of everything that
+set $\omega_n$. Suppose $\varphi(\omega^{\circ}) = 0$, and expand $\varphi$ about
+$\omega^{\circ}$ to first order: $\varphi(\omega) \approx \varphi'(\omega^{\circ})(\omega - \omega^{\circ})$.
+This is an approximation, valid only while $\omega_n$ stays in a neighbourhood of
+$\omega^{\circ}$ where the first-order term dominates, and it treats the variance of
+$\xi_n$ as fixed, though in general it depends on $\omega_n$.
+With $x_n = \omega_n - \omega^{\circ}$,</p>
+<div class="eqn"><div class="eqbody">$$x_{n+1} \;=\; x_n + \beta\varphi'(\omega^{\circ})\,x_n + \beta\xi_n
+\;=\; (1 - \kappa)\,x_n + \beta\xi_n,
+\qquad \kappa \;=\; -\beta\,\varphi'(\omega^{\circ}) .$$</div></div>
+<p>This is the recursion of <a class="eqref" href="#eq-ema">(3.1.7)</a>, with $\beta\xi_n$ in place of
+$\kappa(u_n - \bar u)$. Within that approximation, three conclusions follow from the
+running average.
+If $\varphi'(\omega^{\circ}) < 0$ and $0 < \kappa < 2$, the expected deviation
+$\mathbb E_{P^*}[x_n]$ shrinks by a factor $1 - \kappa$ per trial, so $\omega^{\circ}$
+attracts. If $\varphi'(\omega^{\circ}) > 0$, then $\kappa < 0$, the factor exceeds one
+and $\omega^{\circ}$ repels. And at an attracting zero the deviation has stationary
+variance $\beta^2\sigma_\xi^2/[\kappa(2-\kappa)]$ by <a class="eqref" href="#eq-ema-var">(3.1.8)</a>, which is about
+$\beta\sigma_\xi^2/(2|\varphi'(\omega^{\circ})|)$ for small $\beta$, with $\sigma_\xi^2$ the
+variance of $\xi$ near $\omega^{\circ}$.</p>
+<p>The stationary variance is of order $\beta$, so the standard deviation of one value
+$\omega_n$ about $\omega^{\circ}$ is of order $\sqrt\beta$. The expansion also dropped
+the term $\tfrac12\varphi''(\omega^{\circ})x_n^2$, which moves the stationary mean. Near
+an attracting zero, and assuming $x_n$ has a stationary distribution with finite
+moments, average $x_{n+1} = x_n + \beta\big[\varphi'x_n + \tfrac12\varphi''x_n^2 + \xi_n\big]$
+over it. The left side and the first term on the right have the same average, and
+$\xi_n$ averages to zero, so to leading order</p>
+<div class="eqn"><div class="eqbody">$$0 \;\approx\; \varphi'(\omega^{\circ})\,\mathbb E[x] + \tfrac12\varphi''(\omega^{\circ})\,\mathbb E[x^2],
+\qquad
+\mathbb E[x] \;\approx\; -\frac{\varphi''(\omega^{\circ})}{2\varphi'(\omega^{\circ})}\operatorname{Var}(x) ,$$</div></div>
+<p>where replacing $\mathbb E[x^2]$ by $\operatorname{Var}(x)$ neglects
+$\mathbb E[x]^2$, which is smaller still. The stationary mean is therefore displaced
+from the zero by an amount of order $\beta$.</p></div>
+<p>Three quantities have now appeared, and they scale differently with the rate. One
+value of a parameter fluctuates about the zero of the drift with a standard deviation
+of order $\sqrt\beta$. The mean of those values, over the stationary distribution,
+can sit off the zero by order $\beta$ when the drift is curved. And the average of one
+finite run differs from that stationary mean by a sampling error, which depends on how
+long the run is and on how strongly successive values are correlated. The running
+average has no mean shift: its drift is exactly linear, so its stationary mean is
+exactly the zero. It shows the first quantity clearly, since its standard deviation in the linear world is
+$0.1005$ at $\beta = 0.02$, $0.0501$ at
+$\beta = 0.005$ and $0.0250$ at $\beta = 0.00125$: dividing
+the rate by four halves the fluctuation.</p>
+<p>So a rule is judged by where its drift vanishes and by the sign of the drift's slope
+there. The running average is the case $F = (u - d_p)/(\Sigma_p + \Sigma_u)$, with
+$\varphi'= -1/(\Sigma_p + \Sigma_u)$ and $\kappa = \beta/(\Sigma_p + \Sigma_u)$, as before.
+When the lessons that follow say a rule is biased, they mean its drift vanishes
+somewhere other than the world's value. A run with a fixed rate fluctuates about that
+point, and the average of one run is evidence about the zero of the drift, not a
+measurement of it.</p>
+<h2 id="timescale-separation"><span class="secno">10</span>Timescale separation</h2>
+<p>The scheme needs two things. Inference must settle within each trial, so that
+<a class="eqref" href="#eq-envelope">(3.1.5)</a> applies. And a parameter must change little over the many trials its
+average is taken across, so that a single loud or quiet sound does not set it. The
+first is a condition on the number of inference steps per trial; the second is
+$\kappa \ll 1$.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">What the separation of timescales is doing</span></div><p>For a fixed set of recorded observations, settling every state against the current
+parameters and then stepping the parameters is alternating ascent on <a class="eqref" href="#eq-total">(3.1.3)</a>:
+the states are profiled out, and</p>
+<div class="eqn"><div class="eqbody">$$\max_{d_1, \dots, d_N}\mathcal L \;=\; \sum_{n=1}^{N}\hat\ell(u_n; \omega)$$</div></div>
+<p>when each settled state is the highest mode of its trial. The two speeds do not
+change the criterion. They change the path taken through it, and so which local
+maximum is reached, as finite steps did for the state in Week&nbsp;2, Lesson&nbsp;3.</p>
+<p>That criterion has no global maximum. Put every $d_n$ at $d_p$. The prior terms
+become $-\tfrac N2\ln(2\pi\Sigma_p) - N\ln Z_p$, and the sensory terms do not involve
+$\Sigma_p$. As $\Sigma_p \to 0$ with $d_p > 0$ fixed, $Z_p \to 1$ and
+$-\tfrac N2 \ln \Sigma_p \to +\infty$, so $\mathcal L$ grows without bound along a path
+that declares every source to be exactly where it was expected and the prior to be
+perfectly sharp. When every recorded observation is positive, the same happens with
+$\Sigma_u \to 0$ along states that reproduce each one exactly, $\theta/d_n^{2} = u_n$.
+A single negative observation cannot be reproduced by any distance, leaves a
+nonzero residual, and sends that path to $-\infty$ instead; Gaussian noise does
+produce negative observations.</p>
+<p>An objective unbounded above can still have local maxima, and the slow dynamics
+look for one. What they reach is at best a local maximum of the average of
+$\hat\ell$, never a global one. Lesson&nbsp;4 finds where the drift of each
+parameter vanishes and what the unboundedness does there.</p></div>
+<aside class="mn"><span class="mnl">Three timescales</span><p><a href="https://doi.org/10.1016/j.jmp.2017.09.004">Buckley et al. (2017)</a>, section 8,
+separate three: states fastest, then the parameters of the observation and
+dynamics functions, then the precisions slowest. Their parameter dynamics are
+written in second-order form, with the accumulated gradient setting the rate of
+change; an exercise examines what that does.</p></aside>
+<h2 id="the-two-timescales-running-at-once"><span class="secno">11</span>The two timescales running at once</h2>
+<p>In the widget, the process places sources at location $d_p^{*} = 3.0$, further
+away than the animal expects. Everything else in the process is Week&nbsp;2's model,
+except that the ear is sharper: $\Sigma_u^{*} = \Sigma_u = 0.01$ for both process
+and model, Week&nbsp;2's sharp setting. The animal learns $d_p$ alone, with
+$\beta = 0.01$, over 2000 trials.</p>
+<figure id="fig-3-1-1"><div class="widget" data-widget="two-timescales"></div><figcaption><span class="fno">Figure 3.1.1.</span> Inference within a trial, learning across trials. Left, the state settling on the trial chosen by the trial slider, starting from the prior location the animal held at that moment. Right, the prior location across all trials, with the chosen trial marked.</figcaption></figure>
+<p>On the first trial the state settles in 178 steps, at
+$d = 2.8819$. Across trials the prior location climbs: it is at
+$2.3903$ after 200 trials, and over the second half of the run it
+averages $2.4946$ with a standard deviation of $0.0403$.</p>
+<p>It does not reach $3.0$. The drift vanishes at
+$d_p = 2.5019$, $-16.6$ per cent from the world's
+location, and that is where the run fluctuates. Set the ear back to Week&nbsp;2's
+$\Sigma_u = 0.1$ and the drift vanishes at $1.9274$,
+$-35.8$ per cent from it: the prior location moves down, below
+where it started, while the sources have moved further away.</p>
+<p>The sharp ear is not sharp about distance at this range. What the ear says about $d$
+is set by the slope of the link, and its precision about $d$ near a source at
+distance $d$ is $g'(d)^2/\Sigma_u = 4\theta^2/(d^{6}\Sigma_u)$, which falls as $d^{-6}$.
+At $d = 3.0$ with $\Sigma_u = 0.01$ it is $0.5487$, less than the
+prior's precision of $1.0$. At Week&nbsp;2's location and ear it is
+$0.6250$. So the posterior for a distant source is wide whichever ear the
+animal has, and wide posteriors are where the mode and the posterior mean part
+company. Nothing in this lesson says what that does to learning.
+Lesson&nbsp;4 does.</p>
+<div class="box exercise"><div class="boxhd">Exercise 3.1.1<span class="bt">One trial or many</span></div><p>Show from <a class="eqref" href="#eq-param-sum">(3.1.4)</a> that if the animal could store all $N$ settled states and
+take a full gradient step on the sum, a learning rate $\beta/N$ would give the same
+expected step as $N$ single-trial steps of size $\beta/N$ taken with the parameter held
+fixed. Then say what changes when the parameter is updated after each trial instead
+of being held fixed.</p><details><summary>Solution</summary><p>With the parameter held at $\omega$ across the $N$ trials, the $N$ single-trial steps
+add up to $(\beta/N)\sum_n \partial\ell_n/\partial\omega$, which is a full step of size
+$\beta/N$ on <a class="eqref" href="#eq-param-sum">(3.1.4)</a>. They are the same sum taken in a different order.</p>
+<p>When the parameter is updated after each trial, trial $n$'s derivative is evaluated
+at the value left by trials $1$ to $n-1$, and its settled state was inferred with that
+value too. The order of the trials now matters, and the result is a different
+iteration. For small $\beta$ the parameter changes little over any stretch of
+trials, so each derivative is evaluated near a common value and the two schemes
+nearly agree; <a class="eqref" href="#eq-ema">(3.1.7)</a> is the exactly solvable case, in which later observations
+carry more weight than earlier ones.</p></details></div>
+<div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
+<li>What makes the source power a parameter and the distance a state?</li>
+<li>Why could Week&nbsp;2 drop $\tfrac12\ln(2\pi\Sigma_u)$, and why can this week not?</li>
+<li>State the envelope theorem and the assumption it needs.</li>
+<li>In the linear case, what is the prior location an average of, and what sets the
+  length of its memory?</li>
+<li>What is the drift of a learning rule, and what decides whether a zero of it attracts?</li>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-02/exercises.html"><span class="dir">Previous</span><span class="ttl">Problems and code</span></a><a class="nx" href="../week-03/prior-and-noise.html"><span class="dir">Next</span><span class="ttl">Learning the prior and the noise</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w03.js"></script>
+</body>
+</html>

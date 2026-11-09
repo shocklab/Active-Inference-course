@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>What the mode leaves out · Active Inference</title><meta name="description" content="The rules of the last three lessons settle at the wrong values even when the model is exactly right. Why, by how much, and what expectation maximisation and hyperpriors change."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+:root{
+  --paper:#fdfcf9; --card:#ffffff;
+  --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
+  --rule:#e4e1d9; --rule2:#d3cfc4;
+  --accent:#0f5f57; --accent2:#14837a; --accent-tint:#e9f2f0; --accent-deep:#0a423d;
+  --clay:#9c4d2f; --clay-tint:#f9efe9;
+  --gold:#8a6d1f; --gold-tint:#faf5e6;
+  --tint:#f4f2ec; --code-bg:#f5f4f0;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SF Mono',Menlo,Consolas,monospace;
+  --measure:44rem; --margincol:13rem; --gap:2.5rem; --shell:80rem;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);
+     font-variant-numeric:oldstyle-nums proportional-nums;line-height:1.6}
+::selection{background:var(--accent);color:#fff}
+img,svg,canvas{max-width:100%}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2)}
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.topbar{position:sticky;top:0;z-index:60;background:var(--accent-deep);
+        border-bottom:2px solid var(--accent);}
+.topbar .tin{max-width:var(--shell);margin:0 auto;padding:0 2rem;height:3rem;
+             display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.topbar a.home{font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.13em;
+               text-transform:uppercase;color:rgba(255,255,255,.82)}
+.topbar a.home:hover{color:#fff}
+.topbar .tcode{font-family:var(--sans);font-size:.7rem;font-weight:500;letter-spacing:.2em;
+               text-transform:uppercase;color:rgba(255,255,255,.42)}
+.tocbtn{display:none;font-family:var(--sans);font-size:.75rem;letter-spacing:.1em;
+        text-transform:uppercase;color:rgba(255,255,255,.82);background:none;border:0;cursor:pointer}
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:14rem minmax(0,1fr);gap:0 var(--gap);
+       max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.maincol{min-width:0;max-width:calc(var(--measure) + var(--margincol) + var(--gap))}
+
+/* ── side nav ────────────────────────────────────────────────────────── */
+.sidenav{position:sticky;top:3rem;align-self:start;max-height:calc(100vh - 3rem);
+         overflow-y:auto;padding:2.6rem 0 3rem;scrollbar-width:thin}
+.sidenav::-webkit-scrollbar{width:0}
+.sidenav .part{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--faint);margin:1.6rem 0 .55rem}
+.sidenav .part:first-child{margin-top:0}
+.sidenav a.wk{display:block;font-family:var(--sans);font-size:.83rem;line-height:1.35;
+              color:var(--ink2);padding:.34rem 0 .34rem .8rem;border-left:2px solid var(--rule)}
+.sidenav a.wk:hover{color:var(--accent);border-left-color:var(--rule2)}
+.sidenav a.wk.cur{color:var(--accent);font-weight:500;border-left-color:var(--accent)}
+.sidenav a.wk .n{color:var(--faint);font-variant-numeric:tabular-nums;margin-right:.45rem}
+.sidenav a.wk.cur .n{color:var(--accent2)}
+.sidenav .lessons{margin:.15rem 0 .5rem .8rem;border-left:1px solid var(--rule)}
+.sidenav .lessons a{display:block;font-family:var(--sans);font-size:.76rem;line-height:1.35;
+                    color:var(--muted);padding:.28rem 0 .28rem .75rem;border-left:2px solid transparent;margin-left:-1px}
+.sidenav .lessons a:hover{color:var(--accent)}
+.sidenav .lessons a.cur{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.sidenav .navhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.16em;
+                text-transform:uppercase;color:var(--accent);padding-bottom:.6rem;
+                margin-bottom:1rem;border-bottom:1px solid var(--rule)}
+
+/* ── article head ────────────────────────────────────────────────────── */
+.ahead{padding:3.2rem 0 1.7rem;border-bottom:1px solid var(--rule);max-width:var(--measure)}
+.ahead .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.2em;
+                text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.ahead h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.2vw,2.9rem);
+          line-height:1.08;letter-spacing:-.015em;color:var(--ink);margin-bottom:.85rem;
+          font-variant-numeric:lining-nums}
+.ahead .deck{font-family:var(--serif);font-style:italic;font-size:1.18rem;line-height:1.5;
+             color:var(--muted)}
+.ahead .meta{font-family:var(--sans);font-size:.74rem;letter-spacing:.06em;color:var(--faint);
+             margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap}
+
+/* ── body ────────────────────────────────────────────────────────────── */
+.abody{padding:2rem 0 1rem;font-size:1.115rem;max-width:var(--measure)}
+.abody > *{max-width:var(--measure)}
+.abody p{margin:0 0 1.15rem;color:var(--ink);text-wrap:pretty}
+.abody p.lede{font-size:1.24rem;line-height:1.55;color:var(--ink2)}
+.abody strong{font-weight:600}
+.abody em{font-style:italic}
+.abody a{border-bottom:1px solid var(--rule2)}
+.abody a:hover{border-bottom-color:var(--accent2)}
+.abody h2{font-family:var(--serif);font-weight:500;font-size:1.72rem;line-height:1.16;
+          color:var(--ink);letter-spacing:-.01em;margin:2.9rem 0 .9rem;padding-top:1.6rem;
+          border-top:1px solid var(--rule);scroll-margin-top:4rem}
+.abody h2 .secno{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.6rem;font-weight:400}
+.abody h3{font-family:var(--serif);font-weight:600;font-size:1.24rem;color:var(--ink);
+          margin:2rem 0 .6rem;scroll-margin-top:4rem}
+.abody h4{font-family:var(--sans);font-weight:600;font-size:.78rem;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--accent);margin:1.6rem 0 .5rem}
+.abody ul,.abody ol{margin:0 0 1.25rem;padding-left:1.5rem}
+.abody li{margin-bottom:.45rem;color:var(--ink)}
+.abody ul>li::marker{color:var(--accent)}
+.abody ol>li::marker{color:var(--accent);font-family:var(--sans);font-size:.9em}
+.abody li>ul,.abody li>ol{margin:.45rem 0 .2rem}
+.abody blockquote{border-left:2px solid var(--accent);padding:.15rem 0 .15rem 1.3rem;
+                  margin:1.6rem 0;color:var(--ink2);font-style:italic}
+.abody blockquote p:last-child{margin-bottom:0}
+.abody hr{border:0;border-top:1px solid var(--rule);margin:2.4rem 0}
+
+/* ── code ────────────────────────────────────────────────────────────── */
+.abody code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);
+            padding:.1em .35em;border-radius:2px;border:1px solid var(--rule)}
+.abody pre{background:var(--code-bg);border:1px solid var(--rule);border-left:2px solid var(--accent);
+           padding:1rem 1.15rem;overflow-x:auto;margin:1.5rem 0;line-height:1.55}
+.abody pre code{background:none;border:0;padding:0;font-size:.83rem;color:var(--ink2)}
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.abody .tablewrap{overflow-x:auto;margin:1.7rem 0;
+           width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+.abody table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.86rem}
+.abody th{text-align:left;font-weight:600;color:var(--accent);border-bottom:1.5px solid var(--accent);
+          padding:.5rem .7rem;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;
+          vertical-align:bottom}
+.abody td{padding:.55rem .7rem;border-bottom:1px solid var(--rule);color:var(--ink2);vertical-align:top}
+.abody tbody tr:hover td{background:var(--tint)}
+
+/* ── maths ───────────────────────────────────────────────────────────── */
+.katex{font-size:1.045em}
+.katex-display{margin:0;padding:.15rem 0;overflow-x:auto;overflow-y:hidden}
+.eqn{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;max-width:var(--measure);
+     scroll-margin-top:4.5rem}
+.eqn > .eqbody{flex:1;min-width:0}
+.eqn > .eqno{flex:0 0 auto;font-family:var(--sans);font-size:.8rem;color:var(--faint);
+             font-variant-numeric:tabular-nums}
+.eqn > .eqno a{color:var(--faint);border:0}
+.eqn > .eqno a:hover{color:var(--accent)}
+.eqn:target{background:var(--gold-tint);box-shadow:0 0 0 .7rem var(--gold-tint);border-radius:2px}
+.eqn:target > .eqno a{color:var(--gold)}
+a.eqref{font-variant-numeric:tabular-nums;white-space:nowrap;border-bottom:1px solid var(--rule2)}
+
+/* ── margin notes ────────────────────────────────────────────────────── */
+.mn{float:right;clear:right;width:var(--margincol);
+    margin:.3rem calc(-1 * (var(--margincol) + var(--gap))) 1.1rem var(--gap);
+    font-family:var(--sans);font-size:.775rem;line-height:1.5;color:var(--muted)}
+.mn .mnl{display:block;font-weight:600;font-size:.66rem;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.mn p{margin:0 0 .5rem;font-size:inherit;line-height:inherit;color:inherit}
+.mn p:last-child{margin-bottom:0}
+.mn code{font-size:.85em}
+.mn a{border-bottom:1px solid var(--rule2)}
+
+/* ── boxes ───────────────────────────────────────────────────────────── */
+.box{margin:1.9rem 0;padding:1.15rem 1.35rem;border:1px solid var(--rule);
+     background:var(--card);max-width:var(--measure)}
+.box > :last-child{margin-bottom:0}
+.box .boxhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.15em;
+            text-transform:uppercase;margin-bottom:.6rem;display:flex;gap:.5rem;align-items:baseline}
+.box .boxhd .bt{color:var(--ink2);font-weight:500;letter-spacing:.02em;text-transform:none;
+                font-size:.95rem;font-family:var(--serif);font-style:italic}
+.box p,.box li{font-size:1.03rem}
+
+.box.definition,.box.theorem,.box.proposition,.box.lemma{
+  border-left:2px solid var(--accent);background:var(--card)}
+.box.definition .boxhd,.box.theorem .boxhd,.box.proposition .boxhd,.box.lemma .boxhd{color:var(--accent)}
+
+.box.keyidea{border:0;border-left:2px solid var(--accent);background:var(--accent-tint);
+             padding:1.2rem 1.4rem}
+.box.keyidea .boxhd{color:var(--accent)}
+
+.box.remark,.box.aside{border-left:2px solid var(--rule2);background:var(--tint)}
+.box.remark .boxhd,.box.aside .boxhd{color:var(--muted)}
+
+.box.warning{border-left:2px solid var(--clay);background:var(--clay-tint)}
+.box.warning .boxhd{color:var(--clay)}
+
+.box.derivation{border:1px solid var(--rule);border-left:2px solid var(--gold);background:#fdfcf7;
+                padding:1.25rem 1.45rem}
+.box.derivation .boxhd{color:var(--gold)}
+.box.derivation .eqn{margin:1rem 0}
+.box.derivation p{color:var(--ink2)}
+
+.box.exercise{border-left:2px solid var(--clay)}
+.box.exercise .boxhd{color:var(--clay)}
+.box.exercise details{margin-top:.9rem;border-top:1px solid var(--rule);padding-top:.7rem}
+.box.exercise summary{font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.11em;
+                      text-transform:uppercase;color:var(--clay);cursor:pointer;list-style:none}
+.box.exercise summary::-webkit-details-marker{display:none}
+.box.exercise summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+.box.exercise details[open] summary::before{content:'▾ '}
+.box.exercise details > :nth-child(2){margin-top:.8rem}
+
+.box.checkpoint{border-left:2px solid var(--accent2);background:var(--accent-tint)}
+.box.checkpoint .boxhd{color:var(--accent)}
+.box.checkpoint ul{margin-bottom:0}
+
+/* ── figures & widgets ───────────────────────────────────────────────── */
+.abody figure{margin:2.2rem 0;width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+figure{margin:2.2rem 0}
+figure figcaption{font-family:var(--sans);font-size:.79rem;line-height:1.5;color:var(--muted);
+                  margin-top:.7rem;max-width:var(--measure)}
+figure figcaption .fno{font-weight:600;color:var(--accent);letter-spacing:.03em}
+figure.widget .wmount{border:1px solid var(--rule2);background:var(--card);padding:1rem}
+figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:var(--muted);
+                                 padding:2rem 1rem;text-align:center}
+
+/* widget internals (used by aif-widgets.js) */
+.wpanel{display:grid;gap:1rem}
+.wrow{display:flex;flex-wrap:wrap;gap:1.1rem 1.6rem;align-items:flex-start}
+.wctl{font-family:var(--sans);font-size:.78rem;color:var(--ink2);display:flex;
+      flex-direction:column;gap:.28rem;min-width:11rem;flex:1 1 11rem}
+.wctl .wlab{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline}
+.wctl .wlab b{font-weight:500;color:var(--ink2)}
+.wctl .wlab .wval{font-family:var(--mono);font-size:.76rem;color:var(--accent);
+                  font-variant-numeric:tabular-nums}
+.wctl input[type=range]{width:100%;accent-color:var(--accent);height:1.1rem;cursor:pointer}
+.wbtn{font-family:var(--sans);font-size:.76rem;font-weight:500;letter-spacing:.04em;
+      background:var(--accent);color:#fff;border:0;padding:.42rem .9rem;cursor:pointer;
+      border-radius:2px}
+.wbtn:hover{background:var(--accent2)}
+.wbtn.ghost{background:transparent;color:var(--accent);border:1px solid var(--rule2)}
+.wbtn.ghost:hover{background:var(--accent-tint)}
+.wbtns{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.wnote{font-family:var(--sans);font-size:.78rem;line-height:1.5;color:var(--muted);
+       border-top:1px solid var(--rule);padding-top:.7rem}
+.wnote b{color:var(--accent);font-weight:600}
+.wreadout{font-family:var(--mono);font-size:.78rem;color:var(--ink2);display:flex;
+          flex-wrap:wrap;gap:.4rem 1.3rem;font-variant-numeric:tabular-nums}
+.wreadout span b{color:var(--faint);font-weight:500}
+.wtabs{display:flex;gap:.3rem;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.wtab{font-family:var(--sans);font-size:.75rem;padding:.34rem .75rem;cursor:pointer;
+      color:var(--muted);border:1px solid transparent;border-bottom:0;background:none}
+.wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
+canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
+
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
+
+/* ── footer nav ──────────────────────────────────────────────────────── */
+.pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
+         border-top:1px solid var(--rule);margin-top:3.5rem;padding:1.7rem 0 0;
+         max-width:var(--measure)}
+.pagenav a{display:flex;flex-direction:column;gap:.22rem;max-width:20rem;border:0}
+.pagenav a.nx{text-align:right;margin-left:auto}
+.pagenav .dir{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.16em;
+              text-transform:uppercase;color:var(--accent)}
+.pagenav .ttl{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);line-height:1.3}
+.pagenav a:hover .ttl{color:var(--accent)}
+.sitefoot{border-top:1px solid var(--rule);margin-top:3rem;padding:1.6rem 0 3.5rem;
+          font-family:var(--sans);font-size:.76rem;line-height:1.65;color:var(--faint);
+          max-width:var(--measure)}
+.sitefoot a{color:var(--muted);border-bottom:1px solid var(--rule)}
+.sitefoot a:hover{color:var(--accent)}
+.sitefoot p{margin-bottom:.4rem}
+
+/* ── landing page ────────────────────────────────────────────────────── */
+.cover{background:var(--accent-deep);color:#fff;padding:4.5rem 0 3.6rem;margin-bottom:0}
+.cover .cin{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.cover .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.22em;
+                text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1.3rem}
+.cover h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,6vw,4.2rem);
+          line-height:1.04;letter-spacing:-.02em;max-width:24ch;margin-bottom:1.2rem}
+.cover .sub{font-family:var(--serif);font-style:italic;font-size:1.25rem;line-height:1.5;
+            color:rgba(255,255,255,.72);max-width:44rem}
+.cover .rule{width:3rem;height:2px;background:var(--accent2);margin:0 0 1.2rem}
+.wide{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.weeklist{border-top:1px solid var(--rule)}
+.landing .abody>*{max-width:none}
+.landing .abody .introcopy{max-width:44rem}
+.weekrow{display:flex;gap:2.2rem;padding:1.7rem 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.weekrow .wn{flex:0 0 3.4rem;text-align:right}
+.weekrow .wn .l{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.18em;
+                text-transform:uppercase;color:var(--faint)}
+.weekrow .wn .n{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--accent);
+                line-height:1;font-variant-numeric:lining-nums}
+.weekrow .wc{flex:1 1 20rem;min-width:0}
+.weekrow .wc h3{font-family:var(--serif);font-weight:500;font-size:1.28rem;margin-bottom:.3rem}
+.weekrow .wc h3 a{color:var(--ink);border:0}
+.weekrow .wc h3 a:hover{color:var(--accent)}
+.weekrow .wc p{font-family:var(--sans);font-size:.86rem;line-height:1.6;color:var(--muted);
+               margin-bottom:.55rem;max-width:46rem}
+.weekrow .wc ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+.weekrow .wc ul li{font-family:var(--sans);font-size:.79rem;margin:0}
+.weekrow .wc ul li a{color:var(--ink2);border-bottom:1px solid var(--rule)}
+.weekrow .wc ul li a:hover{color:var(--accent);border-bottom-color:var(--accent2)}
+.partband{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.2em;
+          text-transform:uppercase;color:var(--accent);padding:2.2rem 0 .5rem}
+.partband span{color:var(--faint);font-weight:400;letter-spacing:.04em;text-transform:none;
+               font-family:var(--serif);font-style:italic;font-size:1rem;margin-left:.8rem}
+
+/* ── responsive ──────────────────────────────────────────────────────── */
+@media (max-width:1280px){
+  .shell{grid-template-columns:13rem minmax(0,1fr);gap:0 2rem;padding:0 1.6rem}
+  .maincol{max-width:var(--measure)}
+  .mn{float:none;clear:both;width:auto;margin:1rem 0 1.3rem;padding-left:1rem;
+      border-left:2px solid var(--rule2)}
+  .abody .tablewrap,.abody figure{width:auto;max-width:100%}
+  .cover .cin,.wide{padding:0 1.6rem}
+}
+@media (max-width:860px){
+  html{font-size:97%}
+  .shell{grid-template-columns:minmax(0,1fr);padding:0 1.3rem}
+  .sidenav{position:static;max-height:none;padding:1rem 0 0;display:none;
+           border-bottom:1px solid var(--rule);margin-bottom:1rem}
+  .sidenav.open{display:block}
+  .tocbtn{display:block}
+  .topbar .tin{padding:0 1.3rem}
+  .cover{padding:3rem 0 2.4rem}
+  .cover .cin,.wide{padding:0 1.3rem}
+  .abody{font-size:1.06rem}
+  .weekrow{gap:1rem}
+  .weekrow .wn{flex-basis:2.6rem}
+  .eqn{gap:.5rem}
+  .eqn > .eqno{font-size:.72rem}
+}
+@media print{
+  .topbar,.sidenav,.pagenav,.wbtns,.wctl{display:none}
+  .shell{display:block;max-width:none}
+  body{background:#fff}
+}
+</style><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script><script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(!window.renderMathInElement) return;
+  renderMathInElement(document.body,{
+    delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'\\[',right:'\\]',display:true},
+      {left:'$',right:'$',display:false},
+      {left:'\\(',right:'\\)',display:false}
+    ],
+    ignoredTags:['script','noscript','style','textarea','pre','code','option'],
+    throwOnError:false,
+    macros:{
+      '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
+      '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
+      '\\ta':'\\tilde{s}'
+      // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
+      // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.querySelector('.tocbtn'),n=document.querySelector('.sidenav');
+  if(b&&n){b.addEventListener('click',function(){n.classList.toggle('open');});}
+});
+</script>
+</head>
+<body>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk cur" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><div class="lessons"><a class="" href="../week-03/two-timescales.html">Two timescales</a><a class="" href="../week-03/prior-and-noise.html">Learning the prior and the noise</a><a class="" href="../week-03/learning-the-link.html">Learning the link</a><a class="cur" href="../week-03/what-the-mode-leaves-out.html">What the mode leaves out</a><a class="" href="../week-03/exercises.html">Problems and code</a></div><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Learning the model</div><h1>What the mode leaves out</h1><p class="deck">The rules of the last three lessons settle at the wrong values even when the model is exactly right. Why, by how much, and what expectation maximisation and hyperpriors change.</p><div class="meta"><span>Week 3</span><span>&#167;4</span><span>60 min</span></div></header><article class="abody"><p><a href="../week-03/two-timescales.html">Lesson&nbsp;1</a> chose to climb the settled log joint $\hat\ell$ rather than the log
+evidence $\ln p(u; \omega)$, because the evidence needs an integral over the state.
+This lesson measures what that choice costs. The answer is a bias in every learned
+parameter, present even when the world is generated by exactly the model the animal
+holds, and in one case a collapse.</p>
+<h2 id="the-gradient-of-the-evidence"><span class="secno">1</span>The gradient of the evidence</h2>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The Fisher identity</span></div><p>Write $p(u; \omega) = \int_0^\infty p(d, u; \omega)\,\mathrm dd$. Differentiate under the
+integral, then multiply and divide the integrand by $p(d, u; \omega)$:</p>
+<div class="eqn"><div class="eqbody">$$\frac{\partial \ln p(u; \omega)}{\partial \omega}
+\;=\; \frac{1}{p(u; \omega)}\int_0^\infty \frac{\partial p(d, u; \omega)}{\partial \omega}\,\mathrm dd
+\;=\; \int_0^\infty \frac{p(d, u; \omega)}{p(u; \omega)}\,\frac{\partial \ln p(d, u; \omega)}{\partial \omega}\,\mathrm dd .$$</div></div>
+<p>The ratio in front is the posterior $p(d \mid u; \omega)$, and $\ln p(d, u; \omega)$ is
+the log joint $\ell$. So</p>
+<div class="eqn" id="eq-fisher"><div class="eqbody">$$\frac{\partial \ln p(u; \omega)}{\partial \omega}
+\;=\; \mathbb E_{d\mid u}\!\left[\frac{\partial \ell(d, u; \omega)}{\partial \omega}\right] ,$$</div><div class="eqno"><a href="#eq-fisher" title="Link to equation 3.4.1">(3.4.1)</a></div></div>
+<p>the average over the posterior $p(d \mid u; \omega)$ at the current parameters.</p></div>
+<p>The slope of the log evidence is the posterior average of the same partial derivative
+the animal uses. The animal evaluates it at one point, the mode, where <a class="eqref" href="#eq-fisher">(3.4.1)</a>
+averages it over the whole posterior.</p>
+<p>At Week&nbsp;2's observation the posterior has mean $2.0900$ and variance
+$0.5198$, against a mode of $1.5500$. The two versions of each
+derivative are:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>At the mode</th>
+<th>Posterior average</th>
+<th>Slope of $\ln p(u)$, by finite difference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$d_p$</td>
+<td>$-0.5052$</td>
+<td>$0.0348$</td>
+<td>$0.0348$</td>
+</tr>
+<tr>
+<td>$\Sigma_p$</td>
+<td>$-0.3435$</td>
+<td>$-0.1808$</td>
+<td>$-0.1808$</td>
+</tr>
+<tr>
+<td>$\Sigma_u$</td>
+<td>$-4.6490$</td>
+<td>$-1.1518$</td>
+<td>$-1.1518$</td>
+</tr>
+</tbody>
+</table></div>
+<p>The last two columns agree, as <a class="eqref" href="#eq-fisher">(3.4.1)</a> requires. The first does not: for $\Sigma_u$
+it is several times too steep, and for $d_p$ it has the wrong sign. On this one sound the
+evidence would be raised by moving the prior location up, and the animal moves it
+down.</p>
+<h2 id="mean-zero-at-the-truth"><span class="secno">2</span>Mean zero at the truth</h2>
+<p>One trial proves little. By Lesson&nbsp;1, a rule is judged by where its drift
+vanishes and whether that zero attracts.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The score has mean zero</span></div><p>Suppose the world draws $u$ from $p(u; \omega^{*})$, the model's own evidence at some
+true parameter $\omega^{*}$. The expected slope of the log evidence at the truth is</p>
+<div class="eqn"><div class="eqbody">$$\int p(u; \omega^{*})\,\frac{\partial \ln p(u; \omega)}{\partial \omega}\bigg|_{\omega^{*}}\mathrm du
+\;=\; \int \frac{\partial p(u; \omega)}{\partial \omega}\bigg|_{\omega^{*}}\mathrm du
+\;=\; \frac{\partial}{\partial \omega}\int p(u; \omega)\,\mathrm du\,\bigg|_{\omega^{*}}
+\;=\; \frac{\partial}{\partial\omega}\,1 \;=\; 0 .$$</div></div></div>
+<p>The slope of the log evidence is called the <strong>score</strong>, and this is the statement that
+its mean is zero at the true parameter. Combined with <a class="eqref" href="#eq-fisher">(3.4.1)</a>, it says that a rule
+which averages $\partial\ell/\partial\omega$ over the posterior, rather than reading it
+at the mode, has zero drift at the truth whenever the world is one of the model's own
+settings.</p>
+<div class="box definition"><div class="boxhd">Definition 3.4.1<span class="bt">Posterior-averaged rule and point rule</span></div><p>The <strong>posterior-averaged rule</strong> changes a parameter on trial $n$ by</p>
+<div class="eqn" id="eq-post-rule"><div class="eqbody">$$\omega \;\leftarrow\; \omega \;+\; \beta\,\mathbb E_{d\mid u_n}\!\left[\frac{\partial \ell(d, u_n; \omega)}{\partial \omega}\right] .$$</div><div class="eqno"><a href="#eq-post-rule" title="Link to equation 3.4.2">(3.4.2)</a></div></div>
+<p>The rule of Lesson&nbsp;1 reads the same derivative at the mode
+instead, and from here on is called the <strong>point rule</strong>.</p></div>
+<p>The animal does not have the posterior average; the simulations compute it on every
+trial by quadrature over the posterior, on 801 points, so that the two rules can be
+compared on the same trials. Nothing guarantees zero drift at the truth for the point
+rule.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The posterior-averaged rule climbs towards the world</span></div><p>By <a class="eqref" href="#eq-fisher">(3.4.1)</a> the drift of <a class="eqref" href="#eq-post-rule">(3.4.2)</a> is the process average of the score,</p>
+<div class="eqn"><div class="eqbody">$$\varphi(\omega) \;=\; \mathbb E_{P^*}\!\left[\frac{\partial \ln p(u; \omega)}{\partial\omega}\right]
+\;=\; \frac{\partial}{\partial\omega}\,\mathbb E_{P^*}\big[\ln p(u; \omega)\big] .$$</div></div>
+<p>Write $P^*(u)$ for the density of the observations the process produces. Adding and
+subtracting $\ln P^*(u)$ inside the average, as <a href="../week-01/process-and-model.html">Week&nbsp;1, Lesson&nbsp;2</a> did with surprise and
+entropy, with the sum there replaced by an integral,</p>
+<div class="eqn"><div class="eqbody">$$\mathbb E_{P^*}\big[\ln p(u;\omega)\big] \;=\; \mathbb E_{P^*}\big[\ln P^*(u)\big] \;-\; D_{\mathrm{KL}}\big[P^*\,\|\,p(\cdot\,;\omega)\big] .$$</div></div>
+<p>The first term does not involve $\omega$, so</p>
+<div class="eqn"><div class="eqbody">$$\varphi(\omega) \;=\; -\frac{\partial}{\partial\omega}\,D_{\mathrm{KL}}\big[P^*\,\|\,p(\cdot\,;\omega)\big] .$$</div></div></div>
+<p>The drift is minus the slope, in $\omega$, of the divergence of the world's
+distribution of sounds relative to the model's. When the world is one of the model's settings, that divergence
+is zero at the truth and positive elsewhere, so the truth is a minimum of it: the drift
+vanishes there, and where the divergence curves upwards, $\varphi' < 0$ and the truth
+attracts. The score argument above is the first half of this; the second half is why
+the posterior-averaged rule returns to the truth after a disturbance.</p>
+<h2 id="the-linear-case-exactly"><span class="secno">3</span>The linear case, exactly</h2>
+<p>In a linear Gaussian model every expectation can be done by hand, so the size of the
+bias can be computed exactly. Let the world draw $d$ from $\mathcal N(d_p, \Sigma_p^{*})$
+on the whole line, and let $u$ be $d$ plus noise of variance $\Sigma_u$, so that $u$
+has mean $d_p$ and variance $\Sigma_p^{*} + \Sigma_u$. The star marks the process, as
+in Lesson&nbsp;1. The animal knows $d_p$ and $\Sigma_u$ and learns its prior variance
+$\Sigma_p$, with no truncation.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The stationary points of the point rule</span></div><p>With prior variance $\Sigma_p$, the mode is the precision-weighted average of
+<a href="../week-02/reading-the-update.html">Week&nbsp;2, Lesson&nbsp;4</a>,</p>
+<div class="eqn"><div class="eqbody">$$\hat d - d_p \;=\; \frac{\Sigma_p}{\Sigma_p + \Sigma_u}\,(u - d_p) .$$</div></div>
+<p>The point rule's update for the prior variance is the derivative of <a href="../week-03/prior-and-noise.html">Lesson&nbsp;2</a>
+without the truncation term, $\tfrac12\big((\hat d - d_p)^2/\Sigma_p^2 - 1/\Sigma_p\big)$.
+Its average over the world uses $\mathbb E_{P^*}[(u - d_p)^2] = \Sigma_p^{*} + \Sigma_u$:</p>
+<div class="eqn"><div class="eqbody">$$\mathbb E_{P^*}\!\left[\frac{(\hat d - d_p)^2}{\Sigma_p^2}\right] - \frac{1}{\Sigma_p}
+\;=\; \frac{\Sigma_p^{*} + \Sigma_u}{(\Sigma_p + \Sigma_u)^2} - \frac{1}{\Sigma_p} .$$</div></div>
+<p>This vanishes where $\Sigma_p(\Sigma_p^{*} + \Sigma_u) = (\Sigma_p + \Sigma_u)^2$.
+Expanded,</p>
+<div class="eqn" id="eq-lin-roots"><div class="eqbody">$$\Sigma_p^2 + (\Sigma_u - \Sigma_p^{*})\,\Sigma_p + \Sigma_u^2 \;=\; 0 ,
+\qquad
+\Sigma_p \;=\; \tfrac12\Big[(\Sigma_p^{*} - \Sigma_u) \pm \sqrt{(\Sigma_p^{*} - \Sigma_u)^2 - 4\Sigma_u^2}\,\Big] .$$</div><div class="eqno"><a href="#eq-lin-roots" title="Link to equation 3.4.3">(3.4.3)</a></div></div>
+<p>Real positive roots need $\Sigma_p^{*} - \Sigma_u \geq 2\Sigma_u$, that is
+$\Sigma_p^{*} \geq 3\Sigma_u$. Neither root is the truth unless $\Sigma_u = 0$:
+substituting $\Sigma_p = \Sigma_p^{*}$ into the quadratic leaves
+$\Sigma_p^{*}\Sigma_u + \Sigma_u^2$, which is positive.</p></div>
+<p>The sign of the drift settles which root attracts. Half the bracket above, put over
+the common denominator $2\Sigma_p(\Sigma_p + \Sigma_u)^2$, is</p>
+<div class="eqn"><div class="eqbody">$$\varphi(\Sigma_p) \;=\; -\,\frac{\Sigma_p^2 + (\Sigma_u - \Sigma_p^{*})\,\Sigma_p + \Sigma_u^2}{2\Sigma_p(\Sigma_p + \Sigma_u)^2} .$$</div></div>
+<p>The denominator is positive, so the drift has the opposite sign to the quadratic in
+<a class="eqref" href="#eq-lin-roots">(3.4.3)</a>. That quadratic is $\Sigma_u^2 > 0$ at $\Sigma_p = 0$ and positive for
+large $\Sigma_p$, and its discriminant factorises as
+$(\Sigma_p^{*} - \Sigma_u)^2 - 4\Sigma_u^2 = (\Sigma_p^{*} - 3\Sigma_u)(\Sigma_p^{*} + \Sigma_u)$.
+Three cases follow.</p>
+<ul>
+<li>$\Sigma_p^{*} < 3\Sigma_u$: no real root, the quadratic is positive throughout, the
+  drift is negative for every $\Sigma_p$, and the learned variance falls towards zero.</li>
+<li>$\Sigma_p^{*} = 3\Sigma_u$: a double root at $\Sigma_p = \Sigma_u$, where the quadratic
+  is $(\Sigma_p - \Sigma_u)^2$. The drift is negative on both sides and zero only there,
+  so for the mean dynamics, which follow the drift, the root attracts from above and
+  repels from below. A learner with a fixed rate does not follow the drift exactly. Its
+  fluctuations can carry it below the root, and there the drift points down, but the
+  observations are Gaussian and so unbounded, and one large enough observation gives
+  an upward step that can take the variance back above the root. Whether the learner
+  eventually collapses is a question about its sample paths that the drift alone does
+  not answer.</li>
+<li>$\Sigma_p^{*} > 3\Sigma_u$: two roots. The drift is negative below the smaller,
+  positive between them and negative above the larger. The smaller root repels and
+  separates collapse from survival; the larger attracts, and is where the point rule
+  settles.</li>
+</ul>
+<p>Why the drift turns negative near zero can be read off the mode. The shrinkage factor
+$\Sigma_p/(\Sigma_p + \Sigma_u)$ in the mode depends on the variance being learned. A
+smaller $\Sigma_p$ pulls each mode closer to $d_p$, so the modes' spread
+$\Sigma_p^2(\Sigma_p^{*} + \Sigma_u)/(\Sigma_p + \Sigma_u)^2$ shrinks like $\Sigma_p^2$
+while the target it is compared with, $\Sigma_p$, shrinks only like $\Sigma_p$. Below
+the smaller root the modes look less spread than the prior claims, the rule narrows the
+prior, and the narrower prior pulls the modes in further. The rule feeds back on
+itself.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The posterior-averaged rule in the linear case</span></div><p>The posterior variance is $\Sigma_{\text{post}} = \Sigma_p\Sigma_u/(\Sigma_p + \Sigma_u)$, the
+reciprocal of the summed precisions, as derived in Week&nbsp;2, Lesson&nbsp;4. The posterior average
+of $(d - d_p)^2$ is $(\hat d - d_p)^2 + \Sigma_{\text{post}}$. The drift vanishes where</p>
+<div class="eqn"><div class="eqbody">$$\frac{\Sigma_p^2(\Sigma_p^{*} + \Sigma_u)}{(\Sigma_p + \Sigma_u)^2} + \frac{\Sigma_p\Sigma_u}{\Sigma_p + \Sigma_u} \;=\; \Sigma_p .$$</div></div>
+<p>Multiply by $(\Sigma_p + \Sigma_u)^2/\Sigma_p$:
+$\Sigma_p(\Sigma_p^{*} + \Sigma_u) + \Sigma_u(\Sigma_p + \Sigma_u) = (\Sigma_p + \Sigma_u)^2$.
+Expanding both sides and cancelling $\Sigma_u^2$ and $2\Sigma_p\Sigma_u$ leaves
+$\Sigma_p\Sigma_p^{*} = \Sigma_p^2$, whose positive solution is $\Sigma_p = \Sigma_p^{*}$.</p></div>
+<p>With $\Sigma_p^{*} = 1$ and $\Sigma_u = 0.1$, the roots of
+<a class="eqref" href="#eq-lin-roots">(3.4.3)</a> are $0.011252$ and $0.888748$; the larger differs
+from the truth by $-11.1$ per cent. A simulation in <code>values.py</code> with
+the log-variance step of Lesson&nbsp;2, started at $\Sigma_p = 1$,
+averages $0.908$ under the point rule and $1.019$ under
+the posterior-averaged rule. With $\Sigma_u = 0.5$, so that
+$3\Sigma_u = 1.5$ exceeds $\Sigma_p^{*}$, the point rule takes the
+variance from $1$ to $4.5 \times 10^{-7}$ in $4000$
+trials.</p>
+<h2 id="the-missing-term"><span class="secno">4</span>The missing term</h2>
+<p>The point rule prefers a smaller variance because of what $\hat\ell$ is.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The settled log joint against the evidence</span></div><p>The posterior is Gaussian, so the joint at any $d$ is the evidence times the posterior
+density there: $p(d, u) = p(u)\,\mathcal N(d; \hat d, \Sigma_{\text{post}})$. At the
+mode the density is $1/\sqrt{2\pi\Sigma_{\text{post}}}$, so</p>
+<div class="eqn" id="eq-laplace-exact"><div class="eqbody">$$\ln p(u; \Sigma_p) \;=\; \hat\ell(u; \Sigma_p) \;+\; \tfrac12\ln(2\pi\Sigma_{\text{post}}) .$$</div><div class="eqno"><a href="#eq-laplace-exact" title="Link to equation 3.4.4">(3.4.4)</a></div></div>
+<p>Average over the world. Under the model, $u \sim \mathcal N(d_p, \Sigma_p + \Sigma_u)$,
+and under the world $\mathbb E_{P^*}[(u - d_p)^2] = \Sigma_p^{*} + \Sigma_u$, so</p>
+<div class="eqn"><div class="eqbody">$$\mathbb E_{P^*}\big[\ln p(u; \Sigma_p)\big] \;=\; -\frac{\Sigma_p^{*} + \Sigma_u}{2(\Sigma_p + \Sigma_u)} - \tfrac12\ln\big(2\pi(\Sigma_p + \Sigma_u)\big) .$$</div></div>
+<p>This is largest where its derivative,
+$(\Sigma_p^{*} + \Sigma_u)/\big(2(\Sigma_p + \Sigma_u)^2\big) - 1/\big(2(\Sigma_p + \Sigma_u)\big)$,
+vanishes, which is at $\Sigma_p = \Sigma_p^{*}$. Subtracting
+$\tfrac12\ln(2\pi\Sigma_{\text{post}})$, with
+$\ln\Sigma_{\text{post}} = \ln\Sigma_p + \ln\Sigma_u - \ln(\Sigma_p + \Sigma_u)$, gives</p>
+<div class="eqn"><div class="eqbody">$$\mathbb E_{P^*}\big[\hat\ell(u; \Sigma_p)\big] \;=\; -\frac{\Sigma_p^{*} + \Sigma_u}{2(\Sigma_p + \Sigma_u)} - \tfrac12\ln\Sigma_p - \ln(2\pi) - \tfrac12\ln\Sigma_u .$$</div></div>
+<p>Its derivative in $\Sigma_p$ is the point rule's drift computed above, as the
+envelope theorem of Lesson&nbsp;1 says it must be.</p></div>
+<p>The two differ by $\tfrac12\ln(2\pi\Sigma_{\text{post}})$. As $\Sigma_p \to 0$ the
+evidence falls, because a prior with no spread cannot account for the spread in $u$.
+The settled log joint rises without bound, because the prior's density at its own peak
+grows like $1/\sqrt{\Sigma_p}$ and the mode moves to that peak. The term
+$\tfrac12\ln(2\pi\Sigma_{\text{post}})$ is the log of the posterior's width, and adding
+it cancels the growth.</p>
+<figure id="fig-3-4-1"><svg viewBox="0 0 660 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two curves against the prior variance on a log axis. The evidence has one maximum at the true variance. The settled log joint has a local maximum below it, a local minimum near zero and rises to the left.">
+  <rect x="1" y="1" width="658" height="288" fill="#fdfcf9" stroke="#e4e1d9"/>
+  <line x1="70" y1="250" x2="640" y2="250" stroke="#3c3c42" stroke-width="1"/>
+  <line x1="70" y1="30" x2="70" y2="250" stroke="#3c3c42" stroke-width="1"/>
+  <g font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75" text-anchor="middle">
+    <line x1="177.7" y1="250" x2="177.7" y2="255" stroke="#3c3c42"/>
+    <text x="177.7" y="268">10<tspan dy="-4" font-size="8">&#8722;2</tspan></text>
+    <line x1="331.8" y1="250" x2="331.8" y2="255" stroke="#3c3c42"/>
+    <text x="331.8" y="268">10<tspan dy="-4" font-size="8">&#8722;1</tspan></text>
+    <line x1="485.9" y1="250" x2="485.9" y2="255" stroke="#3c3c42"/>
+    <text x="485.9" y="268">1</text>
+    <line x1="640.0" y1="250" x2="640.0" y2="255" stroke="#3c3c42"/>
+    <text x="640.0" y="268">10</text>
+    <text x="355" y="284">learned prior variance</text>
+  </g>
+  <g font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75" text-anchor="end">
+    <text x="64" y="230.9" dy="3">&#8722;5</text>
+    <text x="64" y="183.0" dy="3">&#8722;4</text>
+    <text x="64" y="135.2" dy="3">&#8722;3</text>
+    <text x="64" y="87.4" dy="3">&#8722;2</text>
+    <text x="64" y="39.6" dy="3">&#8722;1</text>
+  </g>
+  <line x1="485.9" y1="30" x2="485.9" y2="250" stroke="#d3cfc4" stroke-dasharray="3 3"/>
+  <path d="M70.0 239.0 L72.4 238.8 L74.8 238.6 L77.2 238.5 L79.5 238.3 L81.9 238.1 L84.3 237.9 L86.7 237.7 L89.1 237.5 L91.5 237.3 L93.8 237.0 L96.2 236.8 L98.6 236.6 L101.0 236.3 L103.4 236.1 L105.8 235.8 L108.2 235.5 L110.5 235.2 L112.9 234.9 L115.3 234.6 L117.7 234.3 L120.1 234.0 L122.5 233.7 L124.9 233.3 L127.2 233.0 L129.6 232.6 L132.0 232.2 L134.4 231.8 L136.8 231.4 L139.2 231.0 L141.5 230.5 L143.9 230.1 L146.3 229.6 L148.7 229.2 L151.1 228.7 L153.5 228.2 L155.9 227.6 L158.2 227.1 L160.6 226.5 L163.0 226.0 L165.4 225.4 L167.8 224.8 L170.2 224.1 L172.6 223.5 L174.9 222.8 L177.3 222.1 L179.7 221.4 L182.1 220.7 L184.5 220.0 L186.9 219.2 L189.2 218.4 L191.6 217.6 L194.0 216.8 L196.4 215.9 L198.8 215.0 L201.2 214.1 L203.6 213.2 L205.9 212.3 L208.3 211.3 L210.7 210.3 L213.1 209.3 L215.5 208.2 L217.9 207.1 L220.3 206.0 L222.6 204.9 L225.0 203.7 L227.4 202.6 L229.8 201.3 L232.2 200.1 L234.6 198.8 L236.9 197.5 L239.3 196.2 L241.7 194.9 L244.1 193.5 L246.5 192.1 L248.9 190.7 L251.3 189.2 L253.6 187.7 L256.0 186.2 L258.4 184.7 L260.8 183.1 L263.2 181.6 L265.6 180.0 L267.9 178.3 L270.3 176.7 L272.7 175.0 L275.1 173.3 L277.5 171.6 L279.9 169.8 L282.3 168.1 L284.6 166.3 L287.0 164.5 L289.4 162.6 L291.8 160.8 L294.2 159.0 L296.6 157.1 L299.0 155.2 L301.3 153.3 L303.7 151.4 L306.1 149.5 L308.5 147.6 L310.9 145.7 L313.3 143.7 L315.6 141.8 L318.0 139.9 L320.4 137.9 L322.8 136.0 L325.2 134.1 L327.6 132.1 L330.0 130.2 L332.3 128.3 L334.7 126.4 L337.1 124.5 L339.5 122.6 L341.9 120.7 L344.3 118.8 L346.7 117.0 L349.0 115.2 L351.4 113.3 L353.8 111.5 L356.2 109.8 L358.6 108.0 L361.0 106.3 L363.3 104.6 L365.7 102.9 L368.1 101.3 L370.5 99.6 L372.9 98.0 L375.3 96.5 L377.7 94.9 L380.0 93.4 L382.4 91.9 L384.8 90.5 L387.2 89.1 L389.6 87.7 L392.0 86.4 L394.4 85.1 L396.7 83.8 L399.1 82.6 L401.5 81.4 L403.9 80.2 L406.3 79.1 L408.7 78.0 L411.0 77.0 L413.4 76.0 L415.8 75.0 L418.2 74.0 L420.6 73.1 L423.0 72.3 L425.4 71.5 L427.7 70.7 L430.1 69.9 L432.5 69.2 L434.9 68.5 L437.3 67.9 L439.7 67.3 L442.1 66.7 L444.4 66.2 L446.8 65.7 L449.2 65.2 L451.6 64.8 L454.0 64.4 L456.4 64.0 L458.7 63.6 L461.1 63.3 L463.5 63.1 L465.9 62.8 L468.3 62.6 L470.7 62.4 L473.1 62.3 L475.4 62.1 L477.8 62.0 L480.2 62.0 L482.6 61.9 L485.0 61.9 L487.4 61.9 L489.7 61.9 L492.1 62.0 L494.5 62.0 L496.9 62.1 L499.3 62.3 L501.7 62.4 L504.1 62.6 L506.4 62.8 L508.8 63.0 L511.2 63.2 L513.6 63.4 L516.0 63.7 L518.4 64.0 L520.8 64.3 L523.1 64.6 L525.5 64.9 L527.9 65.3 L530.3 65.6 L532.7 66.0 L535.1 66.4 L537.4 66.8 L539.8 67.3 L542.2 67.7 L544.6 68.1 L547.0 68.6 L549.4 69.1 L551.8 69.6 L554.1 70.1 L556.5 70.6 L558.9 71.1 L561.3 71.6 L563.7 72.2 L566.1 72.8 L568.5 73.3 L570.8 73.9 L573.2 74.5 L575.6 75.1 L578.0 75.7 L580.4 76.3 L582.8 76.9 L585.1 77.5 L587.5 78.2 L589.9 78.8 L592.3 79.4 L594.7 80.1 L597.1 80.8 L599.5 81.4 L601.8 82.1 L604.2 82.8 L606.6 83.5 L609.0 84.2 L611.4 84.9 L613.8 85.6 L616.2 86.3 L618.5 87.0 L620.9 87.7 L623.3 88.4 L625.7 89.1 L628.1 89.9 L630.5 90.6 L632.8 91.4 L635.2 92.1 L637.6 92.8 L640.0 93.6" fill="none" stroke="#2c5f8a" stroke-width="2"/>
+  <path d="M70.0 133.9 L72.4 134.5 L74.8 135.2 L77.2 135.8 L79.5 136.5 L81.9 137.1 L84.3 137.8 L86.7 138.4 L89.1 139.0 L91.5 139.6 L93.8 140.2 L96.2 140.8 L98.6 141.4 L101.0 142.0 L103.4 142.6 L105.8 143.1 L108.2 143.7 L110.5 144.2 L112.9 144.7 L115.3 145.2 L117.7 145.7 L120.1 146.2 L122.5 146.7 L124.9 147.2 L127.2 147.6 L129.6 148.1 L132.0 148.5 L134.4 148.9 L136.8 149.3 L139.2 149.7 L141.5 150.1 L143.9 150.5 L146.3 150.8 L148.7 151.1 L151.1 151.4 L153.5 151.7 L155.9 152.0 L158.2 152.2 L160.6 152.5 L163.0 152.7 L165.4 152.9 L167.8 153.1 L170.2 153.2 L172.6 153.4 L174.9 153.5 L177.3 153.6 L179.7 153.6 L182.1 153.7 L184.5 153.7 L186.9 153.7 L189.2 153.7 L191.6 153.6 L194.0 153.6 L196.4 153.5 L198.8 153.3 L201.2 153.2 L203.6 153.0 L205.9 152.8 L208.3 152.5 L210.7 152.3 L213.1 152.0 L215.5 151.7 L217.9 151.3 L220.3 150.9 L222.6 150.5 L225.0 150.1 L227.4 149.6 L229.8 149.1 L232.2 148.5 L234.6 148.0 L236.9 147.4 L239.3 146.7 L241.7 146.0 L244.1 145.3 L246.5 144.6 L248.9 143.9 L251.3 143.1 L253.6 142.2 L256.0 141.4 L258.4 140.5 L260.8 139.6 L263.2 138.6 L265.6 137.6 L267.9 136.6 L270.3 135.6 L272.7 134.5 L275.1 133.4 L277.5 132.3 L279.9 131.1 L282.3 129.9 L284.6 128.7 L287.0 127.5 L289.4 126.2 L291.8 124.9 L294.2 123.6 L296.6 122.3 L299.0 120.9 L301.3 119.6 L303.7 118.2 L306.1 116.8 L308.5 115.4 L310.9 114.0 L313.3 112.5 L315.6 111.1 L318.0 109.6 L320.4 108.1 L322.8 106.7 L325.2 105.2 L327.6 103.7 L330.0 102.2 L332.3 100.7 L334.7 99.2 L337.1 97.7 L339.5 96.2 L341.9 94.8 L344.3 93.3 L346.7 91.8 L349.0 90.4 L351.4 88.9 L353.8 87.5 L356.2 86.0 L358.6 84.6 L361.0 83.2 L363.3 81.9 L365.7 80.5 L368.1 79.2 L370.5 77.9 L372.9 76.6 L375.3 75.3 L377.7 74.0 L380.0 72.8 L382.4 71.6 L384.8 70.5 L387.2 69.3 L389.6 68.2 L392.0 67.1 L394.4 66.0 L396.7 65.0 L399.1 64.0 L401.5 63.0 L403.9 62.1 L406.3 61.2 L408.7 60.3 L411.0 59.5 L413.4 58.7 L415.8 57.9 L418.2 57.1 L420.6 56.4 L423.0 55.7 L425.4 55.1 L427.7 54.4 L430.1 53.9 L432.5 53.3 L434.9 52.8 L437.3 52.3 L439.7 51.8 L442.1 51.4 L444.4 51.0 L446.8 50.6 L449.2 50.3 L451.6 50.0 L454.0 49.7 L456.4 49.4 L458.7 49.2 L461.1 49.0 L463.5 48.8 L465.9 48.7 L468.3 48.6 L470.7 48.5 L473.1 48.4 L475.4 48.4 L477.8 48.4 L480.2 48.4 L482.6 48.4 L485.0 48.5 L487.4 48.5 L489.7 48.6 L492.1 48.8 L494.5 48.9 L496.9 49.1 L499.3 49.3 L501.7 49.5 L504.1 49.7 L506.4 49.9 L508.8 50.2 L511.2 50.5 L513.6 50.8 L516.0 51.1 L518.4 51.4 L520.8 51.8 L523.1 52.1 L525.5 52.5 L527.9 52.9 L530.3 53.3 L532.7 53.7 L535.1 54.2 L537.4 54.6 L539.8 55.1 L542.2 55.6 L544.6 56.1 L547.0 56.6 L549.4 57.1 L551.8 57.6 L554.1 58.1 L556.5 58.7 L558.9 59.2 L561.3 59.8 L563.7 60.3 L566.1 60.9 L568.5 61.5 L570.8 62.1 L573.2 62.7 L575.6 63.3 L578.0 64.0 L580.4 64.6 L582.8 65.2 L585.1 65.9 L587.5 66.5 L589.9 67.2 L592.3 67.9 L594.7 68.5 L597.1 69.2 L599.5 69.9 L601.8 70.6 L604.2 71.3 L606.6 72.0 L609.0 72.7 L611.4 73.4 L613.8 74.1 L616.2 74.8 L618.5 75.5 L620.9 76.3 L623.3 77.0 L625.7 77.7 L628.1 78.5 L630.5 79.2 L632.8 80.0 L635.2 80.7 L637.6 81.5 L640.0 82.2" fill="none" stroke="#0f5f57" stroke-width="2"/>
+  <circle cx="478.0" cy="48.4" r="4" fill="#0f5f57"/>
+  <circle cx="185.6" cy="153.7" r="4" fill="#fdfcf9" stroke="#0f5f57" stroke-width="1.5"/>
+  <circle cx="485.9" cy="61.9" r="4" fill="#2c5f8a"/>
+  <g font-family="'IBM Plex Sans',sans-serif" font-size="10">
+    <text x="478.0" y="48.4" dx="-8" dy="-8" text-anchor="end" fill="#0f5f57">point rule settles</text>
+    <text x="185.6" y="153.7" dx="8" dy="14" text-anchor="start" fill="#0f5f57">collapse threshold</text>
+    <text x="485.9" y="61.9" dx="8" dy="16" text-anchor="start" fill="#2c5f8a">truth</text>
+  </g>
+</svg><figcaption><span class="fno">Figure 3.4.1.</span> The expected settled log joint (teal) and the expected log evidence (blue) as functions of the learned prior variance, in the linear model with the true and sensory variances of the text, on a logarithmic axis. The evidence peaks at the truth. The settled log joint has a local maximum below the truth, a local minimum near zero, and grows without bound to the left of it.</figcaption></figure>
+<p>Week&nbsp;4 adds $\tfrac12\ln(2\pi\Sigma_{\text{post}})$ back. Its free energy under a Gaussian
+approximation to the posterior contains the log of the approximation's width. In this
+model, where the posterior is Gaussian, the best such approximation is exact, and then
+the free energy equals minus the log evidence: the negative free energy is the log
+evidence.</p>
+<h2 id="week-2-s-model"><span class="secno">5</span>Week 2's model</h2>
+<p>Return to the model of Week&nbsp;2 and let the world be that model exactly, with
+$\theta^{*} = 1$. Learn one parameter at a time with the others held at
+their true values, and find by quadrature over the world where each rule's drift
+vanishes.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Truth</th>
+<th>Point rule settles at</th>
+<th>Difference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$d_p$</td>
+<td>$2$</td>
+<td>$1.3591$</td>
+<td>$-32.0$ per cent</td>
+</tr>
+<tr>
+<td>$\Sigma_p$</td>
+<td>$1$</td>
+<td>$0.3839$</td>
+<td>$-61.6$ per cent</td>
+</tr>
+<tr>
+<td>$\Sigma_u$</td>
+<td>$0.1$</td>
+<td>$0.0266$</td>
+<td>$-73.4$ per cent</td>
+</tr>
+<tr>
+<td>$\theta$</td>
+<td>$1$</td>
+<td>$1.1204$</td>
+<td>$12.0$ per cent</td>
+</tr>
+</tbody>
+</table></div>
+<p>The posterior-averaged rule's drift at the truth is zero to the accuracy of the
+quadrature in all four, as the score argument requires; <code>values.py</code> asserts each. The
+point rule misses in all four, and not always in the same direction. For the prior
+variance, the drift was sampled at 25 values from $\Sigma_p = 10^{-4}$ to $100$.
+It is the drift of the inference the animal runs, the capped ascent from the prior
+location, which settles on a local maximum and not always the highest one, so it need
+not equal the drift computed from the global mode. The sampled drift changes
+sign once, at an attracting zero near $0.3839$, and from Week&nbsp;2's
+starting value of $1$ the drift leads to that zero. So, unlike the
+linear case, the prior variance does not collapse from there. Sampling can miss a pair
+of zeros between two sampled values, or a zero where the drift touches zero without
+changing sign, and it says nothing outside the sampled range.</p>
+<p>The prior location's shortfall is the one Lesson&nbsp;1's widget showed. Its
+stationary condition in Lesson&nbsp;2 asks that the average mode equal the truncated
+prior's mean. At the truth the average posterior mean equals that prior mean, since
+averaging the posterior mean over the world's sounds gives back the prior mean. The
+point rule's drift at the truth is $-0.3303$, negative, so on
+average the modes lie below the posterior means, as at Week&nbsp;2's sound. The prior
+location falls until the modes it produces average to its own mean. In that widget's
+world, sources at $d_p^{*} = 3$, the posterior-averaged rule's drift at the
+truth comes out of the quadrature as $5.7 \times 10^{-17}$, which is zero to
+rounding.</p>
+<h2 id="where-the-bias-comes-from"><span class="secno">6</span>Where the bias comes from</h2>
+<p>Both rules use the same per-trial derivative. Write it as a function of the state,
+$\psi(d) = \partial\ell(d, u; \omega)/\partial\omega$, for one trial and the current
+parameters. The point rule uses $\psi(\hat d)$; the posterior-averaged rule uses
+$\mathbb E_{d\mid u}[\psi(d)]$. Write $m = \mathbb E_{d\mid u}[d]$ for the posterior mean, $m$ being Week&nbsp;2's
+placeholder for a Gaussian's mean put to the same use, and $V$ for the posterior
+variance.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The gap between the two rules on one trial</span></div><p>Expand $\psi$ about the mode to second order,</p>
+<div class="eqn"><div class="eqbody">$$\psi(d) \;\approx\; \psi(\hat d) + \psi'(\hat d)\,(d - \hat d) + \tfrac12 \psi''(\hat d)\,(d - \hat d)^2 ,$$</div></div>
+<p>and average over the posterior. The first moment is
+$\mathbb E_{d\mid u}[d - \hat d] = m - \hat d$. The second is
+$\mathbb E_{d\mid u}[(d - \hat d)^2] = \mathbb E_{d\mid u}[(d - m + m - \hat d)^2] = V + (m - \hat d)^2$,
+the cross term vanishing because $d - m$ averages to zero. So</p>
+<div class="eqn" id="eq-gap"><div class="eqbody">$$\mathbb E_{d\mid u}[\psi(d)] - \psi(\hat d) \;\approx\; \psi'(\hat d)\,(m - \hat d) \;+\; \tfrac12 \psi''(\hat d)\,\big[V + (m - \hat d)^2\big] ,$$</div><div class="eqno"><a href="#eq-gap" title="Link to equation 3.4.5">(3.4.5)</a></div></div>
+<p>with equality when $\psi$ is a polynomial of degree at most two in $d$.</p></div>
+<p>The posterior-averaged rule has zero drift at the truth, so the point rule's drift
+there is minus the process average of <a class="eqref" href="#eq-gap">(3.4.5)</a>. Two features of the posterior drive it:
+the offset of the mode from the mean, which a skewed posterior has, and the posterior
+variance, which every posterior has. The derivatives of Lesson&nbsp;2 and <a href="../week-03/learning-the-link.html">Lesson&nbsp;3</a>
+say how each parameter responds.</p>
+<ul>
+<li><strong>Prior location.</strong> $\psi = (d - d_p)/\Sigma_p - \zeta_p$ is linear in $d$, so
+  <a class="eqref" href="#eq-gap">(3.4.5)</a> is exact and equals $(m - \hat d)/\Sigma_p$. Only the offset matters. In the
+  linear model of Lesson&nbsp;1 the posterior is Gaussian, $m = \hat d$, and the location
+  is learned without bias. In Week&nbsp;2's model the link flattens with distance, the
+  posterior has a long tail towards far sources, the mode lies below the mean, and the
+  learned location is too small.</li>
+<li><strong>Prior variance.</strong> $\psi$ is quadratic in $d$ with $\psi'' = 1/\Sigma_p^2$, so <a class="eqref" href="#eq-gap">(3.4.5)</a> is
+  exact. Since $\psi$ is $(d - d_p)^2/(2\Sigma_p^2)$ plus terms that do not depend on $d$,
+  the same gap can also be written directly as $\big[\mathbb E_{d\mid u}[(d - d_p)^2] - (\hat d - d_p)^2\big]/(2\Sigma_p^2)$,
+  and $\mathbb E_{d\mid u}[(d - d_p)^2] = V + (m - d_p)^2$ by the same cross-term
+  argument, so the bracket is
+  $V + (m - d_p)^2 - (\hat d - d_p)^2$. The first term is positive on every trial: the
+  modes leave out each posterior's own variance. The other two compare the mean's
+  squared deviation with the mode's, and either can be the larger. At $u = 1$
+  under Week&nbsp;2's model the mode's squared deviation from $d_p$ is
+  $0.9458$ and the posterior average of $(d - d_p)^2$ is only
+  $0.6839$, so on that trial the point rule's squared deviation is the
+  larger. Averaged over the process, the law of total variance splits the
+  posterior-averaged term into $\mathbb E_{P^*}[V]$ and the spread of the posterior
+  means $m$ about $d_p$; the point rule has neither, only the spread of the modes. The
+  quadrature over the world gives the net effect: the learned variance comes out too
+  small.</li>
+<li><strong>Sensory variance.</strong> $\psi$ depends on $d$ through $\delta_u^2/(2\Sigma_u^2)$, and
+  $\mathrm d^2\delta_u^2/\mathrm dd^2 = 2g'(d)^2 - 2\delta_u g''(d)$. This $\psi$ is not a
+  polynomial in $d$, so <a class="eqref" href="#eq-gap">(3.4.5)</a> is an approximation. Where the residual at the mode is
+  small, $\psi'' > 0$ and the variance term has the same sign as for the prior. The
+  quadrature in the table confirms the sign: the learned sensory variance is too
+  small.</li>
+<li><strong>Source power.</strong> $\psi = \varepsilon_u h(d)$, and at a small residual $\psi' > 0$ while
+  $\psi'' < 0$ (an exercise asks for both). This $\psi$ is not a polynomial either, and
+  the two terms of <a class="eqref" href="#eq-gap">(3.4.5)</a> pull in opposite directions. The full calculation puts the
+  learned power $12.0$ per cent from the truth in the world equal to
+  Week&nbsp;2's model, an overestimate, and $-11.3$ per cent from it in the
+  louder world of Lesson&nbsp;3, an underestimate.</li>
+</ul>
+<p>The second-order formula does not settle the power's sign. Averaged over the louder
+world, at the true power, the offset term of <a class="eqref" href="#eq-gap">(3.4.5)</a> is $0.7702$ and the
+variance term $-1.5131$. Their sum, $-0.7429$, is negative,
+while the exact average of the gap, computed from the whole posterior, is
+$0.0303$, positive; the point rule's drift at the truth is minus that,
+and the power is underestimated. The terms the expansion drops reverse the sign. In
+the world equal to Week&nbsp;2's model the sum is $-2.7267$ against an exact
+$-0.0385$: the signs agree and the sizes do not. Where $\psi$ is a
+polynomial of degree at most two, as for the prior's location and variance, <a class="eqref" href="#eq-gap">(3.4.5)</a>
+is exact and names the two contributions. Elsewhere it is a local approximation that
+names the same two contributions without fixing their net effect, and the signs and
+sizes in the table come from the full calculation over the world.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">What the settled log joint adds to the evidence</span></div><p>For any model and any $u$, factor the joint at its maximum:
+$p(u) = \int_0^\infty p(d, u)\,\mathrm dd = e^{\hat\ell}\int_0^\infty e^{\ell(d) - \hat\ell}\,\mathrm dd$.
+Since $p(\hat d \mid u) = e^{\hat\ell}/p(u)$,</p>
+<div class="eqn" id="eq-hat-ev"><div class="eqbody">$$\hat\ell(u; \omega) \;=\; \ln p(u; \omega) \;+\; \ln p(\hat d \mid u; \omega) .$$</div><div class="eqno"><a href="#eq-hat-ev" title="Link to equation 3.4.6">(3.4.6)</a></div></div></div>
+<p>The settled log joint is the log evidence plus the log of the posterior's height at
+its peak. In the linear model that height is $1/\sqrt{2\pi\Sigma_{\text{post}}}$, which
+is <a class="eqref" href="#eq-laplace-exact">(3.4.4)</a> again. Climbing $\hat\ell$ climbs the evidence and, at the same
+time, rewards any parameter change that makes the posterior taller and narrower,
+whether or not it explains the sounds better. That is the general reason the point
+rule shrinks variances, and the reason it can run away to zero when nothing else
+holds them up.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">The bias comes from the states</span></div><p>The rules are biased because the state is replaced by its mode before the parameter
+update is computed. The same rules, applied to the posterior average of the state's
+contribution, have zero drift at the truth. A good parameter learner on top of a point
+estimate of the state is not enough. The mode leaves out the posterior's spread, and
+where the posterior is asymmetric it is also not the posterior mean; how much each
+omission costs depends on how the parameter's derivative depends on the state. Of the
+four parameters computed here, the sensory variance is off by the most.</p></div>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">Point estimates of parameters</span></div><p>The animal also holds each parameter as a single number. That is a separate
+simplification, and it costs something different: the animal has no measure of how
+well it knows a parameter, so a value learned from ten sounds and one learned from
+ten thousand are used with the same confidence. With many trials the uncertainty about
+a parameter shrinks, and holding only its best value loses little. Early in learning,
+or after the world changes, it loses a great deal. Week&nbsp;11 keeps counts for the
+parameters of discrete models, which is the simplest way to carry that uncertainty.</p></div>
+<h2 id="expectation-maximisation"><span class="secno">7</span>Expectation maximisation</h2>
+<p>The posterior-averaged rule is a stochastic, online form of an algorithm statisticians
+use to fit models with unobserved variables. <strong>Expectation maximisation</strong>, or EM,
+alternates two steps from the current parameter $\omega_{\text{old}}$:</p>
+<ul>
+<li>the E step computes the posterior $p(d \mid u; \omega_{\text{old}})$;</li>
+<li>the M step chooses the new parameter to maximise
+  $\mathbb E_{p(d \mid u;\, \omega_{\text{old}})}\big[\ell(d, u; \omega)\big]$, the log joint
+  averaged over that fixed posterior.</li>
+</ul>
+<p>At $\omega = \omega_{\text{old}}$ the gradient of the M step's objective is the
+posterior average of $\partial\ell/\partial\omega$, which by <a class="eqref" href="#eq-fisher">(3.4.1)</a> is the slope of
+the log evidence. EM is therefore an ascent method on the evidence; Week&nbsp;4 proves
+that each full EM iteration never lowers it.</p>
+<p>The animal's scheme departs from EM in three ways:</p>
+<ol>
+<li>it replaces the posterior by its mode in the E step;</li>
+<li>it takes one small gradient step in the M step instead of maximising;</li>
+<li>it does both one trial at a time.</li>
+</ol>
+<p>The second and third change the speed and the noise of learning but not where the
+drift vanishes: by Lesson&nbsp;1, a run with a small fixed rate fluctuates about that
+zero by order $\sqrt\beta$, with a stationary mean that the drift's curvature can
+displace by order $\beta$. The first changes where the drift vanishes, and that is the
+bias computed above.
+<a href="https://doi.org/10.1016/j.jmp.2017.09.004">Buckley et al. (2017)</a>, in their
+introduction, trace the free energy back to work by Hinton and colleagues in which a
+function like it implements a variant of EM.</p>
+<h2 id="hyperpriors"><span class="secno">8</span>Hyperpriors</h2>
+<p>Lesson&nbsp;2 noted that the original model forbade small variances outright. A smooth
+alternative is to give the variance a prior of its own. A prior over a parameter of a
+prior or likelihood is a <strong>hyperprior</strong>.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">A hyperprior as imaginary trials</span></div><p>Take the density on $\Sigma > 0$</p>
+<div class="eqn"><div class="eqbody">$$p(\Sigma) \;\propto\; \Sigma^{-(n_0/2 + 1)}\exp\!\left(-\frac{n_0\Sigma_0}{2\Sigma}\right),$$</div></div>
+<p>an inverse-gamma density with parameters written so that $n_0 > 0$ and
+$\Sigma_0 > 0$ can be read in a moment. Suppose $N$ trials give residuals $\delta_n$ whose
+log likelihood in $\Sigma$ is $\sum_n\big[-\delta_n^2/(2\Sigma) - \tfrac12\ln\Sigma\big]$,
+up to a constant. Adding the log hyperprior,</p>
+<div class="eqn"><div class="eqbody">$$-\frac{\sum_n \delta_n^2 + n_0\Sigma_0}{2\Sigma} \;-\; \frac{N + n_0 + 2}{2}\,\ln\Sigma .$$</div></div>
+<p>The hyperprior has the form of $n_0$ extra trials, each with squared residual
+$\Sigma_0$, plus a constant $2$. Setting the derivative in $\Sigma$ to zero,</p>
+<div class="eqn" id="eq-hyper-opt"><div class="eqbody">$$\frac{\sum_n \delta_n^2 + n_0\Sigma_0}{2\Sigma^2} \;=\; \frac{N + n_0 + 2}{2\Sigma}
+\quad\Longrightarrow\quad
+\Sigma \;=\; \frac{\sum_n \delta_n^2 + n_0\Sigma_0}{N + n_0 + 2} .$$</div><div class="eqno"><a href="#eq-hyper-opt" title="Link to equation 3.4.7">(3.4.7)</a></div></div></div>
+<p>So $n_0$ says how many trials' worth of confidence the hyperprior carries, and
+$\Sigma_0$ is its guess at the variance. Without data the optimum is
+$n_0\Sigma_0/(n_0 + 2)$; with many trials the data dominate. Even if every residual
+is zero, <a class="eqref" href="#eq-hyper-opt">(3.4.7)</a> gives a positive variance, and the objective is bounded above,
+since as $\Sigma \to 0$ the term $-n_0\Sigma_0/(2\Sigma)$ falls to $-\infty$ faster than
+$-\ln\Sigma$ rises. This removes the unbounded direction found in Lesson&nbsp;1's
+warning and in the figure above.</p>
+<p>An online learner has no fixed $N$: it goes on learning. To use the hyperprior online,
+one has to choose how many trials it is shared across, and that choice is part of the
+model, not something the derivation supplies. Shared evenly over a window of $N$
+trials, the hyperprior adds
+$\tfrac1N\big[n_0\Sigma_0/(2\Sigma) - (n_0/2 + 1)\big]$ to each trial's log-variance
+step, the derivative of $\tfrac1N\ln p(\Sigma)$ with respect to $\ln\Sigma$. As $\Sigma \to 0$ that term grows without bound and pushes the variance back up,
+which is the smooth version of a floor. A hard floor is the limiting case of a
+hyperprior with zero density below the floor and no preference above it.</p>
+<h2 id="learning-the-precision-of-the-ear"><span class="secno">9</span>Learning the precision of the ear</h2>
+<p>A precision decides how far the estimate follows each channel.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The ear's share</span></div><p>Replace the link near the prior location by its tangent,
+$g(d) \approx g(d_p) + g'(d_p)(d - d_p)$. The log joint is then quadratic in $d$, and
+setting its derivative to zero,</p>
+<div class="eqn"><div class="eqbody">$$-\Pi_p(d - d_p) + \Pi_u g'(d_p)\big[u - g(d_p) - g'(d_p)(d - d_p)\big] \;=\; 0 ,$$</div></div>
+<p>gives</p>
+<div class="eqn"><div class="eqbody">$$\hat d - d_p \;=\; \frac{\Pi_u g'(d_p)}{\Pi_p + \Pi_u g'(d_p)^2}\,\big(u - g(d_p)\big) .$$</div></div>
+<p>Multiply by $g'(d_p)$. The left side becomes the change in the predicted intensity,
+to the same order, and</p>
+<div class="eqn" id="eq-share"><div class="eqbody">$$g'(d_p)\,(\hat d - d_p) \;=\; \frac{\Pi_u g'(d_p)^2}{\Pi_p + \Pi_u g'(d_p)^2}\,\big(u - g(d_p)\big) .$$</div><div class="eqno"><a href="#eq-share" title="Link to equation 3.4.8">(3.4.8)</a></div></div></div>
+<p>The prediction moves the fraction in <a class="eqref" href="#eq-share">(3.4.8)</a> of the way from what the prior
+predicts to what was heard. Its denominator is the Gauss-Newton curvature of
+Week&nbsp;2, Lesson&nbsp;4 at the prior location, so the fraction is also the ear's part of the
+posterior precision. Call it the <strong>ear's share</strong>. With Week&nbsp;2's values it is $0.385$. Learning $\Sigma_u$ is learning that
+number, which is how much to trust the ear. Week&nbsp;8 develops this into attention, as
+the optimisation of precisions.</p>
+<p>In the widget the world's sensory variance is $\Sigma_u^{*} = 0.3$, three
+times what the animal believes. The animal learns $\Sigma_u$ alone with
+$\beta = 0.01$, under either rule, on the same sequence of trials.</p>
+<figure id="fig-3-4-2"><div class="widget" data-widget="precision-learning"></div><figcaption><span class="fno">Figure 3.4.2.</span> Learning the precision of a noisier ear. The learned sensory variance across trials under the point rule and the posterior-averaged rule, against the world's value. The readout gives the ear's share of the curvature at the start, at the truth, and under each learned value.</figcaption></figure>
+<p>The posterior-averaged rule reaches $0.3000$ by the last trial and
+averages $0.2933$ over the second half. The ear's share should fall
+from $0.385$ to $0.172$, and at that run's average it is
+$0.176$.</p>
+<p>The point rule's drift, computed by quadrature over the world, vanishes at
+$\Sigma_u = 0.1017$. That is just above the $0.1$ the animal
+started with: the drift there is $0.00708$ in $\ln\Sigma_u$, positive and
+small. At the zero the ear's share is $0.381$, against
+$0.385$ at the start. A channel three times noisier than the animal believes
+leaves its trust in the ear almost where it was. The run in the widget averages
+$0.0957$ over its second half, slightly below the start, with a
+share of $0.395$; one run with a fixed rate fluctuates about the zero of
+the drift, as Lesson&nbsp;1 showed, and this one happens to sit below it.</p>
+<p>The reason is the one the linear case showed. The point rule measures residuals at
+the mode, and the mode is the state that makes the residual small, subject to the
+prior. Part of each trial's noise is absorbed by moving the estimate, so the
+residuals the rule sees are smaller than the noise, and the variance learned from them
+is too small. The point rule does learn a larger variance in the noisier world,
+$0.1017$ against $0.0266$ when the world is
+Week&nbsp;2's model, but both are far below the truth, and in the noisier world the
+learned value barely moves from where the animal started.</p>
+<div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
+<li>State the Fisher identity and say which quantity in it the animal does not have.</li>
+<li>Why does the posterior-averaged rule have zero drift at the truth,
+  and why does the point rule not?</li>
+<li>In the linear model, when does the learned prior variance collapse, and what term of
+  the evidence is missing from $\hat\ell$?</li>
+<li>What does a hyperprior on a variance add to the learning objective, and why does
+  that stop the collapse?</li>
+<li>Under the point rule, why does an ear three times noisier than believed leave the
+  ear's share almost unchanged?</li>
+<li>Which feature of the posterior biases the learned prior location? For the source
+  power, why does the second-order expansion not settle the sign of the bias?</li>
+</ul></div></article><nav class="pagenav"><a class="pv" href="../week-03/learning-the-link.html"><span class="dir">Previous</span><span class="ttl">Learning the link</span></a><a class="nx" href="../week-03/exercises.html"><span class="dir">Next</span><span class="ttl">Problems and code</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w03.js"></script>
+</body>
+</html>
