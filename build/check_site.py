@@ -6,7 +6,8 @@
 Checks, in order of how much trouble they have already caused:
   1. every [eq:name] reference resolves to a labelled equation on the same page
   2. every widget named in content is registered in a JS file that page loads
-  3. every internal href points at a file that exists
+  3. every internal href points at a file that exists, and every #fragment
+     at an id on that page; no equation label is defined twice on a page
   4. HTML tags balance on every page (counting every tag the corpus uses,
      not only the ones we thought of)
   5. no stray LaTeX delimiters left outside a maths span
@@ -45,7 +46,14 @@ def html_files():
 def check_eqrefs():
     for path in html_files():
         h = open(path, encoding="utf-8").read()
-        defined = set(re.findall(r'<div class="eqn" id="eq-([^"]+)"', h))
+        labels = Counter(re.findall(r'<div class="eqn" id="eq-([^"]+)"', h))
+        # Two equations with one label: a reference silently goes to the first,
+        # and a set of labels could not see the second.
+        for lab, n in labels.items():
+            if n > 1:
+                fail(f"equation label {{#{lab}}} defined {n} times on "
+                     f"{os.path.relpath(path, ROOT)}")
+        defined = set(labels)
         used = set(re.findall(r'<a class="eqref" href="#eq-([^"]+)"', h))
         for u in used - defined:
             fail(f"eqref -> nothing: [eq:{u}] on {os.path.relpath(path, ROOT)}")
@@ -81,16 +89,38 @@ def check_widgets():
 
 
 # ── 3. internal links ────────────────────────────────────────────────────
+_IDS = {}
+
+
+def ids_in(path):
+    """Every id an anchor could land on, read from the static HTML."""
+    if path not in _IDS:
+        h = open(path, encoding="utf-8").read()
+        _IDS[path] = set(re.findall(r'\sid="([^"]+)"', h)) | set(re.findall(r'\sname="([^"]+)"', h))
+    return _IDS[path]
+
+
 def check_links():
+    """A link must reach its file, and a #fragment must reach an id in it.
+
+    The fragment half was missing: a file existing says nothing about whether
+    `#eq-vfe` or `#fig-2-3-1` is on the page, so a renamed label left links
+    that scrolled nowhere and passed."""
     for path in html_files():
         h = open(path, encoding="utf-8").read()
         base = os.path.dirname(path)
+        rel = os.path.relpath(path, ROOT)
         for href in re.findall(r'href="([^"]+)"', h):
-            if href.startswith(("http", "mailto:", "#", "data:")):
+            if href.startswith(("http", "mailto:", "data:")):
                 continue
-            target = os.path.normpath(os.path.join(base, href.split("#")[0]))
+            file_part, _, frag = href.partition("#")
+            target = (path if not file_part
+                      else os.path.normpath(os.path.join(base, file_part)))
             if not os.path.exists(target):
-                fail(f"dead link {href} on {os.path.relpath(path, ROOT)}")
+                fail(f"dead link {href} on {rel}")
+                continue
+            if frag and target.endswith(".html") and frag not in ids_in(target):
+                fail(f"link {href} on {rel}: no id=\"{frag}\" on the target page")
 
 
 # ── 4. tag balance ───────────────────────────────────────────────────────

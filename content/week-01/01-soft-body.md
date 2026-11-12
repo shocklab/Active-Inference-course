@@ -21,8 +21,9 @@ feedback alone does not establish that proposal.
 
 Call the set of physiological states compatible with survival the **viable set**.
 For a small example, take two regulated variables and measure each as a deviation
-from its target. Scale their units so that the viable set is the circle of radius
-one. This circular boundary is an assumption of the example, not a claim about the
+from its target. Scale their units so that the viable set is the closed disc of
+radius one, $\{x\in\mathbb R^2:\lVert x\rVert\le1\}$: the circle of radius one
+and everything inside it. This circular boundary is an assumption of the example, not a claim about the
 shape of a real organism's physiological limits.
 
 Write $x_t\in\mathbb R^2$ for the displacement at time step $t$, starting at
@@ -47,7 +48,7 @@ This is an **absorbing boundary**: crossing ends the run, even if the recursion
 would subsequently return inside. We will also study the recursion without that
 boundary to understand its spread. These are two different processes.
 
-::: widget homeostasis-drift | Two regulated coordinates, measured relative to their targets. The solid circle is the absorbing boundary at radius one. The dashed circle shows the root-mean-square radius $\sqrt{2v}$ of the unabsorbed stationary process, with $v$ defined below; it is not a safety guarantee. The right panel records the entropy of the empirical visit histogram on a ${{hs_bins:d}}\times{{hs_bins:d}}$ grid. Its reference maximum is $\ln {{hs_bin_cells:d}}={{hs_max_entropy:.3f}}$ nats for uniform occupancy of the whole square grid. The absorbing circle prevents this run from exploring the whole square. A nat is an information unit based on natural logarithms, defined in the entropy section.
+::: widget homeostasis-drift | Two regulated coordinates, measured relative to their targets. The solid circle is the absorbing boundary at radius one. The dashed circle shows the root-mean-square radius $\sqrt{2v}$ of the unabsorbed stationary process, with $v$ defined below; it is not a safety guarantee. It is drawn only when $0<\kappa<2$, where that stationary process exists, so at the starting gain $\kappa=0$ there is no dashed circle. The right panel records the entropy of the empirical histogram of positions inside the disc, on a ${{hs_bins:d}}\times{{hs_bins:d}}$ grid. Its reference maximum is $\ln {{hs_bin_cells:d}}={{hs_max_entropy:.3f}}$ nats for uniform occupancy of the whole square grid. The absorbing circle prevents this run from exploring the whole square. A nat is an information unit based on natural logarithms, defined in the entropy section.
 :::
 
 ### Without feedback
@@ -119,7 +120,9 @@ with independent coordinates of variance $v$.
 At $\sigma={{hs_sigma}}$ and $\kappa={{hs_kappa}}$, the variance is
 ${{hs_var_per_coord:.5f}}$ per coordinate, giving standard deviation
 ${{hs_sd_per_coord:.4f}}$. Since the mean is zero,
-$\mathbb E[\lVert x\rVert^2]=2v$, which explains the dashed circle in the widget.
+$\mathbb E[\lVert x\rVert^2]=2v$, so the root-mean-square radius is
+$\sqrt{2v}={{hs_rms_radius:.4f}}$. That is the radius of the dashed circle in the
+widget at these settings.
 
 | Gain | Response without noise | Stationary variance with noise |
 |---|---|---|
@@ -179,7 +182,7 @@ logarithms instead give bits.
 For the chosen distribution $(0.94,0.02,0.02,0.02)$,
 
 $$
-\mathrm H[P^*]=-[0.94\ln0.94+3(0.02\ln0.02)]
+\mathrm H[P^*]=-[{{in_peak_hi:.2f}}\ln{{in_peak_hi:.2f}}+3({{in_peak_lo:.2f}}\ln{{in_peak_lo:.2f}})]
 ={{ent_peaked:.4f}}\text{ nats}.
 $$
 

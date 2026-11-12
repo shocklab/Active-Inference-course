@@ -10,7 +10,7 @@ We will infer a sound source's distance from a noisy intensity measurement. The 
 ## The setup
 
 An animal hears a sound. Write $d>0$ for the source distance in its model, with
-$d$ chosen for distance. It is a hidden state in the role of $s$ from Week 1.
+$d$ chosen for distance. It is a hidden state in the role of $s$ from [week:1].
 We will also use $d$ as the argument at which a density or objective is evaluated.
 An estimate, such as the posterior mode, is a particular value of that argument.
 
@@ -32,7 +32,7 @@ For example, the same inverse-square function with Gaussian noise and with a
 heavy-tailed noise distribution gives different likelihoods.
 
 Write $u$ for the intensity registered by the animal, using the notation of
-Bogacz's predictive-coding example. It plays the same role as Week 1's observation
+Bogacz's predictive-coding example. It plays the same role as [week:1]'s observation
 $o$. The observation is held fixed while we compare possible distances.
 
 Take the sensory error to be Gaussian about the true intensity:
@@ -82,7 +82,7 @@ So the prior says one thing, the data another, and the posterior must account fo
 
 ## From sums to densities
 
-The discrete examples of Week&nbsp;1 used finite sets. There were three states, the prior
+The discrete examples of [week:1] used finite sets. There were three states, the prior
 was three numbers adding to one, and $P(o)$ was a sum with one term per state.
 Here $d$ ranges over an interval, and every one of those has to be replaced. The
 replacement is routine, but it changes what the symbols *are*, and the change is
@@ -247,10 +247,11 @@ function of $u$. Plotted against $d$ it is not, because $d$ and $u$ are related
 nonlinearly and the map compresses one region while stretching another.
 
 Concretely, near $d = {{d_from_data_alone:.2f}}$ the derivative
-$g'(d) = -2/d^{3}$ has magnitude about $0.7$, so a given interval in intensity
-corresponds to an interval in distance about $1/0.7$ times as wide. Further out,
-$|g'|$ falls sharply: at $d = 4$ it is about $0.03$, so the same interval in
-intensity spans a range in distance more than twenty times wider. Equal steps in
+$g'(d) = -2/d^{3}$ has magnitude ${{gprime_mag_data:.3f}}$, so a short interval in
+intensity corresponds to an interval in distance $1/|g'| = {{stretch_data:.2f}}$
+times as wide. Further out, $|g'|$ falls sharply: at $d = {{d_far:.0f}}$ it is
+${{gprime_mag_far:.5f}}$, so the same interval in intensity spans a range in
+distance ${{stretch_far:.0f}}$ times as wide. Equal steps in
 intensity become unequal steps in distance, and the further away the source, the
 more distance a given change in loudness buys. The likelihood therefore has a
 long tail to the right.
@@ -258,8 +259,13 @@ long tail to the right.
 With $g(d) = d^{2}$ the situation reverses. There $g'(d) = 2d$ grows with
 distance, so far-away distances are *compressed* in intensity terms and the tail
 runs the other way, towards small $d$.
+:::
 
-This change in the shape of a likelihood is distinct from transforming a random variable with a density. We derive the latter operation separately because it is needed in the reparameterisation exercise.
+## Transforming a density
+
+The leaning of a likelihood is distinct from transforming a random variable that
+has a density. The reparameterisation exercise in [lesson:2.5] needs the second
+operation, so it is derived here.
 
 ::: derivation Changing variables in a density
 Let $D$ be a random variable with density $p_D$, and let $\rho = r(D)$ for a
@@ -312,12 +318,11 @@ $p_\rho(\rho)=p_d(e^\rho)e^\rho$. In contrast the likelihood in that
 parameterisation is $P(u\mid e^\rho)$, without an extra factor.
 
 [lesson:2.5] uses [eq:jacobian] to compare modes in distance and log-distance.
-:::
 
 ::: checkpoint
 - Why do Gaussian sensory noise and a truncated Gaussian prior fail to give a truncated Gaussian posterior for this observation map?
 - Which is larger here, the posterior mean or the posterior mode, and what
   feature of the distribution decides it?
 - Name the two separate difficulties this lesson identifies, and say which of
-  them Week&nbsp;1 had already met.
+  them [week:1] had already met.
 :::

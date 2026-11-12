@@ -25,7 +25,7 @@ JAX version too.
 | `week01_jax.ipynb` | The same, vectorised: posteriors over a grid of priors at once, and 10,000 homeostasis runs in parallel to get the survival curve | [Colab](https://colab.research.google.com/github/shocklab/Active-Inference-course/blob/main/notebooks/week-01/week01_jax.ipynb) |
 
 There is no `pymdp` notebook this week. The library operates on the discrete
-generative models we meet in Week&nbsp;9; there is nothing here for it to do yet.
+generative models we meet in [week:9]; there is nothing here for it to do yet.
 
 ## Problems
 
@@ -60,18 +60,18 @@ state. Find the posterior probability of overheating using the odds form.
 (a) With rows (alarm, no alarm) and columns (overheated, normal),
 
 $$
-\mathbf{A} = \begin{pmatrix} 0.90 & 0.05 \\ 0.10 & 0.95 \end{pmatrix}.
+\mathbf{A} = \begin{pmatrix} {{in_wu_hit:.2f}} & {{in_wu_false:.2f}} \\ {{in_wu_miss:.2f}} & {{in_wu_quiet:.2f}} \end{pmatrix}.
 $$
 
 The columns sum to one, since each is the distribution of the report given one
-state. The rows do not: the alarm row sums to $0.90 + 0.05$ and the no-alarm row
-to $0.10 + 0.95$, and neither has any reason to sum to one.
+state. The rows do not: the alarm row sums to ${{in_wu_hit:.2f}} + {{in_wu_false:.2f}}$ and the no-alarm row
+to ${{in_wu_miss:.2f}} + {{in_wu_quiet:.2f}}$, and neither has any reason to sum to one.
 
 (b) The numerators $P(o \mid s)P(s)$ of Bayes' theorem are
 
 $$
-0.90 \times 0.02 = {{wu_num_hot:.3f}}, \qquad
-0.05 \times (1 - 0.02) = {{wu_num_normal:.3f}} .
+{{in_wu_hit:.2f}} \times {{in_wu_prior:.2f}} = {{wu_num_hot:.3f}}, \qquad
+{{in_wu_false:.2f}} \times (1 - {{in_wu_prior:.2f}}) = {{wu_num_normal:.3f}} .
 $$
 
 Their sum is the evidence, $P(\text{alarm}) = {{wu_ev:.3f}}$, so the posterior
@@ -99,8 +99,8 @@ $$
 The evidence cancels. With only two states, $P(s_2) = 1 - P(s_1)$ and
 $P(s_2 \mid o) = 1 - P(s_1 \mid o)$, so the two ratios of state probabilities
 are odds in the sense just defined. Here the prior odds are
-$0.02/(1-0.02) = 1/{{wu_prior_odds_inv}}$ and the likelihood ratio is
-$0.90/0.05 = {{wu_lr:.0f}}$, so the posterior odds are
+${{in_wu_prior:.2f}}/(1-{{in_wu_prior:.2f}}) = 1/{{wu_prior_odds_inv}}$ and the likelihood ratio is
+${{in_wu_hit:.2f}}/{{in_wu_false:.2f}} = {{wu_lr:.0f}}$, so the posterior odds are
 ${{wu_lr:.0f}}/{{wu_prior_odds_inv}} = {{wu_post_odds:.4f}}$. To convert
 odds back to a probability, solve $\text{odds} = p/(1-p)$ for $p$, which gives
 $p = \text{odds}/(1+\text{odds})$. Keeping the fraction,
@@ -117,7 +117,7 @@ P(\text{overheated} \mid \text{two alarms}) = \frac{{{wu_two_odds:.3f}}}{1 + {{w
 $$
 
 Bayes' theorem applied directly to both alarms gives the same answer. The
-likelihoods of two alarms are $0.90^2$ and $0.05^2$, so the numerators are
+likelihoods of two alarms are ${{in_wu_hit:.2f}}^2$ and ${{in_wu_false:.2f}}^2$, so the numerators are
 ${{wu_two_num_hot:.4f}}$ and ${{wu_two_num_normal:.5f}}$, the evidence is
 ${{wu_two_ev:.5f}}$, and the posterior is
 ${{wu_two_num_hot:.4f}}/{{wu_two_ev:.5f}} = {{wu_two_post:.3f}}$.
@@ -179,19 +179,19 @@ ratio $22 : 70$ as $\rho$ varies.
 ---solution---
 Let the leopard prior be $\rho$. The other two share $1 - \rho$ in the ratio
 $22:70$, so they are $\tfrac{22}{92}(1-\rho)$ and $\tfrac{70}{92}(1-\rho)$. The
-tawny-flash row is $(0.70, 0.15, 0.02)$. The posterior odds of leopard against
+tawny-flash row is $({{in_A_tf_leo:.2f}}, {{in_A_tf_bab:.2f}}, {{in_A_tf_not:.2f}})$. The posterior odds of leopard against
 everything else are
 
 $$
-\frac{0.70\,\rho}{\left(0.15 \cdot \tfrac{22}{92} + 0.02 \cdot \tfrac{70}{92}\right)(1-\rho)}
-= \frac{0.70\,\rho}{{{tip_coef:.6f}}\,(1-\rho)} .
+\frac{{{in_A_tf_leo:.2f}}\,\rho}{\left({{in_A_tf_bab:.2f}} \cdot \tfrac{22}{92} + {{in_A_tf_not:.2f}} \cdot \tfrac{70}{92}\right)(1-\rho)}
+= \frac{{{in_A_tf_leo:.2f}}\,\rho}{{{tip_coef:.6f}}\,(1-\rho)} .
 $$
 
-Setting this to 1 gives $0.70\rho = {{tip_coef:.6f}}(1-\rho)$, so
+Setting this to 1 gives ${{in_A_tf_leo:.2f}}\rho = {{tip_coef:.6f}}(1-\rho)$, so
 $\rho = {{tip_coef:.6f}} / {{tip_denominator:.6f}} = {{tip_q:.4f}}$.
 
 So a leopard prior of about {{tip_q_pct:.1f}}% is the tipping point: the model in
-[lesson:1.3] used $q = 0.08$, which is just above it, which is why the
+[lesson:1.3] used $\rho = {{in_prior_leo:.2f}}$, which is just above it, which is why the
 posterior came out at ${{post_tawny_leopard:.3f}}$ rather than exactly a half. The observation is
 strong, but it is only just strong enough to overturn a prior of that size, and
 a slightly more sceptical hiker would have remained unconvinced by the same
@@ -212,10 +212,10 @@ state has not changed.
 which it would fail.
 ---solution---
 (a) After the shaking branch the posterior was $({{post_branch_leopard:.6f}}, {{post_branch_baboon:.6f}}, {{post_branch_nothing:.6f}})$.
-Use this as the prior and apply the tawny-flash row $(0.70, 0.15, 0.02)$:
+Use this as the prior and apply the tawny-flash row $({{in_A_tf_leo:.2f}}, {{in_A_tf_bab:.2f}}, {{in_A_tf_not:.2f}})$:
 
 $$
-(0.70 \times {{post_branch_leopard:.6f}},\ 0.15 \times {{post_branch_baboon:.6f}},\ 0.02 \times {{post_branch_nothing:.6f}})
+({{in_A_tf_leo:.2f}} \times {{post_branch_leopard:.6f}},\ {{in_A_tf_bab:.2f}} \times {{post_branch_baboon:.6f}},\ {{in_A_tf_not:.2f}} \times {{post_branch_nothing:.6f}})
 = ({{seq_num_leopard:.6f}},\ {{seq_num_baboon:.6f}},\ {{seq_num_nothing:.6f}}).
 $$
 
@@ -228,7 +228,7 @@ it does not pull far enough.
 
 (b) Processing the flash first gives posterior
 $({{post_tawny_leopard:.6f}}, {{post_tawny_baboon:.6f}}, {{post_tawny_nothing:.6f}})$, then applying the branch row
-$(0.25, 0.75, 0.08)$:
+$({{in_A_br_leo:.2f}}, {{in_A_br_bab:.2f}}, {{in_A_br_not:.2f}})$:
 
 $$
 ({{alt_num_leopard:.6f}},\ {{alt_num_baboon:.6f}},\ {{alt_num_nothing:.6f}}), \quad \text{sum } {{alt_ev:.6f}},
@@ -244,7 +244,7 @@ other than through the state. A concrete case: you shout after seeing the branch
 move. Whatever is in the scrub reacts to the shout, so the second observation
 depends on the first directly, not only through what the animal is. Sequential
 active inference agents create exactly this kind of dependence on purpose, which
-is why Week&nbsp;9 has to be careful about the difference between the time index
+is why [week:9] has to be careful about the difference between the time index
 on an observation and the time index on a belief.
 :::
 
@@ -270,7 +270,7 @@ exactly to the extent that different states disagree about what it will report.
 
 ::: exercise Posterior entropy
 Use the leopard, baboon and nothing model of [lesson:1.3], with prior
-$(0.08, 0.22, 0.70)$.
+$({{in_prior_leo:.2f}}, {{in_prior_bab:.2f}}, {{in_prior_not:.2f}})$.
 
 (a) Compute the entropy of the prior, and the entropy of the posterior after
 each of the three observations. Which observations increase the entropy of the
@@ -290,7 +290,7 @@ does not contradict it.
 (a) The prior entropy is
 
 $$
-\mathrm{H}[P(s)] = -(0.08 \ln 0.08 + 0.22 \ln 0.22 + 0.70 \ln 0.70) = {{pe_prior:.5f}} \text{ nats}.
+\mathrm{H}[P(s)] = -({{in_prior_leo:.2f}} \ln {{in_prior_leo:.2f}} + {{in_prior_bab:.2f}} \ln {{in_prior_bab:.2f}} + {{in_prior_not:.2f}} \ln {{in_prior_not:.2f}}) = {{pe_prior:.5f}} \text{ nats}.
 $$
 
 For comparison, the largest entropy on three states is
@@ -469,7 +469,7 @@ ${{mi_Hcol_leopard:.4f}}$ (leopard), ${{mi_Hcol_baboon:.4f}}$ (baboon) and
 ${{mi_Hcol_nothing:.4f}}$ (nothing). Weighting by the prior,
 
 $$
-0.08 \times {{mi_Hcol_leopard:.4f}} + 0.22 \times {{mi_Hcol_baboon:.4f}} + 0.70 \times {{mi_Hcol_nothing:.4f}} = {{mi_Hcond:.4f}},
+{{in_prior_leo:.2f}} \times {{mi_Hcol_leopard:.4f}} + {{in_prior_bab:.2f}} \times {{mi_Hcol_baboon:.4f}} + {{in_prior_not:.2f}} \times {{mi_Hcol_nothing:.4f}} = {{mi_Hcond:.4f}},
 $$
 
 so $I(s;o) = {{mi_H_o:.4f}} - {{mi_Hcond:.4f}} = {{mi_obs_side:.4f}}$ nats, the
@@ -492,9 +492,9 @@ more than the observation itself varies.
 
 | $\alpha$ | $I(s;o)$, nats | $(1-\alpha)\,I_0$, nats | $I(s;o)/I_0$ |
 |---|---|---|---|
-| 0.25 | {{mi_alpha_25:.4f}} | {{mi_line_25:.4f}} | {{mi_frac_25:.3f}} |
-| 0.5 | {{mi_alpha_50:.4f}} | {{mi_line_50:.4f}} | {{mi_frac_50:.3f}} |
-| 0.75 | {{mi_alpha_75:.4f}} | {{mi_line_75:.4f}} | {{mi_frac_75:.3f}} |
+| {{in_alpha_25:.2f}} | {{mi_alpha_25:.4f}} | {{mi_line_25:.4f}} | {{mi_frac_25:.3f}} |
+| {{in_alpha_50:.1f}} | {{mi_alpha_50:.4f}} | {{mi_line_50:.4f}} | {{mi_frac_50:.3f}} |
+| {{in_alpha_75:.2f}} | {{mi_alpha_75:.4f}} | {{mi_line_75:.4f}} | {{mi_frac_75:.3f}} |
 
 with $I_0 = {{mi_leopard_model:.4f}}$. For this model the information falls
 faster than the line: mixed halfway towards uniform, the channel keeps
@@ -587,31 +587,31 @@ KL divergence, not this average, and is not covered by the result.
 
 ::: exercise Explaining away with three causes
 Extend the noisy-OR example of [lesson:1.4] to three independent causes, each
-with prior $0.1$ and each firing the observation with probability $0.9$, keeping
-the leak at $0.01$. Compute $P(s_1 = 1 \mid o = 1)$ and compare it with the
+with prior ${{in_noisy_prior:.1f}}$ and each firing the observation with probability ${{in_noisy_w:.1f}}$, keeping
+the leak at ${{in_noisy_leak:.2f}}$. Compute $P(s_1 = 1 \mid o = 1)$ and compare it with the
 two-cause answer of ${{noisy_marg_gust:.3f}}$. Explain the direction of the change.
 ---solution---
 There are eight joint states. Write $k$ for the number of causes present. The
 likelihood depends only on $k$:
 
 $$
-P(o=1 \mid k) = 1 - (0.1)^k (0.99),
+P(o=1 \mid k) = 1 - ({{in_noisy_miss:.1f}})^k ({{in_noisy_noleak:.2f}}),
 $$
 
 giving ${{noisy_lik_k0:.2f}}, {{noisy_lik_k1:.3f}}, {{noisy_lik_k2:.4f}}, {{noisy_lik_k3:.5f}}$ for $k = 0,1,2,3$. The prior for a state
-with $k$ causes present is $0.1^k \, 0.9^{3-k}$, and there are $\binom{3}{k}$
+with $k$ causes present is ${{in_noisy_prior:.1f}}^k \, {{in_noisy_prior_c:.1f}}^{3-k}$, and there are $\binom{3}{k}$
 such states. So
 
 $$
-P(o=1) = \sum_{k=0}^{3} \binom{3}{k} 0.1^k 0.9^{3-k} \left[1 - 0.99 \times 0.1^k\right]
+P(o=1) = \sum_{k=0}^{3} \binom{3}{k} {{in_noisy_prior:.1f}}^k {{in_noisy_prior_c:.1f}}^{3-k} \left[1 - {{in_noisy_noleak:.2f}} \times {{in_noisy_miss:.1f}}^k\right]
 = {{noisy3_ev:.5f}} .
 $$
 
 For the marginal, sum the unnormalised mass over the four states with $s_1 = 1$:
 
 $$
-P(s_1=1, o=1) = 0.1 \sum_{k'=0}^{2} \binom{2}{k'} 0.1^{k'} 0.9^{2-k'}
-\left[1 - 0.99 \times 0.1^{\,k'+1}\right] = {{noisy3_joint_mass:.5f}} ,
+P(s_1=1, o=1) = {{in_noisy_prior:.1f}} \sum_{k'=0}^{2} \binom{2}{k'} {{in_noisy_prior:.1f}}^{k'} {{in_noisy_prior_c:.1f}}^{2-k'}
+\left[1 - {{in_noisy_noleak:.2f}} \times {{in_noisy_miss:.1f}}^{\,k'+1}\right] = {{noisy3_joint_mass:.5f}} ,
 $$
 
 so $P(s_1 = 1 \mid o = 1) = {{noisy3_joint_mass:.5f}} / {{noisy3_ev:.5f}} = {{noisy3_marg:.4f}}$.
@@ -702,12 +702,12 @@ small gain, $\kappa = 0.01$ and $t = 10$ give $v_t/\sigma^2 = {{reg_check_ratio:
 against $t = 10$. The limit is taken at fixed $t$. For any fixed $\kappa > 0$ the factor $(1-\kappa)^{2t}$
 eventually becomes negligible, and the variance stops growing and settles at $v$.
 
-(b) From (a), $v_t \ge 0.95\,v$ exactly when $(1-\kappa)^{2t} \le 0.05$. Taking
+(b) From (a), $v_t \ge 0.95\,v$ exactly when $(1-\kappa)^{2t} \le {{in_settle_gap:.2f}}$. Taking
 logarithms, and noting that $\ln(1-\kappa) < 0$ reverses the inequality on
 division,
 
 $$
-t \ge \frac{\ln 0.05}{2\ln(1-\kappa)} = {{reg_settle_95:.2f}} ,
+t \ge \frac{\ln {{in_settle_gap:.2f}}}{2\ln(1-\kappa)} = {{reg_settle_95:.2f}} ,
 $$
 
 so the first such step is $t = {{reg_settle_step}}$: after that many steps the
@@ -736,9 +736,9 @@ using that every $x_t$ has mean zero. As $t$ grows this tends to
 $(1-\kappa)^j v$, and the correlation between the two times tends to
 $(1-\kappa)^j$. For $1 < \kappa < 2$ the base $1-\kappa$ is negative, so the
 correlation alternates in sign with the lag. Each step overcorrects and the
-displacement changes side. At lags 1, 2 and 3, a gain of $0.5$ gives correlations
+displacement changes side. At lags 1, 2 and 3, a gain of ${{in_gain_k05:.1f}}$ gives correlations
 ${{reg_corr_k05_1}}$, ${{reg_corr_k05_2}}$ and ${{reg_corr_k05_3}}$, and a gain of
-$1.5$ gives ${{reg_corr_k15_1}}$, ${{reg_corr_k15_2}}$ and ${{reg_corr_k15_3}}$.
+${{in_gain_k15:.1f}}$ gives ${{reg_corr_k15_1}}$, ${{reg_corr_k15_2}}$ and ${{reg_corr_k15_3}}$.
 Gains $\kappa$ and $2-\kappa$ give correlations of
 the same magnitude and opposite sign at odd lags, which is the difference
 between the two equally broad trajectories described in [lesson:1.1].
@@ -940,13 +940,14 @@ as independent.
 
 Everything here is freely accessible.
 
-- Parr, Pezzulo and Friston, *Active Inference: The Free Energy Principle in
-  Mind, Brain, and Behavior* (MIT Press, 2022), Chapters 1 and 2. Open access.
+- Parr, Pezzulo and Friston, [*Active Inference: The Free Energy Principle in
+  Mind, Brain, and Behavior*](https://doi.org/10.7551/mitpress/12441.001.0001)
+  (MIT Press, 2022), Chapters 1 and 2. Open access.
   Read it for the framing; we will do the algebra it skips.
-- Smith, Friston and Whyte, "A step-by-step tutorial on active inference and its
-  application to empirical data", *Journal of Mathematical Psychology* 107
-  (2022). The most practical published introduction to the discrete case, with
+- Smith, Friston and Whyte, ["A step-by-step tutorial on active inference and its
+  application to empirical data"](https://doi.org/10.1016/j.jmp.2021.102632),
+  *Journal of Mathematical Psychology* 107 (2022), 102632. The most practical published introduction to the discrete case, with
   MATLAB code.
-- Bruineberg, Dolega, Dewhurst and Baltieri, "The Emperor's New Markov Blankets",
-  *Behavioral and Brain Sciences* (2022). A careful criticism of exactly the
-  interface picture drawn in [lesson:1.2]. Read it now, and again after Week&nbsp;12.
+- Bruineberg, Dołęga, Dewhurst and Baltieri, ["The Emperor's New Markov Blankets"](https://doi.org/10.1017/S0140525X21002351),
+  *Behavioral and Brain Sciences* 45 (2022), e183. A careful criticism of exactly the
+  interface picture drawn in [lesson:1.2]. Read it now, and again after [week:12].

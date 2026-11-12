@@ -144,9 +144,20 @@ _INLINE = re.compile(r"(?<![\$\\])\$(?!\$)((?:[^\$\\\n]|\\.|\n(?!\n))+?)(?<!\\)\
 _PAREN = re.compile(r"\\\((.+?)\\\)", re.S)
 
 
+def _esc_math(s):
+    """Escape the two characters that HTML would read as markup.
+
+    Restored maths is raw text inside HTML, so `$x<y$ more prose` reached the
+    page as `<p>$x<y$ more prose</p>`: a parser reads `<y$` as the start of a
+    tag and the rest of the paragraph can vanish into it. KaTeX reads the text
+    content, where `&lt;` is `<` again, so escaping changes nothing it sees.
+    """
+    return s.replace("<", "&lt;").replace(">", "&gt;")
+
+
 def _display_html(body, label, doc):
     """Render one display equation, numbered only if it carries a label."""
-    body = body.strip()
+    body = _esc_math(body.strip())
     if label:
         doc.eqn_no += 1
         n = f"{doc.prefix}.{doc.eqn_no}" if doc.prefix else str(doc.eqn_no)
@@ -163,8 +174,8 @@ def _stash_math(text, doc):
 
     text = _DISPLAY.sub(disp, text)
     text = _BRACKET_DISPLAY.sub(lambda m: doc.put_math(_display_html(m.group(1), None, doc)), text)
-    text = _INLINE.sub(lambda m: doc.put_math("$" + m.group(1) + "$"), text)
-    text = _PAREN.sub(lambda m: doc.put_math("$" + m.group(1) + "$"), text)
+    text = _INLINE.sub(lambda m: doc.put_math("$" + _esc_math(m.group(1)) + "$"), text)
+    text = _PAREN.sub(lambda m: doc.put_math("$" + _esc_math(m.group(1)) + "$"), text)
     return text
 
 

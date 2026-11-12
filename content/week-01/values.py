@@ -424,6 +424,7 @@ for _a, _tag in ((0.25, "25"), (0.5, "50"), (0.75, "75")):
     V[f"mi_line_{_tag}"] = (1 - _a) * _mi
     V[f"mi_frac_{_tag}"] = V[f"mi_alpha_{_tag}"] / _mi
     V[f"mi_frac_{_tag}_pct"] = 100 * V[f"mi_frac_{_tag}"]
+    V[f"in_alpha_{_tag}"] = _a                               # an input, restated in a table
     assert V[f"mi_alpha_{_tag}"] <= V[f"mi_line_{_tag}"]   # the convexity bound
 
 # The regulated walk, kappa > 0, at the lesson's settings.
@@ -432,6 +433,7 @@ V["reg_settle_95"] = log(0.05) / (2 * log(1 - KAPPA))      # steps to 95% of v
 V["reg_settle_step"] = int(-(-V["reg_settle_95"] // 1))    # first whole step past it
 V["reg_rho1"] = 1 - KAPPA
 for _kk, _tg in ((0.5, "k05"), (1.5, "k15")):
+    V[f"in_gain_{_tg}"] = _kk                                # Lesson 1's illustrative gains
     for _lag in (1, 2, 3):
         V[f"reg_corr_{_tg}_{_lag}"] = (1 - _kk) ** _lag
 V["reg_check_ratio"] = (1 - (1 - 0.01) ** 20) / (0.01 * (2 - 0.01))   # v_t/sigma^2 at kappa=0.01, t=10
@@ -484,6 +486,83 @@ V["impl_sd_unc_pct"] = 100 / (2 * (IMPL_SEEDS - 1)) ** 0.5   # rough relative er
 V["impl_obs_over_naive"] = V["impl_var_relsd_pct"] / V["impl_naive_relsd_pct"]
 V["impl_obs_over_pred"] = V["impl_var_relsd_pct"] / V["impl_pred_relsd_pct"]
 V["impl_var_se_pct"] = V["impl_var_relsd_pct"] / IMPL_SEEDS ** 0.5   # of the 20-seed mean
+
+# ── the chain prior is stationary (Lesson 5) ─────────────────────────────
+# T (0.40, 0.60)^T = (0.40, 0.60)^T, so every state in the chain has that
+# marginal and the evidence does not depend on the chain's length.
+_Tp = [sum(_ct[i][j] * _cp[j] for j in range(2)) for i in range(2)]
+assert _Tp == _cp
+V["chain_stat_0"], V["chain_stat_1"] = float(_Tp[0]), float(_Tp[1])
+assert sum(_cp[i] * _cl[i] for i in range(2)) == _ce   # evidence at n = 3 equals the one-state value
+
+# ── every symmetric product is worse (Lesson 4) ──────────────────────────
+# Along the diagonal q1 = q2 = q, the reverse divergence of q x q from the
+# noisy-OR posterior is f(q) = 2[q ln q + (1-q) ln(1-q)] - sum_ab Q_ab ln P_ab.
+# f''(q) = 2/[q(1-q)] - 2 ln(P00 P11 / (P01 P10)), positive for every q here
+# because the log ratio is negative, so f has one minimum. Find it by bisection
+# on f'(q).
+_l00, _l01, _l10, _l11 = (log(V[f"noisy_post_{k}"]) for k in ("00", "01", "10", "11"))
+V["noisy_diag_logratio"] = _l00 + _l11 - _l01 - _l10
+assert V["noisy_diag_logratio"] < 0
+
+
+def _diag_f(q):
+    return (2 * (q * log(q) + (1 - q) * log(1 - q))
+            - ((1 - q) ** 2 * _l00 + q * (1 - q) * (_l01 + _l10) + q * q * _l11))
+
+
+def _diag_fp(q):
+    return (2 * log(q / (1 - q))
+            - (-2 * (1 - q) * _l00 + (1 - 2 * q) * (_l01 + _l10) + 2 * q * _l11))
+
+
+_lo, _hi = 1e-9, 1 - 1e-9
+for _ in range(200):
+    _mid = 0.5 * (_lo + _hi)
+    _lo, _hi = (_mid, _hi) if _diag_fp(_mid) < 0 else (_lo, _mid)
+V["noisy_diag_q"] = 0.5 * (_lo + _hi)
+V["noisy_diag_kl"] = _diag_f(V["noisy_diag_q"])
+assert abs(_diag_f(V["noisy_marg_gust"]) - V["noisy_gap_reverse_symmetric"]) < 1e-12
+assert V["noisy_diag_kl"] > V["noisy_gap_reverse"]
+# the smallest value f'' takes on (0, 1), at q = 1/2
+V["noisy_diag_fpp_min"] = 8 - 2 * V["noisy_diag_logratio"]
+
+# ── inputs restated in the prose ─────────────────────────────────────────
+# A lesson states each chosen input once, in a sentence that check_numbers.py
+# admits by its exact words. Every later restatement of that input cites it
+# from here, so changing an input changes every place that repeats it, and a
+# typed digit string that matches an input is never admitted twice.
+for _o, _on in enumerate(("tf", "br", "qu")):            # Lesson 3's likelihood
+    for _s, _sn in enumerate(("leo", "bab", "not")):
+        V[f"in_A_{_on}_{_sn}"] = A[_o][_s]
+for _s, _sn in enumerate(("leo", "bab", "not")):         # the two priors of Lesson 3
+    V[f"in_prior_{_sn}"] = PRIOR[_s]
+    V[f"in_nervous_{_sn}"] = PRIOR_NERVOUS[_s]
+V["in_amb_alpha"] = 0.3                                   # Lesson 3's worked ambiguity
+V["in_amb_keep"] = 1 - V["in_amb_alpha"]
+V["in_peak_hi"], V["in_peak_lo"] = P_PEAKED[0], P_PEAKED[1]
+# Lesson 2's blanket example: sensor copy, internal copy, and the bypass
+V["in_bl_sensor"], V["in_bl_mu"], V["in_bl_bypass"] = 0.9, 0.8, 0.3
+V["in_bl_keep"] = 1 - V["in_bl_bypass"]
+assert V["blanket_direct"] == V["in_bl_bypass"] + V["in_bl_keep"] * V["in_bl_mu"]
+assert V["blanket_other"] == V["in_bl_keep"] * V["in_bl_mu"]
+# Lesson 4's noisy-OR, and the complements its exercise writes out
+V["in_noisy_prior"], V["in_noisy_w"], V["in_noisy_leak"] = P_CAUSE, STRENGTH, LEAK
+V["in_noisy_prior_c"] = 1 - P_CAUSE
+V["in_noisy_miss"] = 1 - STRENGTH
+V["in_noisy_noleak"] = 1 - LEAK
+# Lesson 5's chain: P(s_1), T[to][from] and the sensor P(o=1 | s_3)
+for _i in range(2):
+    V[f"in_chain_p{_i}"] = float(_cp[_i])
+    V[f"in_chain_l{_i}"] = float(_cl[_i])
+    for _j in range(2):
+        V[f"in_chain_t{_j}{_i}"] = float(_ct[_j][_i])
+# the warm-up alarm exercise and the complements of its sensor
+V["in_wu_prior"], V["in_wu_hit"], V["in_wu_false"] = WU_PRIOR, WU_HIT, WU_FALSE
+V["in_wu_miss"] = 1 - WU_HIT
+V["in_wu_quiet"] = 1 - WU_FALSE
+V["in_settle"] = 0.95                                     # the settling threshold
+V["in_settle_gap"] = 0.05                                 # 1 - 0.95, as reg_settle_95 uses it
 
 VALUES = V
 

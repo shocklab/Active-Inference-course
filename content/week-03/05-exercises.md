@@ -303,7 +303,7 @@ sign comes from the full posterior calculation, which gives the power overestima
 when the world equals Week&nbsp;2's model and underestimated in the louder world.
 :::
 
-::: exercise Learning with momentum &dagger;
+::: exercise Second-order parameter dynamics &dagger;
 [Buckley et al. (2017)](https://doi.org/10.1016/j.jmp.2017.09.004), section 8, write
 the dynamics of a parameter in second-order form: the parameter's acceleration, rather
 than its velocity, is proportional to the gradient. Apply this to the prior location in
@@ -339,7 +339,7 @@ $\tfrac12\big(-b \pm \sqrt{b^2 - 4\omega_0^2}\big)$. For $b < 2\omega_0$ the roo
 complex and $x$ oscillates with decaying amplitude; for $b > 2\omega_0$ both are real and
 negative and the slower one, $\tfrac12\big(-b + \sqrt{b^2 - 4\omega_0^2}\big)$, approaches
 zero as $b$ grows, so heavy friction is slow. The fastest return without overshoot is at
-$b = 2\omega_0$, critical damping, where $x(t) = x(0)(1 + \omega_0 t)e^{-\omega_0 t}$.
+$b = 2\omega_0$, critical damping, where $x(t) = x(0)(1 + \omega_0 t)\exp(-\omega_0 t)$.
 :::
 
 ::: exercise Precision as the learned quantity in the circuit

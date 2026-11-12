@@ -24,8 +24,6 @@ Read the report; do not just check the exit code.
 """
 import json
 import os
-import json
-import os
 import re
 import sys
 
@@ -39,7 +37,10 @@ MATH = re.compile(r"\$\$(.+?)\$\$|(?<!\$)\$([^\$\n]+?)\$", re.S)
 NUMBER_TOKEN = re.compile(r"\{\{[A-Za-z_][A-Za-z0-9_]*(?::[^}]+)?\}\}")
 MACRO = re.compile(r"\\([a-zA-Z]+)")
 LETTER = re.compile(r"(?<![\\a-zA-Z])([A-Za-z])(?![a-zA-Z])")
-BOLD = re.compile(r"\*\*([^*\n]{3,45}?)\*\*")
+# A bold span may wrap onto a second source line; it may not cross a blank line.
+# Excluding every newline missed a definition the moment a line break fell inside
+# the bold, which in hard-wrapped prose is often.
+BOLD = re.compile(r"\*\*((?:[^*\n]|\n(?![ \t]*\n)){3,45}?)\*\*")
 
 # Cues that a definition is being given. Deliberately NARROW.
 #
@@ -71,6 +72,7 @@ EXEMPT = {
     "E",   # expectation, standard for this audience and listed in notation.md
     "\\mathrm{d}",  # the differential in an integral, not a symbol
     "\\langle", "\\rangle", "\\lVert", "\\rVert", "\\colon", "\\operatorname",
+    "\\mathbb{E}", "\\mathbb{R}",   # expectation and the reals, as decorated keys
     "e", "i", "j", "k", "n", "m", "c", "x", "y", "z",   # generic dummies and indices
 }
 
@@ -116,7 +118,17 @@ WEEK_TAG = re.compile(r"Week&nbsp;(\d+)|Week (\d+)")
 # and $D_{\mathrm{KL}}$ all read as "D" and report collisions between three
 # things a reader would never confuse.
 DECOR = r"mathbf|mathcal|mathbb|mathrm|boldsymbol|tilde|bar|hat|dot|vec"
-DECORATED = re.compile(r"\\(" + DECOR + r")\s*\{\s*([A-Za-z])\s*\}")
+# The decorated thing may be braced or not, and a letter or a Greek macro:
+# \hat{d}, \hat d, \hat\ell and \boldsymbol{\pi} are four spellings this
+# course uses. Only the first was read, so a row for $\hat d$ reserved a bare d.
+DECORATED = re.compile(r"\\(" + DECOR + r")(?![A-Za-z])\s*"
+                       r"(?:\{\s*(\\[A-Za-z]+|[A-Za-z])\s*\}|(\\[A-Za-z]+)|([A-Za-z])(?![A-Za-z]))")
+
+
+def _decorated_key(m):
+    return "\\" + m.group(1) + "{" + (m.group(2) or m.group(3) or m.group(4)) + "}"
+
+
 PLAIN_MACRO = re.compile(r"\\[a-zA-Z]+")
 BARE_LETTER = re.compile(r"(?<![A-Za-z])([A-Za-z])(?![A-Za-z])")
 
@@ -126,14 +138,14 @@ GENERIC_LETTERS = set("ijklmnpqre")
 
 
 def _symbol_keys(src):
-    """Every symbol a stretch of maths uses, decoration included.
+    r"""Every symbol a stretch of maths uses, decoration included.
 
     Returns keys like `\mathbf{A}`, `\alpha`, `g`. Decorated forms are pulled
     out first and removed, so the letter inside one is not also counted bare.
     """
     keys, rest = set(), src
     for m in DECORATED.finditer(src):
-        keys.add("\\" + m.group(1) + "{" + m.group(2) + "}")
+        keys.add(_decorated_key(m))
     rest = DECORATED.sub(" ", rest)
     keys |= {t for t in PLAIN_MACRO.findall(rest)}
     rest = PLAIN_MACRO.sub(" ", rest)
@@ -147,22 +159,42 @@ ROW_PREFIX = re.compile(r"^[\s$\-+]*(?:\\(?:ln|log|exp|left)\b\s*)*")
 
 
 def _row_symbols(sym):
-    """The one symbol a notation.md row defines: its head, not its arguments.
+    r"""The symbols a notation.md row defines: each head, not its arguments.
 
     `$Q(s)$` defines Q and merely mentions s; `$P(o \mid s)$` defines the letter
     P. Reading every letter in the row made each argument look like a
     reservation, which turned the collision scan into noise the moment it
     learned to see bare letters at all.
+
+    A head cell can name several symbols: `$n,\ k$` in one span, or
+    `$q(s)$, $Q(s)$` in two. Only the first used to count, so k and Q were never
+    reserved. Split on commas outside brackets and take the head of each piece.
     """
-    core = ROW_PREFIX.sub("", sym.strip())
-    m = DECORATED.match(core)
-    if m:
-        head = "\\" + m.group(1) + "{" + m.group(2) + "}"
-        return set() if head in EXEMPT else {head}
-    m = re.match(r"\\[a-zA-Z]+|[A-Za-z]", core)
-    if not m:
-        return set()
-    return set() if m.group(0) in EXEMPT else {m.group(0)}
+    heads = set()
+    for span in re.findall(r"\$([^$]+)\$", sym) or [sym]:
+        piece, depth, pieces = "", 0, []
+        for ch in span:
+            depth += ch in "([{"
+            depth -= ch in ")]}"
+            if ch == "," and depth == 0:
+                pieces.append(piece)
+                piece = ""
+            else:
+                piece += ch
+        pieces.append(piece)
+        for p in pieces:
+            core = ROW_PREFIX.sub("", re.sub(r"^(?:\\[ ,;!]|\s)+", "", p.strip()))
+            m = DECORATED.match(core)
+            if m:
+                head = _decorated_key(m)
+            else:
+                m = re.match(r"\\[a-zA-Z]+|[A-Za-z]", core)
+                if not m:
+                    continue
+                head = m.group(0)
+            if head not in EXEMPT:
+                heads.add(head)
+    return heads
 
 
 def check_collisions():
@@ -245,10 +277,18 @@ def check_collisions():
                 for mm in MATH.finditer(body):
                     used |= _symbol_keys(mm.group(1) or mm.group(2))
         for tok in sorted(used):
-            for home, desc in owner.get(tok, []):
-                if home and home > int(wk["n"]):
-                    out.append(f"{tok} is used in Week {wk['n']} but notation.md files it "
-                               f"under Week {home}: \"{desc[:70]}...\"")
+            # A symbol with several rows is reserved from the earliest of them,
+            # its first legitimate use, as a row's own home is the earliest week
+            # it mentions. Once every head of a row counts, $\Sigma_u$ (Week 1)
+            # and $m,\ \Sigma$ (Week 2) both own \Sigma, and treating the later
+            # row as binding reported Week 1's own symbol as spent early.
+            homes = [(h, d) for h, d in owner.get(tok, []) if h]
+            if not homes:
+                continue
+            home, desc = min(homes, key=lambda hd: hd[0])
+            if home > int(wk["n"]):
+                out.append(f"{tok} is used in Week {wk['n']} but notation.md files it "
+                           f"under Week {home}: \"{desc[:70]}...\"")
     return out
 
 
@@ -260,7 +300,7 @@ def main():
         body = NUMBER_TOKEN.sub(" ", body)
 
         for m in BOLD.finditer(body):
-            raw_term = m.group(1).strip()
+            raw_term = re.sub(r"\s+", " ", m.group(1)).strip()
             # A run-in heading ("**Surprise.** From ...") is a label, not a
             # definition. Test before stripping, or the guard never fires.
             if raw_term.endswith((".", ":")) or len(raw_term.split()) > 5:

@@ -79,7 +79,11 @@ $$
 $$
 
 So $\partial N/\partial\Sigma_p = \tfrac12\,\partial^2 N/\partial x^2$, the heat
-equation with the variance in the role of time. Integrate over the half-line, and use
+equation with the variance in the role of time. Differentiating $Z_p$ under the
+integral sign is allowed here as it was for the location: for $\Sigma_p$ in a closed
+interval $[a, b]$ with $a > 0$, the first display bounds $|\partial N/\partial\Sigma_p|$
+by $\big[(x - d_p)^2/(2a^2) + 1/(2a)\big](2\pi a)^{-1/2}e^{-(x - d_p)^2/(2b)}$, which is
+integrable on the half-line. Integrate over the half-line, and use
 $\partial N/\partial x \to 0$ as $x \to \infty$:
 
 $$
@@ -150,7 +154,9 @@ a finite-difference derivative of [eq:ell] at the same point.
 
 ## What each update does
 
-**The prior location** moves opposite to the prior error, which means towards the
+### The prior location
+
+The prior location moves opposite to the prior error, which means towards the
 inferred state: if the state was inferred below the prior location, $\varepsilon_p > 0$
 and $d_p$ falls. The term $-\zeta_p$ adds a steady push downwards that does not
 depend on the trial. The drift of [lesson:3.1], the update averaged over the trials
@@ -183,7 +189,9 @@ the prior the animal holds. "The mean chases the inferred state" is the informal
 version, and the $\zeta_p$ term is what makes it the prior's actual mean rather
 than its location parameter.
 
-**The prior variance** grows when [eq:grad-vp] is positive. Multiplying it by
+### The prior variance
+
+The prior variance grows when [eq:grad-vp] is positive. Multiplying it by
 $2\Sigma_p^2$, that is when
 
 $$
@@ -202,7 +210,9 @@ $$
 and an exercise shows that the right-hand side is the truncated prior's own second
 moment about $d_p$, ${{trunc_m2:.6f}}$ at Week&nbsp;2's values.
 
-**The sensory variance** grows when $\varepsilon_u^2 > \Pi_u$, that is when the
+### The sensory variance
+
+The sensory variance grows when $\varepsilon_u^2 > \Pi_u$, that is when the
 squared residual $(u - g(d))^2$ exceeds $\Sigma_u$, and its drift vanishes where
 
 $$
@@ -334,9 +344,12 @@ vanishes at the same value by [eq:grad-logvar] and which can never cross zero. I
 keeps the variance positive; it does not keep the steps small, since
 [eq:grad-logvar] still grows without bound as $\Sigma_u \to 0$ at a fixed nonzero
 residual. The simulations of this week use it for both variances. The other is to forbid small
-variances outright: Bogacz notes, in his section on learning model parameters, that Friston (2005) imposes a minimum
-value of one on the estimated variance, and in a footnote calls the constraint a
-hyperprior. [lesson:3.4] derives a smooth version.
+variances outright: Bogacz notes, in his section on learning model parameters, that
+[Friston (2005)](https://doi.org/10.1098/rstb.2005.1622) imposes a minimum value of one
+on the estimated variance, and in a footnote calls the constraint a hyperprior. A fixed
+floor depends on the units of the observation: measuring $u$ in units $a$ times smaller
+gives $u' = a u$ and $\Sigma_u' = a^2\Sigma_u$, so the same floor of one excludes a
+different set of variances in each unit. [lesson:3.4] derives a smooth version.
 
 Neither repair addresses why the variance is heading towards zero, which is
 sometimes the rule's fault rather than the step's. [lesson:3.4] shows when.

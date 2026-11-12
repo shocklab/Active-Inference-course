@@ -40,16 +40,35 @@
     return s * y;
   }
 
+  /* exp(z^2) erfc(z) for z >= 0: the Numerical Recipes Chebyshev fit with its
+   * exp(-z^2) factor left out, so nothing underflows. */
+  function erfcxNR(z) {
+    var t = 1.0 / (1.0 + 0.5 * z);
+    return t * Math.exp(-1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418
+                   + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587
+                   + t * (-0.82215223 + t * 0.17087277)))))))));
+  }
+
+  /* N(0; dp, vp) / Z_p. For dp < 0 the denominator is a small erfc that the
+   * first formula would compute by cancellation, so both sides' exp(-z^2) is
+   * cancelled by hand. */
   function truncRatio(dp, vp) {
+    if (dp < 0.0) return 2.0 / (Math.sqrt(2.0 * Math.PI * vp) * erfcxNR(-dp / Math.sqrt(2.0 * vp)));
     var dens = Math.exp(-dp * dp / (2.0 * vp)) / Math.sqrt(2.0 * Math.PI * vp);
     return dens / (0.5 * (1.0 + erfAS(dp / Math.sqrt(2.0 * vp))));
+  }
+
+  /* The inner loop's start: dp when it is a distance, otherwise the mean of
+   * the truncated prior, which is positive for every real dp. */
+  function startPoint(dp, vp) {
+    return dp > 0.0 ? dp : dp + vp * truncRatio(dp, vp);
   }
 
   /* Week 2's ascent, capped at the reciprocal Gauss-Newton curvature and never
    * removing more than half the current distance. Returns the state, the
    * number of steps, and whether the stopping rule was met within KMAX. */
   function settle(u, dp, vp, th, vu, path) {
-    var d = dp, k = 0, ok = false;
+    var d = startPoint(dp, vp), k = 0, ok = false;
     while (k < KMAX) {
       var gp = -2.0 * th / (d * d * d);
       var grad = (dp - d) / vp + (u - th / (d * d)) / vu * gp;
@@ -73,49 +92,234 @@
     return [d, th / (d * d) + Math.sqrt(vu) * normal(r)];
   }
 
-  /* Posterior expectation of the squared sensory residual. When the window of
-   * ten likelihood widths either side of u lies at intensities the prior can
-   * reach, by quadrature over it in residual coordinates rho = u - y, with
-   * y = theta / d^2 and the Jacobian y^(-3/2); otherwise (a quiet or negative
-   * u) over log distance. */
-  function postR2(u, dp, vp, th, vu) {
-    var sd = Math.sqrt(vu);
-    var lw = new Array(NY), r2 = new Array(NY), mx = -Infinity, i, h, d, res;
-    var far = dp + 12.0 * Math.sqrt(vp);
-    if (u - 10.0 * sd > th / (far * far)) {
-      h = 20.0 * sd / (NY - 1);
-      for (i = 0; i < NY; i++) {
-        var rho = -10.0 * sd + i * h;
-        var y = u - rho;
-        d = Math.sqrt(th / y);
-        lw[i] = -rho * rho / (2.0 * vu) - (d - dp) * (d - dp) / (2.0 * vp) - 1.5 * Math.log(y);
-        r2[i] = rho * rho;
-        if (lw[i] > mx) mx = lw[i];
-      }
+  /* The posterior average of a trial, as values.py computes it: in log
+   * distance, shifted for u > 0 to t = ln d - ln d_u (d_u = sqrt(theta/u)) so
+   * that the residual is -u expm1(-2t) and a very near source loses no digits.
+   * Every stationary point lies between the bounds of postBounds and is found
+   * there as a root of a polynomial (postStationary). With two peaks the line
+   * is split at the valley between them, each piece is narrowed by height,
+   * which is safe because it holds one peak, and integrated with the node
+   * count doubled until the result stops changing. */
+  var KCUT = 50.0, MSCAN = 401, NZOOM = 40, NMAX = 64 * 800 + 1, RTOL = 1e-10, NBIS = 100;
+
+  function postPoint(u, dp, vp, th, vu, x) {
+    var d, res;
+    if (u > 0.0) {
+      d = Math.sqrt(th / u) * Math.exp(x);
+      res = -u * Math.expm1(-2.0 * x);
     } else {
-      var up = u > 0.0 ? u : 0.0;
-      var da = Math.sqrt(th / (up + 12.0 * sd));
-      var c = 2.0 * th * vp * (th / (dp * dp) + Math.abs(u)) / vu;
-      var db = dp + 12.0 * Math.sqrt(vp) + Math.sqrt(Math.sqrt(c));
-      if (da > 0.5 * db) da = 0.5 * db;
-      var sa = Math.log(da);
-      h = (Math.log(db) - sa) / (NY - 1);
-      for (i = 0; i < NY; i++) {
-        var q = sa + i * h;
-        d = Math.exp(q);
-        res = u - th / (d * d);
-        lw[i] = -res * res / (2.0 * vu) - (d - dp) * (d - dp) / (2.0 * vp) + q;
-        r2[i] = res * res;
-        if (lw[i] > mx) mx = lw[i];
+      d = Math.exp(x);
+      res = u - th / (d * d);
+    }
+    return [-res * res / (2.0 * vu) - (d - dp) * (d - dp) / (2.0 * vp) + x, d, res];
+  }
+
+  /* The log density at x minus that at x0, formed from differences computed
+   * directly, so that a large log density costs no digits. */
+  function postRel(u, dp, vp, th, vu, x, x0) {
+    var d0, d, r0, res, dr;
+    if (u > 0.0) {
+      var c = Math.sqrt(th / u);
+      d0 = c * Math.exp(x0); d = c * Math.exp(x);
+      r0 = -u * Math.expm1(-2.0 * x0); res = -u * Math.expm1(-2.0 * x);
+      dr = -u * Math.exp(-2.0 * x0) * Math.expm1(-2.0 * (x - x0));
+    } else {
+      d0 = Math.exp(x0); d = Math.exp(x);
+      r0 = u - th / (d0 * d0); res = u - th / (d * d);
+      dr = -th / (d0 * d0) * Math.expm1(-2.0 * (x - x0));
+    }
+    var dd = d0 * Math.expm1(x - x0);
+    return [-dr * (res + r0) / (2.0 * vu) - dd * ((d - dp) + (d0 - dp)) / (2.0 * vp) + (x - x0), d, res];
+  }
+
+  /* Two coordinates with every stationary point of the posterior between them;
+   * the log density rises up to the first and falls beyond the second. */
+  function postBounds(u, dp, vp, th, vu) {
+    function gh(x) {
+      var p = postPoint(u, dp, vp, th, vu, x), d = p[1], res = p[2], y = u - res;
+      return [2.0 * y * (-res) / vu - (d + Math.abs(dp)) * d / vp,
+              (d - dp) * d - vp - 2.0 * vp * y * (y + Math.abs(u)) / vu];
+    }
+    var x0, step;
+    if (u > 0.0) {
+      x0 = 0.0;
+      step = Math.min(Math.sqrt(vu) / (4.0 * u), 0.5);
+    } else {
+      x0 = 0.5 * Math.log(th / (Math.sqrt(vu) - u));
+      step = 0.5;
+    }
+    var xl = x0, k = 0;
+    while (gh(xl)[0] <= 0.0) {
+      xl = x0 - step * Math.pow(2.0, k);
+      k += 1;
+    }
+    var xr = xl;
+    if (dp > 0.0) {
+      var xh = Math.log(0.5 * dp) - (u > 0.0 ? 0.5 * Math.log(th / u) : 0.0);
+      if (xh > xr) xr = xh;
+    }
+    var x1 = xr;
+    k = 0;
+    step = Math.max(Math.abs(xr - xl), 1e-3);
+    while (gh(xr)[1] <= 0.0) {
+      xr = x1 + step * Math.pow(2.0, k);
+      k += 1;
+    }
+    return [xl, xr];
+  }
+
+  /* Every stationary point between xl and xr, for u > 0: the roots of
+   * P(s) = -(theta/u) s^6 + dp d_u s^5 + Sigma_p s^4 + K (1 - s^2), s = e^t,
+   * K = 2 Sigma_p u^2 / Sigma_u, whose sign is that of the slope of the log
+   * density. Between neighbouring roots of P', P is monotone, so its roots are
+   * found by bisection from those of its derivatives, down to the linear P^(5).
+   * There are at most three (Descartes' rule of signs). */
+  function postStationary(u, dp, vp, th, vu, xl, xr) {
+    var c = Math.sqrt(th / u), K = 2.0 * vp * u * u / vu;
+    var polys = [[-c * c, dp * c, vp, 0.0, -K, 0.0, K]], j, i;
+    for (j = 0; j < 5; j++) {
+      var q = polys[polys.length - 1], n = q.length - 1, dq = [];
+      for (i = 0; i < n; i++) dq.push(q[i] * (n - i));
+      polys.push(dq);
+    }
+    var a1 = polys[5][0], b1 = polys[5][1], roots = [];
+    if (-b1 / a1 > 0.0) {
+      var r = Math.log(-b1 / a1);
+      if (xl < r && r < xr) roots = [r];
+    }
+    for (j = 4; j >= 0; j--) {
+      var f;
+      if (j === 0) {
+        f = function (x) {
+          return -c * c * Math.exp(6.0 * x) + dp * c * Math.exp(5.0 * x) + vp * Math.exp(4.0 * x)
+                 - K * Math.expm1(2.0 * x);
+        };
+      } else {
+        f = (function (q) {
+          return function (x) {
+            var s = Math.exp(x), v = 0.0;
+            for (var m = 0; m < q.length; m++) v = v * s + q[m];
+            return v;
+          };
+        })(polys[j]);
       }
+      var pts = [xl].concat(roots, [xr]), next = [];
+      for (i = 0; i + 1 < pts.length; i++) {
+        var a = pts[i], b = pts[i + 1], fa = f(a), fb = f(b);
+        if (fa !== 0.0 && fb !== 0.0 && (fa < 0.0) !== (fb < 0.0)) {
+          for (var it = 0; it < NBIS; it++) {
+            var mid = 0.5 * (a + b), fm = f(mid);
+            if ((fm < 0.0) === (fa < 0.0)) { a = mid; fa = fm; } else { b = mid; }
+          }
+          next.push(0.5 * (a + b));
+        }
+      }
+      roots = next;
     }
-    var s0 = 0.0, s2 = 0.0;
-    for (i = 0; i < NY; i++) {
-      var w = Math.exp(lw[i] - mx) * ((i === 0 || i === NY - 1) ? 0.5 : 1.0);
-      s0 += w;
-      s2 += w * r2[i];
+    return roots;
+  }
+
+  function postScan(u, dp, vp, th, vu, xa, xb) {
+    var h = (xb - xa) / (MSCAN - 1), lw = new Array(MSCAN);
+    for (var i = 0; i < MSCAN; i++) lw[i] = postPoint(u, dp, vp, th, vu, xa + i * h)[0];
+    return lw;
+  }
+
+  function maxOf(a) {
+    var m = -Infinity;
+    for (var i = 0; i < a.length; i++) if (a[i] > m) m = a[i];
+    return m;
+  }
+
+  /* An interval holding the one peak on [xl, xr]: an open end (a bound of
+   * postBounds) moves outwards until the log density is KCUT below the highest
+   * node seen; a closed end (a valley) stays; then the interval is narrowed to
+   * the nodes within KCUT of a scan's highest, which a single peak allows. */
+  function postWindow(u, dp, vp, th, vu, xl, xr, openL, openR) {
+    var mx = maxOf(postScan(u, dp, vp, th, vu, xl, xr));
+    var s0 = xr > xl ? (xr - xl) / (MSCAN - 1) : 1e-3;
+    var xa = xl, xb = xr, k = 0, lv;
+    while (openL) {
+      lv = postPoint(u, dp, vp, th, vu, xa)[0];
+      if (lv > mx) mx = lv;
+      if (lv < mx - KCUT) break;
+      xa = xl - s0 * Math.pow(2.0, k);
+      k += 1;
     }
-    return s2 / s0;
+    k = 0;
+    while (openR) {
+      lv = postPoint(u, dp, vp, th, vu, xb)[0];
+      if (lv > mx) mx = lv;
+      if (lv < mx - KCUT) break;
+      xb = xr + s0 * Math.pow(2.0, k);
+      k += 1;
+    }
+    for (var z = 0; z < NZOOM; z++) {
+      var lw = postScan(u, dp, vp, th, vu, xa, xb), m = maxOf(lw);
+      if (!(m > -1e300)) throw new Error('postWindow: no node has a finite density');
+      var h = (xb - xa) / (MSCAN - 1), i0 = 0, i1 = MSCAN - 1;
+      while (lw[i0] < m - KCUT) i0 += 1;
+      while (lw[i1] < m - KCUT) i1 -= 1;
+      i0 = i0 > 0 ? i0 - 1 : 0;
+      i1 = i1 < MSCAN - 1 ? i1 + 1 : MSCAN - 1;
+      if (2 * (i1 - i0) > MSCAN) break;
+      var a0 = xa;
+      xa = a0 + i0 * h;
+      xb = a0 + i1 * h;
+    }
+    return [xa, xb];
+  }
+
+  function qWeight(i, n, simpson) {
+    if (i === 0 || i === n - 1) return simpson ? 1.0 / 3.0 : 0.5;
+    return simpson ? (i % 2 ? 4.0 : 2.0) / 3.0 : 1.0;
+  }
+
+  /* The trapezium rule (both ends in the tails) or Simpson's rule (an end at a
+   * valley) on n nodes, against the same rule on every other node, n doubling
+   * until the means of d and of the squared residual agree to RTOL. Returns the
+   * log mass of the piece and the mean squared residual. */
+  function postPiece(u, dp, vp, th, vu, xa, xb, simpson) {
+    var n = NY, x0 = 0.5 * (xa + xb);
+    while (true) {
+      var h = (xb - xa) / (n - 1), pts = new Array(n), mx = -Infinity, i, nh = (n + 1) / 2;
+      for (i = 0; i < n; i++) {
+        pts[i] = postRel(u, dp, vp, th, vu, xa + i * h, x0);
+        if (pts[i][0] > mx) mx = pts[i][0];
+      }
+      var s0 = 0.0, s1 = 0.0, s2 = 0.0, s3 = 0.0, s4 = 0.0, s5 = 0.0;
+      for (i = 0; i < n; i++) {
+        var e = Math.exp(pts[i][0] - mx), r2 = pts[i][2] * pts[i][2];
+        var w = e * qWeight(i, n, simpson);
+        s0 += w; s1 += w * pts[i][1]; s2 += w * r2;
+        if (i % 2 === 0) {
+          w = e * qWeight(i / 2, nh, simpson);
+          s3 += w; s4 += w * pts[i][1]; s5 += w * r2;
+        }
+      }
+      var m1 = s1 / s0, e1 = s2 / s0, m2 = s4 / s3, e2 = s5 / s3;
+      if (Math.abs(m1 - m2) <= RTOL * m1 && Math.abs(e1 - e2) <= RTOL * e1) {
+        return [postPoint(u, dp, vp, th, vu, x0)[0] + mx + Math.log(s0 * h), e1];
+      }
+      n = 2 * n - 1;
+      if (n > NMAX) throw new Error('postPiece: the quadrature did not converge');
+    }
+  }
+
+  /* Posterior expectation of the squared sensory residual (u - g(d))^2. */
+  function postR2(u, dp, vp, th, vu) {
+    var bd = postBounds(u, dp, vp, th, vu), xl = bd[0], xr = bd[1];
+    var st = u > 0.0 ? postStationary(u, dp, vp, th, vu, xl, xr) : [];
+    if (st.length !== 3) {
+      var win = postWindow(u, dp, vp, th, vu, xl, xr, true, true);
+      return postPiece(u, dp, vp, th, vu, win[0], win[1], false)[1];
+    }
+    var w1 = postWindow(u, dp, vp, th, vu, xl, st[1], true, false);
+    var w2 = postWindow(u, dp, vp, th, vu, st[1], xr, false, true);
+    var p1 = postPiece(u, dp, vp, th, vu, w1[0], w1[1], true);
+    var p2 = postPiece(u, dp, vp, th, vu, w2[0], w2[1], true);
+    var top = Math.max(p1[0], p2[0]), a = Math.exp(p1[0] - top), b = Math.exp(p2[0] - top);
+    return (a * p1[1] + b * p2[1]) / (a + b);
   }
 
   /* Trials one after another. world = [location, variance, theta, Sigma_u] of
@@ -126,7 +330,7 @@
   function run(seed, n, world, model, learn, beta, rule) {
     var r = mulberry32(seed);
     var dp = model.dp, vp = model.vp, th = model.th, vu = model.vu;
-    var hist = [], ep = [], eu = [], dh = [], us = [], before = [], truth = [], unsettled = 0;
+    var hist = [], ep = [], eu = [], dh = [], us = [], before = [], truth = [], unsettled = 0, withheld = 0;
     for (var i = 0; i < n; i++) {
       var wt = worldTrial(r, world[0], world[1], world[2], world[3]);
       var u = wt[1];
@@ -137,16 +341,19 @@
       var e1 = (dp - d) / vp;
       var e2 = (u - th / (d * d)) / vu;
       ep.push(e1); eu.push(e2); dh.push(d); us.push(u); truth.push(wt[0]);
-      if (!s[2]) {
-        /* inference unfinished: the parameters are left as they were */
+      if (learn === 'vu' && rule === 'post') {
+        /* the posterior average does not depend on where the climb stopped */
+        vu = vu * Math.exp(beta * 0.5 * (postR2(u, dp, vp, th, vu) / vu - 1.0));
+      } else if (!s[2]) {
+        withheld += 1;   /* inference unfinished: the parameters are left as they were */
       } else if (learn === 'dp') {
         dp = dp + beta * (-e1 - truncRatio(dp, vp));
       } else if (learn === 'th') {
-        th = th + beta * e2 / (d * d);
+        var thNew = th + beta * e2 / (d * d);
+        if (thNew > 0.0) th = thNew; else withheld += 1;   /* a source power stays positive */
       } else if (learn === 'vu') {
         var res = u - th / (d * d);
-        var r2 = rule === 'post' ? postR2(u, dp, vp, th, vu) : res * res;
-        vu = vu * Math.exp(beta * 0.5 * (r2 / vu - 1.0));
+        vu = vu * Math.exp(beta * 0.5 * (res * res / vu - 1.0));
       } else if (learn === 'vp') {
         var dev = d - dp;
         vp = vp * Math.exp(beta * (0.5 * (dev * dev / vp - 1.0)
@@ -155,15 +362,19 @@
       hist.push({ dp: dp, vp: vp, th: th, vu: vu }[learn]);
     }
     return { hist: hist, ep: ep, eu: eu, dh: dh, us: us, before: before, truth: truth,
-             unsettled: unsettled };
+             unsettled: unsettled, withheld: withheld };
   }
 
-  /* A readout row that appears only when some trial ran out of steps before
-   * meeting the stopping rule; the lesson's numbers assume none did. */
+  /* Readout rows that appear only when some trial ran out of steps before
+   * meeting the stopping rule, or some update was not applied; the lesson's
+   * numbers assume neither happened. The two counts differ: the
+   * posterior-averaged rule still updates on an unsettled trial, and an update
+   * that would make the source power non-positive is refused. */
   function unsettledRows(rows, runs) {
-    var n = 0;
-    runs.forEach(function (r) { n += r.unsettled; });
-    if (n > 0) rows.push(['trials not settled in ' + KMAX + ' steps (no update)', String(n)]);
+    var n = 0, w = 0;
+    runs.forEach(function (r) { n += r.unsettled; w += r.withheld; });
+    if (n > 0) rows.push(['trials not settled in ' + KMAX + ' steps', String(n)]);
+    if (w > 0) rows.push(['updates withheld', String(w)]);
     return rows;
   }
 
@@ -278,7 +489,7 @@
 
     function pick() {
       var i = Math.round(sTrial.get()) - 1, res = st.res, b = res.before[i];
-      var path = [b.dp];
+      var path = [startPoint(b.dp, b.vp)];
       var s = settle(res.us[i], b.dp, b.vp, b.th, b.vu, path);
       st.i = i; st.path = path; st.steps = s[1];
       out.show(unsettledRows([
@@ -286,7 +497,7 @@
         ['settled at', s[0].toFixed(4)],
         ['true distance', res.truth[i].toFixed(4)],
         ['prior location after', res.hist[i].toFixed(4)],
-        ['mean over trials 1001–2000', meanFrom(res.hist, NTRIALS / 2).toFixed(4)],
+        ['mean over trials 1001 to 2000', meanFrom(res.hist, NTRIALS / 2).toFixed(4)],
         ['final', res.hist[NTRIALS - 1].toFixed(4)]
       ], [res]));
       plot.render();
@@ -394,7 +605,7 @@
       var last = NTRIALS - WIN;
       out.show(unsettledRows([
         ['final power', res.hist[NTRIALS - 1].toFixed(4)],
-        ['mean over trials 1001–2000', meanFrom(res.hist, NTRIALS / 2).toFixed(4)],
+        ['mean over trials 1001 to 2000', meanFrom(res.hist, NTRIALS / 2).toFixed(4)],
         ['last ' + WIN + ' trials: prior error', meanFrom(res.ep, last).toFixed(4)],
         ['sensory error', meanFrom(res.eu, last).toFixed(4)],
         ['learning signal', meanFrom(sig, last).toFixed(4)]
@@ -479,9 +690,9 @@
       st = { pt: pt.hist, po: po.hist, vw: vw };
       out.show(unsettledRows([
         ['point rule: final', pt.hist[NTRIALS - 1].toFixed(4)],
-        ['mean over trials 1001–2000', mpt.toFixed(4)],
+        ['mean over trials 1001 to 2000', mpt.toFixed(4)],
         ['posterior-averaged: final', po.hist[NTRIALS - 1].toFixed(4)],
-        ['mean over trials 1001–2000', mpo.toFixed(4)],
+        ['mean over trials 1001 to 2000', mpo.toFixed(4)],
         ['ear’s share: at the start', earShare(WEEK2.vu).toFixed(3)],
         ['at the truth', earShare(vw).toFixed(3)],
         ['point rule', earShare(mpt).toFixed(3)],
@@ -513,8 +724,8 @@
       body, out,
       A.note('Both rules see the same ' + NTRIALS + ' trials and take log-variance steps with &beta; = '
         + BETA + '. The point rule squares the residual left at the settled state; the posterior-averaged '
-        + 'rule replaces it by its average over the posterior, computed on each trial by quadrature on '
-        + NY + ' points. The ear&rsquo;s share is the ear&rsquo;s part of the curvature at the prior '
+        + 'rule replaces it by its average over the posterior, computed on each trial by quadrature on at '
+        + 'least ' + NY + ' points, doubled until the result stops changing. The ear&rsquo;s share is the ear&rsquo;s part of the curvature at the prior '
         + 'location, using the mean of each run over its second half. Those are averages of one '
         + 'run, and they move with the seed; Lesson&nbsp;4 computes where each rule&rsquo;s expected '
         + 'update vanishes. The other parameters are Week&nbsp;2&rsquo;s and are not learned.')

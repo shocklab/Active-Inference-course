@@ -47,14 +47,14 @@ List the assignments and multiply their factors:
 
 | $s_1s_2s_3$ | $P(s_1)$ | $T_{s_2s_1}$ | $T_{s_3s_2}$ | $P(o=1\mid s_3)$ | Product |
 |---|---|---|---|---|---|
-| 000 | 0.40 | 0.70 | 0.70 | 0.10 | {{chain_000:.4f}} |
-| 001 | 0.40 | 0.70 | 0.30 | 0.90 | {{chain_001:.4f}} |
-| 010 | 0.40 | 0.30 | 0.20 | 0.10 | {{chain_010:.4f}} |
-| 011 | 0.40 | 0.30 | 0.80 | 0.90 | {{chain_011:.4f}} |
-| 100 | 0.60 | 0.20 | 0.70 | 0.10 | {{chain_100:.4f}} |
-| 101 | 0.60 | 0.20 | 0.30 | 0.90 | {{chain_101:.4f}} |
-| 110 | 0.60 | 0.80 | 0.20 | 0.10 | {{chain_110:.4f}} |
-| 111 | 0.60 | 0.80 | 0.80 | 0.90 | {{chain_111:.4f}} |
+| 000 | {{in_chain_p0:.2f}} | {{in_chain_t00:.2f}} | {{in_chain_t00:.2f}} | {{in_chain_l0:.2f}} | {{chain_000:.4f}} |
+| 001 | {{in_chain_p0:.2f}} | {{in_chain_t00:.2f}} | {{in_chain_t10:.2f}} | {{in_chain_l1:.2f}} | {{chain_001:.4f}} |
+| 010 | {{in_chain_p0:.2f}} | {{in_chain_t10:.2f}} | {{in_chain_t01:.2f}} | {{in_chain_l0:.2f}} | {{chain_010:.4f}} |
+| 011 | {{in_chain_p0:.2f}} | {{in_chain_t10:.2f}} | {{in_chain_t11:.2f}} | {{in_chain_l1:.2f}} | {{chain_011:.4f}} |
+| 100 | {{in_chain_p1:.2f}} | {{in_chain_t01:.2f}} | {{in_chain_t00:.2f}} | {{in_chain_l0:.2f}} | {{chain_100:.4f}} |
+| 101 | {{in_chain_p1:.2f}} | {{in_chain_t01:.2f}} | {{in_chain_t10:.2f}} | {{in_chain_l1:.2f}} | {{chain_101:.4f}} |
+| 110 | {{in_chain_p1:.2f}} | {{in_chain_t11:.2f}} | {{in_chain_t01:.2f}} | {{in_chain_l0:.2f}} | {{chain_110:.4f}} |
+| 111 | {{in_chain_p1:.2f}} | {{in_chain_t11:.2f}} | {{in_chain_t11:.2f}} | {{in_chain_l1:.2f}} | {{chain_111:.4f}} |
 
 Adding the product column gives $P(o=1)={{chain_evidence:.4f}}$.
 :::
@@ -73,8 +73,8 @@ indexed by the variable at its boundary.
 
 $$
 \begin{aligned}
-m_2(0)&=0.70(0.10)+0.30(0.90)={{chain_m20:.4f}},\\
-m_2(1)&=0.20(0.10)+0.80(0.90)={{chain_m21:.4f}}.
+m_2(0)&={{in_chain_t00:.2f}}({{in_chain_l0:.2f}})+{{in_chain_t10:.2f}}({{in_chain_l1:.2f}})={{chain_m20:.4f}},\\
+m_2(1)&={{in_chain_t01:.2f}}({{in_chain_l0:.2f}})+{{in_chain_t11:.2f}}({{in_chain_l1:.2f}})={{chain_m21:.4f}}.
 \end{aligned}
 $$
 
@@ -109,6 +109,24 @@ count or a measured running time.
 
 ::: widget chain-messages | Change the chain length and sensor reliability. The table displays backward messages and the final evidence. For short chains the widget also enumerates every assignment and compares the answers. Message entries are probabilities of the selected observation conditional on a boundary state, not a probability distribution over that state.
 :::
+
+The evidence readout does not move when the chain length changes, and the
+reason is in the numbers chosen. The initial probabilities are stationary for
+$T$:
+
+$$
+T\begin{pmatrix}{{in_chain_p0:.2f}}\\{{in_chain_p1:.2f}}\end{pmatrix}
+=\begin{pmatrix}{{in_chain_t00:.2f}}({{in_chain_p0:.2f}})+{{in_chain_t01:.2f}}({{in_chain_p1:.2f}})\\{{in_chain_t10:.2f}}({{in_chain_p0:.2f}})+{{in_chain_t11:.2f}}({{in_chain_p1:.2f}})\end{pmatrix}
+=\begin{pmatrix}{{chain_stat_0:.2f}}\\{{chain_stat_1:.2f}}\end{pmatrix}.
+$$
+
+So every state in the chain, wherever it sits, has marginal probabilities
+$({{in_chain_p0:.2f}},{{in_chain_p1:.2f}})$, and the evidence is
+${{in_chain_p0:.2f}}\,P(o=1\mid s_n=0)+{{in_chain_p1:.2f}}\,P(o=1\mid s_n=1)$ for every length $n$, which is
+${{chain_evidence:.2f}}$ at the starting reliability. Length changes the number of
+assignments and the intermediate messages, not the answer. With a non-stationary
+initial distribution the evidence would change with $n$, and the comparison with
+enumeration would work in the same way.
 
 This calculation is an instance of the sum-product algorithm. Its messages are
 local: a node uses its adjacent factors and incoming messages. Local computation

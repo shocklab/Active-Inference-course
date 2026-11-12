@@ -17,7 +17,7 @@ surface.
 
 Write $\vartheta$ for the true state of the world and $o$ for what arrives at the
 sensory surface. The generative process specifies how $\vartheta$ evolves, and how
-$\vartheta$ gives rise to $o$. Write $a$ for the agent's **actions**, drawn from whatever set of things the agent can do: for a thermostat $a \in \{\text{heat}, \text{idle}\}$, for an animal a continuous space of muscle commands. Week&nbsp;9 makes the discrete case concrete; the lamp example below has no actions at all, being about perception alone. If actions affect the environment, the process must specify that effect too.
+$\vartheta$ gives rise to $o$. Write $a$ for the agent's **actions**, drawn from whatever set of things the agent can do: for a thermostat $a \in \{\text{heat}, \text{idle}\}$, for an animal a continuous space of muscle commands. [week:9] makes the discrete case concrete; the lamp example below has no actions at all, being about perception alone. If actions affect the environment, the process must specify that effect too.
 For example, moving a sensor changes the observations it receives. The lamp
 example below holds actions fixed so that we can examine perception alone.
 
@@ -284,7 +284,7 @@ KL divergence must be. Note how small it is. Agent B is badly wrong about its
 sensor, yet pays only about five thousandths of a nat per reading, because the
 error happens to leave its *marginal* over observations nearly right. Being wrong
 about the world in a way that does not show up in your predictions is cheap, and
-Week&nbsp;12 asks whether that should worry us.
+[week:12] asks whether that should worry us.
 :::
 
 ::: exercise Break the blanket
@@ -297,7 +297,7 @@ Let $\vartheta$ be a fair coin and let the sensor copy it with probability
 $0.9$, flipping it otherwise. Let $\mu$ copy $o$ with probability $0.8$,
 flipping it otherwise, independently of $\vartheta$ conditional on $o$.
 Fix $a$ constant. Given $o=1$, the conditional probabilities are
-$P(\vartheta=1\mid o=1)=0.9$ and $P(\mu=1\mid o=1)=0.8$.
+$P(\vartheta=1\mid o=1)={{in_bl_sensor:.1f}}$ and $P(\mu=1\mid o=1)={{in_bl_mu:.1f}}$.
 The joint table is
 
 | $\vartheta$ | $\mu$ | $P(\vartheta,\mu\mid o=1)$ |
@@ -314,10 +314,10 @@ Now change the generation of $\mu$: with probability $0.3$ copy $\vartheta$
 directly; otherwise use the previous noisy copy of $o$. Given $o=1$,
 
 $$
-P(\mu=1\mid\vartheta=1,o=1)=0.3+0.7(0.8)={{blanket_direct:.4f}},
+P(\mu=1\mid\vartheta=1,o=1)={{in_bl_bypass:.1f}}+{{in_bl_keep:.1f}}({{in_bl_mu:.1f}})={{blanket_direct:.4f}},
 $$
 
-whereas for $\vartheta=0$ it is $0.7(0.8)={{blanket_other:.4f}}$.
+whereas for $\vartheta=0$ it is ${{in_bl_keep:.1f}}({{in_bl_mu:.1f}})={{blanket_other:.4f}}$.
 Consequently the joint entry and the product of marginals differ:
 
 $$
@@ -345,7 +345,7 @@ $Q(\mathrm{off})=1-q$. Here $q\in[0,1]$ is a probability, not a state or a
 sensor parameter. Define
 
 $$
-F(q)=\sum_s Q(s)\ln\frac{Q(s)}{P(s,\mathrm{bright})}.
+\mathcal F(q)=\sum_s Q(s)\ln\frac{Q(s)}{P(s,\mathrm{bright})}.
 $$ {#belief-free-energy}
 
 This is the finite-state **variational free energy**. Terms with $Q(s)=0$ are
@@ -353,7 +353,7 @@ interpreted by their limit. Substituting
 $P(s,\mathrm{bright})=P(s\mid\mathrm{bright})P(\mathrm{bright})$ gives
 
 $$
-F(q)=D_{\mathrm{KL}}[Q\|P(s\mid\mathrm{bright})]-\ln P(\mathrm{bright}).
+\mathcal F(q)=D_{\mathrm{KL}}[Q\|P(s\mid\mathrm{bright})]-\ln P(\mathrm{bright}).
 $$ {#belief-gap}
 
 The logarithm splits a product into a sum, and the evidence term comes outside
@@ -375,7 +375,7 @@ $\vartheta$ :: True states of the world. The generative *process*. The agent nev
 $s$ :: Hidden states in the agent's generative *model*. Latent variables the agent infers.
 $o$ :: Observations, the sensory states on the blanket. Shared by both sides.
 $a$ :: Actions, the active states on the blanket. Chosen by the agent, felt by the world.
-$\mu$ :: Internal states: the physical variables carrying the model. Not the same as $s$, which is a variable inside it. Returns in Week&nbsp;5.
+$\mu$ :: Internal states: the physical variables carrying the model. Not the same as $s$, which is a variable inside it. Returns in [week:5].
 $P(o \mid s)$ :: The likelihood. What the model says each state predicts.
 $P(s)$ :: The prior over states, before any observation.
 $P(o)$ :: The model evidence, or marginal likelihood. The quantity whose logarithm is minus the surprise.

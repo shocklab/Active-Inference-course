@@ -179,14 +179,20 @@ $\varepsilon_u h(\hat d)$, which weights each trial's sensory error by the link 
 its estimate. It is not a condition on the sensory error alone, nor on the prior
 error. Trials with near sources have large $h(\hat d)$ and count for more.
 
+The slow update of [lesson:3.1] changes $\theta$ by adding $\beta\,\varepsilon_u h(\hat d)$, and nothing in the step keeps $\theta$
+positive: a trial with a large negative sensory error and a near estimate can carry
+it below zero, where $g$ predicts a negative sound level for every distance. The
+simulations refuse such a step. $\theta$ keeps its value on that trial, and the widget
+counts the trial in a row labelled "updates withheld". No update is withheld in the
+runs this lesson quotes.
+
 The widget below sets up a world whose sources are twice as powerful as the animal
 believes, $\theta^{*} = {{w2_th_world:.0f}}$ against the animal's starting
 $\theta = {{theta0:.0f}}$, with every other parameter as in Week&nbsp;2. It shows the
 learned power across trials and the running averages of the two errors and of the
 learning signal over the last ${{w2_window}}$ trials.
 
-::: fig A world louder than the animal's model. Left, the learned source power across trials, against the true value. Right, the averages of the prior error, the sensory error and the learning signal over a window of recent trials. With learning switched off, the power stays at its starting value and the averages show what the mismatch does to inference alone.
-<div class="widget" data-widget="wrong-link"></div>
+::: widget wrong-link | A world louder than the animal's model. Left, the learned source power across trials, against the true value. Right, the averages of the prior error, the sensory error and the learning signal over a window of recent trials. With learning switched off, the power stays at its starting value and the averages show what the mismatch does to inference alone.
 :::
 
 With learning off, over the last ${{w2_window}}$ of ${{n_trials}}$ trials the average
@@ -277,31 +283,51 @@ is not indifferent.
 ::: derivation The settled log joint along the rescaling
 The prior density of $d' = c\,d$ at $c\,d$ is the density of $d$ at $d$ divided by $c$,
 since $\mathrm dd' = c\,\mathrm dd$, and the likelihood is unchanged because the
-prediction is. So the log joint of the rescaled model at $c\,d$ is $\ell(d) - \ln c$.
-Maximising over $d$ is the same as maximising over $c\,d$, so
+prediction is. So, for every $d > 0$ and every $c > 0$, the log joint satisfies
 
 $$
-\hat\ell\big(u;\ c^{2}\theta,\ c\,d_p,\ c^{2}\Sigma_p\big) \;=\; \hat\ell\big(u;\ \theta, d_p, \Sigma_p\big) \;-\; \ln c .
+\ell\big(c\,d,\ u;\ c^{2}\theta,\ c\,d_p,\ c^{2}\Sigma_p\big) \;=\; \ell\big(d,\ u;\ \theta, d_p, \Sigma_p\big) \;-\; \ln c .
+$$ {#scale-joint}
+
+Both sides are smooth in $c$. Differentiate with respect to $c$ at $c = 1$, holding
+$d$ fixed. On the left the chain rule gives the rates of change $d$, $2\theta$, $d_p$
+and $2\Sigma_p$ of the four arguments; on the right $\ln c$ has derivative $1$. So
+
+$$
+d\,\frac{\partial\ell}{\partial d} \;+\; 2\theta\,\frac{\partial\ell}{\partial\theta}
+\;+\; d_p\,\frac{\partial\ell}{\partial d_p} \;+\; 2\Sigma_p\,\frac{\partial\ell}{\partial\Sigma_p} \;=\; -1
 $$
 
-Differentiate with respect to $c$ at $c = 1$. The chain rule gives the parameters'
-rates of change $2\theta$, $d_p$ and $2\Sigma_p$, so
+at every $d$. At a stationary point $\hat d$ the first term is zero, which leaves
 
 $$
-2\theta\,\frac{\partial\hat\ell}{\partial\theta} \;+\; d_p\,\frac{\partial\hat\ell}{\partial d_p}
-\;+\; 2\Sigma_p\,\frac{\partial\hat\ell}{\partial\Sigma_p} \;=\; -1
+2\theta\,\frac{\partial\ell}{\partial\theta} \;+\; d_p\,\frac{\partial\ell}{\partial d_p}
+\;+\; 2\Sigma_p\,\frac{\partial\ell}{\partial\Sigma_p} \;=\; -1
+\qquad\text{at } d = \hat d ,
 $$ {#scale-id}
 
-for every observation.
+for every observation. The partial derivatives here are those of the log joint
+$\ell$ evaluated at $\hat d$, which are the learning signals the point rules use.
+
+Maximising over $d$ is the same as maximising over $c\,d$, so [eq:scale-joint] also
+gives $\hat\ell(u;\ c^{2}\theta,\ c\,d_p,\ c^{2}\Sigma_p) = \hat\ell(u;\ \theta, d_p, \Sigma_p) - \ln c$
+for the settled log joint. Where $\hat d$ lies on a smooth branch of strict maxima,
+as [lesson:3.1] assumes, the envelope result there turns each $\partial\ell/\partial\omega$
+at $\hat d$ into $\partial\hat\ell/\partial\omega$, and [eq:scale-id] holds for
+$\hat\ell$ too. Where two maxima of equal height tie, $\hat\ell$ as a function of the
+parameters can have a corner, and its separate partial derivatives need not exist.
+[eq:scale-id] still holds at each of the tied maxima, and $\hat\ell$ still falls by
+exactly $\ln c$ along the rescaling.
 :::
 
-At Week&nbsp;2's observation the left-hand side of [eq:scale-id], by finite
-differences, is ${{scale_identity:.6f}}$, and $\hat\ell$ falls from
+At Week&nbsp;2's observation the maximum is strict and the branch smooth, and the
+left-hand side of [eq:scale-id], by finite differences of $\hat\ell$, is
+${{scale_identity:.6f}}$. $\hat\ell$ falls from
 ${{ell_hat_w2:.4f}}$ to ${{ell_hat_scaled:.4f}}$ at $c = {{scale_c:.0f}}$, a drop of
-$\ln {{scale_c:.0f}}$. Since [eq:scale-id] holds on every trial, it holds for the drifts
-too, so the three drifts can never vanish together: learning all three by this rule
-has no resting point. Every trial pushes the parameters towards smaller $c$, and
-$\hat\ell$ grows without bound as $c \to 0$.
+$\ln {{scale_c:.0f}}$. Since [eq:scale-id] holds for the learning signals on every
+trial, it holds for their averages, the drifts, so the three drifts can never vanish
+together: learning all three by this rule has no resting point. Every trial pushes
+the parameters towards smaller $c$, and $\hat\ell$ grows without bound as $c \to 0$.
 
 ::: warning Identifiability
 A parameter that the evidence does not determine is **unidentifiable**. Updates that

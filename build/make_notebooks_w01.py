@@ -66,31 +66,32 @@ NUMPY_CELLS = [('markdown',
   'hypothesis from 8% to 54%: not because leopards became likely, but because\n'
   'nothing else explains tawny flashes.\n'
   '\n'
-  '### The ambiguity slider, in code\n'
+  '### The channel-noise slider, in code\n'
   '\n'
   'Blend the likelihood towards uniform and watch the observation stop telling you\n'
   'anything.'),
  ('code',
-  'def blur(A, lam):\n'
-  '    """lam=0 leaves A alone; lam=1 makes every state predict every observation equally."""\n'
-  '    B = (1 - lam) * A + lam / A.shape[0]\n'
+  'def blur(A, alpha):\n'
+  '    """alpha=0 leaves A alone; alpha=1 makes every state predict every observation equally."""\n'
+  '    B = (1 - alpha) * A + alpha / A.shape[0]\n'
   '    return B / B.sum(axis=0, keepdims=True)      # keep the columns normalised\n'
   '\n'
-  'lams = np.linspace(0, 0.98, 40)\n'
-  'info = [np.sum(posterior(blur(A, l), prior, 0)[0]\n'
-  '               * np.log(posterior(blur(A, l), prior, 0)[0] / prior)) for l in lams]\n'
+  'alphas = np.linspace(0, 0.98, 40)\n'
+  'info = [np.sum(posterior(blur(A, al), prior, 0)[0]\n'
+  '               * np.log(posterior(blur(A, al), prior, 0)[0] / prior)) for al in alphas]\n'
   '\n'
   'fig, ax = plt.subplots(figsize=(7, 3.2))\n'
-  "ax.plot(lams, info, color='#0f5f57', lw=2)\n"
-  "ax.set_xlabel('ambiguity $\\\\lambda$'); ax.set_ylabel('information gained, nats')\n"
-  "ax.set_title('An ambiguous channel carries no information', loc='left')\n"
+  "ax.plot(alphas, info, color='#0f5f57', lw=2)\n"
+  "ax.set_xlabel('channel-noise weight $\\\\alpha$'); ax.set_ylabel('information gained, nats')\n"
+  "ax.set_title('A fully noisy channel carries no information', loc='left')\n"
   "ax.spines[['top', 'right']].set_visible(False)\n"
   'plt.tight_layout(); plt.show()'),
  ('markdown',
   '## 2. What the evidence sum costs\n'
   '\n'
-  '`P(o)` requires visiting every state the model admits. With `n` factors of `k`\n'
-  'values each, that is `k**n` terms.'),
+  'Computing `P(o)` by direct enumeration visits every state the model admits. With\n'
+  '`n` factors of `k` values each, that is `k**n` terms. A model with structure, such\n'
+  'as a chain, can cost far less; Lesson 5 shows how.'),
  ('code',
   'for n in (5, 10, 20, 40, 89):\n'
   '    terms = 2.0 ** n\n'
@@ -247,7 +248,12 @@ NUMPY_CELLS = [('markdown',
   '\n'
   'theta = np.linspace(0, 2*np.pi, 200)\n'
   "axes[0].plot(np.cos(theta), np.sin(theta), color='#3c3c42', lw=1.2)\n"
-  "axes[0].plot(0.35*np.cos(theta), 0.35*np.sin(theta), color='#0f5f57', lw=1, ls='--')\n"
+  '# root-mean-square radius sqrt(2v) of the unabsorbed stationary process at the\n'
+  '# acting run\'s settings, v = sigma^2 / (kappa (2 - kappa)). It describes the spread,\n'
+  '# not a boundary the walk stays inside.\n'
+  'rms = np.sqrt(2 * 0.035**2 / (0.15 * (2 - 0.15)))\n'
+  "axes[0].plot(rms*np.cos(theta), rms*np.sin(theta), color='#0f5f57', lw=1, ls='--',\n"
+  "             label=f'RMS radius at $\\\\kappa=0.15$, {rms:.3f}')\n"
   "axes[0].set_aspect('equal'); axes[0].set_title('physiological state', loc='left')\n"
   'axes[0].legend(fontsize=8, frameon=False)\n'
   "axes[1].axhline(H_MAX, color='#90909a', ls=':', lw=1)\n"
@@ -260,7 +266,7 @@ NUMPY_CELLS = [('markdown',
  ('markdown',
   '### The survival curve\n'
   '\n'
-  'Exercise 6 on the problems page asks you to predict, from a small-step diffusion approximation, '
+  'Exercise 1.6.9 on the problems page asks you to predict, from a small-step diffusion approximation, '
   'that lifetime scales as $\\sigma^{-2}$. Here is the measurement. Predict\n'
   'the slope before you run it.'),
  ('code',
@@ -354,8 +360,15 @@ JAX_CELLS = [('markdown',
   "fig.colorbar(im, ax=ax, label='posterior on leopard')\n"
   'plt.tight_layout(); plt.show()\n'
   '\n'
-  "print('The black contour is the tipping point from the problems page.')\n"
-  "print('At a baboon prior of 0.22 it crosses the leopard prior at about 0.068.')"),
+  "print('The black contour is where the posterior on leopard is one half.')\n"
+  '\n'
+  '# Where it crosses the line baboon = 0.22: 0.70 L = 0.15 (0.22) + 0.02 (1 - L - 0.22)\n'
+  'l_slice = (0.15 * 0.22 + 0.02 * 0.78) / (0.70 + 0.02)\n'
+  '# The problems page instead keeps baboon : nothing at 22 : 70 as the leopard prior varies\n'
+  'c = 0.15 * 22 / 92 + 0.02 * 70 / 92\n'
+  'l_ratio = c / (0.70 + c)\n'
+  "print(f'On the line baboon = 0.22 it crosses at a leopard prior of {l_slice:.4f}.')\n"
+  "print(f'Holding baboon : nothing at 22 : 70, as the problems page does, gives {l_ratio:.4f}.')"),
  ('markdown',
   '## 2. Ten thousand lives at once\n'
   '\n'
@@ -364,7 +377,8 @@ JAX_CELLS = [('markdown',
  ('code',
   '@jit\n'
   'def survive(key, sigma, kappa, steps=20000):\n'
-  '    """Return the step at which the walk leaves the unit disc, or `steps`."""\n'
+  '    """Steps taken when the walk first leaves the unit disc (1 for an exit on the\n'
+  '    first step), or `steps + 1` if it is still inside after `steps` steps."""\n'
   '    noise = random.normal(key, (steps, 2)) * sigma\n'
   '\n'
   '    def step(carry, inp):\n'
@@ -373,19 +387,20 @@ JAX_CELLS = [('markdown',
   '        x_new = jnp.where(done, x, x * (1 - kappa) + eps)\n'
   '        out = (x_new @ x_new) > 1.0\n'
   '        newly = out & (~done)\n'
-  '        t_new = jnp.where(newly, i, t)\n'
+  '        t_new = jnp.where(newly, i + 1, t)          # i is 0-based, so step i+1\n'
   '        return (x_new, done | out, t_new), None\n'
   '\n'
   '    idx = jnp.arange(steps)\n'
   '    (_, died, t_death), _ = jax.lax.scan(\n'
-  '        step, (jnp.zeros(2), False, jnp.int32(steps)), (noise, idx))\n'
+  '        step, (jnp.zeros(2), False, jnp.int32(steps + 1)), (noise, idx))\n'
   '    return t_death\n'
   '\n'
   'keys = random.split(random.PRNGKey(0), 10000)\n'
   'lifetimes = jit(vmap(survive, in_axes=(0, None, None)))(keys, 0.035, 0.0)\n'
   'lifetimes = np.array(lifetimes)\n'
   "print(f'10,000 unregulated lives: median {np.median(lifetimes):.0f} steps, '\n"
-  "      f'mean {lifetimes.mean():.0f}, max {lifetimes.max()}')"),
+  "      f'mean {lifetimes.mean():.0f}, max {lifetimes.max()}, '\n"
+  "      f'still alive at 20,000 steps {(lifetimes > 20000).sum()}')"),
  ('code',
   'fig, axes = plt.subplots(1, 2, figsize=(11, 3.8))\n'
   '\n'
@@ -413,9 +428,10 @@ JAX_CELLS = [('markdown',
   'for kappa in (0.0, 0.0005, 0.001, 0.002, 0.004, 0.008, 0.02):\n'
   '    lt = np.array(jit(vmap(survive, in_axes=(0, None, None)))(keys[:3000], 0.035, '
   'float(kappa)))\n'
-  '    frac = (lt >= 20000).mean()\n'
+  '    frac = (lt > 20000).mean()                 # survivors carry steps + 1\n'
   '    med = np.median(lt)\n'
-  "    print(f'{kappa:<7.4f} {frac*100:>16.1f}%   {med:>14.0f}')"),
+  "    med_txt = 'over 20,000' if med > 20000 else f'{med:.0f}'   # most runs survived\n"
+  "    print(f'{kappa:<7.4f} {frac*100:>16.1f}%   {med_txt:>14}')"),
  ('markdown',
   'That last table is the whole of Lesson 1 in four numbers. The physics did not\n'
   'change and the noise did not change. What changed is that the system began to\n'
@@ -428,7 +444,7 @@ JAX_CELLS = [('markdown',
   '2. `survive` currently keeps integrating after death and masks the result. Rewrite\n'
   '   it with `jax.lax.while_loop` to stop early. Is it faster? Why might it not be,\n'
   '   under `vmap`?\n'
-  '3. Vectorise the *ambiguity* sweep from the NumPy notebook over both `alpha` and\n'
+  '3. Vectorise the *channel-noise* sweep from the NumPy notebook over both `alpha` and\n'
   '   the prior at once, and plot information gained as a surface.')]
 
 AI_ATTRIBUTION = "\n\n### AI use\n\nThis course notebook was developed with substantial assistance from Claude\n(Anthropic) and revised with Codex (OpenAI), under Jonathan Shock's direction.\nAI contributed to explanations and code. See [AI use and attribution](https://shocklab.github.io/Active-Inference-course/ai-use.html)\nfor the review process and its limits.\n"
@@ -443,5 +459,14 @@ if __name__ == '__main__':
             for kind, s in cells])
         nb.metadata['kernelspec'] = {'display_name': 'Python 3', 'language': 'python', 'name': 'python3'}
         path = ROOT / 'notebooks' / 'week-01' / f'week01_{name}.ipynb'
+        # Keep the existing cell ids when the cell list has the same shape, so a
+        # regeneration changes only the cells whose text changed. nbformat
+        # otherwise draws fresh random ids and every cell shows as edited.
+        if path.exists():
+            old = nbf.read(path, as_version=4)
+            if [c.cell_type for c in old.cells] == [c.cell_type for c in nb.cells]:
+                for new, prev in zip(nb.cells, old.cells):
+                    if 'id' in prev:
+                        new['id'] = prev['id']
         nbf.write(nb, path)
         print(path)

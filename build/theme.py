@@ -5,6 +5,7 @@ One place for fonts, colours, CSS and the page shell. Every published page in
 docs/ is rendered through page_shell(). Recolouring the whole site is a matter
 of editing the :root block below.
 """
+import re
 
 KATEX = "0.18.4"
 
@@ -364,8 +365,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -384,6 +388,12 @@ document.addEventListener('DOMContentLoaded',function(){
 def page_shell(*, title, site_title, head_extra="", body, root="", scripts=(),
                description="", body_class=""):
     """Wrap rendered body HTML in the full page chrome."""
+    # A deck is prose, and prose can hold a double quote or inline markup. Put
+    # raw into an attribute, a quote ends the attribute early and the rest of the
+    # deck leaks into the tag. Strip tags, then escape the quote; entities such
+    # as &nbsp; are already valid inside an attribute and are left alone.
+    if description:
+        description = re.sub(r"<[^>]+>", "", description).replace('"', "&quot;")
     desc = f'<meta name="description" content="{description}">' if description else ""
     js = "".join(f'<script defer src="{root}{s}"></script>' for s in scripts)
     cls = f' class="{body_class}"' if body_class else ""

@@ -51,7 +51,7 @@ rule. So the agent maximises the joint. Both factors are things it has: a prior
 it holds and a likelihood it can evaluate by predicting an intensity and
 comparing.
 
-## Take the logarithm
+## Logarithms
 
 Taking logarithms turns a product into a sum and exposes the quadratic
 penalties in the Gaussian factors. It also avoids multiplying very small
@@ -271,8 +271,7 @@ contributes ${{err_obs_weighted_at_start:.3f}}$. The gradient is negative, so th
 estimate moves down: the sound was louder than expected, therefore the source is
 closer than expected.
 
-::: fig The estimate climbing the log joint from the prior location. Left, the trajectory against the exact posterior mode. Right, the two terms of [eq:gradient-eps] over the same steps, meeting where their sum is zero.
-<div class="widget" data-widget="ascent-errors"></div>
+::: widget ascent-errors | The estimate climbing the log joint from the prior location, in three panels. Left, the log joint $\ell(d)$ up to a constant, with the iterates drawn on it and the exact posterior mode marked. Middle, the estimate at each step against the exact mode. Right, the two terms of [eq:gradient-eps], $\varepsilon_p$ and $g'(d)\,\varepsilon_u$, over the same steps, with their sum: at the mode the two terms cancel and the sum is zero. The readout says whether the last ten steps have stopped moving, and notes any step held at the edge of the range $0.05$ to $8$.
 :::
 
 It settles at $d = {{ascent_final:.4f}}$, reaching within one per cent of the
@@ -293,9 +292,9 @@ of ${{g_at_mode:.4f}}$ against the ${{u_obs}}$ heard. The animal has not moved f
 enough to account for the whole of what it heard. It has stopped where accounting
 for more would cost more in prior implausibility than it gains in fit.
 
-::: warning A phrase to keep clear of
+::: warning A residual is not explaining away
 It is tempting to say the animal has not "explained away" the observation.
-Resist it. **Explaining away** is Week&nbsp;1's technical term for something
+Resist it. Explaining away is [week:1]'s technical term for something
 quite different: two independent causes of a shared effect becoming
 anti-correlated once that effect is observed, so that evidence for one is
 evidence against the other. It needs at least two causes and there is only one
@@ -311,28 +310,28 @@ the bound on it turns out to depend on the precisions, which is the first sign o
 something the rest of the course keeps running into.
 
 ::: derivation Local stability of an Euler step
-Write $d^{*}$ for the peak, the same point the earlier sections called $\hat d$,
-and $e_k = d_k - d^{*}$ for the error at step $k$. Both symbols refer to the same local maximum. Near
-the peak, expand the gradient to first order. Since $\ell'(d^{*}) = 0$ by
+Let $\hat d$ be the peak, as in the earlier sections, and write
+$e_k = d_k - \hat d$ for the error at step $k$. Near
+the peak, expand the gradient to first order. Since $\ell'(\hat d) = 0$ by
 definition of the peak,
 
 $$
-\ell'(d_k) \;\approx\; \ell'(d^{*}) + \ell''(d^{*})\,e_k
-\;=\; \ell''(d^{*})\,e_k .
+\ell'(d_k) \;\approx\; \ell'(\hat d) + \ell''(\hat d)\,e_k
+\;=\; \ell''(\hat d)\,e_k .
 $$
 
 Substituting into the discrete update $d_{k+1} = d_k + \eta\,\ell'(d_k)$
-and subtracting $d^{*}$ from both sides:
+and subtracting $\hat d$ from both sides:
 
 $$
-e_{k+1} \;\approx\; e_k + \eta\,\ell''(d^{*})\,e_k \;=\; \big(1 + \eta\,\ell''(d^{*})\big)\,e_k .
+e_{k+1} \;\approx\; e_k + \eta\,\ell''(\hat d)\,e_k \;=\; \big(1 + \eta\,\ell''(\hat d)\big)\,e_k .
 $$
 
 The error is multiplied by a fixed factor each step, so it shrinks precisely when
 that factor is less than one in magnitude:
 
 $$
-\big|\,1 + \eta\,\ell''(d^{*})\,\big| \;<\; 1 .
+\big|\,1 + \eta\,\ell''(\hat d)\,\big| \;<\; 1 .
 $$
 
 At a maximum $\ell'' < 0$, so writing $|\ell''|$ for its magnitude the
@@ -340,7 +339,7 @@ condition is $-1 < 1 - \eta|\ell''| < 1$, and the right inequality holds for
 any $\eta > 0$. The left one gives
 
 $$
-\eta \;<\; \frac{2}{|\ell''(d^{*})|} .
+\eta \;<\; \frac{2}{|\ell''(\hat d)|} .
 $$ {#eta-bound}
 :::
 
@@ -385,10 +384,19 @@ Louder than predicted means $u > g(d_p)$, so at $d = d_p$ we have
 $\varepsilon_u > 0$. Since $g' < 0$, the sensory term $g'(d)\varepsilon_u$ is
 negative, and the gradient at the starting point is negative, so $d$ decreases.
 
-It keeps decreasing while the gradient stays negative. At the resting point
-[eq:balance] gives $\varepsilon_p = -g'\varepsilon_u$, and with $g' < 0$ and
-$\varepsilon_u$ still positive the right-hand side is positive, so
-$\varepsilon_p > 0$, which means $d_p - \hat d > 0$, so $\hat d < d_p$.
+That gives the direction of the first step, not where the estimate stops. To
+place the resting point, show that the gradient is negative at every
+$d \ge d_p$. There the prior term $(d_p - d)/\Sigma_p$ is at most zero. Because
+$g$ is decreasing, $g(d) \le g(d_p) < u$, so
+$\varepsilon_u = (u - g(d))/\Sigma_u > 0$, and with $g'(d) < 0$ the sensory term
+$g'(d)\,\varepsilon_u$ is strictly negative. The gradient is the sum of a term at
+most zero and a negative term, so it is negative for every $d \ge d_p$. No
+stationary point lies there, and the MAP estimate satisfies $\hat d < d_p$.
+
+This also fixes the sign of the sensory error at the resting point, which the
+balance condition alone does not. There $\varepsilon_p = (d_p - \hat d)/\Sigma_p > 0$,
+and [eq:balance] gives $-g'(\hat d)\,\varepsilon_u = \varepsilon_p > 0$; with
+$g'(\hat d) < 0$ this forces $\varepsilon_u > 0$ at $\hat d$ as well.
 
 The estimate ends below the prior location, as it must: a loud sound is evidence of a
 near source. Confirming with the figures, $\hat d = {{post_mode:.4f}}$ against a

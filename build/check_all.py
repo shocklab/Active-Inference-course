@@ -16,13 +16,18 @@ Stages, in dependency order. Each exists because something specific went wrong:
                $o$ named "sensory states" before that distinction existed)
   outline      every week names a source, a derivation target, widgets, a link
                (one probe found a topic mislabelled and uncommitted)
-  prose        AI-writing tells, per zone, per 1,000 words, on the built pages
+  prose        AI-writing tells, per zone, per 1,000 words, on the built pages;
+               its hard rules (em-dashes, dashes as punctuation) block
   references   every DOI resolves and matches its stored metadata     [--full]
   notebooks    every notebook executes end to end                     [--full]
 
-Exit code is the number of failed stages. Advisory stages (outline, prose) are
-reported but never fail the run, because their output is a queue to read rather
-than a verdict to obey.
+Exit code is the number of failed stages. Advisory stages (outline,
+definitions) are reported but never fail the run, because their output is a
+queue to read rather than a verdict to obey. The prose stage is both: its census
+is a queue, but check_prose.py exits 1 only when a hard rule is broken (an
+em-dash, a dash as sentence punctuation), and that is a verdict, so the exit
+code blocks. A prose failure once sat beside an overall pass because the whole
+stage was advisory.
 """
 import os
 import subprocess
@@ -38,7 +43,7 @@ STAGES = [
     ("numbers",     ["build/check_numbers.py"],    "blocking", True),
     ("definitions", ["build/check_definitions.py"], "advisory", True),
     ("outline",     ["build/check_outline.py"],    "advisory", True),
-    ("prose",       ["build/check_prose.py"],      "advisory", "not fast"),
+    ("prose",       ["build/check_prose.py"],      "blocking", "not fast"),
     ("references",  ["build/check_references.py"], "blocking", "full"),
 ]
 
@@ -48,7 +53,12 @@ def notebooks():
     nbs = sorted(glob.glob(os.path.join(ROOT, "notebooks", "*", "*.ipynb")))
     if not nbs:
         return 0, "no notebooks found"
-    r = subprocess.run([PY, "-m", "jupyter", "nbconvert", "--to", "notebook",
+    # `python -m jupyter nbconvert` hands over to whichever jupyter-nbconvert is
+    # first on PATH, which on this machine was Homebrew's, outside the project's
+    # interpreter. `python -m nbconvert` runs the one installed beside PY. The
+    # kernel that executes the cells is chosen separately, by the notebook's
+    # kernelspec, and is not fixed by this.
+    r = subprocess.run([PY, "-m", "nbconvert", "--to", "notebook",
                         "--execute", "--inplace",
                         "--ExecutePreprocessor.timeout=600"] + nbs,
                        capture_output=True, text=True, cwd=ROOT)

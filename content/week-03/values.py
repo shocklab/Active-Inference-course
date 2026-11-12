@@ -12,7 +12,7 @@ same update rules, in the same order of floating-point operations, so a widget
 readout at its default settings should agree with the number quoted in the
 prose. Run standalone to see the values:  python3 content/week-03/values.py
 """
-from math import cos, erf, exp, log, pi, sqrt
+from math import cos, erf, erfc, exp, expm1, log, pi, sqrt
 
 import numpy as np
 
@@ -33,7 +33,12 @@ def npdf(x, m, v):
 
 
 def zp(dp, vp):
-    """Positive-half-line mass of N(dp, vp): Week 2's Z_p."""
+    """Positive-half-line mass of N(dp, vp): Week 2's Z_p.
+
+    For dp < 0 the mass is 0.5 erfc(|dp|/sqrt(2 vp)), computed as that rather
+    than as 0.5 (1 + erf(.)), which subtracts two nearly equal numbers there."""
+    if dp < 0.0:
+        return 0.5 * erfc(-dp / sqrt(2 * vp))
     return 0.5 * (1 + erf(dp / sqrt(2 * vp)))
 
 
@@ -74,10 +79,36 @@ def erf_as(x):
     return s * y
 
 
+def erfcx_nr(z):
+    """exp(z^2) erfc(z) for z >= 0, from the Chebyshev fit in Numerical Recipes
+    (section 6.2, fractional error below 1.2e-7) with its exp(-z^2) factor
+    left out, so nothing underflows however large z is."""
+    t = 1.0 / (1.0 + 0.5 * z)
+    return t * exp(-1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418
+                   + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587
+                   + t * (-0.82215223 + t * 0.17087277)))))))))
+
+
 def trunc_ratio(dp, vp):
-    """N(0; dp, vp) / Z_p, the truncation correction in the prior updates."""
+    """N(0; dp, vp) / Z_p, the truncation correction in the prior updates.
+
+    For dp >= 0 the denominator 0.5 (1 + erf) is near one and the formula is
+    stable. For dp < 0 it is 0.5 erfc(z) with z = -dp / sqrt(2 vp), which the
+    same formula computes by cancellation, and which reaches zero (a division
+    by zero) near dp / sqrt(vp) = -9. There both numerator and denominator
+    carry exp(-z^2), so cancel it: the ratio is 2 / (sqrt(2 pi vp) erfcx(z))."""
+    if dp < 0.0:
+        return 2.0 / (sqrt(2.0 * pi * vp) * erfcx_nr(-dp / sqrt(2.0 * vp)))
     dens = exp(-dp * dp / (2.0 * vp)) / sqrt(2.0 * pi * vp)
     return dens / (0.5 * (1.0 + erf_as(dp / sqrt(2.0 * vp))))
+
+
+def start_point(dp, vp):
+    """Where the inner loop starts: the prior location when it is a distance,
+    otherwise the mean of the truncated prior, dp + vp N(0; dp, vp) / Z_p,
+    which is positive for every real dp. Starting at dp <= 0 divided by zero
+    at dp = 0 and, below it, let a negative state pass the stopping rule."""
+    return dp if dp > 0.0 else dp + vp * trunc_ratio(dp, vp)
 
 
 def settle(u, dp, vp, th, vu, path=None):
@@ -89,9 +120,10 @@ def settle(u, dp, vp, th, vu, path=None):
     Lesson 3. A finite step can change which stationary point the climb reaches,
     so the reported runs are checked against the highest mode separately.
     Returns the state, the number of steps, and whether the stopping rule was
-    met before KMAX steps ran out.
+    met before KMAX steps ran out. The start is positive, and no step removes
+    more than half of the state, so every iterate is a positive distance.
     """
-    d = dp
+    d = start_point(dp, vp)
     k = 0
     ok = False
     while k < KMAX:
@@ -122,66 +154,301 @@ def world_trial(r, loc, var, th, vu):
 
 
 NY = 801
+KCUT, MSCAN, NZOOM, NMAX, RTOL = 50.0, 401, 40, 64 * 800 + 1, 1e-10
+
+
+# ── the posterior average of a trial, by quadrature ──────────────────────
+# The posterior is integrated in log distance. For u > 0 the coordinate is
+# shifted to t = ln d - ln d_u, with d_u = sqrt(theta/u) the distance whose
+# prediction is u, so that the residual is u - theta/d^2 = -u expm1(-2t): for a
+# very near source (u near 1e12) the subtraction would otherwise lose every
+# digit of it. For u <= 0 there is no such loss and the coordinate is ln d.
+#
+# The density can have two peaks: a narrow likelihood and a prior far from it
+# each hold one. A scan of the density cannot rule out a peak that falls between
+# its nodes, so the peaks are not looked for by sampling. Every stationary point
+# lies between the bounds of post_bounds, and all of them are found there as
+# roots of a polynomial (post_stationary). Between two neighbouring minima, or
+# a minimum and a bound, the density then has exactly one peak, and on such a
+# piece it is safe to narrow the interval by height (post_window). Each piece is
+# integrated with nodes doubling until the result stops changing (post_piece).
+def post_point(u, dp, vp, th, vu, x):
+    """Log posterior density (up to a constant) at coordinate x, with the
+    distance and the residual there. The + x is the Jacobian of log distance."""
+    if u > 0.0:
+        d = sqrt(th / u) * exp(x)
+        res = -u * expm1(-2.0 * x)
+    else:
+        d = exp(x)
+        res = u - th / (d * d)
+    return -res * res / (2.0 * vu) - (d - dp) * (d - dp) / (2.0 * vp) + x, d, res
+
+
+def post_rel(u, dp, vp, th, vu, x, x0):
+    """The log density at x minus that at x0, with the distance and the residual
+    at x. A far prior or a loud source makes the log density itself large
+    (near -5e7 for a prior 1e4 away), and the difference of two such numbers
+    keeps only about eight digits; here each term's difference is formed from
+    differences that are computed directly: d - d0 = d0 expm1(x - x0), and the
+    same for the residual."""
+    if u > 0.0:
+        c = sqrt(th / u)
+        d0, d = c * exp(x0), c * exp(x)
+        r0, res = -u * expm1(-2.0 * x0), -u * expm1(-2.0 * x)
+        dr = -u * exp(-2.0 * x0) * expm1(-2.0 * (x - x0))
+    else:
+        d0, d = exp(x0), exp(x)
+        r0, res = u - th / (d0 * d0), u - th / (d * d)
+        dr = -th / (d0 * d0) * expm1(-2.0 * (x - x0))
+    dd = d0 * expm1(x - x0)
+    return (-dr * (res + r0) / (2.0 * vu) - dd * ((d - dp) + (d0 - dp)) / (2.0 * vp)
+            + (x - x0)), d, res
+
+
+def post_bounds(u, dp, vp, th, vu):
+    """Two coordinates with every stationary point of the posterior between
+    them. With y = theta/d^2 and dl/dq = 1 - (d - dp) d/Sigma_p + 2y(y - u)/Sigma_u:
+    dl/dq > 0 wherever G = 2y(y - u)/Sigma_u - (d + |dp|) d/Sigma_p > 0, and G
+    falls as d grows while y > u; dl/dq < 0 wherever
+    H = (d - dp) d - Sigma_p - 2 Sigma_p y (y + |u|)/Sigma_u > 0, and H grows with d
+    once d > dp/2. So the log density rises all the way up to the first bound and
+    falls all the way down from the second."""
+    def gh(x):
+        _, d, res = post_point(u, dp, vp, th, vu, x)
+        y = u - res
+        return (2.0 * y * (-res) / vu - (d + abs(dp)) * d / vp,
+                (d - dp) * d - vp - 2.0 * vp * y * (y + abs(u)) / vu)
+    if u > 0.0:
+        x0 = 0.0                                  # y = u, where G < 0
+        step = min(sqrt(vu) / (4.0 * u), 0.5)
+    else:
+        x0 = 0.5 * log(th / (sqrt(vu) - u))       # y = sd + |u|
+        step = 0.5
+    xl, k = x0, 0
+    while gh(xl)[0] <= 0.0:
+        xl = x0 - step * 2.0 ** k
+        k += 1
+    xr = xl
+    if dp > 0.0:
+        xh = log(0.5 * dp) - (0.5 * log(th / u) if u > 0.0 else 0.0)
+        if xh > xr:
+            xr = xh
+    x1, k = xr, 0
+    step = max(abs(xr - xl), 1e-3)
+    while gh(xr)[1] <= 0.0:
+        xr = x1 + step * 2.0 ** k
+        k += 1
+    return xl, xr
+
+
+NBIS = 100      # bisection steps for each root; the bracket shrinks by 2^-100
+
+
+def post_stat_poly(u, dp, vp, th, vu):
+    """For u > 0, the coefficients (highest power first) of a polynomial P(s)
+    whose sign at s = e^t is the sign of dl/dt. Multiplying dl/dq by
+    Sigma_p d^4 gives -d^6 + dp d^5 + Sigma_p d^4 - 2 Sigma_p theta u d^2/Sigma_u
+    + 2 Sigma_p theta^2/Sigma_u; with d = d_u s and division by d_u^4 this is
+    -(theta/u) s^6 + dp d_u s^5 + Sigma_p s^4 + K (1 - s^2), K = 2 Sigma_p u^2/Sigma_u.
+    The signs of its coefficients change at most three times, so by Descartes'
+    rule there are at most three stationary points; for u <= 0 the same count
+    gives at most one."""
+    c = sqrt(th / u)
+    k = 2.0 * vp * u * u / vu
+    return [-c * c, dp * c, vp, 0.0, -k, 0.0, k]
+
+
+def _bisect(f, a, b, fa):
+    for _ in range(NBIS):
+        m = 0.5 * (a + b)
+        fm = f(m)
+        if (fm < 0.0) == (fa < 0.0):
+            a, fa = m, fm
+        else:
+            b = m
+    return 0.5 * (a + b)
+
+
+def post_stationary(u, dp, vp, th, vu, xl, xr):
+    """Every stationary point of the log density between xl and xr, for u > 0.
+
+    The roots of P are found from those of its derivatives: between two
+    neighbouring roots of P', P is monotone and has at most one root, found by
+    bisection where it changes sign, and so on down to P^(5), which is linear.
+    P itself is evaluated with 1 - s^2 = -expm1(2t), which keeps every digit
+    when the source is very near and t is tiny."""
+    cs = post_stat_poly(u, dp, vp, th, vu)
+    polys = [cs]
+    for _ in range(5):
+        q = polys[-1]
+        n = len(q) - 1
+        polys.append([a * (n - i) for i, a in enumerate(q[:-1])])
+    a1, b1 = polys[5]
+    roots = []
+    if -b1 / a1 > 0.0 and xl < log(-b1 / a1) < xr:
+        roots = [log(-b1 / a1)]
+    for j in range(4, -1, -1):
+        if j == 0:
+            c2, c1, c0, k = -cs[0], cs[1], cs[2], cs[6]
+            f = lambda x: (-c2 * exp(6.0 * x) + c1 * exp(5.0 * x) + c0 * exp(4.0 * x)
+                           - k * expm1(2.0 * x))
+        else:
+            def f(x, q=polys[j]):
+                s, v = exp(x), 0.0
+                for a in q:
+                    v = v * s + a
+                return v
+        pts = [xl] + roots + [xr]
+        roots = []
+        for a, b in zip(pts[:-1], pts[1:]):
+            fa, fb = f(a), f(b)
+            if fa != 0.0 and fb != 0.0 and (fa < 0.0) != (fb < 0.0):
+                roots.append(_bisect(f, a, b, fa))
+    return roots
+
+
+def post_pieces(u, dp, vp, th, vu):
+    """The intervals to integrate: one per peak. With three stationary points
+    (peak, valley, peak) the line is split at the valley."""
+    xl, xr = post_bounds(u, dp, vp, th, vu)
+    st = post_stationary(u, dp, vp, th, vu, xl, xr) if u > 0.0 else []
+    if len(st) == 3:
+        return [post_window(u, dp, vp, th, vu, xl, st[1], True, False),
+                post_window(u, dp, vp, th, vu, st[1], xr, False, True)]
+    return [post_window(u, dp, vp, th, vu, xl, xr, True, True)]
+
+
+def post_scan(u, dp, vp, th, vu, xa, xb):
+    h = (xb - xa) / (MSCAN - 1)
+    return [post_point(u, dp, vp, th, vu, xa + i * h)[0] for i in range(MSCAN)]
+
+
+def post_window(u, dp, vp, th, vu, xl, xr, open_l, open_r):
+    """An interval holding the one peak of the density on [xl, xr], outside
+    which the density on that piece is below e^-KCUT of the piece's highest
+    node. An open end lies at a bound of post_bounds, beyond which the density
+    is monotone, and is moved outwards (doubling the step) until the log density
+    there is KCUT below the highest node seen; a closed end lies at a valley
+    between two peaks and stays. The interval is then repeatedly narrowed to the
+    nodes within KCUT of the highest node of a scan, plus one either side, so
+    that a narrow peak is resolved. Narrowing by height is safe only because the
+    piece has a single peak: the set where the density exceeds any level is then
+    one interval, and the peak lies within a node of the highest node."""
+    mx = max(post_scan(u, dp, vp, th, vu, xl, xr))
+    s0 = (xr - xl) / (MSCAN - 1) if xr > xl else 1e-3
+    xa, k = xl, 0
+    while open_l:
+        lv = post_point(u, dp, vp, th, vu, xa)[0]
+        if lv > mx:
+            mx = lv
+        if lv < mx - KCUT:
+            break
+        xa = xl - s0 * 2.0 ** k
+        k += 1
+    xb, k = xr, 0
+    while open_r:
+        lv = post_point(u, dp, vp, th, vu, xb)[0]
+        if lv > mx:
+            mx = lv
+        if lv < mx - KCUT:
+            break
+        xb = xr + s0 * 2.0 ** k
+        k += 1
+    for _ in range(NZOOM):
+        lw = post_scan(u, dp, vp, th, vu, xa, xb)
+        m = max(lw)
+        if not m > -1e300:
+            raise RuntimeError("post_window: no node has a finite density")
+        h = (xb - xa) / (MSCAN - 1)
+        i0 = 0
+        while lw[i0] < m - KCUT:
+            i0 += 1
+        i1 = MSCAN - 1
+        while lw[i1] < m - KCUT:
+            i1 -= 1
+        i0 = i0 - 1 if i0 > 0 else 0
+        i1 = i1 + 1 if i1 < MSCAN - 1 else MSCAN - 1
+        if 2 * (i1 - i0) > MSCAN:
+            break
+        xa, xb = xa + i0 * h, xa + i1 * h
+    return xa, xb
+
+
+def _qweight(i, n, simpson):
+    """Quadrature weight of node i of n, in units of the node spacing."""
+    if i == 0 or i == n - 1:
+        return 1.0 / 3.0 if simpson else 0.5
+    return (4.0 if i % 2 else 2.0) / 3.0 if simpson else 1.0
+
+
+def post_piece(u, dp, vp, th, vu, xa, xb, simpson=False):
+    """Quadrature on n nodes over [xa, xb], compared with the same rule on
+    every other node; n doubles until the means of d and of the squared
+    residual over the piece agree to a relative 1e-10 between the two. Returns
+    the log of the piece's mass (up to the density's constant) and the two means.
+    Weights are formed from differences of the log density from the piece's
+    midpoint (post_rel), so that a large log density does not cost digits.
+
+    A piece with both ends out in the tails, where the density and all its
+    derivatives are negligible, uses the trapezium rule, whose error is then
+    far smaller than any power of the spacing. A piece that ends at a valley
+    between two peaks does not have that property, since the integrand there
+    is not small, and uses Simpson's rule, whose error falls as the fourth power."""
+    n, x0 = NY, 0.5 * (xa + xb)
+    while True:
+        h = (xb - xa) / (n - 1)
+        pts = [post_rel(u, dp, vp, th, vu, xa + i * h, x0) for i in range(n)]
+        mx = max(p[0] for p in pts)
+        nh = (n + 1) // 2
+        s = [0.0] * 6
+        for i in range(n):
+            e = exp(pts[i][0] - mx)
+            r2 = pts[i][2] * pts[i][2]
+            w = e * _qweight(i, n, simpson)
+            s[0] += w
+            s[1] += w * pts[i][1]
+            s[2] += w * r2
+            if i % 2 == 0:
+                w = e * _qweight(i // 2, nh, simpson)
+                s[3] += w
+                s[4] += w * pts[i][1]
+                s[5] += w * r2
+        m1, e1, m2, e2 = s[1] / s[0], s[2] / s[0], s[4] / s[3], s[5] / s[3]
+        if abs(m1 - m2) <= RTOL * m1 and abs(e1 - e2) <= RTOL * e1:
+            return post_point(u, dp, vp, th, vu, x0)[0] + mx + log(s[0] * h), m1, e1
+        n = 2 * n - 1
+        if n > NMAX:
+            raise RuntimeError("post_piece: the quadrature did not converge")
 
 
 def post_r2(u, dp, vp, th, vu):
-    """Posterior expectation of the squared sensory residual (u - g(d))^2.
-
-    When the likelihood's window of ten standard deviations either side of u
-    lies at intensities the prior can reach, the integral runs over that window
-    in residual coordinates rho = u - y, where y = theta / d^2 and the
-    likelihood has a fixed width; the Jacobian |dd/dy| of Week 2's Lesson 2
-    enters as y^(-3/2). Otherwise (a quiet or negative u) it runs over log
-    distance, from where the likelihood has fallen by e^-72 to past the furthest
-    the mode can be pushed. Checked against a brute-force grid for Sigma_u from
-    0.001 to 1 and u from -3 to 3: largest relative difference 5e-15.
-    """
-    sd = sqrt(vu)
-    lw = []
-    r2 = []
-    if u - 10.0 * sd > th / ((dp + 12.0 * sqrt(vp)) * (dp + 12.0 * sqrt(vp))):
-        h = 20.0 * sd / (NY - 1)
-        for i in range(NY):
-            rho = -10.0 * sd + i * h
-            y = u - rho
-            d = sqrt(th / y)
-            lw.append(-rho * rho / (2.0 * vu) - (d - dp) * (d - dp) / (2.0 * vp) - 1.5 * log(y))
-            r2.append(rho * rho)
-    else:
-        up = u if u > 0.0 else 0.0
-        da = sqrt(th / (up + 12.0 * sd))
-        c = 2.0 * th * vp * (th / (dp * dp) + abs(u)) / vu
-        db = dp + 12.0 * sqrt(vp) + sqrt(sqrt(c))
-        if da > 0.5 * db:
-            da = 0.5 * db
-        sa = log(da)
-        h = (log(db) - sa) / (NY - 1)
-        for i in range(NY):
-            q = sa + i * h
-            d = exp(q)
-            res = u - th / (d * d)
-            lw.append(-res * res / (2.0 * vu) - (d - dp) * (d - dp) / (2.0 * vp) + q)
-            r2.append(res * res)
-    mx = max(lw)
-    s0 = 0.0
-    s2 = 0.0
-    for i in range(NY):
-        w = exp(lw[i] - mx) * (0.5 if i == 0 or i == NY - 1 else 1.0)
-        s0 += w
-        s2 += w * r2[i]
-    return s2 / s0
+    """Posterior expectation of the squared sensory residual (u - g(d))^2: the
+    pieces' means, weighted by their masses."""
+    pcs = post_pieces(u, dp, vp, th, vu)
+    if len(pcs) == 1:
+        return post_piece(u, dp, vp, th, vu, *pcs[0])[2]
+    ps = [post_piece(u, dp, vp, th, vu, xa, xb, True) for xa, xb in pcs]
+    top = max(p[0] for p in ps)
+    w = [exp(p[0] - top) for p in ps]
+    return sum(wi * p[2] for wi, p in zip(w, ps)) / sum(w)
 
 
 def run(seed, n, world, model, learn, beta, rule="point", keep_paths=()):
     """Trials one after another. `world` is (location, variance, theta, Sigma_u)
     of the process; `model` holds the animal's (dp, vp, th, vu). Only the
-    parameter named by `learn` changes."""
+    parameter named by `learn` changes.
+
+    Returns the parameter's history, the per-trial errors, any kept paths, the
+    number of trials whose inner loop did not settle, and the number of trials
+    on which no update was applied. These differ: the posterior-averaged rule
+    for Sigma_u does not use the settled state, so it updates on an unsettled
+    trial; and an update that would make theta zero or negative is refused."""
     r = mulberry32(seed)
     dp, vp, th, vu = model["dp"], model["vp"], model["th"], model["vu"]
-    hist, errs, paths, unsettled = [], [], {}, 0
+    hist, errs, paths, unsettled, withheld = [], [], {}, 0, 0
     for i in range(n):
         dtrue, u = world_trial(r, *world)
-        path = [dp] if i in keep_paths else None
+        path = [start_point(dp, vp)] if i in keep_paths else None
         dh, _, ok = settle(u, dp, vp, th, vu, path)
         if not ok:
             unsettled += 1
@@ -190,22 +457,28 @@ def run(seed, n, world, model, learn, beta, rule="point", keep_paths=()):
         ep = (dp - dh) / vp
         eu = (u - th / (dh * dh)) / vu
         errs.append((ep, eu, dh, u, {"dp": dp, "vp": vp, "th": th, "vu": vu}[learn]))
-        if not ok:
-            pass                     # inference unfinished: no parameter update
+        if learn == "vu" and rule != "point":
+            # the posterior average does not depend on where the climb stopped
+            vu = vu * exp(beta * 0.5 * (post_r2(u, dp, vp, th, vu) / vu - 1.0))
+        elif not ok:
+            withheld += 1            # inference unfinished: no parameter update
         elif learn == "dp":
             dp = dp + beta * (-ep - trunc_ratio(dp, vp))
         elif learn == "th":
-            th = th + beta * eu / (dh * dh)
+            th_new = th + beta * eu / (dh * dh)
+            if th_new > 0.0:
+                th = th_new
+            else:
+                withheld += 1        # a source power must stay positive
         elif learn == "vu":
             res = u - th / (dh * dh)
-            r2 = res * res if rule == "point" else post_r2(u, dp, vp, th, vu)
-            vu = vu * exp(beta * 0.5 * (r2 / vu - 1.0))
+            vu = vu * exp(beta * 0.5 * (res * res / vu - 1.0))
         elif learn == "vp":
             dev = dh - dp
             vp = vp * exp(beta * (0.5 * (dev * dev / vp - 1.0)
                                   + 0.5 * dp * trunc_ratio(dp, vp)))
         hist.append({"dp": dp, "vp": vp, "th": th, "vu": vu}[learn])
-    return hist, errs, paths, unsettled
+    return hist, errs, paths, unsettled, withheld
 
 
 WEEK2 = {"dp": D_PRIOR, "vp": VAR_PRIOR, "th": THETA, "vu": VAR_OBS}
@@ -278,6 +551,17 @@ V["env_partial"] = 0.5 * (V["eps_u_w2"] ** 2 - 1 / VAR_OBS)
 assert abs(V["env_total"] - V["env_partial"]) < 1e-5, "envelope theorem check failed"
 V["env_gap"] = abs(V["env_total"] - V["env_partial"])
 
+# How the mode moves with the prior location, by the implicit function theorem:
+# differentiating dl/dd = 0 in d_p gives d(d_hat)/d(d_p) = (1/Sigma_p) / (-l''),
+# since the only term of dl/dd that contains d_p is (d_p - d)/Sigma_p (ln Z_p has
+# no d in it). Checked against finite differences of the mode itself.
+V["ell_dd_w2"] = (-1 / VAR_PRIOR - (4 * THETA ** 2 / _dhat ** 6) / VAR_OBS
+                  + (U_OBS - THETA / _dhat ** 2) / VAR_OBS * (6 * THETA / _dhat ** 4))
+assert V["ell_dd_w2"] < 0
+V["dhat_ddp_w2"] = (1 / VAR_PRIOR) / (-V["ell_dd_w2"])
+_fd = (map_exact(U_OBS, dp=D_PRIOR + _h) - map_exact(U_OBS, dp=D_PRIOR - _h)) / (2 * _h)
+assert abs(_fd - V["dhat_ddp_w2"]) < 1e-6, (_fd, V["dhat_ddp_w2"])
+
 # The same comparison when inference is stopped after three Week 2 steps,
 # before it has settled: the state now depends on Sigma_u through the
 # iteration, and the partial derivative no longer equals the total.
@@ -345,7 +629,7 @@ assert abs(V["sd_dp_lin_sim"] / V["sd_dp_lin"] - 1) < 0.05, "EMA spread formula 
 W1 = dict(seed=7, loc=3.0, vu=0.01, beta=0.01)
 _m = dict(WEEK2, vu=W1["vu"])
 _KEEP = (0, 1, 2, 1999)
-_h1, _e1, _p1, _bad1 = run(W1["seed"], N_TRIALS, (W1["loc"], VAR_PRIOR, THETA, W1["vu"]),
+_h1, _e1, _p1, _bad1, _wh1 = run(W1["seed"], N_TRIALS, (W1["loc"], VAR_PRIOR, THETA, W1["vu"]),
                     _m, "dp", W1["beta"], keep_paths=_KEEP)
 V["w1_seed"], V["w1_loc"], V["w1_vu"], V["w1_beta"] = W1["seed"], W1["loc"], W1["vu"], W1["beta"]
 V["n_trials"] = N_TRIALS
@@ -433,9 +717,9 @@ V["scaled_dp"], V["scaled_vp"], V["scaled_th"] = SCALE_C * D_PRIOR, SCALE_C ** 2
 # ── widget 2 · wrong-link, at its default settings ───────────────────────
 W2 = dict(seed=7, th_world=2.0, beta=0.01, window=200)
 V["w2_th_world"], V["w2_beta"], V["w2_window"] = W2["th_world"], W2["beta"], W2["window"]
-_h2, _e2, _, _bad2 = run(W2["seed"], N_TRIALS, (D_PRIOR, VAR_PRIOR, W2["th_world"], VAR_OBS),
+_h2, _e2, _, _bad2, _wh2 = run(W2["seed"], N_TRIALS, (D_PRIOR, VAR_PRIOR, W2["th_world"], VAR_OBS),
                   dict(WEEK2), "th", W2["beta"])
-_h2off, _e2off, _, _bad2off = run(W2["seed"], N_TRIALS, (D_PRIOR, VAR_PRIOR, W2["th_world"], VAR_OBS),
+_h2off, _e2off, _, _bad2off, _wh2off = run(W2["seed"], N_TRIALS, (D_PRIOR, VAR_PRIOR, W2["th_world"], VAR_OBS),
                         dict(WEEK2), "th", 0.0)
 V["w2_final"] = _h2[-1]
 V["w2_mean_late"] = float(np.mean(_h2[N_TRIALS // 2:]))
@@ -451,14 +735,14 @@ V["w2_off_epsu"] = float(_e2off[-_w:, 1].mean())
 V["w2_sig_early"] = float((_e2[:_w, 1] / _e2[:_w, 2] ** 2).mean())
 V["w2_sig_late"] = float((_e2[-_w:, 1] / _e2[-_w:, 2] ** 2).mean())
 V["w2_off_sig"] = float((_e2off[-_w:, 1] / _e2off[-_w:, 2] ** 2).mean())
-_, _e2true, _, _bad2true = run(W2["seed"], N_TRIALS, (D_PRIOR, VAR_PRIOR, W2["th_world"], VAR_OBS),
+_, _e2true, _, _bad2true, _wh2true = run(W2["seed"], N_TRIALS, (D_PRIOR, VAR_PRIOR, W2["th_world"], VAR_OBS),
                     dict(WEEK2, th=W2["th_world"]), "th", 0.0)
 _e2true = np.array(_e2true)
 V["w2_true_epsp"] = float(_e2true[:, 0].mean())
 V["w2_true_epsu"] = float(_e2true[:, 1].mean())
 # a world quieter than the model, theta* = 1/2, for the exercises
-_hq, _eq, _, _badq = run(W2["seed"], N_TRIALS, (D_PRIOR, VAR_PRIOR, 0.5, VAR_OBS), dict(WEEK2), "th", W2["beta"])
-_hqoff, _eqoff, _, _badqoff = run(W2["seed"], N_TRIALS, (D_PRIOR, VAR_PRIOR, 0.5, VAR_OBS), dict(WEEK2), "th", 0.0)
+_hq, _eq, _, _badq, _whq = run(W2["seed"], N_TRIALS, (D_PRIOR, VAR_PRIOR, 0.5, VAR_OBS), dict(WEEK2), "th", W2["beta"])
+_hqoff, _eqoff, _, _badqoff, _whqoff = run(W2["seed"], N_TRIALS, (D_PRIOR, VAR_PRIOR, 0.5, VAR_OBS), dict(WEEK2), "th", 0.0)
 _eqoff = np.array(_eqoff)
 V["w2q_th_world"] = 0.5
 V["w2q_final"] = _hq[-1]
@@ -634,7 +918,7 @@ def map_vec(u, dp, vp, th, vu, kmax=20000):
     state, then Newton's method on the exact curvature until every correction
     is below 1e-14 of it. The tolerance is relative because a source a
     micrometre away gives u near 1e12, where an absolute one is never met."""
-    d = np.full_like(u, dp)
+    d = np.full_like(u, start_point(dp, vp))
     act = np.arange(u.size)                      # observations still climbing
     for _ in range(kmax):
         x, ua = d[act], u[act]
@@ -660,46 +944,252 @@ def map_vec(u, dp, vp, th, vu, kmax=20000):
     raise RuntimeError("Newton polish did not converge")
 
 
-def post_moments_vec(u, dp, vp, th, vu, ny=NY):
-    """Posterior averages of d, d^2, the squared residual and the residual
-    times h(d) = 1/d^2, for many u at once, by the two routes of post_r2."""
+def post_point_vec(u, dp, vp, th, vu, x):
+    """post_point for many observations at once: u has one entry per row of x."""
+    pos = u > 0.0
+    us = np.where(pos, u, 1.0)[:, None]
+    e = np.exp(x)
+    d = np.where(pos[:, None], np.sqrt(th / us) * e, e)
+    res = np.where(pos[:, None], -us * np.expm1(-2.0 * x), u[:, None] - th / (d * d))
+    return -res * res / (2.0 * vu) - (d - dp) ** 2 / (2.0 * vp) + x, d, res
+
+
+def post_rel_vec(u, dp, vp, th, vu, x, x0):
+    """post_rel for many observations at once: u and x0 have one entry per row of x."""
+    pos = (u > 0.0)[:, None]
+    us = np.where(u > 0.0, u, 1.0)[:, None]
+    c = np.where(pos, np.sqrt(th / us), 1.0)
+    x0 = x0[:, None]
+    d0, d = c * np.exp(x0), c * np.exp(x)
+    r0 = np.where(pos, -us * np.expm1(-2.0 * x0), u[:, None] - th / (d0 * d0))
+    res = np.where(pos, -us * np.expm1(-2.0 * x), u[:, None] - th / (d * d))
+    dr = np.where(pos, -us * np.exp(-2.0 * x0), -th / (d0 * d0)) * np.expm1(-2.0 * (x - x0))
+    dd = d0 * np.expm1(x - x0)
+    return (-dr * (res + r0) / (2.0 * vu) - dd * ((d - dp) + (d0 - dp)) / (2.0 * vp)
+            + (x - x0)), d, res
+
+
+@np.errstate(over="ignore", divide="ignore", invalid="ignore")
+def post_bounds_vec(u, dp, vp, th, vu):
+    """post_bounds, row by row, for many observations at once."""
+    one = lambda x: tuple(a[:, 0] for a in post_point_vec(u, dp, vp, th, vu, x[:, None]))
+
+    def gh(x):
+        _, d, res = one(x)
+        y = u - res
+        return (2.0 * y * (-res) / vu - (d + abs(dp)) * d / vp,
+                (d - dp) * d - vp - 2.0 * vp * y * (y + np.abs(u)) / vu)
+    pos = u > 0.0
+    x0 = np.where(pos, 0.0, 0.5 * np.log(th / (sqrt(vu) - np.minimum(u, 0.0))))
+    step = np.where(pos, np.minimum(sqrt(vu) / (4.0 * np.where(pos, u, 1.0)), 0.5), 0.5)
+    xl, k = x0.copy(), np.zeros(u.size)
+    todo = gh(xl)[0] <= 0.0
+    while todo.any():
+        xl[todo] = x0[todo] - step[todo] * 2.0 ** k[todo]
+        k[todo] += 1
+        todo = gh(xl)[0] <= 0.0
+    xr = xl.copy()
+    if dp > 0.0:
+        xh = log(0.5 * dp) - np.where(pos, 0.5 * np.log(th / np.where(pos, u, 1.0)), 0.0)
+        xr = np.maximum(xr, xh)
+    x1, k = xr.copy(), np.zeros(u.size)
+    step = np.maximum(np.abs(xr - xl), 1e-3)
+    todo = gh(xr)[1] <= 0.0
+    while todo.any():
+        xr[todo] = x1[todo] + step[todo] * 2.0 ** k[todo]
+        k[todo] += 1
+        todo = gh(xr)[1] <= 0.0
+    return xl, xr
+
+
+@np.errstate(over="ignore", invalid="ignore")
+def post_stationary_vec(u, dp, vp, th, vu, xl, xr):
+    """post_stationary for many observations with u > 0 at once: an array with
+    one row per observation and up to three roots, NaN where there are fewer."""
+    c = np.sqrt(th / u)
+    k = 2.0 * vp * u * u / vu
+    z = np.zeros(u.size)
+    polys = [np.stack([-c * c, dp * c, vp + z, z, -k, z, k], 1)]
+    for _ in range(5):
+        q = polys[-1]
+        n = q.shape[1] - 1
+        polys.append(q[:, :-1] * np.arange(n, 0, -1)[None, :])
+    a1, b1 = polys[5][:, 0], polys[5][:, 1]
+    r = np.log(-b1 / a1)
+    roots = np.where((-b1 / a1 > 0.0) & (r > xl) & (r < xr), r, np.nan)[:, None]
+    for j in range(4, -1, -1):
+        if j == 0:
+            cc = polys[0]
+
+            def f(x):
+                return (cc[:, :1] * np.exp(6.0 * x) + cc[:, 1:2] * np.exp(5.0 * x)
+                        + cc[:, 2:3] * np.exp(4.0 * x) - cc[:, 6:7] * np.expm1(2.0 * x))
+        else:
+            def f(x, q=polys[j]):
+                sx, v = np.exp(x), np.zeros_like(x)
+                for col in range(q.shape[1]):
+                    v = v * sx + q[:, col:col + 1]
+                return v
+        inner = np.sort(np.where(np.isnan(roots), xr[:, None], roots), 1)
+        pts = np.concatenate([xl[:, None], inner, xr[:, None]], 1)
+        a, b = pts[:, :-1].copy(), pts[:, 1:].copy()
+        fa, fb = f(a), f(b)
+        found = (fa != 0.0) & (fb != 0.0) & ((fa < 0.0) != (fb < 0.0)) & (b > a)
+        for _ in range(NBIS):
+            m = 0.5 * (a + b)
+            fm = f(m)
+            left = (fm < 0.0) == (fa < 0.0)
+            a, fa = np.where(left, m, a), np.where(left, fm, fa)
+            b = np.where(left, b, m)
+        roots = np.sort(np.where(found, 0.5 * (a + b), np.nan), 1)
+    return roots[:, :3]
+
+
+@np.errstate(over="ignore", divide="ignore")
+def post_window_vec(u, dp, vp, th, vu, xl, xr, open_l, open_r):
+    """post_window, row by row, for many observations at once: the same outward
+    steps from an open end and the same narrowing, carried out on arrays."""
+    one = lambda x: post_point_vec(u, dp, vp, th, vu, x[:, None])[0][:, 0]
+    t = np.linspace(0.0, 1.0, MSCAN)
+    scan = lambda xa, xb: post_point_vec(u, dp, vp, th, vu, xa[:, None] + (xb - xa)[:, None] * t[None, :])[0]
+    mx = scan(xl, xr).max(1)
+    s0 = np.where(xr > xl, (xr - xl) / (MSCAN - 1), 1e-3)
+    ends = []
+    for sign, xs, op in ((-1.0, xl, open_l), (1.0, xr, open_r)):
+        xe, k = xs.copy(), np.zeros(u.size)
+        while op:
+            lv = one(xe)
+            mx = np.maximum(mx, lv)
+            todo = ~(lv < mx - KCUT)
+            if not todo.any():
+                break
+            xe[todo] = xs[todo] + sign * s0[todo] * 2.0 ** k[todo]
+            k[todo] += 1
+        ends.append(xe)
+    xa, xb = ends
+    act = np.arange(u.size)
+    for _ in range(NZOOM):
+        if act.size == 0:
+            break
+        lw = post_point_vec(u[act], dp, vp, th, vu,
+                            xa[act, None] + (xb - xa)[act, None] * t[None, :])[0]
+        if not np.all(lw.max(1) > -1e300):
+            raise RuntimeError("post_window_vec: no node has a finite density")
+        keep = lw >= lw.max(1, keepdims=True) - KCUT
+        i0 = np.maximum(np.argmax(keep, 1) - 1, 0)
+        i1 = np.minimum(MSCAN - 1 - np.argmax(keep[:, ::-1], 1) + 1, MSCAN - 1)
+        h = (xb - xa)[act] / (MSCAN - 1)
+        go = 2 * (i1 - i0) <= MSCAN
+        a0 = xa[act]
+        xa[act[go]] = a0[go] + i0[go] * h[go]
+        xb[act[go]] = a0[go] + i1[go] * h[go]
+        act = act[go]
+    return xa, xb
+
+
+def _qweights(n, simpson):
+    w = np.ones(n)
+    if simpson:
+        w[1:-1:2], w[2:-1:2] = 4.0, 2.0
+        w[0] = w[-1] = 1.0
+        return w / 3.0
+    w[0] = w[-1] = 0.5
+    return w
+
+
+@np.errstate(over="ignore", divide="ignore")
+def _post_piece_vec(u, dp, vp, th, vu, xa, xb, idx, integrands, simpson):
+    """post_piece for the rows idx at once: the log mass of each row's piece and
+    the means of integrands(rows, x, d, res) over it."""
+    rows = np.arange(idx.size)
+    logm, out, n = np.zeros(idx.size), None, NY
+    while rows.size:
+        g = idx[rows]
+        t = np.linspace(0.0, 1.0, n)
+        x0 = 0.5 * (xa[g] + xb[g])
+        x = xa[g, None] + (xb - xa)[g, None] * t[None, :]
+        lw, d, res = post_rel_vec(u[g], dp, vp, th, vu, x, x0)
+        top = lw.max(1, keepdims=True)
+        e = np.exp(lw - top)
+        w, wh = e * _qweights(n, simpson)[None, :], e[:, ::2] * _qweights((n + 1) // 2, simpson)[None, :]
+        chk = [(w * d).sum(1) / w.sum(1), (w * res ** 2).sum(1) / w.sum(1)]
+        chh = [(wh * d[:, ::2]).sum(1) / wh.sum(1), (wh * res[:, ::2] ** 2).sum(1) / wh.sum(1)]
+        ok = np.ones(rows.size, bool)
+        for a, b in zip(chk, chh):
+            ok &= np.abs(a - b) <= RTOL * a
+        f = integrands(g, x, d, res)
+        vals = np.array([(w * q).sum(1) / w.sum(1) for q in f])
+        if out is None:
+            out = np.zeros((len(f), idx.size))
+        out[:, rows[ok]] = vals[:, ok]
+        h = (xb - xa)[g] / (n - 1)
+        logm[rows[ok]] = (post_point_vec(u[g], dp, vp, th, vu, x0[:, None])[0][:, 0]
+                          + top[:, 0] + np.log(w.sum(1) * h))[ok]
+        rows = rows[~ok]
+        n = 2 * n - 1
+        if rows.size and n > NMAX:
+            raise RuntimeError("_post_piece_vec: the quadrature did not converge")
+    return logm, out
+
+
+@np.errstate(over="ignore", divide="ignore")
+def _post_average(u, dp, vp, th, vu, integrands):
+    """Posterior averages of integrands(rows, x, d, res), as post_r2 forms them:
+    one piece per peak, located from the stationary points, each integrated
+    with nodes doubling until it stops changing, combined by mass."""
+    xl, xr = post_bounds_vec(u, dp, vp, th, vu)
+    two = np.zeros(u.size, bool)
+    mid = np.full(u.size, np.nan)
+    pos = np.flatnonzero(u > 0.0)
+    if pos.size:
+        st = post_stationary_vec(u[pos], dp, vp, th, vu, xl[pos], xr[pos])
+        three = np.all(np.isfinite(st), 1)
+        two[pos[three]] = True
+        mid[pos[three]] = st[three, 1]
+    one_ = np.flatnonzero(~two)
+    res = None
+    if one_.size:
+        xa, xb = post_window_vec(u[one_], dp, vp, th, vu, xl[one_], xr[one_], True, True)
+        k = np.arange(one_.size)
+        sub = lambda rows, x, d, r: integrands(one_[rows], x, d, r)
+        _, out = _post_piece_vec(u[one_], dp, vp, th, vu, xa, xb, k, sub, False)
+        res = np.zeros((out.shape[0], u.size))
+        res[:, one_] = out
+    tw = np.flatnonzero(two)
+    if tw.size:
+        ut, xlt, xrt, mt = u[tw], xl[tw], xr[tw], mid[tw]
+        sub = lambda rows, x, d, r: integrands(tw[rows], x, d, r)
+        a1, b1 = post_window_vec(ut, dp, vp, th, vu, xlt, mt, True, False)
+        a2, b2 = post_window_vec(ut, dp, vp, th, vu, mt, xrt, False, True)
+        k = np.arange(tw.size)
+        l1, o1 = _post_piece_vec(ut, dp, vp, th, vu, a1, b1, k, sub, True)
+        l2, o2 = _post_piece_vec(ut, dp, vp, th, vu, a2, b2, k, sub, True)
+        top = np.maximum(l1, l2)
+        w1, w2 = np.exp(l1 - top), np.exp(l2 - top)
+        if res is None:
+            res = np.zeros((o1.shape[0], u.size))
+        res[:, tw] = (w1 * o1 + w2 * o2) / (w1 + w2)
+    return res
+
+
+def post_moments_vec(u, dp, vp, th, vu):
+    """Posterior averages of d, d^2, the squared residual, h(d) = 1/d^2 and the
+    residual times h(d), for many u at once, on the intervals and nodes of
+    post_r2.
+
+    The last is not summed directly. With y = theta/d^2, the log density l(q) in
+    log distance has dl/dq = 1 - (d - dp) d/Sigma_p - 2 y res/Sigma_u, and
+    the integral of dl/dq e^l over the whole line is zero, so
+    E[res h] = E[res y]/theta = Sigma_u (1 - (E[d^2] - dp E[d])/Sigma_p)/(2 theta).
+    Summed directly, a very near source (u near 1e15) multiplies a residual
+    whose average is below the rounding of the sum by 1/d^2 near 1e15."""
     if u.size > 3000:
-        return np.concatenate([post_moments_vec(u[i:i + 3000], dp, vp, th, vu, ny)
+        return np.concatenate([post_moments_vec(u[i:i + 3000], dp, vp, th, vu)
                                for i in range(0, u.size, 3000)], axis=1)
-    sd = sqrt(vu)
-    out = np.zeros((5, u.size))
-    near = u - 10 * sd > th / (dp + 12 * sqrt(vp)) ** 2
-    t = np.linspace(0, 1, ny)
-    tw = np.ones(ny)
-    tw[0] = tw[-1] = 0.5
-    if near.any():
-        ua = u[near]
-        rho = -10 * sd + 20 * sd * t
-        y = ua[:, None] - rho[None, :]
-        d = np.sqrt(th / y)
-        lw = -rho[None, :] ** 2 / (2 * vu) - (d - dp) ** 2 / (2 * vp) - 1.5 * np.log(y)
-        res = np.broadcast_to(rho[None, :], y.shape)
-        out[:, near] = _moments(lw, tw, d, res, th)
-    if (~near).any():
-        ub = u[~near]
-        up = np.maximum(ub, 0.0)
-        da = np.sqrt(th / (up + 12 * sd))
-        c = 2 * th * vp * (th / dp ** 2 + np.abs(ub)) / vu
-        db = dp + 12 * sqrt(vp) + c ** 0.25
-        da = np.minimum(da, 0.5 * db)
-        q = np.log(da)[:, None] + (np.log(db) - np.log(da))[:, None] * t[None, :]
-        d = np.exp(q)
-        res = ub[:, None] - th / d ** 2
-        lw = -res ** 2 / (2 * vu) - (d - dp) ** 2 / (2 * vp) + q
-        out[:, ~near] = _moments(lw, tw, d, res, th)
-    return out
-
-
-def _moments(lw, tw, d, res, th):
-    p = np.exp(lw - lw.max(1, keepdims=True)) * tw[None, :]
-    p /= p.sum(1, keepdims=True)
-    return np.array([(p * d).sum(1), (p * d * d).sum(1), (p * res ** 2).sum(1),
-                     (p / d ** 2).sum(1), (p * res / d ** 2).sum(1)])
+    m = _post_average(u, dp, vp, th, vu,
+                      lambda rows, x, d, res: [d, d * d, res * res, 1 / d ** 2])
+    erh = vu * (1.0 - (m[1] - dp * m[0]) / vp) / (2.0 * th)
+    return np.vstack([m, erh])
 
 
 from scipy.optimize import brentq  # noqa: E402
@@ -810,8 +1300,8 @@ if len(_roots) > 1:
 assert abs(post_grad("vp", VAR_PRIOR, _WW2, WEEK2)) < 2e-3
 
 # ── widget 3 · precision-learning, at its default settings ───────────────
-_h3p, _e3p, _, _bad3p = run(W3["seed"], N_TRIALS, _WW3, dict(WEEK2), "vu", W3["beta"], "point")
-_h3e, _e3e, _, _bad3e = run(W3["seed"], N_TRIALS, _WW3, dict(WEEK2), "vu", W3["beta"], "post")
+_h3p, _e3p, _, _bad3p, _wh3p = run(W3["seed"], N_TRIALS, _WW3, dict(WEEK2), "vu", W3["beta"], "point")
+_h3e, _e3e, _, _bad3e, _wh3e = run(W3["seed"], N_TRIALS, _WW3, dict(WEEK2), "vu", W3["beta"], "post")
 V["w3_point_final"] = _h3p[-1]
 V["w3_point_mean_late"] = float(np.mean(_h3p[N_TRIALS // 2:]))
 V["w3_post_final"] = _h3e[-1]
@@ -832,7 +1322,7 @@ V["share_point3"] = ear_share(V["w3_point_mean_late"])
 V["share_post3"] = ear_share(V["w3_post_mean_late"])
 
 # ── the prior variance collapsing, simulated ─────────────────────────────
-_h4, _e4, _, _bad4 = run(W3["seed"], N_TRIALS, _WW2, dict(WEEK2), "vp", W3["beta"])
+_h4, _e4, _, _bad4, _wh4 = run(W3["seed"], N_TRIALS, _WW2, dict(WEEK2), "vp", W3["beta"])
 V["vp_sim_mean_late"] = float(np.mean(_h4[N_TRIALS // 2:]))
 V["vp_sim_final"] = _h4[-1]
 
@@ -870,6 +1360,8 @@ _runs = [(_bad1, _e1, _m, "dp"), (_bad2, _e2, WEEK2, "th"), (_bad2off, _e2off, W
          (_badqoff, _eqoff, WEEK2, "th"), (_bad3p, _e3p, WEEK2, "vu"), (_bad3e, _e3e, WEEK2, "vu"),
          (_bad4, _e4, WEEK2, "vp")]
 assert all(b == 0 for b, *_ in _runs), "a reported run has a trial that did not settle"
+_withheld = [_wh1, _wh2, _wh2off, _wh2true, _whq, _whqoff, _wh3p, _wh3e, _wh4]
+assert all(w == 0 for w in _withheld), "a reported run had a parameter update refused"
 V["n_runs_checked"] = len(_runs)
 V["mode_gap_max"] = max(mode_gap(list(e), m, k) for _, e, m, k in _runs)
 assert V["mode_gap_max"] < 1e-8, V["mode_gap_max"]
@@ -880,49 +1372,25 @@ assert V["mode_gap_max"] < 1e-8, V["mode_gap_max"]
 # psi'(d_hat)(m - d_hat) + psi''(d_hat)[V + (m - d_hat)^2]/2 is split into its
 # offset and variance parts. The residual at the mode comes from the stationary
 # identity, as in point_grad.
-def dev_moments_vec(u, dh, rh, dp, vp, th, vu, ny=NY):
-    """Posterior averages of d - d_hat and (d - d_hat)^2 on the grids of
-    post_moments_vec, with rh the residual at the mode. On the residual route
-    d - d_hat = sqrt(theta)(rho - rh) / (sqrt(y) sqrt(y_hat) (sqrt(y) + sqrt(y_hat))),
-    with y = u - rho and y_hat = u - rh, so that no two nearly equal distances
-    are subtracted when the source is very near."""
+def dev_moments_vec(u, dh, rh, dp, vp, th, vu):
+    """Posterior averages of d - d_hat and (d - d_hat)^2 on the intervals and
+    nodes of post_moments_vec, with rh the residual at the mode. For u > 0 the
+    mode's coordinate is t_hat = -log1p(-rh/u)/2 and
+    d - d_hat = d_u exp(t_hat) expm1(t - t_hat), so that no two nearly equal
+    distances are subtracted when the source is very near."""
     if u.size > 3000:
         return np.concatenate([dev_moments_vec(u[i:i + 3000], dh[i:i + 3000], rh[i:i + 3000],
-                                               dp, vp, th, vu, ny)
+                                               dp, vp, th, vu)
                                for i in range(0, u.size, 3000)], axis=1)
-    sd = sqrt(vu)
-    out = np.zeros((2, u.size))
-    near = u - 10 * sd > th / (dp + 12 * sqrt(vp)) ** 2
-    t = np.linspace(0, 1, ny)
-    tw = np.ones(ny)
-    tw[0] = tw[-1] = 0.5
-    if near.any():
-        ua, ra = u[near], rh[near]
-        rho = -10 * sd + 20 * sd * t
-        y = ua[:, None] - rho[None, :]
-        yh = (ua - ra)[:, None]
-        d = np.sqrt(th / y)
-        lw = -rho[None, :] ** 2 / (2 * vu) - (d - dp) ** 2 / (2 * vp) - 1.5 * np.log(y)
-        dev = sqrt(th) * (rho[None, :] - ra[:, None]) / (np.sqrt(y * yh) * (np.sqrt(y) + np.sqrt(yh)))
-        p = np.exp(lw - lw.max(1, keepdims=True)) * tw[None, :]
-        p /= p.sum(1, keepdims=True)
-        out[:, near] = [(p * dev).sum(1), (p * dev * dev).sum(1)]
-    if (~near).any():
-        ub, db_ = u[~near], dh[~near]
-        up = np.maximum(ub, 0.0)
-        da = np.sqrt(th / (up + 12 * sd))
-        c = 2 * th * vp * (th / dp ** 2 + np.abs(ub)) / vu
-        db = dp + 12 * sqrt(vp) + c ** 0.25
-        da = np.minimum(da, 0.5 * db)
-        q = np.log(da)[:, None] + (np.log(db) - np.log(da))[:, None] * t[None, :]
-        d = np.exp(q)
-        res = ub[:, None] - th / d ** 2
-        lw = -res ** 2 / (2 * vu) - (d - dp) ** 2 / (2 * vp) + q
-        dev = d - db_[:, None]
-        p = np.exp(lw - lw.max(1, keepdims=True)) * tw[None, :]
-        p /= p.sum(1, keepdims=True)
-        out[:, ~near] = [(p * dev).sum(1), (p * dev * dev).sum(1)]
-    return out
+
+    def dev(rows, x, d, res):
+        ur, pos = u[rows], u[rows] > 0.0
+        us = np.where(pos, ur, 1.0)
+        th_ = -0.5 * np.log1p(-np.where(pos, rh[rows], 0.0) / us)
+        near = (np.sqrt(th / us) * np.exp(th_))[:, None] * np.expm1(x - th_[:, None])
+        v = np.where(pos[:, None], near, d - dh[rows, None])
+        return [v, v * v]
+    return _post_average(u, dp, vp, th, vu, dev)
 
 
 def power_gaps(th_world):

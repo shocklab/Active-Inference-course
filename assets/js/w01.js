@@ -53,10 +53,15 @@
       st.t++;
       st.trail.push([st.x, st.y]);
       if (st.trail.length > 420) st.trail.shift();
-      var bx = Math.floor((st.x + 1) / 2 * NB), by = Math.floor((st.y + 1) / 2 * NB);
-      if (bx >= 0 && bx < NB && by >= 0 && by < NB) { st.bins[by * NB + bx]++; st.n++; }
+      /* Test the exit before binning. The step that leaves the disc ends the
+       * run; it is not a visit to the viable set, so it is not counted. */
+      if (st.x * st.x + st.y * st.y > 1) {
+        st.dead = true;
+      } else {
+        var bx = Math.floor((st.x + 1) / 2 * NB), by = Math.floor((st.y + 1) / 2 * NB);
+        if (bx >= 0 && bx < NB && by >= 0 && by < NB) { st.bins[by * NB + bx]++; st.n++; }
+      }
       if (st.t % 5 === 0) st.hist.push([st.t, entropy()]);
-      if (st.x * st.x + st.y * st.y > 1) st.dead = true;
     }
 
     var plot = new A.Plot({ aspect: 0.44, pad: { l: 8, r: 8, t: 8, b: 8 } });
@@ -275,11 +280,12 @@
 
     function current() {
       var a = M.clamp(pLeo.get(), 0.01, 0.9), b = M.clamp(pBab.get(), 0.01, 0.9);
-      if (a + b > 0.97) { var s = 0.97 / (a + b); a *= s; b *= s; }
+      var scaled = a + b > 0.97;
+      if (scaled) { var s = 0.97 / (a + b); a *= s; b *= s; }
       var prior = [a, b, 1 - a - b];
       var Am = blurA(amb.get());
       var r = M.posterior(Am, prior, obsIdx);
-      return { prior: prior, A: Am, post: r.post, ev: r.evidence };
+      return { prior: prior, A: Am, post: r.post, ev: r.evidence, scaled: scaled };
     }
 
     plot.onDraw(function (p) {
@@ -300,6 +306,8 @@
         { label: 'posterior  P(s|o)', colour: C.accent }
       ], p.o.pad.l + 2, 11);
       out.show([
+        ['prior used (leopard, baboon, nothing)', d.prior.map(function (v) { return v.toFixed(3); }).join(', ')
+          + (d.scaled ? '  (rescaled)' : '')],
         ['P(o)', d.ev.toFixed(4)],
         ['surprise  −ln P(o)', (-Math.log(d.ev)).toFixed(3) + ' nats'],
         ['D_KL[post || prior]', M.kl(d.post, d.prior).toFixed(3) + ' nats']
@@ -315,7 +323,9 @@
         + 'about the observation you actually got. The posterior is prior times likelihood, divided by '
         + 'the number in the readout. Push <b>&alpha;</b> up and the three likelihood bars level out: '
         + 'every state explains the data equally well, so the posterior collapses back onto the prior '
-        + 'and the observation has told you nothing. That last readout is exactly how much it told you.')
+        + 'and the observation has told you nothing. That last readout is exactly how much it told you. '
+        + 'When the leopard and baboon sliders add to more than 0.97, both are scaled down in proportion '
+        + 'so that nothing keeps 0.03; the first readout row shows the prior actually used.')
     ]));
     plot.attach(body);
     [pLeo, pBab, amb].forEach(function (s) { s.onchange(function () { plot.render(); }); });
@@ -401,10 +411,10 @@
           ['numerators  P(o|s)P(s) = [' + un.map(function (v) { return v.toFixed(3); }).join(', ') + ']', C.clay, '400'],
           ['P(o) = Σ over all states = ' + ev.toFixed(3), C.clay, '400'],
           ['posterior = [' + M.normalise(un).map(function (v) { return v.toFixed(2); }).join(', ') + ']', C.ink2, '400'],
-          ['Cost: one term per state. Always.', C.muted, '400']
+          ['Cost by direct enumeration: one term per state.', C.muted, '400']
         ];
         out.show([['direction', 'observation → state'],
-                  ['work', 'a sum over the entire state space'],
+                  ['work', 'a sum over the entire state space, term by term if enumerated directly'],
                   ['P(o)', ev.toFixed(4)]]);
       }
       lines.forEach(function (L, i) {

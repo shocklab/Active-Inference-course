@@ -39,7 +39,7 @@ units and the two precisions become the same kind of quantity. With a general
 $g$ the conversion costs a factor of $g'^2$, which the curvature exercise at the
 end works out.
 
-::: mn Why not just say variance
+::: mn Precision
 Writing inverse variance as precision makes the multiplicative gain on an error signal explicit. Weeks&nbsp;5 to 8 make that gain a physical quantity that the
 system can adjust.
 :::
@@ -171,7 +171,7 @@ their total.
 :::
 
 Setting the gradient to zero located the peak. It did not show that the whole
-posterior is Gaussian, and Week&nbsp;1 promised that it is, with its parameters
+posterior is Gaussian, and [week:1] promised that it is, with its parameters
 written down in two lines. Here are the two lines.
 
 ::: derivation The linear posterior is exactly Gaussian
@@ -216,11 +216,74 @@ sources add.
 Being Gaussian, it has no skew and its mode and mean coincide. The inverse-square example has a non-quadratic exponent. Restricting a Gaussian to a half-line can also introduce skewness; the widget shows this boundary effect separately.
 :::
 
-::: mn Conjugacy, named
-This is what Week&nbsp;1 called conjugacy: the posterior landed back in the
+::: mn Conjugacy
+This is what [week:1] called conjugacy: the posterior landed back in the
 prior's family, so the update changed two numbers and not the form. It is what
 lets the same update run over and over without the expression growing, and
 [eq:completed-square] is the whole of why it works here. For the inverse-square $g$, the exponent is not quadratic in $d$, so this Gaussian calculation no longer applies.
+:::
+
+The same square also gives the evidence $P(u)$, which [lesson:1.5] said would be
+evaluated by completing it. That needs the constants the derivation above
+dropped, so keep them this time.
+
+::: derivation The evidence of the linear model
+With both normalising factors written out, and $d$ ranging over the whole real
+line,
+
+$$
+P(d)\,P(u\mid d) \;=\; \frac{1}{2\pi\sqrt{\Sigma_p\Sigma_u}}
+\exp\!\Big[-\tfrac{1}{2}\Pi_p (d - d_p)^2 - \tfrac{1}{2}\Pi_u (u - d)^2\Big].
+$$
+
+The derivation above showed that the exponent equals
+$-\tfrac{1}{2}\Pi(d-m)^2$ plus the terms that carry no $d$, which were
+$-\tfrac{1}{2}\big(\Pi_p d_p^2 + \Pi_u u^2 - \Pi m^2\big)$. Evaluate that
+bracket. Since $\Pi m = \Pi_p d_p + \Pi_u u$,
+
+$$
+\Pi\big(\Pi_p d_p^2 + \Pi_u u^2\big) - (\Pi m)^2
+\;=\; \Pi_p\Pi_u d_p^2 + \Pi_p\Pi_u u^2 - 2\Pi_p\Pi_u d_p u
+\;=\; \Pi_p\Pi_u (u - d_p)^2 ,
+$$
+
+the $\Pi_p^2 d_p^2$ and $\Pi_u^2 u^2$ terms cancelling. Dividing by $\Pi$, the
+bracket is $\Pi_p\Pi_u (u-d_p)^2/\Pi$, and
+
+$$
+\frac{\Pi_p\Pi_u}{\Pi_p + \Pi_u}
+\;=\; \frac{1}{\Sigma_p\Sigma_u}\cdot\frac{\Sigma_p\Sigma_u}{\Sigma_u + \Sigma_p}
+\;=\; \frac{1}{\Sigma_p + \Sigma_u}.
+$$
+
+So
+
+$$
+P(d)\,P(u\mid d) \;=\; \frac{1}{2\pi\sqrt{\Sigma_p\Sigma_u}}
+\exp\!\Big[-\frac{(u - d_p)^2}{2(\Sigma_p + \Sigma_u)}\Big]
+\exp\!\Big[-\tfrac{1}{2}\Pi (d - m)^2\Big].
+$$
+
+Only the last factor contains $d$. Its integral over the real line is the
+Gaussian integral $\int e^{-\Pi(d-m)^2/2}\,\mathrm{d}d = \sqrt{2\pi/\Pi}$, and
+$1/\Pi = \Sigma_p\Sigma_u/(\Sigma_p + \Sigma_u)$. Multiplying,
+
+$$
+\frac{1}{2\pi\sqrt{\Sigma_p\Sigma_u}}\sqrt{\frac{2\pi\,\Sigma_p\Sigma_u}{\Sigma_p + \Sigma_u}}
+\;=\; \frac{1}{\sqrt{2\pi(\Sigma_p + \Sigma_u)}},
+$$
+
+and therefore
+
+$$
+P(u) \;=\; \int_{-\infty}^{\infty} P(d)\,P(u\mid d)\,\mathrm{d}d
+\;=\; \mathcal{N}\big(u;\, d_p,\, \Sigma_p + \Sigma_u\big).
+$$ {#linear-evidence}
+
+Before any observation, $u$ is the sum of $d$ and an independent noise, so its
+mean is $d_p$ and its variance the sum of the two variances. At the lesson's
+values the formula gives $P(u = {{u_obs}}) = {{lin_evidence:.6f}}$; integrating
+the joint numerically over $-6 < d < 8$ gives ${{lin_evidence_quad:.6f}}$.
 :::
 
 Completing a square is an identity, so it can be checked rather than trusted.
@@ -276,7 +339,7 @@ mean need not coincide.
 Now assemble [eq:precision-form] as a diagram, taking seriously the constraints
 of [lesson:2.1]. Give each quantity a unit and each multiplication a connection.
 
-::: fig The update of [eq:precision-form] drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. Arrow labels give what multiplies a signal in transit, so the sensory error returns scaled by $g'(d)$ and the prior error returns unchanged. The diagram assumes the required derivative and precisions are available. The final sum is multiplied by the mobility ν to give the continuous update.
+::: fig The update of [eq:precision-form] drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. At each error node, $+$ marks the input it adds and $-$ the input it subtracts. Arrow labels give what multiplies a signal in transit, so the sensory error returns scaled by $g'(d)$ and the prior error returns unchanged. The diagram assumes the required derivative and precisions are available. The final sum is multiplied by the mobility ν to give the continuous update.
 <svg viewBox="0 0 660 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A predictive coding circuit: an estimate unit sends a prediction down to a sensory error unit and receives a weighted error back, while a prior error unit compares the estimate with the prior expectation.">
   <rect x="1" y="1" width="658" height="258" fill="#fdfcf9" stroke="#e4e1d9"/>
 
@@ -327,6 +390,11 @@ of [lesson:2.1]. Give each quantity a unit and each multiplication a connection.
   <path d="M420 172 L420 96" fill="none" stroke="#3c3c42" stroke-width="1.6" marker-end="url(#ah)"/>
   <path d="M400 92 C330 126 240 100 176 78" fill="none" stroke="#2c5f8a" stroke-width="1.8" marker-end="url(#ahb)"/>
   <text x="306" y="112" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#2c5f8a">&#215; 1</text>
+
+  <text x="118" y="170" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="15" font-weight="600" fill="#3c3c42">&#8722;</text>
+  <text x="112" y="190" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="15" font-weight="600" fill="#3c3c42">+</text>
+  <text x="384" y="62" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="15" font-weight="600" fill="#3c3c42">&#8722;</text>
+  <text x="432" y="114" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="15" font-weight="600" fill="#3c3c42">+</text>
 </svg>
 :::
 
@@ -360,7 +428,7 @@ prediction errors.
 
 The literature usually says *hidden causes* here rather than hidden states. It
 means the same thing, and the choice of word is a matter of emphasis: "state" is
-what the world is in, "cause" is what the world did to the senses. Week&nbsp;1's
+what the world is in, "cause" is what the world did to the senses. [week:1]'s
 $s$, Week&nbsp;2's $d$ and the literature's causes are one object under three
 names.
 :::
@@ -375,8 +443,7 @@ requires a covariance matrix, so communication and storage requirements change.
 [week:5] examines that extension. [week:3] addresses learning model parameters
 rather than treating them as known.
 
-::: fig Vary the two precisions and watch the posterior move. The mode is what the update of this lesson finds; the mean is what it does not.
-<div class="widget" data-widget="precision-posterior"></div>
+::: widget precision-posterior | Vary the two precisions and watch the posterior move. The mode is what the update of this lesson finds; the mean is what it does not.
 :::
 
 ::: exercise Where the curvature comes from
@@ -415,7 +482,7 @@ channel's precision *expressed about the state* rather than about the
 observation, converted by the same $g'$ that appears in the update, squared
 because a precision is a reciprocal squared quantity. Dropping the $g''$ term and
 keeping only $-\Pi_p - \Pi_u g'^2$ is the Gauss-Newton approximation, and
-Week&nbsp;4 will meet it again as the curvature of a Laplace approximation.
+[week:4] will meet it again as the curvature of a Laplace approximation.
 :::
 
 ::: exercise Two ears

@@ -10,6 +10,10 @@ reports a false clean. Adds the rules specific to this course on top.
 
 Measured on the built site, never on content/. A tell introduced by the renderer
 is still a tell, and a budget measured on source misses the zones a reader meets.
+
+Exit code 1 means a HARD rule was broken (an em-dash or a dash used as sentence
+punctuation). check_all.py treats that as blocking. The census and the banned
+vocabulary are candidates to read and never change the exit code.
 """
 import os
 import re
@@ -63,12 +67,16 @@ def prose_of(path):
     for pat in (r"<pre.*?</pre>", r"<code.*?</code>", r"<svg.*?</svg>",
                 r'<div class="eqn".*?</div>\s*</div>', r"<figcaption.*?</figcaption>"):
         body = re.sub(pat, " ", body, flags=re.S)
-    text = re.sub(r"<[^>]+>", " ", body)
     # KaTeX renders in the browser, so the static HTML still holds raw LaTeX.
     # A minus sign inside maths is not a spaced hyphen; strip maths before
     # measuring punctuation, or every equation reports as a style failure.
-    text = re.sub(r"\$\$.+?\$\$", " ", text, flags=re.S)
+    # Strip it BEFORE the tags: a `<` inside maths, as in `$T(1) - 1 < 0$`,
+    # otherwise opens a fake tag that runs to the next `>`, swallows the
+    # closing dollar and the prose after it, and leaves the maths minus sign
+    # exposed to the punctuation rules.
+    text = re.sub(r"\$\$.+?\$\$", " ", body, flags=re.S)
     text = re.sub(r"(?<!\$)\$[^\$\n]+?\$", " ", text)
+    text = re.sub(r"<[^>]+>", " ", text)
     return re.sub(r"\s+", " ", text)
 
 

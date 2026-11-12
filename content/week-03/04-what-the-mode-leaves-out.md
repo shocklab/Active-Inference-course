@@ -33,6 +33,17 @@ $$
 $$ {#fisher}
 
 the average over the posterior $p(d \mid u; \omega)$ at the current parameters.
+
+The first step differentiates under the integral sign. For a fixed observation $u$
+and parameters $(d_p, \theta, \Sigma_p, \Sigma_u)$ in a compact subset of
+$\mathbb R \times (0, \infty)^3$, so that $d_p$ is bounded and $\theta$, $\Sigma_p$ and
+$\Sigma_u$ are each bounded above and bounded away from zero, that is justified by one
+integrable bound on $|\partial p(d, u;\omega)/\partial\omega|$.
+The parameter derivatives multiply $p(d, u; \omega)$ by polynomials in $d$ and
+$1/d$. Near $d = 0$ the likelihood contains $\exp\!\big(-(u - \theta/d^{2})^2/(2\Sigma_u)\big)$,
+which falls like $\exp(-C/d^{4})$ for some $C > 0$ and so goes to zero faster than any
+power of $1/d$ grows; at large $d$ the prior's Gaussian tail goes to zero faster than
+any power of $d$ grows.
 :::
 
 The slope of the log evidence is the posterior average of the same partial derivative
@@ -59,6 +70,11 @@ down.
 One trial proves little. By [lesson:3.1], a rule is judged by where its drift
 vanishes and whether that zero attracts.
 
+::: definition Score
+The **score** of a parameter is the slope of the log evidence in that parameter,
+$\partial\ln p(u; \omega)/\partial\omega$, as a function of the observation $u$.
+:::
+
 ::: derivation The score has mean zero
 Suppose the world draws $u$ from $p(u; \omega^{*})$, the model's own evidence at some
 true parameter $\omega^{*}$. The expected slope of the log evidence at the truth is
@@ -69,10 +85,14 @@ $$
 \;=\; \frac{\partial}{\partial \omega}\int p(u; \omega)\,\mathrm du\,\bigg|_{\omega^{*}}
 \;=\; \frac{\partial}{\partial\omega}\,1 \;=\; 0 .
 $$
+
+The second equality moves the derivative outside an integral over $u$. Unlike the
+interchange in [eq:fisher], which has a fixed $u$, this one needs a bound that holds
+over all observations as well, and the lesson assumes it rather than proving it. The
+derivation of the drift below makes the same assumption.
 :::
 
-The slope of the log evidence is called the **score**, and this is the statement that
-its mean is zero at the true parameter. Combined with [eq:fisher], it says that a rule
+So the score has mean zero at the true parameter. Combined with [eq:fisher], it says that a rule
 which averages $\partial\ell/\partial\omega$ over the posterior, rather than reading it
 at the mode, has zero drift at the truth whenever the world is one of the model's own
 settings.
@@ -89,7 +109,8 @@ instead, and from here on is called the **point rule**.
 :::
 
 The animal does not have the posterior average; the simulations compute it on every
-trial by quadrature over the posterior, on 801 points, so that the two rules can be
+trial by quadrature over the posterior, on at least 801 points and more where the
+result has not stopped changing, so that the two rules can be
 compared on the same trials. Nothing guarantees zero drift at the truth for the point
 rule.
 
@@ -123,7 +144,7 @@ vanishes there, and where the divergence curves upwards, $\varphi' < 0$ and the 
 attracts. The score argument above is the first half of this; the second half is why
 the posterior-averaged rule returns to the truth after a disturbance.
 
-## The linear case, exactly
+## The linear case
 
 In a linear Gaussian model every expectation can be done by hand, so the size of the
 bias can be computed exactly. Let the world draw $d$ from $\mathcal N(d_p, \Sigma_p^{*})$
@@ -349,7 +370,7 @@ world, sources at $d_p^{*} = {{w1_loc:.0f}}$, the posterior-averaged rule's drif
 truth comes out of the quadrature as ${{w1_post_grad_truth:sci1}}$, which is zero to
 rounding.
 
-## Where the bias comes from
+## The source of the bias
 
 Both rules use the same per-trial derivative. Write it as a function of the state,
 $\psi(d) = \partial\ell(d, u; \omega)/\partial\omega$, for one trial and the current
@@ -472,13 +493,18 @@ parameters of discrete models, which is the simplest way to carry that uncertain
 ## Expectation maximisation
 
 The posterior-averaged rule is a stochastic, online form of an algorithm statisticians
-use to fit models with unobserved variables. **Expectation maximisation**, or EM,
-alternates two steps from the current parameter $\omega_{\text{old}}$:
+use to fit models with unobserved variables, given its general form by
+[Dempster, Laird and Rubin (1977)](https://doi.org/10.1111/j.2517-6161.1977.tb01600.x).
+
+::: definition Expectation maximisation
+**Expectation maximisation**, or EM, alternates two steps from the current parameter
+$\omega_{\text{old}}$:
 
 - the E step computes the posterior $p(d \mid u; \omega_{\text{old}})$;
 - the M step chooses the new parameter to maximise
   $\mathbb E_{p(d \mid u;\, \omega_{\text{old}})}\big[\ell(d, u; \omega)\big]$, the log joint
   averaged over that fixed posterior.
+:::
 
 At $\omega = \omega_{\text{old}}$ the gradient of the M step's objective is the
 posterior average of $\partial\ell/\partial\omega$, which by [eq:fisher] is the slope of
@@ -498,7 +524,12 @@ displace by order $\beta$. The first changes where the drift vanishes, and that 
 bias computed above.
 [Buckley et al. (2017)](https://doi.org/10.1016/j.jmp.2017.09.004), in their
 introduction, trace the free energy back to work by Hinton and colleagues in which a
-function like it implements a variant of EM.
+function like it implements a variant of EM: the Helmholtz machine of
+[Dayan, Hinton, Neal and Zemel (1995)](https://doi.org/10.1162/neco.1995.7.5.889), which
+fits its parameters by maximising a lower bound on the probability of the
+observations, and [Neal and Hinton (1998)](https://doi.org/10.1007/978-94-011-5014-9_12),
+who justify incremental variants of EM that update the parameters after each
+observation, as the posterior-averaged rule does.
 
 ## Hyperpriors
 
@@ -587,8 +618,7 @@ In the widget the world's sensory variance is $\Sigma_u^{*} = {{w3_vu_world}}$, 
 times what the animal believes. The animal learns $\Sigma_u$ alone with
 $\beta = {{w3_beta}}$, under either rule, on the same sequence of trials.
 
-::: fig Learning the precision of a noisier ear. The learned sensory variance across trials under the point rule and the posterior-averaged rule, against the world's value. The readout gives the ear's share of the curvature at the start, at the truth, and under each learned value.
-<div class="widget" data-widget="precision-learning"></div>
+::: widget precision-learning | Learning the precision of a noisier ear. The learned sensory variance across trials under the point rule and the posterior-averaged rule, against the world's value. The readout gives the ear's share of the curvature at the start, at the truth, and under each learned value.
 :::
 
 The posterior-averaged rule reaches ${{w3_post_final:.4f}}$ by the last trial and

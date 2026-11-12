@@ -31,7 +31,7 @@ Bayes' theorem specifies the posterior for this fixed model and observation. Com
 ## Four probability distributions
 
 ::: notation
-$P(s)$, the prior :: What the agent expects before it looks. In this framework a prior is read as the agent's own commitment rather than as a measured frequency in the world. That reading is a choice, and Week&nbsp;12 returns to what it costs.
+$P(s)$, the prior :: What the agent expects before it looks. In this framework a prior is read as the agent's own commitment rather than as a measured frequency in the world. That reading is a choice, and [week:12] returns to what it costs.
 $P(o \mid s)$, the likelihood :: Read as a function of $s$ for fixed $o$, this scores how well each state would account for the data you actually got. It is not a distribution over $s$ and does not sum to one over $s$.
 $P(o)$, the evidence :: The probability the model assigns to seeing $o$ at all, having averaged over every state it thinks possible. Its negative logarithm is the surprise from [lesson:1.1].
 $P(s \mid o)$, the posterior :: The updated belief. Prior reweighted by how well each state explains the data, then renormalised.
@@ -46,11 +46,11 @@ When an observation arrives you pick out the corresponding row and read it
 across the states. That row is not a distribution and there is no reason at all
 for it to sum to one. The axes determine which variable is fixed and which varies.
 
-::: mn Rows and columns
-From Week&nbsp;9 this matrix is written $\mathbf{A}$, with
-$A_{ij} = P(o = i \mid s = j)$, and the problems at the end of this week already
-use that name. Columns sum to one. The discrete chapters use the same convention.
-:::
+Write this table as the matrix $\mathbf{A}$, with
+$A_{ij} = P(o = i \mid s = j)$: the row index $i$ is the observation and the
+column index $j$ is the state, so each column sums to one. The problems at the
+end of this week use that name, and the discrete models from [week:9] use the
+same matrix with the same convention.
 
 The evidence averages the likelihood of the observation across the model's possible states, weighted by the prior. Direct enumeration visits each state, although a factorisation can let an algorithm reuse partial calculations.
 
@@ -79,9 +79,9 @@ by the prior:
 $$
 \begin{aligned}
 P(o \mid s)P(s) \;=\; \big(\,
-&0.70 \times 0.08,\;\;
-0.15 \times 0.22,\;\;
-0.02 \times 0.70 \,\big) \\[2pt]
+&{{in_A_tf_leo:.2f}} \times {{in_prior_leo:.2f}},\;\;
+{{in_A_tf_bab:.2f}} \times {{in_prior_bab:.2f}},\;\;
+{{in_A_tf_not:.2f}} \times {{in_prior_not:.2f}} \,\big) \\[2pt]
 \;=\; \big(\,& {{num_tawny_leopard:.3f}},\;\; {{num_tawny_baboon:.3f}},\;\; {{num_tawny_nothing:.3f}} \,\big).
 \end{aligned}
 $$
@@ -144,11 +144,11 @@ Worked out term by term for the tawny flash, using the posterior
 
 | state | $P(s\mid o)$ | $P(s)$ | ratio | $P(s\mid o)\ln(\text{ratio})$ |
 |---|---|---|---|---|
-| leopard | {{post_tawny_leopard:.4f}} | 0.08 | {{ratio_tawny_leopard:.3f}} | $+${{klterm_tawny_leopard:.4f}} |
-| baboon | {{post_tawny_baboon:.4f}} | 0.22 | {{ratio_tawny_baboon:.3f}} | $+${{klterm_tawny_baboon:.4f}} |
-| nothing | {{post_tawny_nothing:.4f}} | 0.70 | {{ratio_tawny_nothing:.3f}} | {{klterm_tawny_nothing:.4f}} |
+| leopard | {{post_tawny_leopard:.4f}} | {{in_prior_leo:.2f}} | {{ratio_tawny_leopard:.3f}} | $+${{klterm_tawny_leopard:.4f}} |
+| baboon | {{post_tawny_baboon:.4f}} | {{in_prior_bab:.2f}} | {{ratio_tawny_baboon:.3f}} | $+${{klterm_tawny_baboon:.4f}} |
+| nothing | {{post_tawny_nothing:.4f}} | {{in_prior_not:.2f}} | {{ratio_tawny_nothing:.3f}} | {{klterm_tawny_nothing:.4f}} |
 
-summing to ${{info_tawny:.3f}}$ nats. Notice that the last term is **negative**:
+summing to ${{info_tawny:.3f}}$ nats. Notice that the last term is negative:
 the observation pushed probability mass *off* the "nothing" hypothesis, and a
 state whose probability falls contributes negatively. Individual terms of a KL
 divergence carry either sign. Only the total is guaranteed non-negative, and that
@@ -158,7 +158,7 @@ For the shaking branch the same computation gives ${{info_branch:.3f}}$ nats, an
 for quiet ${{info_quiet:.3f}}$. The observation that surprised you most also taught you most,
 which is intuitive and, as the exercises will show, not a theorem.
 
-::: widget bayes-discrete | The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.
+::: widget bayes-discrete | The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the channel-noise slider and watch it stop responding to data at all.
 :::
 
 ## Varying the observation channel
@@ -174,7 +174,7 @@ $$ {#ambiguity}
 so $\alpha = 0$ leaves the matrix as printed above and $\alpha = 1$ replaces it
 with one in which every state predicts every observation equally. At
 $\alpha = 0.3$ the leopard column, for instance, becomes
-$0.7 \times (0.70, 0.25, 0.05) + 0.3 \times (\tfrac13,\tfrac13,\tfrac13)$. Each
+${{in_amb_keep:.1f}} \times ({{in_A_tf_leo:.2f}}, {{in_A_br_leo:.2f}}, {{in_A_qu_leo:.2f}}) + {{in_amb_alpha:.1f}} \times (\tfrac13,\tfrac13,\tfrac13)$. Each
 column still sums to one, because both $\mathbf{A}$'s columns and $U$'s do, and a
 convex combination of two distributions is a distribution.
 
@@ -228,10 +228,10 @@ $P(s) = (0.40,\ 0.30,\ 0.30)$. You observe **quiet**. Compute the evidence, the
 posterior, and the surprise, and compare the surprise with the ${{surprise_quiet:.3f}}$ nats
 obtained under the original prior.
 ---solution---
-The quiet row is $(0.05,\ 0.10,\ 0.90)$. Numerators:
+The quiet row is $({{in_A_qu_leo:.2f}},\ {{in_A_qu_bab:.2f}},\ {{in_A_qu_not:.2f}})$. Numerators:
 
 $$
-(0.05 \times 0.40,\ 0.10 \times 0.30,\ 0.90 \times 0.30)
+({{in_A_qu_leo:.2f}} \times {{in_nervous_leo:.2f}},\ {{in_A_qu_bab:.2f}} \times {{in_nervous_bab:.2f}},\ {{in_A_qu_not:.2f}} \times {{in_nervous_not:.2f}})
 = ({{num_quiet_nervous_leopard:.3f}},\ {{num_quiet_nervous_baboon:.3f}},\ {{num_quiet_nervous_nothing:.3f}}).
 $$
 
@@ -294,7 +294,7 @@ Nothing links them pointwise. An observation is surprising when the model
 thought it unlikely; it is informative when the states disagree about it. A
 sensory channel can easily be rare and useless at once, and an agent choosing
 where to point its eyes had better be able to tell the difference. That
-distinction becomes the two terms of expected free energy in Week&nbsp;10.
+distinction becomes the two terms of expected free energy in [week:10].
 :::
 
 ::: checkpoint

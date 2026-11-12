@@ -24,15 +24,24 @@ import mdx      # noqa: E402
 import theme    # noqa: E402
 
 
+_NUMBERS = {}
+
+
 def load_numbers(week_dir):
-    """Import content/week-NN/values.py and return its VALUES dict, if present."""
+    """Import content/week-NN/values.py and return its VALUES dict, if present.
+
+    Executed once per week per build. It used to run once per lesson, and
+    Week 3's values.py runs its simulations on import, so five lessons cost five
+    runs of the same computation."""
     path = os.path.join(week_dir, "values.py")
     if not os.path.exists(path):
         return {}
-    spec = importlib.util.spec_from_file_location("numbers_mod", path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return dict(mod.VALUES)
+    if path not in _NUMBERS:
+        spec = importlib.util.spec_from_file_location("numbers_mod", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _NUMBERS[path] = dict(mod.VALUES)
+    return _NUMBERS[path]
 
 CONTENT = os.path.join(ROOT, "content")
 OUT = os.path.join(ROOT, "docs")
@@ -106,6 +115,13 @@ def topbar(root, label="Contents"):
     )
 
 
+REFERENCE_PAGES = [
+    ("notation.html", "Notation"),
+    ("orientation.html", "How to use this course"),
+    ("ai-use.html", "AI use and attribution"),
+]
+
+
 def sidenav(weeks, root, cur_week=None, cur_href=None, page_toc=None):
     parts, seen = [], None
     parts.append('<nav class="sidenav"><div class="navhd">Contents</div>')
@@ -124,12 +140,12 @@ def sidenav(weeks, root, cur_week=None, cur_href=None, page_toc=None):
                 lc = " cur" if cur_href == ls.href else ""
                 parts.append(f'<a class="{lc.strip()}" href="{root}{ls.href}">{ls.title}</a>')
             parts.append("</div>")
-    parts.append(
-        f'<div class="part">Reference</div>'
-        f'<a class="wk" href="{root}notation.html"><span class="n">&#167;</span>Notation</a>'
-        f'<a class="wk" href="{root}orientation.html"><span class="n">&#167;</span>How to use this course</a>'
-        f'<a class="wk" href="{root}ai-use.html"><span class="n">&#167;</span>AI use and attribution</a>'
-    )
+    # A reference page marks itself as current, as a lesson does; without this
+    # the sidebar of the notation page gave no sign of where the reader was.
+    parts.append('<div class="part">Reference</div>')
+    for href, label in REFERENCE_PAGES:
+        cur = " cur" if cur_href == href else ""
+        parts.append(f'<a class="wk{cur}" href="{root}{href}"><span class="n">&#167;</span>{label}</a>')
     parts.append("</nav>")
     return "".join(parts)
 
@@ -294,7 +310,10 @@ def render_week_index(week, weeks, flat):
             "<code>OUTLINE.md</code> in the repository.</p></div>"
         )
 
-    idx = [w for w in weeks if w.lessons or True]
+    # Every week, written or not, gets an index page ("Not yet written" for an
+    # empty one), so previous/next walks the whole list. Restricting it to weeks
+    # with lessons would make .index() fail when rendering an empty week.
+    idx = list(weeks)
     pos = [w.n for w in idx].index(week.n)
     prevw = idx[pos - 1] if pos > 0 else None
     nextw = idx[pos + 1] if pos + 1 < len(idx) else None
@@ -380,17 +399,29 @@ def render_index(data, weeks):
     )
 
 
-def render_standalone(name, weeks):
+class _NoWeek:
+    """Stands in for the citing week when a page belongs to none, so that
+    [lesson:W.L] always renders as "Week W, Lesson L"."""
+    n = None
+
+
+def render_standalone(name, weeks, flat=()):
     src = os.path.join(CONTENT, f"{name}.md")
     if not os.path.exists(src):
         return None
     raw = open(src, encoding="utf-8").read()
     html, meta, doc = mdx.render(raw)
     root = ""
+    # Cross-references work here as they do in lessons. They used to reach the
+    # notation page as literal "[lesson:1.1]" text, because only lessons were
+    # passed through the resolver.
+    page = _NoWeek()
+    page._self_href = f"{name}.html"
+    html = resolve_internal_links(html, page, weeks, flat, root, name)
     body = (
         topbar(root)
         + '<div class="shell">'
-        + sidenav(weeks, root)
+        + sidenav(weeks, root, None, f"{name}.html")
         + '<main class="maincol"><header class="ahead">'
         + f'<div class="eyebrow">{meta.get("eyebrow", "Reference")}</div>'
         + f'<h1>{meta.get("title", name)}</h1>'
@@ -438,7 +469,7 @@ def main():
     write(os.path.join(OUT, "index.html"), render_index(data, weeks))
     n += 1
     for name in ("notation", "orientation", "ai-use"):
-        page = render_standalone(name, weeks)
+        page = render_standalone(name, weeks, flat)
         if page:
             write(os.path.join(OUT, f"{name}.html"), page)
             n += 1

@@ -109,9 +109,11 @@ docstring so nobody deletes a check without knowing what it was for.
 | `check_references.py` | a DOI that does not resolve or whose metadata drifted | two citations were wrong from memory, including an author list |
 | notebooks | a notebook that no longer runs | the published Colab links are only as good as the last execution |
 
-Blocking stages fail the run. Advisory stages (`outline`, `prose`, `definitions`)
-print a queue to read, never a verdict to obey: this course teaches distinctions,
-so a high keep-rate on the "X, not Y" family is correct, not a defect.
+Blocking stages fail the run. `prose` blocks on em-dashes and dash substitutes
+only; its per-1,000-word census of other tells is advisory. Advisory stages
+(`outline`, `definitions`, the rest of `prose`) print a queue to read, never a
+verdict to obey: this course teaches distinctions, so a high keep-rate on the
+"X, not Y" family is correct, not a defect.
 
 ### Numbers are computed, never typed
 

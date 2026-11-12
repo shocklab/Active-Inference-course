@@ -184,21 +184,54 @@ So the slope of the settled log joint can be read off without knowing how the mo
 would move. The animal evaluates the partial derivative at the state it has already
 inferred.
 
+The mode does move, and the same implicit-function argument gives how far.
+
+::: derivation How the mode moves with the prior location
+Write $\ell_d$ for $\partial\ell/\partial d$. The mode satisfies
+$\ell_d\big(\hat d(\omega), \omega\big) = 0$ for every $\omega$ near the current value.
+Differentiating this identity in $\omega$ by the chain rule,
+
+$$
+\ell''\,\frac{\mathrm d\hat d}{\mathrm d\omega} \;+\; \frac{\partial \ell_d}{\partial\omega} \;=\; 0 ,
+\qquad\text{so}\qquad
+\frac{\mathrm d\hat d}{\mathrm d\omega} \;=\; \frac{\partial \ell_d/\partial\omega}{-\ell''} ,
+$$
+
+with both derivatives evaluated at $d = \hat d$. For the prior location, the only term
+of $\ell_d$ that contains $d_p$ is $(d_p - d)/\Sigma_p$; the normaliser $\ln Z_p$
+depends on $d_p$ but not on $d$, so it drops out of $\ell_d$. Hence
+$\partial\ell_d/\partial d_p = 1/\Sigma_p$ and
+
+$$
+\frac{\partial\hat d}{\partial d_p} \;=\; \frac{1/\Sigma_p}{-\ell''} \;>\; 0 ,
+$$ {#mode-shift}
+
+positive because $-\ell'' > 0$ at a strict maximum.
+:::
+
+Moving the prior location outward moves the mode outward. At Week&nbsp;2's mode
+$\ell'' = {{ell_dd_w2:.4f}}$, so [eq:mode-shift] is ${{dhat_ddp_w2:.4f}}$, which agrees
+with a finite-difference derivative of the mode to six decimal places.
+
 Two cautions about "the mode". Week&nbsp;2's posterior can have more than one local
 maximum, and the envelope theorem holds at whichever one inference stopped on;
 $\hat\ell$ is the log joint on that branch. And a climb with finite steps can reach
 a different local maximum than the continuous ascent would, as [lesson:2.3] showed.
-The simulations this week run Week&nbsp;2's capped ascent from the prior location
-until a step falls below $10^{-12}$, giving up after 2000 steps. In the
+The simulations this week run Week&nbsp;2's capped ascent until a step falls below
+$10^{-12}$, giving up after 2000 steps. The climb starts at the prior location when
+that is positive, and otherwise at the mean of the truncated prior, which is positive
+for every real $d_p$. In the
 {{n_runs_checked}} runs whose numbers the lessons quote, every trial met that
 stopping rule, and every settled state agreed with the highest mode of its trial,
 found by a separate grid search, to within ${{mode_gap_max:sci1}}$. That is a check of
 those runs, not a guarantee for every slider setting; the widgets add a readout row
-if a trial runs out of steps. A trial that runs out of steps changes no parameter, in
-the widgets, the notebooks and `values.py` alike, so that an unfinished state never
-feeds a learning rule.
+if a trial runs out of steps. A trial that runs out of steps changes no parameter
+whose update is read at the mode, in the widgets, the notebooks and `values.py`
+alike, so that an unfinished state never feeds a learning rule. The
+posterior-averaged rule of [lesson:3.4] does not use the mode, and it updates on
+every trial.
 
-## Why the log joint and not the evidence
+## The log joint in place of the evidence
 
 The number that says how well a set of parameters accounts for a sound is the
 evidence, $p(u; \omega) = \int_0^\infty p(d, u; \omega)\,\mathrm dd$, the denominator of
@@ -288,12 +321,33 @@ d_p \;\leftarrow\; d_p + \frac{\beta}{\Sigma_p}\cdot\frac{\Sigma_p}{\Sigma_p + \
 \qquad
 \kappa \;=\; \frac{\beta}{\Sigma_p + \Sigma_u} .
 $$ {#ema}
+
+Applying [eq:ema] once per trial unwinds it. Write $d_p^{(n)}$ for the location after
+trial $n$, with $d_p^{(0)}$ the starting value. The first two trials give
+
+$$
+d_p^{(1)} \;=\; (1-\kappa)\,d_p^{(0)} + \kappa u_1 ,
+\qquad
+d_p^{(2)} \;=\; (1-\kappa)^{2}\,d_p^{(0)} + \kappa(1-\kappa)\,u_1 + \kappa u_2 ,
+$$
+
+and substituting the expression for $d_p^{(n-1)}$ into [eq:ema] each time gives, by
+induction,
+
+$$
+d_p^{(n)} \;=\; (1-\kappa)^{n}\,d_p^{(0)} \;+\; \kappa\sum_{k=0}^{n-1}(1-\kappa)^{k}\,u_{n-k} .
+$$ {#ema-unwound}
+
+For $\kappa \neq 0$ the geometric series gives $\kappa\sum_{k=0}^{n-1}(1-\kappa)^{k} = 1 - (1-\kappa)^{n}$,
+so the weights on the observations and the weight $(1-\kappa)^{n}$ on the starting
+value add to one.
 :::
 
 The factor $1/\Sigma_p$ in the update cancelled against the $\Sigma_p$ in the
 shrinkage factor, though $\Sigma_p$ is still in $\kappa$. For $0 < \kappa < 1$ the
-prior location is an exponentially weighted average of the raw observations: trial
-$n - k$ carries weight $\kappa(1-\kappa)^{k}$, so older trials fade geometrically.
+prior location is an exponentially weighted average of the raw observations: by
+[eq:ema-unwound], trial $n - k$ carries weight $\kappa(1-\kappa)^{k}$, so older trials
+fade geometrically, and the starting value's weight $(1-\kappa)^{n}$ goes to zero.
 (At $\kappa = 1$ the memory is the last trial alone, and for $\kappa > 1$ the weights
 alternate in sign.) The inferred states dropped out of the final expression, but
 only because the mode is linear in $u_n$ here; in the nonlinear model they do not.
@@ -351,7 +405,7 @@ world with the same rate gives ${{sd_dp_lin_sim:.4f}}$. For small $\kappa$, halv
 $\beta$ about doubles the memory and reduces the fluctuation by a factor of about
 $\sqrt 2$.
 
-## Where a learning rule comes to rest
+## Resting points of a learning rule
 
 Every learning rule this week has the form [eq:slow]: a step $\beta F(\omega, u_n)$,
 where $F$ is computed from the trial's observation and the current parameter. The
@@ -387,7 +441,22 @@ x_{n+1} \;=\; x_n + \beta\varphi'(\omega^{\circ})\,x_n + \beta\xi_n
 $$
 
 This is the recursion of [eq:ema], with $\beta\xi_n$ in place of
-$\kappa(u_n - \bar u)$. Within that approximation, three conclusions follow from the
+$\kappa(u_n - \bar u)$. The derivation of [eq:ema-var] used the independence of the
+newest term from $x_n$ only to drop the cross term, and a mean of zero given the
+history is enough for that. Write $\mathcal H_n$ for everything that happened before
+trial $n$; it fixes $x_n$ and every earlier remainder $\xi_m$, $m < n$. Averaging first
+over $u_n$ with $\mathcal H_n$ held fixed, then over $\mathcal H_n$ (the tower
+property of conditional expectation),
+
+$$
+\mathbb E[x_n\xi_n] \;=\; \mathbb E\big[x_n\,\mathbb E(\xi_n \mid \mathcal H_n)\big] \;=\; 0,
+\qquad
+\mathbb E[\xi_m\xi_n] \;=\; \mathbb E\big[\xi_m\,\mathbb E(\xi_n \mid \mathcal H_n)\big] \;=\; 0
+\quad (m < n) .
+$$
+
+So the cross term still vanishes, and remainders on different trials are
+uncorrelated. Within that approximation, three conclusions follow from the
 running average.
 If $\varphi'(\omega^{\circ}) < 0$ and $0 < \kappa < 2$, the expected deviation
 $\mathbb E_{P^*}[x_n]$ shrinks by a factor $1 - \kappa$ per trial, so $\omega^{\circ}$
@@ -490,8 +559,7 @@ except that the ear is sharper: $\Sigma_u^{*} = \Sigma_u = {{w1_vu}}$ for both p
 and model, Week&nbsp;2's sharp setting. The animal learns $d_p$ alone, with
 $\beta = {{w1_beta}}$, over {{n_trials}} trials.
 
-::: fig Inference within a trial, learning across trials. Left, the state settling on the trial chosen by the trial slider, starting from the prior location the animal held at that moment. Right, the prior location across all trials, with the chosen trial marked.
-<div class="widget" data-widget="two-timescales"></div>
+::: widget two-timescales | Inference within a trial, learning across trials. Left, the state settling on the trial chosen by the trial slider, starting from the prior location the animal held at that moment. Right, the prior location across all trials, with the chosen trial marked.
 :::
 
 On the first trial the state settles in {{w1_first_steps}} steps, at

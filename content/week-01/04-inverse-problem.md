@@ -52,7 +52,7 @@ the problem evaporates.
 Independent prior factors need not remain independent after observing data. We can test that possibility with two competing causes.
 
 Take two independent causes. This is a new and smaller model than the three-
-state one of Lesson 3, chosen because two competing causes are the fewest that
+state one of [lesson:1.3], chosen because two competing causes are the fewest that
 can compete: a **gust** of wind, and a **baboon**. Either can
 make a branch shake. Each is uncommon on its own:
 
@@ -66,7 +66,7 @@ We can construct the likelihood from independent attempts to produce the observa
 Suppose each cause, when present, makes its own independent attempt to shake the
 branch, and succeeds with probability $w$. Suppose also the branch sometimes
 shakes for no reason at all, with probability $\lambda$; treat that as a third,
-always-present cause. Then the branch fails to shake only if **every** attempt
+always-present cause. Then the branch fails to shake only if every attempt
 fails, and those failures are independent, so their probabilities multiply:
 
 $$
@@ -78,7 +78,7 @@ right: it makes no attempt and so cannot fail. Subtracting from one gives the
 probability that the branch does shake, and with $w = 0.9$ and $\lambda = 0.01$:
 
 $$
-P(o = 1 \mid s) \;=\; 1 - (1 - 0.9\,s_{\text{gust}})(1 - 0.9\,s_{\text{bab}})(1 - 0.01).
+P(o = 1 \mid s) \;=\; 1 - (1 - {{in_noisy_w:.1f}}\,s_{\text{gust}})(1 - {{in_noisy_w:.1f}}\,s_{\text{bab}})(1 - {{in_noisy_leak:.2f}}).
 $$ {#noisy-or}
 
 This construction is called a **noisy-OR**, and it generalises without effort: for
@@ -101,7 +101,7 @@ $$
 P(s_{\text{gust}} = 1 \mid o) \;=\; P(s_{\text{bab}} = 1 \mid o) \;=\; {{noisy_marg_gust:.3f}},
 $$
 
-up from $0.1$. Now compare the joint probability with the product of these marginals. If the posterior
+up from ${{in_noisy_prior:.1f}}$. Now compare the joint probability with the product of these marginals. If the posterior
 factorised, the probability of *both* causes being present would be the product
 of the marginals, ${{noisy_marg_gust:.3f}}^2 = {{noisy_prod_marginals:.3f}}$. The actual value in the table is ${{noisy_post_11:.3f}}$, smaller by a factor
 of {{noisy_collapse_ratio:.1f}}.
@@ -167,7 +167,7 @@ a tour of them.
 **Solve it exactly, where the model lets you.** Some pairings of prior and
 likelihood have posteriors in closed form. If the likelihood is Gaussian with
 known variance and the prior over the mean is Gaussian, the posterior is
-Gaussian and you can write down its parameters in two lines. This is **conjugacy**: a prior family and a likelihood family are conjugate when the posterior always lands back in the prior's family, so updating changes the parameters and never the form. That is stronger than merely having a closed form, and it is what lets the update be applied over and over without the expression growing. It is the backbone of Week&nbsp;2, and remains useful for models whose assumptions match the task.
+Gaussian and you can write down its parameters in two lines. This is **conjugacy**: a prior family and a likelihood family are conjugate when the posterior always lands back in the prior's family, so updating changes the parameters and never the form. That is stronger than merely having a closed form, and it is what lets the update be applied over and over without the expression growing. It is the backbone of [week:2], and remains useful for models whose assumptions match the task.
 
 **Sample from it.** Do not compute $P(s\mid o)$; draw from it. Markov chain
 Monte Carlo needs only ratios of posterior values, and the intractable $P(o)$
@@ -180,7 +180,7 @@ Sampling methods and optimisation methods can both provide evolving estimates.
 of distributions $Q(s)$ you can compute with, define a measure of how far $Q$ is
 from the true posterior, and descend it. Because the measure can be arranged so
 that the intractable term drops out, you can minimise a distance to something
-you cannot evaluate. That trick is variational inference, and the quantity you descend is the **free energy**. Week&nbsp;4 builds it, but the shape is already visible from [eq:two-kls]: it is the reverse divergence minus $\ln P(o)$, which makes it computable from $Q$ and the generative model alone, and an upper bound on the surprise. It occupies Week&nbsp;4 and everything after.
+you cannot evaluate. That trick is variational inference, and the quantity you descend is the **free energy**. [week:4] builds it, but its shape can be stated now. It is the divergence $\sum_s Q(s)\ln[Q(s)/P(s\mid o)]$, the expected log ratio of the approximation to the true posterior under the approximation, minus $\ln P(o)$. That makes it computable from $Q$ and the generative model alone, and an upper bound on the surprise. It occupies [week:4] and everything after.
 
 A variational distribution gives a current approximation during optimisation.
 That approximation may be useful before convergence, but convergence and accuracy
@@ -199,18 +199,18 @@ the true posterior is correlated and no product of marginals is.
 
 ## Comparing factorised approximations
 
-That question hides a choice, and the choice decides the answer. Make it explicit now, because Week&nbsp;4 rests on it.
+Measuring how far a factorised $Q$ is from the true posterior needs a measure of distance between distributions, and the choice of measure decides the answer. Make it explicit now, because [week:4] rests on it.
 
 The Kullback&ndash;Leibler divergence is not symmetric, so there are two ways to
-ask how far a factorised $Q$ sits from the true posterior $P$:
+ask how far a factorised $Q$ sits from the true posterior $P(s\mid o)$:
 
 $$
-D_{\mathrm{KL}}\big[P \,\|\, Q\big] = \sum_{s} P(s)\ln\frac{P(s)}{Q(s)},
+D_{\mathrm{KL}}\big[P \,\|\, Q\big] = \sum_{s} P(s\mid o)\ln\frac{P(s\mid o)}{Q(s)},
 \qquad
-D_{\mathrm{KL}}\big[Q \,\|\, P\big] = \sum_{s} Q(s)\ln\frac{Q(s)}{P(s)},
+D_{\mathrm{KL}}\big[Q \,\|\, P\big] = \sum_{s} Q(s)\ln\frac{Q(s)}{P(s\mid o)},
 $$ {#two-kls}
 
-with $s$ running over the four joint states of the table. Call the first the
+with $s$ running over the four joint states of the table and $o$ the observed shake. Inside the brackets, $P$ abbreviates the posterior $P(\cdot\mid o)$, not the prior. Call the first the
 **forward** direction and the second the **reverse**. They disagree, and not by a
 little.
 
@@ -221,23 +221,23 @@ logarithm:
 
 $$
 D_{\mathrm{KL}}[P \,\|\, Q]
-= \underbrace{\sum_s P(s)\ln P(s)}_{\text{minus the entropy of } P,\ \text{no } Q \text{ in it}}
-\; -\; \sum_{s} P(s)\big[\ln q_1(s_{\text{gust}}) + \ln q_2(s_{\text{bab}})\big].
+= \underbrace{\sum_s P(s\mid o)\ln P(s\mid o)}_{\text{minus the entropy of } P,\ \text{no } Q \text{ in it}}
+\; -\; \sum_{s} P(s\mid o)\big[\ln q_1(s_{\text{gust}}) + \ln q_2(s_{\text{bab}})\big].
 $$
 
 Only the second term can be optimised. In it, sum out the variable that does not
 appear:
 
 $$
-\sum_{s} P(s)\,\ln q_1(s_{\text{gust}})
+\sum_{s} P(s\mid o)\,\ln q_1(s_{\text{gust}})
 \;=\; \sum_{s_{\text{gust}}} P_1(s_{\text{gust}})\,\ln q_1(s_{\text{gust}}),
 $$
 
-where $P_1$ is the true marginal of the first cause, and likewise for the second.
+where $P_1$ is the true posterior marginal of the first cause, and likewise for the second.
 The problem has separated into two independent ones, each of the form "choose a
 distribution $q$ maximising $\sum_x p(x)\ln q(x)$". By **Gibbs' inequality**, which says that for any two distributions on the same set $\sum_x p(x)\ln q(x) \le \sum_x p(x)\ln p(x)$, with equality only when $q = p$, that is solved by $q = p$. (The inequality is itself just the non-negativity of $D_{\mathrm{KL}}[p\,\|\,q]$, rearranged.)
 
-So the forward-optimal $Q$ has **exactly the true marginals**, here
+So the forward-optimal $Q$ has exactly the true marginals, here
 ${{noisy_marg_gust:.4f}} $ for each cause, and leaves a gap of
 ${{noisy_gap_forward:.4f}}$ nats. This is a lemma, not an accident of these
 numbers: forward KL over a product family always returns the marginals.
@@ -255,8 +255,10 @@ fixed. The part of the reverse KL that depends on $q_1$ is
 
 $$
 J(q_1)=\sum_x q_1(x)\ln q_1(x)
--\sum_xq_1(x)\sum_yq_2(y)\ln P(x,y)+\text{const}.
+-\sum_xq_1(x)\sum_yq_2(y)\ln P(x,y)+\text{const},
 $$
+
+where $P(x,y)$ is the posterior table entry $P(s_{\mathrm{gust}}=x,s_{\mathrm{bab}}=y\mid o)$.
 
 The $q_2\ln q_2$ term is constant because $\sum_xq_1(x)=1$. Define
 $B(x)=\sum_yq_2(y)\ln P(x,y)$, an expected log probability. Add a Lagrange
@@ -317,7 +319,35 @@ interchangeably and the answer has stopped treating them that way.
 For comparison, score the product of the true posterior marginals, both
 marginals at ${{noisy_marg_gust:.4f}}$, under the reverse divergence and you get
 ${{noisy_gap_reverse_symmetric:.4f}}$ nats, higher than the asymmetric
-${{noisy_gap_reverse:.4f}}$. This compares two particular products; it does not establish that every symmetric product is worse.
+${{noisy_gap_reverse:.4f}}$. This compares two particular products; it does not establish that every symmetric product is worse. The next derivation establishes that.
+
+::: derivation Every symmetric product is worse
+A symmetric product gives both causes the same factor, $q_1(1)=q_2(1)=q$. Write $P_{ab}$ for the posterior entry with $s_{\mathrm{gust}}=a$ and $s_{\mathrm{bab}}=b$, and $J(q)$ for the reverse divergence of $Q=q_1q_2$ from $P$. The four entries of $Q$ are $(1-q)^2$, $q(1-q)$, $q(1-q)$ and $q^2$, so
+
+$$
+J(q)=\sum_{a,b}Q_{ab}\ln Q_{ab}-\sum_{a,b}Q_{ab}\ln P_{ab}.
+$$
+
+The first sum is minus the entropy of a product, which is the sum of the two factors' terms:
+
+$$
+\sum_{a,b}Q_{ab}\ln Q_{ab}=2\big[q\ln q+(1-q)\ln(1-q)\big].
+$$
+
+The second sum is a quadratic in $q$:
+
+$$
+\sum_{a,b}Q_{ab}\ln P_{ab}=(1-q)^2\ln P_{00}+q(1-q)\big(\ln P_{01}+\ln P_{10}\big)+q^2\ln P_{11}.
+$$
+
+Differentiate twice. The first sum gives $2[1/q+1/(1-q)]=2/[q(1-q)]$. In the second, $(1-q)^2$, $q(1-q)$ and $q^2$ have second derivatives $2$, $-2$ and $2$, so
+
+$$
+J''(q)=\frac{2}{q(1-q)}-2\ln\frac{P_{00}P_{11}}{P_{01}P_{10}}.
+$$ {#diag-curvature}
+
+From the table, $\ln[P_{00}P_{11}/(P_{01}P_{10})]={{noisy_diag_logratio:.4f}}$, which is negative because the posterior puts little mass on the two corners. The first term is at least $8$, its value at $q=1/2$, so $J''(q)\ge {{noisy_diag_fpp_min:.4f}}>0$ for every $q$ in $(0,1)$. A function with positive second derivative on an interval has at most one stationary point there, and that point is its minimum. Solving $J'(q)=0$ numerically puts it at $q={{noisy_diag_q:.4f}}$, where $J={{noisy_diag_kl:.4f}}$ nats. That is the smallest reverse divergence any symmetric product can reach, and it exceeds the asymmetric ${{noisy_gap_reverse:.4f}}$. The symmetric product of the true marginals scored above is one point on this curve, at $q={{noisy_marg_gust:.4f}}$.
+:::
 
 The reason is visible in the table. The true posterior puts its mass on the two
 states where exactly one cause fired, and almost none on $(1,1)$ or $(0,0)$. A
@@ -340,19 +370,19 @@ $P$ is large and $Q$ is small, so it insists on covering everything $P$ covers.
   <rect x="150" y="125" width="80" height="80" fill="#0f5f57" fill-opacity="0.90"/>
   <rect x="70" y="45" width="80" height="80" fill="#0f5f57" fill-opacity="0.90"/>
   <rect x="150" y="45" width="80" height="80" fill="#0f5f57" fill-opacity="0.11"/>
-  <text x="110" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">0.045</text>
-  <text x="190" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#ffffff">0.450</text>
-  <text x="110" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#ffffff">0.450</text>
-  <text x="190" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">0.055</text>
+  <text x="110" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">{{noisy_post_00:.3f}}</text>
+  <text x="190" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#ffffff">{{noisy_post_10:.3f}}</text>
+  <text x="110" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#ffffff">{{noisy_post_01:.3f}}</text>
+  <text x="190" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">{{noisy_post_11:.3f}}</text>
   <rect x="390" y="45" width="160" height="160" fill="none" stroke="#d3cfc4"/>
   <rect x="390" y="125" width="80" height="80" fill="#9c4d2f" fill-opacity="0.30"/>
   <rect x="470" y="125" width="80" height="80" fill="#9c4d2f" fill-opacity="0.11"/>
   <rect x="390" y="45" width="80" height="80" fill="#9c4d2f" fill-opacity="0.95"/>
   <rect x="470" y="45" width="80" height="80" fill="#9c4d2f" fill-opacity="0.34"/>
-  <text x="430" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">0.176</text>
-  <text x="510" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">0.061</text>
-  <text x="430" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#ffffff">0.566</text>
-  <text x="510" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">0.197</text>
+  <text x="430" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">{{noisy_revq_00:.3f}}</text>
+  <text x="510" y="172" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">{{noisy_revq_10:.3f}}</text>
+  <text x="430" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#ffffff">{{noisy_revq_01:.3f}}</text>
+  <text x="510" y="92" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#3c3c42">{{noisy_revq_11:.3f}}</text>
   <text x="60" y="92" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">baboon 1</text>
   <text x="60" y="172" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">baboon 0</text>
   <text x="110" y="224" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#6d6d75">gust 0</text>
@@ -363,11 +393,11 @@ $P$ is large and $Q$ is small, so it insists on covering everything $P$ covers.
 :::
 
 Which direction you minimise therefore decides whether your approximation hedges
-or commits. Week&nbsp;4 has to say which one active inference uses and why. One word of terminology, since it is easy to attach it to the wrong thing. **Mean-field** names the *factorisation*, the restriction of $Q$ to products of independent factors. It does not name the choice of divergence direction; those are two separate decisions, and this section has now shown that both of them cost something. Mean-field is the name of the first compromise, and you have just seen what it compromises.
+or commits. [week:4] has to say which one active inference uses and why. One word of terminology, since it is easy to attach it to the wrong thing. **Mean-field** names the *factorisation*, the restriction of $Q$ to products of independent factors. It does not name the choice of divergence direction; those are two separate decisions, and this section has now shown that both of them cost something. Mean-field is the name of the first compromise, and you have just seen what it compromises.
 
 ::: exercise Where does explaining away go?
-In the two-cause example, make the observation uninformative by setting both cause strengths (the $0.9$
-coefficients in [eq:noisy-or]) to zero, so that $P(o = 1 \mid s) = 0.01$ for every state.
+In the two-cause example, make the observation uninformative by setting both cause strengths (the ${{in_noisy_w:.1f}}$
+coefficients in [eq:noisy-or]) to zero, so that $P(o = 1 \mid s) = {{in_noisy_leak:.2f}}$ for every state.
 Without computing anything, say what the posterior is and whether the two causes
 remain independent. Then explain what feature of [eq:noisy-or] is responsible
 for the coupling in the original example.
@@ -393,17 +423,17 @@ the number of nanoseconds since the Big Bang, roughly $4.4 \times 10^{26}$.
 ---solution---
 With $k = 2$ and $n = 15$ the sum has $2^{15} = {{terms_15_binary:,}}$ terms, before counting the cost of evaluating each term.
 
-For the second part, $2^n > 4.4\times10^{26}$ requires
-$n > \log_2(4.4\times10^{26}) = {{log2_universe:.2f}}$, so
+For the second part, $2^n > {{universe_ns:sci1}}$ requires
+$n > \log_2({{universe_ns:sci1}}) = {{log2_universe:.2f}}$, so
 $n = {{factors_to_exceed_universe:d}}$ factors. Working in base ten instead,
-$\log_{10}(4.4\times10^{26}) = {{log10_universe:.3f}}$, and dividing by
+$\log_{10}({{universe_ns:sci1}}) = {{log10_universe:.3f}}$, and dividing by
 $\log_{10}2$ gives the same answer. Keep the third decimal: rounding that to
-$26.6$ before dividing costs you more than a tenth of a factor. Adding {{factors_to_add:d}} binary variables exceeds this illustrative enumeration budget. A structured model may still admit a much cheaper exact algorithm; [lesson:1.5] provides one.
+${{log10_universe:.1f}}$ before dividing costs you more than a tenth of a factor. Adding {{factors_to_add:d}} binary variables exceeds this illustrative enumeration budget. A structured model may still admit a much cheaper exact algorithm; [lesson:1.5] provides one.
 :::
 
 ::: checkpoint
 - Name the three separate ways in which model inversion is harder than model evaluation.
 - Two causes have independent priors. After a shared observation, are they independent? Under what condition on the likelihood would they remain so?
-- Which of the three solution families does not require evaluating $P(o)$, and why?
+- Which of the three solution families avoid evaluating $P(o)$, and how does each one avoid it?
 - What property of the true posterior can a factorised $Q$ never represent?
 :::

@@ -31,7 +31,7 @@
       body.replaceChildren(table(['Boundary index','Quantity','Given state 0','Given state 1'],rows));
       out.show([['Evidence',ev.toFixed(6)],['Assignments',Math.pow(2,count).toLocaleString()],['Enumeration difference',brute===null?'not enumerated above 12 states':Math.abs(brute-ev).toExponential(2)]]);
     }
-    mount.appendChild(A.panel([A.row([n.el,rel.el]),out,body,A.note('Transition columns are (0.70, 0.30) and (0.20, 0.80); initial probabilities are (0.40, 0.60). The other sensor likelihood is one minus its slider value. At reliability 0.50, the report is uninformative.')]));
+    mount.appendChild(A.panel([A.row([n.el,rel.el]),out,body,A.note('Transition columns are (0.70, 0.30) and (0.20, 0.80); initial probabilities are (0.40, 0.60). Those initial probabilities are stationary for the transitions, so every state has them and the evidence does not change with the number of states. The other sensor likelihood is one minus its slider value. At reliability 0.50, the report is uninformative.')]));
     n.onchange(render);rel.onchange(render);render();
   });
   A.register('belief-evidence',function(mount){

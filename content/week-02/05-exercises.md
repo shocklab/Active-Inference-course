@@ -25,7 +25,7 @@ answers a question the problems below can only pose one starting point at a
 time.
 
 There is no `pymdp` notebook this week, for the same reason as last week: the
-library works with the discrete generative models of Week&nbsp;9, and there is
+library works with the discrete generative models of [week:9], and there is
 nothing here for it to do.
 
 ## Problems
@@ -249,7 +249,7 @@ is the first serious cost of the move made in [lesson:2.3]. Trading the whole
 posterior for its peak was cheap when there was one peak. A distribution with two
 modes has something to say that no single number can carry, and reporting
 ${{bi_from_prior:.4f}}$ conceals the existence of ${{bi_peak_lo:.4f}}$ entirely.
-Week&nbsp;4's $Q$ is a distribution rather than a point in part for this reason,
+[week:4]'s $Q$ is a distribution rather than a point in part for this reason,
 though a unimodal $Q$ will turn out to have its own version of the problem.
 :::
 
@@ -344,7 +344,11 @@ distance falls by a factor of $4^6 = {{sensprec_ratio_1_to_4:.0f}}$. Far away, t
 however good its ear, for fixed sensory precision. At any finite positive distance, increasing $\Pi_u$ can compensate; maintaining fixed state precision here requires it to grow as $d^6$.
 
 (c) The measurement becomes $\ln u$, whose predicted value is
-$\ln g(d) = -2\ln d$, with derivative $-2/d$. The sensitivity is now $4\Pi/d^2$
+$\ln g(d) = -2\ln d$, with derivative $-2/d$. Write $\Pi_{\ln u}$ for the
+precision of the new noise, the inverse of its fixed variance in log-intensity
+units. This is a different quantity from $\Pi_u$, and it is not the posterior
+precision. By the result of (a), with $-2/d$ in place of $g'$, the sensory
+channel now contributes $(-2/d)^2\Pi_{\ln u} = 4\Pi_{\ln u}/d^2$
 rather than $4\Pi_u/d^6$: it still decays, but as an inverse square rather than
 an inverse sixth power.
 
@@ -405,6 +409,35 @@ of the report across possible true distances. We must specify the asymmetric
 loss, average it under the posterior, and minimise that expected loss. Changing
 the cost of underestimation can change the optimal report while leaving the
 posterior unchanged.
+
+For a concrete case, charge $c_2>0$ per unit of underestimate and $c_1>0$ per
+unit of overestimate:
+
+$$
+R(b)=\mathbb E\big[c_1(b-d)\,\mathbf 1\{d<b\}+c_2(d-b)\,\mathbf 1\{d>b\}\big]
+=c_1\int_{0}^{b}(b-d)\,p(d)\,\mathrm d d+c_2\int_{b}^{\infty}(d-b)\,p(d)\,\mathrm d d ,
+$$
+
+with $p$ the posterior density and $\Phi$ its cumulative distribution function, as in [lesson:2.2].
+Differentiate under each integral. The integrands vanish at $d=b$, so the
+moving limits contribute nothing, and the derivatives of the integrands with
+respect to $b$ are $c_1\,p(d)$ and $-c_2\,p(d)$:
+
+$$
+R'(b)=c_1\Phi(b)-c_2\big[1-\Phi(b)\big]=(c_1+c_2)\Phi(b)-c_2 .
+$$
+
+$R'$ increases with $b$, from $-c_2$ to $c_1$, so $R$ is minimised at the
+report $\hat b$ where $R'(\hat b)=0$:
+
+$$
+\Phi(\hat b)=\frac{c_2}{c_1+c_2}.
+$$
+
+The best report is the $c_2/(c_1+c_2)$ quantile of the posterior. Equal costs
+give the median. Making underestimates costlier raises $c_2$, and the report
+moves up the posterior towards larger distances. Nothing in this calculation
+refers to the mode.
 :::
 
 [week:10] introduces a particular objective for policies, involving preferences

@@ -109,12 +109,26 @@ V["err_obs_at_start"] = (U_OBS - g(D_PRIOR)) / VAR_OBS
 V["err_obs_weighted_at_start"] = V["err_obs_at_start"] * g_prime(D_PRIOR)
 V["gprime_at_prior"] = g_prime(D_PRIOR)
 
+# How the link stretches the distance axis (the "why the likelihood leans"
+# exercise): |g'| near the distance the data alone suggest, and at d = 4. An
+# interval in intensity maps to an interval in distance 1/|g'| times as wide.
+D_FAR = 4.0
+V["d_far"] = D_FAR
+V["gprime_mag_data"] = abs(g_prime(V["d_from_data_alone"]))
+V["stretch_data"] = 1 / V["gprime_mag_data"]
+V["gprime_mag_far"] = abs(g_prime(D_FAR))
+V["stretch_far"] = 1 / V["gprime_mag_far"]
+
 # ── gradient ascent from the prior mean ──────────────────────────────────
 def ascend(phi0=D_PRIOR, rate=0.05, steps=400):
     phi, path = phi0, [phi0]
     for _ in range(steps):
         phi += rate * ((D_PRIOR - phi) / VAR_PRIOR
                        + (U_OBS - g(phi)) / VAR_OBS * g_prime(phi))
+        # A distance at or below zero is outside the model; an over-large rate
+        # can step there, and 1/d^2 would carry on returning numbers. Stop.
+        if not phi > 0:
+            raise ValueError(f"ascent left d > 0 (d = {phi}) at rate {rate}")
         path.append(phi)
     return path
 
@@ -264,6 +278,19 @@ V["lin_square_spread"] = float(_ratio.max() - _ratio.min())
 
 # The simple average is what equal variances must give, whatever their value.
 V["lin_equal_mean"] = (D_PRIOR + U_OBS) / 2
+
+# The evidence of the linear model, in closed form and by quadrature over the
+# whole real line: P(u) = N(u; d_p, Sigma_p + Sigma_u).
+_norm_joint = (np.exp(-(_wide - D_PRIOR) ** 2 / (2 * VAR_PRIOR))
+               / sqrt(2 * pi * VAR_PRIOR)
+               * np.exp(-(U_OBS - _wide) ** 2 / (2 * VAR_OBS))
+               / sqrt(2 * pi * VAR_OBS))
+V["lin_evidence_quad"] = float(np.trapezoid(_norm_joint, _wide))
+V["lin_evidence_var"] = VAR_PRIOR + VAR_OBS
+V["lin_evidence"] = (np.exp(-(U_OBS - D_PRIOR) ** 2 / (2 * V["lin_evidence_var"]))
+                     / sqrt(2 * pi * V["lin_evidence_var"]))
+V["lin_evidence_relerr"] = abs(V["lin_evidence_quad"] / V["lin_evidence"] - 1)
+assert V["lin_evidence_relerr"] < 1e-9
 
 # ── how much of the curvature the g'' term accounts for ──────────────────
 def g_second(d):
