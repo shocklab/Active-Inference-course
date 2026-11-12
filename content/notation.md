@@ -16,14 +16,14 @@ this course. Where a common alternative exists, it is named.
 ::: notation
 $x_t$ :: Displacement from the centre of the viable set at step $t$, a vector. Lesson&nbsp;1.
 $\xi_t$ :: One step of noise, standard normal and independent across steps. Lesson&nbsp;1.
-$\sigma$ :: The size of one step of noise, in the units of $x$. **Not** the softmax; see the note on collisions below. Lesson&nbsp;1.
+$\sigma$ :: The size of one step of noise, in the units of $x$. Not the softmax; see the note on collisions below. Lesson&nbsp;1.
 $\kappa$ :: The gain: dimensionless, the fraction of the current displacement removed per step. Stability needs $0 < \kappa < 2$, and $\kappa = 1$ minimises the spread. Lesson&nbsp;1.
 $v$ :: The stationary variance of one coordinate, $\sigma^2/\kappa(2-\kappa)$. Lesson&nbsp;1.
 $T$ :: The number of steps in a life, the upper limit of a time average. Lesson&nbsp;1.
 $P^{*}(\cdot)$ :: A star marks a distribution belonging to the *process*: the frequencies the world actually produces. No agent can evaluate it. Lesson&nbsp;2.
 $P_A(\cdot),\ P_B(\cdot)$ :: A subscript marks the same distribution computed under a named agent's *model*. Lesson&nbsp;2.
 $\bar{S}_X$ :: Agent $X$'s average surprise, $\sum_o P^{*}(o)[-\ln P_X(o)]$, in nats. Bounded below by $\mathrm{H}[P^{*}(o)]$. Lesson&nbsp;2.
-$\alpha$ :: Ambiguity of a sensory channel, in $[0,1]$: the weight on the uniform matrix in $(1-\alpha)\mathbf{A} + \alpha U$. At $1$ observations carry nothing. Lesson&nbsp;3.
+$\alpha$ :: The channel-noise mixture weight of a sensory channel, in $[0,1]$: the weight on the uniform matrix in $(1-\alpha)\mathbf{A} + \alpha U$. At $1$ observations carry nothing. It is not the expected conditional entropy called ambiguity in Week&nbsp;10. Lesson&nbsp;3.
 $n,\ k$ :: The number of state factors, and the number of values each can take. The evidence sum then has $k^n$ terms. Lessons&nbsp;3 and 4.
 $w,\ \lambda$ :: In a noisy-OR likelihood, the probability that a present cause fires the effect, and the probability the effect fires with no cause present (the leak). Both in $[0,1]$. Lesson&nbsp;4.
 $h_1, h_2$ :: Generic factor functions in the independence lemma, with no fixed meaning beyond that paragraph. Lesson&nbsp;4.
@@ -54,7 +54,7 @@ $Q(s)$ :: A distribution the agent holds over states, as against the $P$ of the 
 ## Information-theoretic quantities, from Week 1
 
 Logarithms are natural throughout, so all information quantities are in **nats**.
-Multiply by $1/\ln 2 = 1.4427$ for bits.
+Multiply by $1/\ln 2$ for bits.
 
 ::: notation
 $\mathrm{H}[P]$ :: Shannon entropy, $-\sum_x P(x)\ln P(x)$.
@@ -98,7 +98,7 @@ $\mathbf{E}$ :: The prior over policies, $E_\pi = P(\pi)$, one entry per policy 
 $\pi$ :: A policy: a sequence of actions. $\Pi$ is the set of them, and $\boldsymbol{\pi}$ is the distribution over that set. Where confusion is possible we write $Q(\pi)$ for the distribution.
 $\tau$ :: A time index *within* a policy, running over the planning horizon.
 $t$ :: The current time, discrete from Week&nbsp;1 and continuous from Week&nbsp;5. Distinguishing $t$ from $\tau$ is essential in Week&nbsp;10 and is a place the literature is frequently careless.
-$\gamma$ :: Precision over policies: the inverse temperature in $Q(\pi) \propto \exp(-\gamma G(\pi))$.
+$\gamma$ :: Precision over policies: the inverse temperature in $Q(\pi) \propto \exp(-\gamma \mathcal{G}(\pi))$.
 $\mathrm{softmax}(\cdot)$ :: $\mathrm{softmax}(x)_i = e^{x_i} / \sum_j e^{x_j}$. Much of the literature writes this $\sigma$; this course does not, because $\sigma$ is a standard deviation from Week&nbsp;1 onwards and the collision is worse than the inconvenience.
 $\tilde{s}, \tilde{o}$ :: A tilde denotes a whole *sequence* over time rather than a single time point, so $\tilde{s} = (s_1, \dots, s_T)$.
 :::
@@ -118,6 +118,7 @@ $Z_p$ :: Positive-half-line probability under the underlying Gaussian, used to n
 $\rho$ :: A local prior probability in Week&nbsp;1's threshold exercise; log-distance coordinate, $\rho=\ln d$, in Week&nbsp;2's change-of-variables example. The meanings are local to those exercises.
 $r,\ w$ :: The activity of a unit and the weight of a connection, in the stylised device of Week&nbsp;2 Lesson&nbsp;1. $r$ for rate, since $a$ is already actions.
 $\Phi$ :: A cumulative distribution function, needed to change variables in a density. Week&nbsp;2.
+$\hat d$ :: The MAP estimate of the distance, the peak of $\ell(d)$. Week&nbsp;2 Lesson&nbsp;3. From Week&nbsp;3, the settled state of one trial, a function of the observation and the parameters.
 :::
 
 ## Learning the model, from Week 3
@@ -126,8 +127,8 @@ $\Phi$ :: A cumulative distribution function, needed to change variables in a de
 $\theta$ :: The source power, the parameter in the link $g(d, \theta) = \theta/d^2$. Week&nbsp;1 Lesson&nbsp;2 used the letter locally for a sensor probability. Week&nbsp;3.
 $\omega$ :: Whichever of the parameters $d_p, \Sigma_p, \Sigma_u, \theta$ is meant, when a statement holds for all of them. Week&nbsp;3. A Week&nbsp;1 exercise uses the letter locally for a mixing weight in a convexity argument.
 $h(d)$ :: The link shape, the part of a link $g = \theta h(d)$ that depends on the state; $h(d) = 1/d^2$ in the running example. Week&nbsp;3 Lesson&nbsp;3. Unrelated to the generic factor functions $h_1, h_2$ of Week&nbsp;1 Lesson&nbsp;4.
-$n,\ N$ :: A trial index and the number of trials. Week&nbsp;3.
-$\hat d,\ \hat\ell$ :: The settled state of a trial, and the log joint evaluated there, a function of the observation and the parameters. Week&nbsp;3 Lesson&nbsp;1.
+$n,\ N$ :: A trial index and the number of trials. Week&nbsp;3. A Week&nbsp;1 exercise uses $N$ locally for a number of samples.
+$\hat\ell$ :: The log joint evaluated at the settled state $\hat d$ of a trial, a function of the observation and the parameters. Week&nbsp;3 Lesson&nbsp;1.
 $\mathcal{L}$ :: The total log joint over $N$ trials, a function of every state and the parameters. Week&nbsp;3 Lesson&nbsp;1.
 $\beta$ :: The learning rate, the step size of a parameter update per trial. Week&nbsp;2 Lesson&nbsp;1 used it for the step of a generic weight update. Week&nbsp;3.
 $\zeta_p$ :: The ratio $\mathcal N(0; d_p, \Sigma_p)/Z_p$ that the truncation adds to the prior updates. Week&nbsp;3 Lesson&nbsp;2. A Week&nbsp;1 exercise uses $\zeta$ locally for the function $y\ln y$.
@@ -137,6 +138,32 @@ $x^{*}$ :: A star on a parameter marks the value the generative process uses, as
 $\mathbb E_{P^*},\ \mathbb E_{d\mid u}$ :: An average over trials of the generative process, and an average over the model's posterior on the distance for one observation at the current parameters. Week&nbsp;3 Lesson&nbsp;1.
 $\varphi(\omega)$ :: The drift of a learning rule: its step per unit learning rate, averaged over the process at a fixed parameter value. A rule comes to rest near a zero of it. Week&nbsp;3 Lesson&nbsp;1. A Week&nbsp;1 exercise uses $\phi$ locally.
 $\psi(d)$ :: One trial's derivative of the log joint with respect to a parameter, read as a function of the state, so that the point rule uses $\psi(\hat d)$ and the posterior-averaged rule its posterior average. Week&nbsp;3 Lesson&nbsp;4. Unrelated to the factors $\psi_{12}, \psi_{13}$ of Week&nbsp;1 Lesson&nbsp;5.
+:::
+
+## Variational free energy, from Week 4
+
+::: notation
+$E(s)$ :: The energy of a state, $-\ln P(o, s)$, so that the expected energy is $U = \mathbb{E}_Q[E]$. Week&nbsp;4 Lesson&nbsp;1.
+$\Sigma_q$ :: The variance of a Gaussian recognition density, $Q = \mathcal{N}(m, \Sigma_q)$; a covariance matrix in $K$ dimensions. Week&nbsp;4 Lesson&nbsp;1.
+$K$ :: The number of factors of the hidden state, $s = (s_1, \dots, s_K)$, or its dimension when it is continuous. Week&nbsp;4 Lessons&nbsp;2 and&nbsp;3.
+$\mathcal{S}_i$ :: The finite set of values of factor $i$; $|\mathcal{S}_i|$ is its size. Week&nbsp;4 Lesson&nbsp;2. Week&nbsp;1 Lesson&nbsp;5 writes $\mathcal{S}$ for the domain of a continuous state, the same idea for an unfactored state.
+$q_i(s_i),\ Q_{\setminus i}$ :: One factor of a mean-field recognition density $Q = \prod_i q_i$, and the product of all the factors except the $i$th. For a binary factor, $q_i$ also names the probability $q_i(s_i = 1)$. Week&nbsp;4 Lesson&nbsp;2.
+$\mathcal{E}_i(s_i)$ :: The partially averaged energy of factor $i$: the energy averaged under every factor except the $i$th. Week&nbsp;4 Lesson&nbsp;2.
+$Z_i$ :: The normaliser of the free-form coordinate update, $\sum_{s_i} \exp(-\mathcal{E}_i(s_i))$. Week&nbsp;4 Lesson&nbsp;2.
+$\mathcal{J},\ \Psi_c$ :: A collection of factors of a joint distribution, and one factor in it, a non-negative function of the variables in its scope. $\mathcal{J}_i$ is the set of factors whose scope contains $s_i$. Week&nbsp;4 Lesson&nbsp;2.
+$\mathcal{M}_{c \to i}(s_i)$ :: The variational message from factor $c$ to variable $s_i$: the average of $\ln \Psi_c$ over the factor's other hidden variables. Week&nbsp;4 Lesson&nbsp;2.
+$R(q),\ b_0,\ b_1$ :: The coordinate update of the noisy-OR example as a map from one belief to the other, and the intercept and slope of its log-odds form, $b_0 + b_1 q$. Week&nbsp;4 Lesson&nbsp;2. Week&nbsp;1 uses $R$ locally for a radius and a density ratio, and Week&nbsp;2 for an expected cost; a Week&nbsp;2 exercise uses $b$ for a reported distance, and Week&nbsp;1 uses $b$ only as an index.
+$x^{(t)}$ :: A parenthesised superscript counts iterations of an algorithm. Week&nbsp;4 Lesson&nbsp;2.
+$k_0,\ r_0,\ k_q,\ r_q$ :: Shape and rate of a Gamma prior on a precision, and of the Gamma factor of the recognition density. Not the number of values of a factor. Week&nbsp;4 Lesson&nbsp;2.
+$\psi(k)$ :: The digamma function, $\mathrm{d}\ln\Gamma(k)/\mathrm{d}k$. Unrelated to the per-trial score $\psi(d)$ of the learning rules. Week&nbsp;4 Lesson&nbsp;2.
+$\mathcal{F}_{\mathrm{Lap}}(m)$ :: The Laplace free energy: the free energy of a Gaussian at $m$ whose covariance is minus the inverse Hessian of $\ell$ there. Week&nbsp;4 Lesson&nbsp;3.
+$\Pi_{\mathrm{post}}$ :: The precision matrix of a Gaussian posterior. Week&nbsp;4 Lesson&nbsp;3.
+$\mathcal{F}_{\mathrm{tot}}$ :: The free energy of many trials, the sum of one free energy per trial. Week&nbsp;4 Lesson&nbsp;4.
+$\lambda_i$ :: In the two-cause model, the rate of the exponential prior on cause $s_i$. Unrelated to the noisy-OR leak $\lambda$. Week&nbsp;4 Lesson&nbsp;5.
+$m_i,\ k_i$ :: In the two-cause model, the mean and shape of the recognition factor $q_i$. Week&nbsp;4 Lesson&nbsp;5.
+$\bar m_i$ :: The recognition mean of cause $i$ averaged over trials, whose reciprocal is the M-step's rate. Week&nbsp;4 Lesson&nbsp;5.
+$\Lambda,\ J$ :: The map that one iteration of variational EM applies to the rates, and its Jacobian matrix, $J_{ij} = \partial\Lambda_i/\partial\lambda_j$. Week&nbsp;4 Lesson&nbsp;5. Week&nbsp;1 Lesson&nbsp;4 uses $J$ locally for the part of a divergence that depends on one factor.
+$y_i$ :: A local coordinate in Week&nbsp;4 Lesson&nbsp;5: the cube root of sensor $i$'s noiseless output. Not an observation.
 :::
 
 ## Continuous models, from Week 5

@@ -9,7 +9,7 @@ number_sections: false
 
 This course was developed by Jonathan Shock, Department of Mathematics & Applied
 Mathematics, University of Cape Town, with substantial assistance from Claude
-(Anthropic) and subsequent revisions using Codex (OpenAI). AI assistance extended
+(Anthropic), with revisions using Codex (OpenAI) and Gemini (Google). AI assistance extended
 to the mathematical content and code, as well as the wording and presentation.
 
 Jonathan supplied his own notes and examples, set the audience and teaching
@@ -28,8 +28,9 @@ not be assumed to be AI-generated.
 
 Claude assisted with the initial development. Codex subsequently reviewed and
 revised the explanations, assumptions, notation and code, and added further
-interactive examples. These contributions are substantial; they are not limited
-to proofreading.
+interactive examples. Gemini wrote the first draft of Week 4 and an audit of
+Weeks 1 to 3; Claude and Codex then checked both and revised Week 4. These
+contributions are substantial; they are not limited to proofreading.
 
 ## Review and verification
 
@@ -48,8 +49,10 @@ establish that its paper supports the claim made beside the citation.
 AI-assisted drafting and review have produced errors in this course, including
 incorrect numerical claims, notation conflicts and explanations that skipped
 necessary steps. Revisions have addressed identified problems, but further errors
-may remain. The notebooks have been executed locally; that does not establish
-compatibility with Colab's free tier.
+may remain. The notebooks have been run on Google Colab, on a runtime the size of
+the free tier, and every check in them passes there. Iteration counts can differ
+slightly from one machine to another, so the Week&nbsp;4 NumPy notebook prints
+them beside the lesson's without checking them.
 
 ## Sources, credit and corrections
 

@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mean-field and variational messages · Active Inference</title><meta name="description" content="The free-form mean-field update proved twice, reduced to local messages on a factorised model, compared with the sum-product messages of Week 1, and applied to a sensory precision that is itself unknown."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+:root{
+  --paper:#fdfcf9; --card:#ffffff;
+  --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
+  --rule:#e4e1d9; --rule2:#d3cfc4;
+  --accent:#0f5f57; --accent2:#14837a; --accent-tint:#e9f2f0; --accent-deep:#0a423d;
+  --clay:#9c4d2f; --clay-tint:#f9efe9;
+  --gold:#8a6d1f; --gold-tint:#faf5e6;
+  --tint:#f4f2ec; --code-bg:#f5f4f0;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SF Mono',Menlo,Consolas,monospace;
+  --measure:44rem; --margincol:13rem; --gap:2.5rem; --shell:80rem;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);
+     font-variant-numeric:oldstyle-nums proportional-nums;line-height:1.6}
+::selection{background:var(--accent);color:#fff}
+img,svg,canvas{max-width:100%}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2)}
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.topbar{position:sticky;top:0;z-index:60;background:var(--accent-deep);
+        border-bottom:2px solid var(--accent);}
+.topbar .tin{max-width:var(--shell);margin:0 auto;padding:0 2rem;height:3rem;
+             display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.topbar a.home{font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.13em;
+               text-transform:uppercase;color:rgba(255,255,255,.82)}
+.topbar a.home:hover{color:#fff}
+.topbar .tcode{font-family:var(--sans);font-size:.7rem;font-weight:500;letter-spacing:.2em;
+               text-transform:uppercase;color:rgba(255,255,255,.42)}
+.tocbtn{display:none;font-family:var(--sans);font-size:.75rem;letter-spacing:.1em;
+        text-transform:uppercase;color:rgba(255,255,255,.82);background:none;border:0;cursor:pointer}
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:14rem minmax(0,1fr);gap:0 var(--gap);
+       max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.maincol{min-width:0;max-width:calc(var(--measure) + var(--margincol) + var(--gap))}
+
+/* ── side nav ────────────────────────────────────────────────────────── */
+.sidenav{position:sticky;top:3rem;align-self:start;max-height:calc(100vh - 3rem);
+         overflow-y:auto;padding:2.6rem 0 3rem;scrollbar-width:thin}
+.sidenav::-webkit-scrollbar{width:0}
+.sidenav .part{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--faint);margin:1.6rem 0 .55rem}
+.sidenav .part:first-child{margin-top:0}
+.sidenav a.wk{display:block;font-family:var(--sans);font-size:.83rem;line-height:1.35;
+              color:var(--ink2);padding:.34rem 0 .34rem .8rem;border-left:2px solid var(--rule)}
+.sidenav a.wk:hover{color:var(--accent);border-left-color:var(--rule2)}
+.sidenav a.wk.cur{color:var(--accent);font-weight:500;border-left-color:var(--accent)}
+.sidenav a.wk .n{color:var(--faint);font-variant-numeric:tabular-nums;margin-right:.45rem}
+.sidenav a.wk.cur .n{color:var(--accent2)}
+.sidenav .lessons{margin:.15rem 0 .5rem .8rem;border-left:1px solid var(--rule)}
+.sidenav .lessons a{display:block;font-family:var(--sans);font-size:.76rem;line-height:1.35;
+                    color:var(--muted);padding:.28rem 0 .28rem .75rem;border-left:2px solid transparent;margin-left:-1px}
+.sidenav .lessons a:hover{color:var(--accent)}
+.sidenav .lessons a.cur{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.sidenav .navhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.16em;
+                text-transform:uppercase;color:var(--accent);padding-bottom:.6rem;
+                margin-bottom:1rem;border-bottom:1px solid var(--rule)}
+
+/* ── article head ────────────────────────────────────────────────────── */
+.ahead{padding:3.2rem 0 1.7rem;border-bottom:1px solid var(--rule);max-width:var(--measure)}
+.ahead .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.2em;
+                text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.ahead h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.2vw,2.9rem);
+          line-height:1.08;letter-spacing:-.015em;color:var(--ink);margin-bottom:.85rem;
+          font-variant-numeric:lining-nums}
+.ahead .deck{font-family:var(--serif);font-style:italic;font-size:1.18rem;line-height:1.5;
+             color:var(--muted)}
+.ahead .meta{font-family:var(--sans);font-size:.74rem;letter-spacing:.06em;color:var(--faint);
+             margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap}
+
+/* ── body ────────────────────────────────────────────────────────────── */
+.abody{padding:2rem 0 1rem;font-size:1.115rem;max-width:var(--measure)}
+.abody > *{max-width:var(--measure)}
+.abody p{margin:0 0 1.15rem;color:var(--ink);text-wrap:pretty}
+.abody p.lede{font-size:1.24rem;line-height:1.55;color:var(--ink2)}
+.abody strong{font-weight:600}
+.abody em{font-style:italic}
+.abody a{border-bottom:1px solid var(--rule2)}
+.abody a:hover{border-bottom-color:var(--accent2)}
+.abody h2{font-family:var(--serif);font-weight:500;font-size:1.72rem;line-height:1.16;
+          color:var(--ink);letter-spacing:-.01em;margin:2.9rem 0 .9rem;padding-top:1.6rem;
+          border-top:1px solid var(--rule);scroll-margin-top:4rem}
+.abody h2 .secno{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.6rem;font-weight:400}
+.abody h3{font-family:var(--serif);font-weight:600;font-size:1.24rem;color:var(--ink);
+          margin:2rem 0 .6rem;scroll-margin-top:4rem}
+.abody h4{font-family:var(--sans);font-weight:600;font-size:.78rem;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--accent);margin:1.6rem 0 .5rem}
+.abody ul,.abody ol{margin:0 0 1.25rem;padding-left:1.5rem}
+.abody li{margin-bottom:.45rem;color:var(--ink)}
+.abody ul>li::marker{color:var(--accent)}
+.abody ol>li::marker{color:var(--accent);font-family:var(--sans);font-size:.9em}
+.abody li>ul,.abody li>ol{margin:.45rem 0 .2rem}
+.abody blockquote{border-left:2px solid var(--accent);padding:.15rem 0 .15rem 1.3rem;
+                  margin:1.6rem 0;color:var(--ink2);font-style:italic}
+.abody blockquote p:last-child{margin-bottom:0}
+.abody hr{border:0;border-top:1px solid var(--rule);margin:2.4rem 0}
+
+/* ── code ────────────────────────────────────────────────────────────── */
+.abody code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);
+            padding:.1em .35em;border-radius:2px;border:1px solid var(--rule)}
+.abody pre{background:var(--code-bg);border:1px solid var(--rule);border-left:2px solid var(--accent);
+           padding:1rem 1.15rem;overflow-x:auto;margin:1.5rem 0;line-height:1.55}
+.abody pre code{background:none;border:0;padding:0;font-size:.83rem;color:var(--ink2)}
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.abody .tablewrap{overflow-x:auto;margin:1.7rem 0;
+           width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+.abody table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.86rem}
+.abody th{text-align:left;font-weight:600;color:var(--accent);border-bottom:1.5px solid var(--accent);
+          padding:.5rem .7rem;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;
+          vertical-align:bottom}
+.abody td{padding:.55rem .7rem;border-bottom:1px solid var(--rule);color:var(--ink2);vertical-align:top}
+.abody tbody tr:hover td{background:var(--tint)}
+
+/* ── maths ───────────────────────────────────────────────────────────── */
+.katex{font-size:1.045em}
+.katex-display{margin:0;padding:.15rem 0;overflow-x:auto;overflow-y:hidden}
+.eqn{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;max-width:var(--measure);
+     scroll-margin-top:4.5rem}
+.eqn > .eqbody{flex:1;min-width:0}
+.eqn > .eqno{flex:0 0 auto;font-family:var(--sans);font-size:.8rem;color:var(--faint);
+             font-variant-numeric:tabular-nums}
+.eqn > .eqno a{color:var(--faint);border:0}
+.eqn > .eqno a:hover{color:var(--accent)}
+.eqn:target{background:var(--gold-tint);box-shadow:0 0 0 .7rem var(--gold-tint);border-radius:2px}
+.eqn:target > .eqno a{color:var(--gold)}
+a.eqref{font-variant-numeric:tabular-nums;white-space:nowrap;border-bottom:1px solid var(--rule2)}
+
+/* ── margin notes ────────────────────────────────────────────────────── */
+.mn{float:right;clear:right;width:var(--margincol);
+    margin:.3rem calc(-1 * (var(--margincol) + var(--gap))) 1.1rem var(--gap);
+    font-family:var(--sans);font-size:.775rem;line-height:1.5;color:var(--muted)}
+.mn .mnl{display:block;font-weight:600;font-size:.66rem;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.mn p{margin:0 0 .5rem;font-size:inherit;line-height:inherit;color:inherit}
+.mn p:last-child{margin-bottom:0}
+.mn code{font-size:.85em}
+.mn a{border-bottom:1px solid var(--rule2)}
+
+/* ── boxes ───────────────────────────────────────────────────────────── */
+.box{margin:1.9rem 0;padding:1.15rem 1.35rem;border:1px solid var(--rule);
+     background:var(--card);max-width:var(--measure)}
+.box > :last-child{margin-bottom:0}
+.box .boxhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.15em;
+            text-transform:uppercase;margin-bottom:.6rem;display:flex;gap:.5rem;align-items:baseline}
+.box .boxhd .bt{color:var(--ink2);font-weight:500;letter-spacing:.02em;text-transform:none;
+                font-size:.95rem;font-family:var(--serif);font-style:italic}
+.box p,.box li{font-size:1.03rem}
+
+.box.definition,.box.theorem,.box.proposition,.box.lemma{
+  border-left:2px solid var(--accent);background:var(--card)}
+.box.definition .boxhd,.box.theorem .boxhd,.box.proposition .boxhd,.box.lemma .boxhd{color:var(--accent)}
+
+.box.keyidea{border:0;border-left:2px solid var(--accent);background:var(--accent-tint);
+             padding:1.2rem 1.4rem}
+.box.keyidea .boxhd{color:var(--accent)}
+
+.box.remark,.box.aside{border-left:2px solid var(--rule2);background:var(--tint)}
+.box.remark .boxhd,.box.aside .boxhd{color:var(--muted)}
+
+.box.warning{border-left:2px solid var(--clay);background:var(--clay-tint)}
+.box.warning .boxhd{color:var(--clay)}
+
+.box.derivation{border:1px solid var(--rule);border-left:2px solid var(--gold);background:#fdfcf7;
+                padding:1.25rem 1.45rem}
+.box.derivation .boxhd{color:var(--gold)}
+.box.derivation .eqn{margin:1rem 0}
+.box.derivation p{color:var(--ink2)}
+
+.box.exercise{border-left:2px solid var(--clay)}
+.box.exercise .boxhd{color:var(--clay)}
+.box.exercise details{margin-top:.9rem;border-top:1px solid var(--rule);padding-top:.7rem}
+.box.exercise summary{font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.11em;
+                      text-transform:uppercase;color:var(--clay);cursor:pointer;list-style:none}
+.box.exercise summary::-webkit-details-marker{display:none}
+.box.exercise summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+.box.exercise details[open] summary::before{content:'▾ '}
+.box.exercise details > :nth-child(2){margin-top:.8rem}
+
+.box.checkpoint{border-left:2px solid var(--accent2);background:var(--accent-tint)}
+.box.checkpoint .boxhd{color:var(--accent)}
+.box.checkpoint ul{margin-bottom:0}
+
+/* ── figures & widgets ───────────────────────────────────────────────── */
+.abody figure{margin:2.2rem 0;width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+figure{margin:2.2rem 0}
+figure figcaption{font-family:var(--sans);font-size:.79rem;line-height:1.5;color:var(--muted);
+                  margin-top:.7rem;max-width:var(--measure)}
+figure figcaption .fno{font-weight:600;color:var(--accent);letter-spacing:.03em}
+figure.widget .wmount{border:1px solid var(--rule2);background:var(--card);padding:1rem}
+figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:var(--muted);
+                                 padding:2rem 1rem;text-align:center}
+
+/* widget internals (used by aif-widgets.js) */
+.wpanel{display:grid;gap:1rem}
+.wrow{display:flex;flex-wrap:wrap;gap:1.1rem 1.6rem;align-items:flex-start}
+.wctl{font-family:var(--sans);font-size:.78rem;color:var(--ink2);display:flex;
+      flex-direction:column;gap:.28rem;min-width:11rem;flex:1 1 11rem}
+.wctl .wlab{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline}
+.wctl .wlab b{font-weight:500;color:var(--ink2)}
+.wctl .wlab .wval{font-family:var(--mono);font-size:.76rem;color:var(--accent);
+                  font-variant-numeric:tabular-nums}
+.wctl input[type=range]{width:100%;accent-color:var(--accent);height:1.1rem;cursor:pointer}
+.wbtn{font-family:var(--sans);font-size:.76rem;font-weight:500;letter-spacing:.04em;
+      background:var(--accent);color:#fff;border:0;padding:.42rem .9rem;cursor:pointer;
+      border-radius:2px}
+.wbtn:hover{background:var(--accent2)}
+.wbtn.ghost{background:transparent;color:var(--accent);border:1px solid var(--rule2)}
+.wbtn.ghost:hover{background:var(--accent-tint)}
+.wbtns{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.wnote{font-family:var(--sans);font-size:.78rem;line-height:1.5;color:var(--muted);
+       border-top:1px solid var(--rule);padding-top:.7rem}
+.wnote b{color:var(--accent);font-weight:600}
+.wreadout{font-family:var(--mono);font-size:.78rem;color:var(--ink2);display:flex;
+          flex-wrap:wrap;gap:.4rem 1.3rem;font-variant-numeric:tabular-nums}
+.wreadout span b{color:var(--faint);font-weight:500}
+.wtabs{display:flex;gap:.3rem;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.wtab{font-family:var(--sans);font-size:.75rem;padding:.34rem .75rem;cursor:pointer;
+      color:var(--muted);border:1px solid transparent;border-bottom:0;background:none}
+.wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
+canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
+
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
+
+/* ── footer nav ──────────────────────────────────────────────────────── */
+.pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
+         border-top:1px solid var(--rule);margin-top:3.5rem;padding:1.7rem 0 0;
+         max-width:var(--measure)}
+.pagenav a{display:flex;flex-direction:column;gap:.22rem;max-width:20rem;border:0}
+.pagenav a.nx{text-align:right;margin-left:auto}
+.pagenav .dir{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.16em;
+              text-transform:uppercase;color:var(--accent)}
+.pagenav .ttl{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);line-height:1.3}
+.pagenav a:hover .ttl{color:var(--accent)}
+.sitefoot{border-top:1px solid var(--rule);margin-top:3rem;padding:1.6rem 0 3.5rem;
+          font-family:var(--sans);font-size:.76rem;line-height:1.65;color:var(--faint);
+          max-width:var(--measure)}
+.sitefoot a{color:var(--muted);border-bottom:1px solid var(--rule)}
+.sitefoot a:hover{color:var(--accent)}
+.sitefoot p{margin-bottom:.4rem}
+
+/* ── landing page ────────────────────────────────────────────────────── */
+.cover{background:var(--accent-deep);color:#fff;padding:4.5rem 0 3.6rem;margin-bottom:0}
+.cover .cin{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.cover .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.22em;
+                text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1.3rem}
+.cover h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,6vw,4.2rem);
+          line-height:1.04;letter-spacing:-.02em;max-width:24ch;margin-bottom:1.2rem}
+.cover .sub{font-family:var(--serif);font-style:italic;font-size:1.25rem;line-height:1.5;
+            color:rgba(255,255,255,.72);max-width:44rem}
+.cover .rule{width:3rem;height:2px;background:var(--accent2);margin:0 0 1.2rem}
+.wide{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.weeklist{border-top:1px solid var(--rule)}
+.landing .abody>*{max-width:none}
+.landing .abody .introcopy{max-width:44rem}
+.weekrow{display:flex;gap:2.2rem;padding:1.7rem 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.weekrow .wn{flex:0 0 3.4rem;text-align:right}
+.weekrow .wn .l{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.18em;
+                text-transform:uppercase;color:var(--faint)}
+.weekrow .wn .n{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--accent);
+                line-height:1;font-variant-numeric:lining-nums}
+.weekrow .wc{flex:1 1 20rem;min-width:0}
+.weekrow .wc h3{font-family:var(--serif);font-weight:500;font-size:1.28rem;margin-bottom:.3rem}
+.weekrow .wc h3 a{color:var(--ink);border:0}
+.weekrow .wc h3 a:hover{color:var(--accent)}
+.weekrow .wc p{font-family:var(--sans);font-size:.86rem;line-height:1.6;color:var(--muted);
+               margin-bottom:.55rem;max-width:46rem}
+.weekrow .wc ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+.weekrow .wc ul li{font-family:var(--sans);font-size:.79rem;margin:0}
+.weekrow .wc ul li a{color:var(--ink2);border-bottom:1px solid var(--rule)}
+.weekrow .wc ul li a:hover{color:var(--accent);border-bottom-color:var(--accent2)}
+.partband{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.2em;
+          text-transform:uppercase;color:var(--accent);padding:2.2rem 0 .5rem}
+.partband span{color:var(--faint);font-weight:400;letter-spacing:.04em;text-transform:none;
+               font-family:var(--serif);font-style:italic;font-size:1rem;margin-left:.8rem}
+
+/* ── responsive ──────────────────────────────────────────────────────── */
+@media (max-width:1280px){
+  .shell{grid-template-columns:13rem minmax(0,1fr);gap:0 2rem;padding:0 1.6rem}
+  .maincol{max-width:var(--measure)}
+  .mn{float:none;clear:both;width:auto;margin:1rem 0 1.3rem;padding-left:1rem;
+      border-left:2px solid var(--rule2)}
+  .abody .tablewrap,.abody figure{width:auto;max-width:100%}
+  .cover .cin,.wide{padding:0 1.6rem}
+}
+@media (max-width:860px){
+  html{font-size:97%}
+  .shell{grid-template-columns:minmax(0,1fr);padding:0 1.3rem}
+  .sidenav{position:static;max-height:none;padding:1rem 0 0;display:none;
+           border-bottom:1px solid var(--rule);margin-bottom:1rem}
+  .sidenav.open{display:block}
+  .tocbtn{display:block}
+  .topbar .tin{padding:0 1.3rem}
+  .cover{padding:3rem 0 2.4rem}
+  .cover .cin,.wide{padding:0 1.3rem}
+  .abody{font-size:1.06rem}
+  .weekrow{gap:1rem}
+  .weekrow .wn{flex-basis:2.6rem}
+  .eqn{gap:.5rem}
+  .eqn > .eqno{font-size:.72rem}
+}
+@media print{
+  .topbar,.sidenav,.pagenav,.wbtns,.wctl{display:none}
+  .shell{display:block;max-width:none}
+  body{background:#fff}
+}
+</style><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script><script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(!window.renderMathInElement) return;
+  renderMathInElement(document.body,{
+    delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'\\[',right:'\\]',display:true},
+      {left:'$',right:'$',display:false},
+      {left:'\\(',right:'\\)',display:false}
+    ],
+    ignoredTags:['script','noscript','style','textarea','pre','code','option'],
+    throwOnError:false,
+    macros:{
+      '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
+      '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
+      // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
+      // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.querySelector('.tocbtn'),n=document.querySelector('.sidenav');
+  if(b&&n){b.addEventListener('click',function(){n.classList.toggle('open');});}
+});
+</script>
+</head>
+<body>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk cur" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="lessons"><a class="" href="../week-04/bounding-surprise.html">Bounding surprise</a><a class="cur" href="../week-04/mean-field-and-messages.html">Mean-field and variational messages</a><a class="" href="../week-04/laplace-approximation.html">The Laplace approximation</a><a class="" href="../week-04/learning.html">Learning with free energy</a><a class="" href="../week-04/two-causes.html">A mean-field learning failure</a><a class="" href="../week-04/exercises.html">Problems and code</a></div><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Variational free energy</div><h1>Mean-field and variational messages</h1><p class="deck">The free-form mean-field update proved twice, reduced to local messages on a factorised model, compared with the sum-product messages of Week 1, and applied to a sensory precision that is itself unknown.</p><div class="meta"><span>Week 4</span><span>&#167;2</span><span>85 min</span></div></header><article class="abody"><p>Minimising $\mathcal{F}[Q, o]$ over every normalised distribution $Q(s)$ returns $Q(s) = P(s \mid o)$, and with it the cost of representing the posterior. If the hidden state has $K$ factors $s = (s_1, \dots, s_K)$ and factor $i$ takes values in a finite set $\mathcal{S}_i$ with $|\mathcal{S}_i|$ elements, an arbitrary distribution over $s$ needs $\prod_i |\mathcal{S}_i| - 1$ numbers. <a href="../week-01/the-denominator.html">Week&nbsp;1, Lesson&nbsp;5</a> showed that this count does not by itself make inference hard: on a chain, sums over the joint are computed exactly in time linear in $K$. For a model whose dependencies are dense, though, no exact method is known that avoids the exponential cost, and there the usual remedy is to restrict the family $\mathcal{Q}$ within which $Q$ may vary. This lesson studies one restriction: independence between factors.</p>
+<div class="box definition"><div class="boxhd">Definition 4.2.1<span class="bt">Free-form and fixed-form variational families</span></div><p>Let the hidden state split into $K$ factors $s = (s_1, \dots, s_K)$.</p>
+<ul>
+<li>
+<p>A <strong>free-form mean-field</strong> family contains every product
+<div class="eqn" id="eq-mf-product"><div class="eqbody">$$Q(s_1, \dots, s_K) \;=\; \prod_{i=1}^{K} q_i(s_i),$$</div><div class="eqno"><a href="#eq-mf-product" title="Link to equation 4.2.1">(4.2.1)</a></div></div>
+where each factor $q_i$ is any normalised distribution over $s_i$. The family fixes which variables are independent and nothing else.</p>
+</li>
+<li>
+<p>A <strong>fixed-form</strong> family restricts $Q$, or each factor $q_i$, to a parametric family, such as Gaussians with mean $m$ and variance $\Sigma_q$. Minimising $\mathcal{F}$ is then ordinary calculus in the parameters.</p>
+</li>
+</ul></div>
+<p>This lesson develops the free-form case. <a href="../week-04/laplace-approximation.html">Lesson&nbsp;3</a> develops the fixed-form Gaussian, and <a href="../week-04/two-causes.html">Lesson&nbsp;5</a> shows what happens when a fixed form and a mean-field product are imposed together and parameters are learned on top.</p>
+<h2 id="the-free-form-coordinate-update"><span class="secno">1</span>The free-form coordinate update</h2>
+<p><a href="../week-01/inverse-problem.html">Week&nbsp;1, Lesson&nbsp;4</a> derived the optimal factor for two binary causes with the other factor held fixed. Here the same result is proved for $K$ factors of any kind, discrete or continuous, and the change in $\mathcal{F}$ at each update is computed exactly. Two pieces of notation are needed. Write $s_{\setminus i}$ for all hidden variables except $s_i$, and
+<div class="eqn"><div class="eqbody">$$Q_{\setminus i}(s_{\setminus i}) \;=\; \prod_{j \ne i} q_j(s_j)$$</div></div>
+for their recognition distribution.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Additivity of entropy for a product distribution</span></div><p>Substitute $Q(s) = \prod_{j} q_j(s_j)$ into $\mathrm{H}[Q] = -\sum_{s} Q(s)\ln Q(s)$, and write the logarithm of the product as a sum of logarithms:
+<div class="eqn"><div class="eqbody">$$\mathrm{H}[Q]
+\;=\; -\sum_{s_1}\cdots\sum_{s_K} \left(\prod_{j=1}^{K} q_j(s_j)\right) \sum_{i=1}^{K} \ln q_i(s_i).$$</div></div>
+Exchange the finite sum over $i$ with the sums over states. For each $i$, the sum over $s_i$ carries $q_i(s_i)\ln q_i(s_i)$ and every other sum carries only $q_j(s_j)$:
+<div class="eqn" id="eq-mf-entropy-sum"><div class="eqbody">$$\mathrm{H}[Q]
+\;=\; -\sum_{i=1}^{K} \left(\sum_{s_i} q_i(s_i)\ln q_i(s_i)\right) \prod_{j \ne i} \left(\sum_{s_j} q_j(s_j)\right)
+\;=\; \sum_{i=1}^{K} \mathrm{H}[q_i],$$</div><div class="eqno"><a href="#eq-mf-entropy-sum" title="Link to equation 4.2.2">(4.2.2)</a></div></div>
+because each $\sum_{s_j} q_j(s_j) = 1$. The same steps with integrals give the continuous case, provided each $\mathrm{H}[q_j]$ is finite.</p></div>
+<div class="box definition"><div class="boxhd">Definition 4.2.2<span class="bt">Partially averaged energy</span></div><p>For an observation $o$ and fixed factors $Q_{\setminus i}$, the <strong>partially averaged energy</strong> of factor $i$ is the function of $s_i$ alone
+<div class="eqn" id="eq-partial-energy"><div class="eqbody">$$\mathcal{E}_i(s_i) \;=\; -\mathbb{E}_{Q_{\setminus i}(s_{\setminus i})}\!\big[\ln P(o, s_i, s_{\setminus i})\big]
+\;=\; -\sum_{s_{\setminus i}} \left(\prod_{j \ne i} q_j(s_j)\right) \ln P(o, s_i, s_{\setminus i}),$$</div><div class="eqno"><a href="#eq-partial-energy" title="Link to equation 4.2.3">(4.2.3)</a></div></div>
+with the value $+\infty$ allowed where the averaged log joint is $-\infty$. It is the energy $E(s) = -\ln P(o, s)$ of <a href="../week-04/bounding-surprise.html">Lesson&nbsp;1</a> averaged over every factor except the $i$-th.</p></div>
+<div class="box theorem"><div class="boxhd">Theorem 4.2.1<span class="bt">Free-form coordinate update</span></div><p>Hold $q_j$ fixed for every $j \ne i$, with $\mathrm{H}[q_j]$ finite, and suppose
+<div class="eqn"><div class="eqbody">$$0 \;&lt;\; Z_i \;=\; \sum_{s_i} \exp\!\big(-\mathcal{E}_i(s_i)\big) \;&lt;\; \infty .$$</div></div>
+Then among all normalised distributions $q_i$, the free energy $\mathcal{F}\big[q_i Q_{\setminus i}, o\big]$ has the unique minimiser
+<div class="eqn" id="eq-cavi-update"><div class="eqbody">$$\hat{q}_i(s_i) \;=\; \frac{1}{Z_i}\exp\!\Big(\mathbb{E}_{Q_{\setminus i}(s_{\setminus i})}\!\big[\ln P(o, s_i, s_{\setminus i})\big]\Big),$$</div><div class="eqno"><a href="#eq-cavi-update" title="Link to equation 4.2.4">(4.2.4)</a></div></div>
+that is, $\ln \hat{q}_i(s_i) = -\mathcal{E}_i(s_i) - \ln Z_i$. Replacing any factor $q_i$ by $\hat{q}_i$ lowers $\mathcal{F}$ by exactly
+<div class="eqn" id="eq-cavi-drop"><div class="eqbody">$$\mathcal{F}\big[q_i Q_{\setminus i}, o\big] \;-\; \mathcal{F}\big[\hat{q}_i Q_{\setminus i}, o\big]
+\;=\; D_{\mathrm{KL}}\!\big[q_i \,\big\|\, \hat{q}_i\big] \;\ge\; 0.$$</div><div class="eqno"><a href="#eq-cavi-drop" title="Link to equation 4.2.5">(4.2.5)</a></div></div></p></div>
+<p>Both conditions on $Z_i$ can fail. $Z_i = \infty$ happens for continuous $s_i$ when $e^{-\mathcal{E}_i}$ is not integrable. $Z_i = 0$ happens when every value of $s_i$ has $\mathcal{E}_i = +\infty$. For an example, take a joint over two binary variables that is positive only at $(0, 0)$ and $(1, 1)$, and fix $q_2 = (\tfrac12, \tfrac12)$. Each value of $s_1$ then meets a value of $s_2$ at which the joint is zero, both values of $\mathcal{E}_1$ are $+\infty$, and every product with this $q_2$ has $\mathcal{F} = +\infty$, so there is nothing to minimise.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">First proof: Gibbs' inequality</span></div><p>Start from the energy-minus-entropy form of Lesson&nbsp;1, $\mathcal{F}[Q, o] = -\mathbb{E}_Q[\ln P(o, s)] - \mathrm{H}[Q]$. Insert $Q = q_i\,Q_{\setminus i}$, use <a class="eqref" href="#eq-mf-entropy-sum">(4.2.2)</a>, and do the average over $s_{\setminus i}$ first:
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+\mathcal{F}\big[q_i Q_{\setminus i}, o\big]
+&\;=\; -\sum_{s_i} q_i(s_i)\sum_{s_{\setminus i}} Q_{\setminus i}(s_{\setminus i})\ln P(o, s_i, s_{\setminus i}) \;-\; \mathrm{H}[q_i] \;-\; \sum_{j \ne i} \mathrm{H}[q_j] \\
+&\;=\; \sum_{s_i} q_i(s_i)\,\mathcal{E}_i(s_i) \;+\; \sum_{s_i} q_i(s_i)\ln q_i(s_i) \;-\; \sum_{j \ne i} \mathrm{H}[q_j].
+\end{aligned}$$</div></div>
+By the definition of $\hat q_i$, $\mathcal{E}_i(s_i) = -\ln \hat{q}_i(s_i) - \ln Z_i$. Substituting,
+<div class="eqn" id="eq-cavi-kl-split"><div class="eqbody">$$\begin{aligned}
+\mathcal{F}\big[q_i Q_{\setminus i}, o\big]
+&\;=\; \sum_{s_i} q_i(s_i)\Big[\ln q_i(s_i) - \ln \hat{q}_i(s_i) - \ln Z_i\Big] \;-\; \sum_{j \ne i} \mathrm{H}[q_j] \\
+&\;=\; D_{\mathrm{KL}}\!\big[q_i \,\big\|\, \hat{q}_i\big] \;-\; \ln Z_i \;-\; \sum_{j \ne i} \mathrm{H}[q_j],
+\end{aligned}$$</div><div class="eqno"><a href="#eq-cavi-kl-split" title="Link to equation 4.2.6">(4.2.6)</a></div></div>
+using $\sum_{s_i} q_i(s_i) = 1$. If $q_i$ puts mass where $\hat q_i = 0$, both sides are $+\infty$. The last two terms do not depend on $q_i$. By Gibbs' inequality from <a href="../week-01/process-and-model.html">Week&nbsp;1, Lesson&nbsp;2</a>, $D_{\mathrm{KL}}[q_i \,\|\, \hat{q}_i] \ge 0$ with equality if and only if $q_i = \hat{q}_i$. Evaluating <a class="eqref" href="#eq-cavi-kl-split">(4.2.6)</a> at $q_i = \hat q_i$ and subtracting gives <a class="eqref" href="#eq-cavi-drop">(4.2.5)</a>. For continuous $s_i$ the same lines hold with integrals.</p></div>
+<p>This is the calculation that gave the free energy its name in Lesson&nbsp;1, applied to one factor: there the minimiser of $U - \mathrm{H}$ over all $Q$ was $e^{-E}/Z$, and here the minimiser over one factor is $e^{-\mathcal{E}_i}/Z_i$, with the energy replaced by its average over the other factors.</p>
+<p>The second proof finds the same distribution by setting a derivative to zero, which is how the update is usually derived in the literature. It also shows why no optimal factor can put zero probability on a value of finite energy.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Second proof: perturbation within the simplex</span></div><p>Take $s_i$ discrete, and let $q_i$ be a minimiser. Write $G(q_i) = \sum_{s_i} q_i(s_i)\big[\mathcal{E}_i(s_i) + \ln q_i(s_i)\big]$ for the part of $\mathcal{F}$ that depends on $q_i$. Fix two values $a \ne b$ of $s_i$ with $\mathcal{E}_i(a)$ and $\mathcal{E}_i(b)$ finite, and move probability between them: $q_i^{\epsilon} = q_i + \epsilon(\mathbf{e}_a - \mathbf{e}_b)$, where $\mathbf{e}_a$ puts $1$ on $a$ and $0$ elsewhere. The total stays $1$. Since $\frac{\mathrm{d}}{\mathrm{d}q}(q \ln q) = \ln q + 1$,
+<div class="eqn"><div class="eqbody">$$\frac{\mathrm{d}}{\mathrm{d}\epsilon} G(q_i^{\epsilon})\Big|_{\epsilon = 0}
+\;=\; \big[\mathcal{E}_i(a) + \ln q_i(a) + 1\big] - \big[\mathcal{E}_i(b) + \ln q_i(b) + 1\big].$$</div></div>
+<em>No value of finite energy has probability zero.</em> Suppose $q_i(a) = 0 &lt; q_i(b)$. For small $\epsilon &gt; 0$ the perturbation is a distribution, and the derivative above contains $\ln q_i^{\epsilon}(a) = \ln\epsilon \to -\infty$, so $G$ decreases as $\epsilon$ increases from $0$, contradicting minimality. So $q_i(a) &gt; 0$ at every $a$ with $\mathcal{E}_i(a) &lt; \infty$.</p>
+<p><em>The bracket is constant.</em> Both $q_i(a)$ and $q_i(b)$ are now positive, so $\epsilon$ may have either sign and the derivative must vanish:
+<div class="eqn"><div class="eqbody">$$\mathcal{E}_i(a) + \ln q_i(a) \;=\; \mathcal{E}_i(b) + \ln q_i(b)$$</div></div>
+for every such pair. Call the common value $-\ln Z$. Then $q_i(s_i) = e^{-\mathcal{E}_i(s_i)}/Z$, and normalisation forces $Z = Z_i$. Values with $\mathcal{E}_i = +\infty$ must have $q_i = 0$, or $\mathcal{F}$ would be infinite.</p>
+<p><em>The stationary point is a minimum.</em> The second derivative is $\frac{\mathrm{d}^2}{\mathrm{d}\epsilon^2}G = 1/q_i^{\epsilon}(a) + 1/q_i^{\epsilon}(b) &gt; 0$, so $G$ is strictly convex along every such line.</p>
+<p>For continuous $s_i$, take for $\mathbf{e}_a - \mathbf{e}_b$ the difference of two narrow bumps of equal area centred at $a$ and at $b$. The first-order change is the integral of $\mathcal{E}_i + \ln q_i + 1$ against that difference, and as the bumps narrow it tends to the difference of the bracket at $a$ and at $b$ wherever the bracket is continuous. The conclusion is the same.</p></div>
+<p>Updating the factors one at a time in turn, each with <a class="eqref" href="#eq-cavi-update">(4.2.4)</a> given the current values of all the others, is the coordinate ascent of Week&nbsp;1, Lesson&nbsp;4, usually called coordinate ascent variational inference (CAVI). By <a class="eqref" href="#eq-cavi-drop">(4.2.5)</a>, $\mathcal{F}$ never rises at any single step.</p>
+<h2 id="messages-on-a-factorised-model"><span class="secno">2</span>Messages on a factorised model</h2>
+<p>As written, <a class="eqref" href="#eq-partial-energy">(4.2.3)</a> averages over every configuration of $s_{\setminus i}$, which is $\prod_{j \ne i}|\mathcal{S}_j|$ terms. The model's own factorisation removes almost all of them.</p>
+<div class="box definition"><div class="boxhd">Definition 4.2.3<span class="bt">Directed acyclic graph, factor, scope</span></div><p>A <strong>directed acyclic graph</strong> on a set of variables has an arrow from $u$ to $v$ for each direct dependence, and no directed cycle. The variables with an arrow into $v$ are its <strong>parents</strong>, written $\mathrm{pa}(v)$; the variables that $v$ points to are its <strong>children</strong>; and the other parents of a child of $v$ are its <strong>co-parents</strong>. A directed graph defines a joint distribution as a product of one conditional per variable, $P = \prod_v P(v \mid \mathrm{pa}(v))$.</p>
+<p>More generally, a joint distribution factorises over a collection $\mathcal{J}$ of non-negative functions when
+<div class="eqn" id="eq-factor-graph"><div class="eqbody">$$P(o, s_1, \dots, s_K) \;=\; \prod_{c \in \mathcal{J}} \Psi_c(o_c, s_c),$$</div><div class="eqno"><a href="#eq-factor-graph" title="Link to equation 4.2.7">(4.2.7)</a></div></div>
+where each <strong>factor</strong> $\Psi_c$ depends only on the observations $o_c$ and hidden variables $s_c$ in its <strong>scope</strong>. For a directed graph there is one factor per variable, $\Psi_v = P(v \mid \mathrm{pa}(v))$, whose scope is $v$ together with its parents.</p></div>
+<div class="box definition"><div class="boxhd">Definition 4.2.4<span class="bt">Markov blanket of a node</span></div><p>In a directed acyclic graph, the <strong>Markov blanket of a node</strong> $v$ is the set made of its parents, its children and its co-parents.</p></div>
+<figure id="fig-4-2-1"><svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A directed acyclic graph of nine variables. One node is filled; its two parents, its two children and the other parent of one child are shaded and form its Markov blanket; the remaining three nodes are unshaded.">
+<rect x="1" y="1" width="678" height="318" fill="#fdfcf9" stroke="#e4e1d9"/>
+<defs><marker id="w04arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#3c3c42"/></marker></defs>
+<line x1="164.3" y1="64.5" x2="214.2" y2="108.2" stroke="#3c3c42" stroke-width="1.4" marker-end="url(#w04arr)"/>
+<line x1="243.1" y1="135.8" x2="285.6" y2="180.7" stroke="#3c3c42" stroke-width="1.4" marker-end="url(#w04arr)"/>
+<line x1="348.0" y1="136.8" x2="313.2" y2="179.7" stroke="#3c3c42" stroke-width="1.4" marker-end="url(#w04arr)"/>
+<line x1="585.7" y1="64.5" x2="535.8" y2="108.2" stroke="#3c3c42" stroke-width="1.4" marker-end="url(#w04arr)"/>
+<line x1="284.1" y1="206.4" x2="207.6" y2="256.5" stroke="#3c3c42" stroke-width="1.4" marker-end="url(#w04arr)"/>
+<line x1="316.9" y1="204.7" x2="421.3" y2="258.4" stroke="#3c3c42" stroke-width="1.4" marker-end="url(#w04arr)"/>
+<line x1="510.9" y1="138.7" x2="450.1" y2="249.6" stroke="#3c3c42" stroke-width="1.4" marker-end="url(#w04arr)"/>
+<line x1="459.0" y1="268.0" x2="569.0" y2="268.0" stroke="#3c3c42" stroke-width="1.4" marker-end="url(#w04arr)"/>
+<circle cx="150" cy="52" r="19" fill="#fdfcf9" stroke="#6d6d75" stroke-width="1.6"/>
+<circle cx="600" cy="52" r="19" fill="#fdfcf9" stroke="#6d6d75" stroke-width="1.6"/>
+<circle cx="230" cy="122" r="19" fill="#dcebe7" stroke="#0f5f57" stroke-width="1.6"/>
+<text x="203.0" y="126.0" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">parent</text>
+<circle cx="360" cy="122" r="19" fill="#dcebe7" stroke="#0f5f57" stroke-width="1.6"/>
+<text x="387.0" y="126.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">parent</text>
+<circle cx="520" cy="122" r="19" fill="#dcebe7" stroke="#0f5f57" stroke-width="1.6"/>
+<text x="547.0" y="126.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">co-parent</text>
+<circle cx="300" cy="196" r="19" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<text x="300.0" y="200.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="13" font-style="italic" fill="#fdfcf9">s<tspan baseline-shift="sub" font-size="9">i</tspan></text>
+<circle cx="190" cy="268" r="19" fill="#dcebe7" stroke="#0f5f57" stroke-width="1.6"/>
+<text x="190.0" y="304.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">child</text>
+<circle cx="440" cy="268" r="19" fill="#dcebe7" stroke="#0f5f57" stroke-width="1.6"/>
+<text x="440.0" y="304.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">child</text>
+<circle cx="590" cy="268" r="19" fill="#fdfcf9" stroke="#6d6d75" stroke-width="1.6"/>
+</svg><figcaption><span class="fno">Figure 4.2.1.</span> The Markov blanket of one node $s_i$ (filled) in a directed acyclic graph. Its two parents, two children and the co-parent of one child are shaded; the three unshaded nodes are outside the blanket. The blanket is computed from the edge list in <code>values.py</code>.</figcaption></figure>
+<p>The name is the one Week&nbsp;1, Lesson&nbsp;2 gave a different object. There a Markov blanket was any set of variables that, once conditioned on, makes the agent's internal states independent of the external ones. Here it is a particular set around one node of a graph. The next result shows that it has the same defining property, with one variable in place of the internal states.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The blanket separates a node from everything else</span></div><p>Write $B$ for the Markov blanket of $v$ and $R$ for all variables other than $v$ and $B$. By the product rule, the conditional of $v$ given everything else is the joint divided by its sum over $v$:
+<div class="eqn"><div class="eqbody">$$P(v \mid B, R) \;=\; \frac{\prod_{w} P(w \mid \mathrm{pa}(w))}{\sum_{v'} \prod_{w} P(w \mid \mathrm{pa}(w))\big|_{v = v'}} .$$</div></div>
+A factor $P(w \mid \mathrm{pa}(w))$ in which $v$ does not appear (because $w \ne v$ and $v \notin \mathrm{pa}(w)$) is the same in the numerator and in every term of the denominator, so it cancels. The factors that remain are $P(v \mid \mathrm{pa}(v))$, which involves $v$ and its parents, and $P(w \mid \mathrm{pa}(w))$ for each child $w$ of $v$, which involves $w$ and all of $w$'s parents, that is, $v$ and its co-parents. Every variable left is $v$ or in $B$, so $P(v \mid B, R)$ does not depend on $R$:
+<div class="eqn"><div class="eqbody">$$P(v \mid B, R) \;=\; P(v \mid B).$$</div></div></p></div>
+<p>The same cancellation localises the free-form update.</p>
+<div class="box theorem"><div class="boxhd">Theorem 4.2.2<span class="bt">Locality of the free-form update</span></div><p>Let $P$ factorise as <a class="eqref" href="#eq-factor-graph">(4.2.7)</a> and let $Q = \prod_j q_j(s_j)$. Write $\mathcal{J}_i = \{c \in \mathcal{J} : s_i \in s_c\}$ for the factors whose scope contains $s_i$, and define
+<div class="eqn" id="eq-vmp-message"><div class="eqbody">$$\mathcal{M}_{c \to i}(s_i) \;=\; \mathbb{E}_{\prod_{j \in s_c \setminus \{s_i\}} q_j(s_j)}\!\big[\ln \Psi_c(o_c, s_c)\big],$$</div><div class="eqno"><a href="#eq-vmp-message" title="Link to equation 4.2.8">(4.2.8)</a></div></div>
+an average over the other hidden variables in the scope of $c$ only. Then <a class="eqref" href="#eq-cavi-update">(4.2.4)</a> is
+<div class="eqn" id="eq-vmp-sum"><div class="eqbody">$$\ln \hat{q}_i(s_i) \;=\; \sum_{c \in \mathcal{J}_i} \mathcal{M}_{c \to i}(s_i) \;-\; \ln Z_i^{\mathrm{loc}},
+\qquad
+Z_i^{\mathrm{loc}} \;=\; \sum_{s_i} \exp\!\Big(\sum_{c \in \mathcal{J}_i} \mathcal{M}_{c \to i}(s_i)\Big).$$</div><div class="eqno"><a href="#eq-vmp-sum" title="Link to equation 4.2.9">(4.2.9)</a></div></div>
+For a directed graph, the variables that appear in the factors of $\mathcal{J}_i$ are $s_i$ and its Markov blanket, so $\hat q_i$ depends on the other factors only through the $q_j$ of variables in the blanket of $s_i$.</p></div>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Cancellation of the factors outside the blanket</span></div><p>Take the logarithm of <a class="eqref" href="#eq-factor-graph">(4.2.7)</a> and split $\mathcal{J}$ into the factors that contain $s_i$ and those that do not:
+<div class="eqn"><div class="eqbody">$$\ln P(o, s) \;=\; \sum_{c \in \mathcal{J}_i} \ln \Psi_c(o_c, s_c) \;+\; \sum_{c' \notin \mathcal{J}_i} \ln \Psi_{c'}(o_{c'}, s_{c'}).$$</div></div>
+Average under $Q_{\setminus i}$.</p>
+<ol>
+<li>A factor $c' \notin \mathcal{J}_i$ does not involve $s_i$, so its average is a number $C_{c'}$ that does not depend on $s_i$. Write $C_i = \sum_{c' \notin \mathcal{J}_i} C_{c'}$.</li>
+<li>A factor $c \in \mathcal{J}_i$ involves $s_i$ and some other variables. In its average, the sums over variables outside the scope of $c$ each give $\sum_{s_l} q_l(s_l) = 1$:
+<div class="eqn"><div class="eqbody">$$\mathbb{E}_{Q_{\setminus i}}\big[\ln \Psi_c(o_c, s_c)\big]
+\;=\; \sum_{s_c \setminus s_i} \Big(\prod_{j \in s_c \setminus \{s_i\}} q_j(s_j)\Big) \ln \Psi_c(o_c, s_c) \prod_{l \notin s_c}\Big(\sum_{s_l} q_l(s_l)\Big)
+\;=\; \mathcal{M}_{c \to i}(s_i).$$</div></div></li>
+</ol>
+<p>So $-\mathcal{E}_i(s_i) = \sum_{c \in \mathcal{J}_i}\mathcal{M}_{c \to i}(s_i) + C_i$. In <a class="eqref" href="#eq-cavi-update">(4.2.4)</a> the factor $e^{C_i}$ multiplies the numerator and, summed over $s_i$, the normaliser, so $Z_i = e^{C_i} Z_i^{\mathrm{loc}}$ and $e^{C_i}$ cancels. What remains is <a class="eqref" href="#eq-vmp-sum">(4.2.9)</a>. The normaliser must be the local one: dividing the local numerator by $Z_i$ would give a distribution whose total is $e^{-C_i}$, not $1$.</p></div>
+<div class="box definition"><div class="boxhd">Definition 4.2.5<span class="bt">Variational message</span></div><p>Each function $\mathcal{M}_{c \to i}$ in <a class="eqref" href="#eq-vmp-message">(4.2.8)</a> is a <strong>variational message</strong> from factor $c$ to variable $s_i$. Applying <a class="eqref" href="#eq-vmp-sum">(4.2.9)</a> to each variable in turn is <strong>variational message passing</strong> (<a href="https://jmlr.org/papers/v6/winn05a.html">Winn &amp; Bishop, 2005</a>).</p></div>
+<p>When the factors are conjugate exponential families, each message is determined by a few expected statistics of the neighbouring factors, such as a mean and a mean square, and only those numbers need to travel along the edges of the graph. The last section of this lesson works one such case.</p>
+<h3 id="variational-and-sum-product-messages">Variational and sum-product messages</h3>
+<p>Week&nbsp;1, Lesson&nbsp;5 also passed messages, and they were different. Take one factor $\Psi(s_1, s_2)$ and a belief or incoming message $m(s_2)$ about $s_2$. The two messages to $s_1$ are
+<div class="eqn" id="eq-two-messages"><div class="eqbody">$$\underbrace{\sum_{s_2} \Psi(s_1, s_2)\, m(s_2)}_{\text{sum-product}}
+\qquad\text{and}\qquad
+\underbrace{\exp\!\Big(\sum_{s_2} q_2(s_2) \ln \Psi(s_1, s_2)\Big)}_{\text{variational}} .$$</div><div class="eqno"><a href="#eq-two-messages" title="Link to equation 4.2.10">(4.2.10)</a></div></div>
+The first is an arithmetic average of the factor over $s_2$; the second, exponentiated, is a geometric average. An incoming sum-product message need not be normalised, so to compare the two, normalise it, $q_2 = m/\sum_{s_2} m(s_2)$, and compare messages up to a factor that does not depend on $s_1$. By Jensen's inequality for the logarithm, $\ln \mathbb{E}[Y] \ge \mathbb{E}[\ln Y]$ from Lesson&nbsp;1, with $Y = \Psi(s_1, \cdot)$ and weights $q_2$,
+<div class="eqn"><div class="eqbody">$$\exp\!\Big(\mathbb{E}_{q_2}\big[\ln \Psi(s_1, s_2)\big]\Big) \;\le\; \mathbb{E}_{q_2}\big[\Psi(s_1, s_2)\big]$$</div></div>
+at every $s_1$, with equality only where $\Psi(s_1, \cdot)$ is constant over the values $q_2$ allows. On a tree the sum-product messages give the exact marginals, as Week&nbsp;1, Lesson&nbsp;5 showed; the variational ones, in general, do not.</p>
+<p>The noisy-OR model of Week&nbsp;1, Lesson&nbsp;4 makes the difference concrete. Two binary causes, a gust $s_1$ and a baboon $s_2$, each occur with prior probability $p = 0.10$, independently. Each cause shakes the branch with probability $w = 0.90$, and the branch also shakes with leak probability $\lambda = 0.01$ when neither is present, so
+<div class="eqn"><div class="eqbody">$$P(o_1 = 1 \mid s_1, s_2) \;=\; 1 - (1 - w s_1)(1 - w s_2)(1 - \lambda).$$</div></div>
+The branch shakes, $o_1 = 1$. The evidence is $P(o_1 = 1) = 0.180181$, the surprise is $1.7138$ nats, and the posterior over $(s_1, s_2)$, rows indexed by $s_1$, is
+<div class="eqn"><div class="eqbody">$$P(s_1, s_2 \mid o_1 = 1) \;=\;
+\begin{pmatrix}
+0.0450 & 0.4500 \\
+0.4500 & 0.0550
+\end{pmatrix},$$</div></div>
+with both marginals equal to $0.5050$.</p>
+<p>Write $\Psi(s_1, s_2) = P(o_1 = 1 \mid s_1, s_2)$, and feed both rules the same belief about $s_2$, its prior $(1 - p, p)$. The sum-product message is $(0.0991, 0.90991)$ at $s_1 = (0, 1)$, and the variational message, exponentiated, is $(0.01568, 0.90954)$. Each entry of the second is below the corresponding entry of the first, as Jensen requires. The gap is large at $s_1 = 0$, where $\Psi(0, \cdot)$ takes the very different values $\lambda = 0.01$ and $0.901$, and small at $s_1 = 1$, where $\Psi(1, \cdot)$ takes the close values $0.901$ and $0.9901$. In log-odds the two messages favour $s_1 = 1$ by $2.2172$ and $4.0603$. Adding the prior log-odds $\ln\frac{p}{1-p} = -2.1972$ gives $P(s_1 = 1) = 0.5050$ from the sum-product message, the exact marginal, and $q_1 = 0.8657$ from the variational message, the first update of CAVI below. The geometric average is dominated by the small value $\lambda$, which makes the explanation $s_1 = 0$ look worse than it is.</p>
+<h3 id="counting-the-work">Counting the work</h3>
+<p>Week&nbsp;1, Lesson&nbsp;5 showed that on a chain of $n$ variables with $k$ values each, the sum-product messages cost $O(nk^2)$ operations. Take $40$ variables with $4$ values and one factor for each neighbouring pair. The joint table has $k^n \approx 1.209 \times 10^{24}$ entries, and passing one message along each of the $n - 1 = 39$ factors, each of its $k$ entries a sum of $k$ products, takes $(n-1)k^2 = 624$ multiplications. The partially averaged energy <a class="eqref" href="#eq-partial-energy">(4.2.3)</a> for one variable, evaluated as written, averages over the $k^{n-1} \approx 3.022 \times 10^{23}$ configurations of the others. By <a class="eqref" href="#eq-vmp-sum">(4.2.9)</a> each pairwise factor needs only the $k^2$ products $q_j(s_j)\ln\Psi(s_i, s_j)$ to send its message to one neighbour, so a sweep that sends every message in both directions costs $1248$ multiplications. On a chain, then, locality brings the mean-field update to the same order of cost as exact inference, and gains nothing over it. Variational messages earn their approximation elsewhere: on graphs with loops, where sum-product messages are no longer exact either, and on continuous models whose exact messages are functions with no finite set of parameters.</p>
+<aside class="mn"><span class="mnl">Message passing in time</span><p>Week&nbsp;9 passes messages along a chain of hidden states in time. <a href="https://doi.org/10.1038/s41598-018-38246-3">Parr et al. (2019)</a> compare three schemes there: the mean-field messages of this lesson, Bethe messages, and <em>marginal</em> message passing. The marginal scheme is a different approximation. Its messages are built from the logarithm of an expected transition probability, combined with forward and backward messages, where a variational message is the expectation of a logarithm; by Jensen's inequality the two differ. <a href="https://doi.org/10.1016/j.jmp.2020.102447">Da Costa et al. (2020)</a> also distinguish the mean-field and marginal approximations. Week&nbsp;9 derives the marginal scheme.</p></aside>
+<h3 id="a-second-sensor">A second sensor</h3>
+<p>Attach a second sensor $o_2$ to the gust alone: leaves that rustle with probability $P(o_2 = 1 \mid s_1 = 1) = 0.85$ in a gust and $P(o_2 = 1 \mid s_1 = 0) = 0.05$ otherwise. The joint has four factors,
+<div class="eqn"><div class="eqbody">$$P(o_1, o_2, s_1, s_2) \;=\; \underbrace{P(s_1)}_{\Psi_1}\;\underbrace{P(s_2)}_{\Psi_2}\;\underbrace{P(o_1 \mid s_1, s_2)}_{\Psi_3}\;\underbrace{P(o_2 \mid s_1)}_{\Psi_4},$$</div></div>
+and in the graph $s_1 \to o_1 \leftarrow s_2$, $s_1 \to o_2$, the blanket of $s_2$ is $\{o_1, s_1\}$: its child and its co-parent. The factors containing $s_1$ are $\mathcal{J}_1 = \{1, 3, 4\}$, and those containing $s_2$ are $\mathcal{J}_2 = \{2, 3\}$. The branch shakes, $o_1 = 1$, and the leaves stay quiet, $o_2 = 0$.</p>
+<p>Factor $\Psi_4$ takes the values $P(o_2 = 0 \mid s_1 = 0) = 0.95$ and $P(o_2 = 0 \mid s_1 = 1) = 0.15$. It contains no $q_j$ to average over, so its message to $s_1$ is its own logarithm, worth $\ln(0.15/0.95) = -1.8458$ in log-odds, and it sends nothing to $s_2$. The baboon hears about the leaves only through the factor $\Psi_3$ it shares with the gust, whose message to $s_2$ is
+<div class="eqn"><div class="eqbody">$$\mathcal{M}_{3 \to 2}(s_2) \;=\; (1 - q_1)\ln P(o_1 = 1 \mid 0, s_2) \;+\; q_1 \ln P(o_1 = 1 \mid 1, s_2).$$</div></div>
+Start CAVI at $q_1 = q_2 = 0.10$ and update $q_1$ first.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align: right;">$q_1$ after sweep 1</th>
+<th style="text-align: right;">$\mathcal{M}_{3 \to 2}(0)$</th>
+<th style="text-align: right;">$\mathcal{M}_{3 \to 2}(1)$</th>
+<th style="text-align: right;">log-odds for $s_2 = 1$</th>
+<th style="text-align: right;">$q_2$ after sweep 1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Branch sensor only</td>
+<td style="text-align: right;">$0.8657$</td>
+<td style="text-align: right;">$-0.7089$</td>
+<td style="text-align: right;">$-0.0226$</td>
+<td style="text-align: right;">$0.6863$</td>
+<td style="text-align: right;">$0.1808$</td>
+</tr>
+<tr>
+<td>Both sensors</td>
+<td style="text-align: right;">$0.5043$</td>
+<td style="text-align: right;">$-2.3353$</td>
+<td style="text-align: right;">$-0.0567$</td>
+<td style="text-align: right;">$2.2787$</td>
+<td style="text-align: right;">$0.5203$</td>
+</tr>
+</tbody>
+</table></div>
+<p>The quiet leaves lower $q_1$, the message to $s_2$ then weights the term $\ln P(o_1 = 1 \mid 0, s_2)$ more heavily, and that term is where the two values of $s_2$ differ most ($\ln \lambda$ against $\ln 0.901$). The log-odds for the baboon rise from $0.6863$ to $2.2787$.</p>
+<p>Iterated to convergence, CAVI reaches $(q_1, q_2) = (0.0293, 0.8979)$ with $\mathcal{F} = 2.4392$ nats, against the surprise $2.3189$. The same fixed point was reached, to within $10^{-12}$, from each of $400$ starting points on a $20 \times 20$ grid over the unit square; that is a numerical check, not a proof of uniqueness. The exact marginals are $(0.1387, 0.7981)$. So the leaves raise the exact probability of the baboon from $0.5050$ to $0.7981$, and the mean-field belief rises further, to $0.8979$, while its belief in the gust falls below the exact $0.1387$ to $0.0293$. This is the explaining away of Week&nbsp;1, Lesson&nbsp;4 in a product: the product cannot represent "one cause or the other", so once the evidence favours the baboon it commits to the baboon more firmly than the posterior does.</p>
+<h2 id="symmetry-breaking-on-the-noisy-or-model"><span class="secno">3</span>Symmetry breaking on the noisy-OR model</h2>
+<p>Equation <a class="eqref" href="#eq-cavi-kl-split">(4.2.6)</a> shows that $\mathcal{F}$ is strictly convex in each factor alone when the others are held fixed. That does not make it convex in all the factors together.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">The mean-field free energy need not be jointly convex</span></div><p>The expected energy $-\sum_s q_1(s_1)\cdots q_K(s_K)\ln P(o, s)$ multiplies different factors together, and such products can give the Hessian of $\mathcal{F}$ in all factors jointly a negative eigenvalue. Whether they do depends on the model: if the posterior is itself a product, $\mathcal{F}$ is a sum of separate divergences, one per factor, and is jointly convex. Where joint convexity fails, CAVI can reach different stationary points from different starts or with different update orders. Updating the factors one at a time, each with the others' current values, guarantees by <a class="eqref" href="#eq-cavi-drop">(4.2.5)</a> that $\mathcal{F}$ never rises. Updating all of them at once from the previous values has no such guarantee.</p></div>
+<p>The noisy-OR model with one sensor shows each of these. Write $q_1 = q_1(s_1 = 1)$ and $q_2 = q_2(s_2 = 1)$. Subtracting $\ln \hat q_1(0)$ from $\ln \hat q_1(1)$ in <a class="eqref" href="#eq-cavi-update">(4.2.4)</a> removes $\ln Z_1$ and gives the update as a map $\hat q_1 = R(q_2)$ in log-odds:
+<div class="eqn" id="eq-nor-cavi-logodds"><div class="eqbody">$$\ln \frac{\hat{q}_1}{1 - \hat{q}_1}
+\;=\; \ln \frac{p}{1 - p}
+\;+\; (1 - q_2)\ln \frac{P(o_1 = 1 \mid 1, 0)}{P(o_1 = 1 \mid 0, 0)}
+\;+\; q_2 \ln \frac{P(o_1 = 1 \mid 1, 1)}{P(o_1 = 1 \mid 0, 1)}
+\;=\; b_0 + b_1 q_2,$$</div><div class="eqno"><a href="#eq-nor-cavi-logodds" title="Link to equation 4.2.11">(4.2.11)</a></div></div>
+with intercept $b_0 = 2.3037$ and slope $b_1 = -4.4066$. By symmetry $\hat q_2 = R(q_1)$. When the baboon is believed absent, a gust raises the probability of a shake from $\lambda = 0.01$ to $0.901$, a large increase; when the baboon is believed present, a gust raises it only from $0.901$ to $0.9901$. So $R$ is decreasing: the more one cause is believed, the less the other is needed.</p>
+<p>Start at the prior, $(q_1, q_2) = (0.10, 0.10)$, where $\mathcal{F} = 3.7491$ nats, and update $q_1$ first. With $q_2 = 0.10$ the update gives $q_1 = 0.8657$, the value from the variational message above, and $\mathcal{F}$ falls to $2.2531$. The drop is $1.4959$ nats, equal to $D_{\mathrm{KL}}$ between the old and new $q_1$ as <a class="eqref" href="#eq-cavi-drop">(4.2.5)</a> requires. Updating $q_2$ against this $q_1$ gives only $0.1808$, because the gust now accounts for the shake; $\mathcal{F}$ falls by a further $0.0254$ to $2.2277$.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Sweep</th>
+<th style="text-align: right;">$q_1$ (gust)</th>
+<th style="text-align: right;">$q_2$ (baboon)</th>
+<th style="text-align: right;">$\mathcal{F}$ after $q_1$</th>
+<th style="text-align: right;">$\mathcal{F}$ after $q_2$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$0$</td>
+<td style="text-align: right;">$0.1000$</td>
+<td style="text-align: right;">$0.1000$</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;">$3.7491$</td>
+</tr>
+<tr>
+<td>$1$</td>
+<td style="text-align: right;">$0.8657$</td>
+<td style="text-align: right;">$0.1808$</td>
+<td style="text-align: right;">$2.2531$</td>
+<td style="text-align: right;">$2.2277$</td>
+</tr>
+<tr>
+<td>$2$</td>
+<td style="text-align: right;">$0.8186$</td>
+<td style="text-align: right;">$0.2136$</td>
+<td style="text-align: right;">$2.2197$</td>
+<td style="text-align: right;">$2.2163$</td>
+</tr>
+<tr>
+<td>$3$</td>
+<td style="text-align: right;">$0.7962$</td>
+<td style="text-align: right;">$0.2306$</td>
+<td style="text-align: right;">$2.2147$</td>
+<td style="text-align: right;">$2.2139$</td>
+</tr>
+<tr>
+<td>$4$</td>
+<td style="text-align: right;">$0.7837$</td>
+<td style="text-align: right;">$0.2405$</td>
+<td style="text-align: right;">$2.2134$</td>
+<td style="text-align: right;">$2.2132$</td>
+</tr>
+<tr>
+<td>limit</td>
+<td style="text-align: right;">$0.7627$</td>
+<td style="text-align: right;">$0.2579$</td>
+<td style="text-align: right;">$2.2127$</td>
+<td style="text-align: right;">$2.2127$</td>
+</tr>
+</tbody>
+</table></div>
+<p>The limit row is where successive sweeps stop changing either probability by more than $10^{-15}$, after $80$ sweeps. That tolerance is close to the rounding error, so on another machine the count can differ by one or two; the limit itself does not change at the precision shown. A search over a $500 \times 500$ grid of $(q_1, q_2)$ finds no lower $\mathcal{F}$, consistent with these being the lowest minima; coordinate ascent and a finite grid cannot establish that. Updating $q_2$ first instead reaches the mirror image, $(0.2579, 0.7627)$, with the same free energy. Both are $0.4989$ nats above the surprise $1.7138$, because no product can put most of its mass on $(1, 0)$ and $(0, 1)$ while keeping little on $(0, 0)$ and $(1, 1)$.</p>
+<p>On the diagonal $q_1 = q_2$ there is one stationary point, the solution of $q = R(q)$, at $q_{\mathrm{sad}} = 0.5119$, with $\mathcal{F} = 2.2264$ nats. Along the diagonal it is a minimum, and across the diagonal a maximum, so it is a saddle; Exercise&nbsp;4.6.4 in <a href="../week-04/exercises.html">the problems</a> proves this from the Hessian. Its free energy is above that of the two asymmetric minima.</p>
+<p>Now update both factors at once from the previous values: $q_1^{(t)} = R(q_2^{(t-1)})$ and $q_2^{(t)} = R(q_1^{(t-1)})$, with superscript $(t)$ for the iteration. From a start on the diagonal both coordinates receive the same update, so the iteration stays on the diagonal and is the one-dimensional map $q \mapsto R(q)$. Its derivative at the fixed point is
+<div class="eqn"><div class="eqbody">$$R'(q_{\mathrm{sad}}) \;=\; q_{\mathrm{sad}}(1 - q_{\mathrm{sad}})\,b_1 \;=\; -1.1010,$$</div></div>
+using $\frac{\mathrm{d}}{\mathrm{d}x}\frac{1}{1 + e^{-x}} = q(1 - q)$ and <a class="eqref" href="#eq-nor-cavi-logodds">(4.2.11)</a>. Its modulus exceeds $1$, so the fixed point is unstable. From the illustrated start $q = 0.1$ the iteration approaches an attracting two-cycle, alternating between $(q, q) = (0.2579, 0.2579)$ and $(0.7627, 0.7627)$, at free energies $2.7792$ and $2.7692$, both above the saddle and the two minima.</p>
+<p>The two values of the cycle are the coordinates of the asymmetric minima. A two-cycle of $R$ is a pair with $R(a) = b$ and $R(b) = a$. A stationary point of the sequential iteration satisfies $q_1 = R(q_2)$ and $q_2 = R(q_1)$. These are the same two equations, so every asymmetric stationary point $(a, b)$ gives a two-cycle $\{a, b\}$ and the reverse. The cycle attracts because the product of the derivatives of $R$ at its two points, $-0.8433 \times -0.7976 = 0.6726$, has modulus below $1$: that product is the derivative of $R \circ R$ at either point.</p>
+<figure id="fig-4-2-2"><svg viewBox="0 0 680 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Left: contours of the mean-field free energy over the two Bernoulli beliefs, with the two minima, the saddle on the diagonal, the path of sequential updates, and the two diagonal points visited by simultaneous updates. Right: the update map R against the diagonal, with the cobweb of the simultaneous iteration settling on a two-cycle.">
+<rect x="1" y="1" width="678" height="370" fill="#fdfcf9" stroke="#e4e1d9"/>
+<line x1="60" y1="300" x2="320" y2="300" stroke="#3c3c42"/>
+<line x1="60" y1="300" x2="60" y2="40" stroke="#3c3c42"/>
+<line x1="60.0" y1="300" x2="60.0" y2="304" stroke="#3c3c42"/>
+<text x="60.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="125.0" y1="300" x2="125.0" y2="304" stroke="#3c3c42"/>
+<text x="125.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.25</text>
+<line x1="190.0" y1="300" x2="190.0" y2="304" stroke="#3c3c42"/>
+<text x="190.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.5</text>
+<line x1="255.0" y1="300" x2="255.0" y2="304" stroke="#3c3c42"/>
+<text x="255.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.75</text>
+<line x1="320.0" y1="300" x2="320.0" y2="304" stroke="#3c3c42"/>
+<text x="320.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="56" y1="300.0" x2="60" y2="300.0" stroke="#3c3c42"/>
+<text x="53.0" y="303.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="56" y1="235.0" x2="60" y2="235.0" stroke="#3c3c42"/>
+<text x="53.0" y="238.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.25</text>
+<line x1="56" y1="170.0" x2="60" y2="170.0" stroke="#3c3c42"/>
+<text x="53.0" y="173.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.5</text>
+<line x1="56" y1="105.0" x2="60" y2="105.0" stroke="#3c3c42"/>
+<text x="53.0" y="108.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.75</text>
+<line x1="56" y1="40.0" x2="60" y2="40.0" stroke="#3c3c42"/>
+<text x="53.0" y="43.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<text x="190.0" y="331.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75">q1  (gust)</text>
+<text x="26" y="170.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75" transform="rotate(-90 26 170.0)">q2  (baboon)</text>
+<line x1="400" y1="300" x2="660" y2="300" stroke="#3c3c42"/>
+<line x1="400" y1="300" x2="400" y2="40" stroke="#3c3c42"/>
+<line x1="400.0" y1="300" x2="400.0" y2="304" stroke="#3c3c42"/>
+<text x="400.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="465.0" y1="300" x2="465.0" y2="304" stroke="#3c3c42"/>
+<text x="465.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.25</text>
+<line x1="530.0" y1="300" x2="530.0" y2="304" stroke="#3c3c42"/>
+<text x="530.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.5</text>
+<line x1="595.0" y1="300" x2="595.0" y2="304" stroke="#3c3c42"/>
+<text x="595.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.75</text>
+<line x1="660.0" y1="300" x2="660.0" y2="304" stroke="#3c3c42"/>
+<text x="660.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="396" y1="300.0" x2="400" y2="300.0" stroke="#3c3c42"/>
+<text x="393.0" y="303.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="396" y1="235.0" x2="400" y2="235.0" stroke="#3c3c42"/>
+<text x="393.0" y="238.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.25</text>
+<line x1="396" y1="170.0" x2="400" y2="170.0" stroke="#3c3c42"/>
+<text x="393.0" y="173.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.5</text>
+<line x1="396" y1="105.0" x2="400" y2="105.0" stroke="#3c3c42"/>
+<text x="393.0" y="108.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.75</text>
+<line x1="396" y1="40.0" x2="400" y2="40.0" stroke="#3c3c42"/>
+<text x="393.0" y="43.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<text x="530.0" y="331.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75">q</text>
+<text x="366" y="170.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75" transform="rotate(-90 366 170.0)">R(q)</text>
+<path d="M111.6 92.1 L111.5 91.6 L111.4 90.8 L111.3 89.9 L111.4 89.0 L111.6 88.4 L111.7 88.2 L112.4 87.3 L112.5 87.2 L113.4 86.8 L114.2 86.5 L115.1 86.5 L115.9 86.5 L116.8 86.7 L117.7 86.9 L118.5 87.2 L118.9 87.3 L119.4 87.5 L120.3 87.9 L120.9 88.2 L121.1 88.3 L122.0 88.7 L122.5 89.0 L122.9 89.2 L123.7 89.7 L124.0 89.9 L124.6 90.3 L125.3 90.8 L125.5 90.9 L126.3 91.5 L126.5 91.6 L127.2 92.1 L127.7 92.5 L128.1 92.8 L128.8 93.4 L128.9 93.5 L129.8 94.2 L129.8 94.2 L130.7 95.0 L130.8 95.1 L131.5 95.8 L131.8 95.9 L132.4 96.6 L132.7 96.8 L133.3 97.4 L133.6 97.7 L134.1 98.3 L134.4 98.5 L135.0 99.1 L135.3 99.4 L135.9 100.1 L136.1 100.3 L136.7 101.0 L136.9 101.1 L137.6 102.0 L137.6 102.0 L138.4 102.9 L138.5 103.0 L139.1 103.7 L139.3 104.0 L139.8 104.6 L140.2 105.1 L140.5 105.5 L141.1 106.2 L141.2 106.3 L141.8 107.2 L141.9 107.4 L142.4 108.1 L142.8 108.6 L143.1 108.9 L143.7 109.8 L143.7 109.8 L144.2 110.7 L144.5 111.2 L144.8 111.5 L145.3 112.4 L145.4 112.6 L145.8 113.3 L146.3 114.1 L146.3 114.1 L146.7 115.0 L147.1 115.9 L147.1 115.9 L147.5 116.7 L147.8 117.6 L148.0 118.2 L148.1 118.5 L148.3 119.3 L148.3 120.2 L148.2 121.1 L148.0 121.7 L147.8 121.9 L147.1 122.3 L146.3 122.5 L145.4 122.5 L144.5 122.3 L143.7 122.1 L143.1 121.9 L142.8 121.8 L141.9 121.5 L141.1 121.1 L141.0 121.1 L140.2 120.7 L139.3 120.3 L139.2 120.2 L138.5 119.8 L137.7 119.3 L137.6 119.3 L136.7 118.8 L136.2 118.5 L135.9 118.2 L135.0 117.7 L134.9 117.6 L134.1 117.1 L133.6 116.7 L133.3 116.5 L132.4 115.9 L132.3 115.9 L131.5 115.3 L131.1 115.0 L130.7 114.6 L130.0 114.1 L129.8 114.0 L128.9 113.3 L128.9 113.3 L128.1 112.6 L127.8 112.4 L127.2 111.9 L126.8 111.5 L126.3 111.2 L125.8 110.7 L125.5 110.4 L124.8 109.8 L124.6 109.6 L123.8 108.9 L123.7 108.9 L122.9 108.1 L122.9 108.0 L122.0 107.2 L122.0 107.2 L121.2 106.3 L121.1 106.3 L120.3 105.5 L120.3 105.4 L119.5 104.6 L119.4 104.5 L118.8 103.7 L118.5 103.5 L118.0 102.9 L117.7 102.5 L117.3 102.0 L116.8 101.4 L116.6 101.1 L115.9 100.3 L115.9 100.3 L115.3 99.4 L115.1 99.1 L114.7 98.5 L114.2 97.7 L114.2 97.7 L113.7 96.8 L113.4 96.3 L113.2 95.9 L112.7 95.1 L112.5 94.5 L112.3 94.2 L112.0 93.4 L111.7 92.5 L111.6 92.1" fill="none" stroke="#6d6d75" stroke-width="0.9" opacity="0.7"/>
+<path d="M238.1 216.9 L237.9 216.3 L237.7 215.5 L237.5 214.6 L237.5 213.7 L237.7 212.9 L238.1 212.2 L238.3 212.0 L238.9 211.8 L239.8 211.7 L240.7 211.7 L241.5 211.9 L241.8 212.0 L242.4 212.2 L243.3 212.5 L244.1 212.9 L244.1 212.9 L245.0 213.3 L245.9 213.7 L245.9 213.7 L246.7 214.2 L247.4 214.6 L247.6 214.7 L248.5 215.2 L248.8 215.5 L249.3 215.8 L250.2 216.3 L250.2 216.3 L251.1 216.9 L251.4 217.2 L251.9 217.6 L252.6 218.1 L252.8 218.2 L253.7 218.8 L253.8 218.9 L254.5 219.5 L254.9 219.8 L255.4 220.2 L256.0 220.7 L256.3 220.9 L257.0 221.5 L257.1 221.6 L258.0 222.4 L258.0 222.4 L258.9 223.1 L259.0 223.3 L259.7 223.9 L259.9 224.1 L260.6 224.7 L260.9 225.0 L261.5 225.6 L261.7 225.9 L262.3 226.4 L262.6 226.7 L263.2 227.3 L263.4 227.6 L264.1 228.2 L264.2 228.5 L264.9 229.2 L265.0 229.3 L265.8 230.2 L265.8 230.2 L266.5 231.1 L266.6 231.2 L267.2 231.9 L267.5 232.3 L267.9 232.8 L268.4 233.5 L268.5 233.7 L269.1 234.5 L269.2 234.7 L269.7 235.4 L270.1 236.0 L270.3 236.3 L270.8 237.1 L271.0 237.5 L271.3 238.0 L271.7 238.9 L271.8 239.1 L272.1 239.7 L272.5 240.6 L272.7 241.1 L272.8 241.5 L273.1 242.3 L273.3 243.2 L273.5 244.1 L273.5 244.9 L273.5 245.8 L273.2 246.6 L272.8 247.5 L272.7 247.6 L271.8 248.3 L271.6 248.4 L271.0 248.6 L270.1 248.7 L269.2 248.6 L268.4 248.5 L267.9 248.4 L267.5 248.3 L266.6 248.0 L265.8 247.7 L265.5 247.5 L264.9 247.3 L264.1 246.8 L263.7 246.6 L263.2 246.3 L262.3 245.8 L262.3 245.8 L261.5 245.3 L260.9 244.9 L260.6 244.7 L259.7 244.1 L259.7 244.1 L258.9 243.4 L258.6 243.2 L258.0 242.7 L257.5 242.3 L257.1 242.0 L256.5 241.5 L256.3 241.2 L255.5 240.6 L255.4 240.5 L254.6 239.7 L254.5 239.7 L253.7 238.9 L253.7 238.8 L252.8 238.0 L252.8 238.0 L252.0 237.1 L251.9 237.1 L251.1 236.3 L251.1 236.2 L250.4 235.4 L250.2 235.2 L249.6 234.5 L249.3 234.2 L248.8 233.7 L248.5 233.2 L248.1 232.8 L247.6 232.2 L247.4 231.9 L246.7 231.1 L246.7 231.1 L246.0 230.2 L245.9 230.0 L245.4 229.3 L245.0 228.9 L244.7 228.5 L244.1 227.7 L244.1 227.6 L243.5 226.7 L243.3 226.4 L242.9 225.9 L242.4 225.1 L242.3 225.0 L241.8 224.1 L241.5 223.8 L241.2 223.3 L240.7 222.4 L240.7 222.3 L240.2 221.5 L239.8 220.8 L239.7 220.7 L239.3 219.8 L238.9 219.0 L238.9 218.9 L238.5 218.1 L238.2 217.2 L238.1 216.9" fill="none" stroke="#6d6d75" stroke-width="0.9" opacity="0.7"/>
+<path d="M100.4 83.5 L100.3 83.0 L100.4 82.4 L100.4 82.1 L100.5 81.2 L100.7 80.4 L101.0 79.5 L101.2 79.1 L101.5 78.6 L102.1 77.9 L102.3 77.8 L103.0 77.2 L103.4 76.9 L103.8 76.7 L104.7 76.4 L105.6 76.1 L106.2 76.0 L106.4 76.0 L107.3 75.9 L108.2 75.9 L109.0 76.0 L109.3 76.0 L109.9 76.1 L110.8 76.3 L111.6 76.4 L112.5 76.7 L113.3 76.9 L113.4 76.9 L114.2 77.2 L115.1 77.5 L115.8 77.8 L115.9 77.8 L116.8 78.2 L117.7 78.6 L117.8 78.6 L118.5 79.0 L119.4 79.4 L119.5 79.5 L120.3 79.9 L121.1 80.4 L121.1 80.4 L122.0 80.9 L122.6 81.2 L122.9 81.4 L123.7 81.9 L124.0 82.1 L124.6 82.5 L125.4 83.0 L125.5 83.0 L126.3 83.6 L126.6 83.8 L127.2 84.2 L127.8 84.7 L128.1 84.9 L128.9 85.5 L129.0 85.6 L129.8 86.2 L130.1 86.4 L130.7 86.8 L131.2 87.3 L131.5 87.5 L132.3 88.2 L132.4 88.2 L133.3 89.0 L133.3 89.0 L134.1 89.7 L134.3 89.9 L135.0 90.5 L135.3 90.8 L135.9 91.2 L136.3 91.6 L136.7 92.0 L137.2 92.5 L137.6 92.8 L138.2 93.4 L138.5 93.6 L139.1 94.2 L139.3 94.5 L140.0 95.1 L140.2 95.3 L140.8 95.9 L141.1 96.2 L141.7 96.8 L141.9 97.0 L142.6 97.7 L142.8 97.9 L143.4 98.5 L143.7 98.8 L144.2 99.4 L144.5 99.8 L145.0 100.3 L145.4 100.7 L145.8 101.1 L146.3 101.6 L146.6 102.0 L147.1 102.6 L147.4 102.9 L148.0 103.5 L148.2 103.7 L148.9 104.5 L148.9 104.6 L149.7 105.5 L149.7 105.5 L150.4 106.3 L150.6 106.5 L151.2 107.2 L151.5 107.5 L151.9 108.1 L152.3 108.6 L152.6 108.9 L153.2 109.6 L153.4 109.8 L154.1 110.7 L154.1 110.7 L154.8 111.5 L154.9 111.7 L155.5 112.4 L155.8 112.8 L156.2 113.3 L156.7 113.9 L156.9 114.1 L157.5 115.0 L157.5 115.0 L158.2 115.9 L158.4 116.1 L158.9 116.7 L159.3 117.2 L159.6 117.6 L160.1 118.3 L160.2 118.5 L160.9 119.3 L161.0 119.5 L161.5 120.2 L161.9 120.6 L162.2 121.1 L162.7 121.8 L162.8 121.9 L163.5 122.8 L163.6 123.0 L164.1 123.7 L164.5 124.1 L164.7 124.5 L165.3 125.3 L165.4 125.4 L166.0 126.3 L166.2 126.5 L166.6 127.1 L167.0 127.7 L167.2 128.0 L167.9 128.9 L167.9 128.9 L168.5 129.7 L168.8 130.2 L169.1 130.6 L169.6 131.4 L169.7 131.5 L170.3 132.3 L170.5 132.6 L170.9 133.2 L171.4 133.9 L171.5 134.1 L172.1 134.9 L172.2 135.1 L172.7 135.8 L173.1 136.4 L173.3 136.7 L173.9 137.5 L174.0 137.7 L174.5 138.4 L174.8 139.0 L175.0 139.3 L175.6 140.1 L175.7 140.2 L176.2 141.0 L176.6 141.5 L176.8 141.9 L177.4 142.7 L177.4 142.8 L178.0 143.6 L178.3 144.1 L178.5 144.5 L179.1 145.3 L179.2 145.4 L179.7 146.2 L180.0 146.7 L180.2 147.0 L180.8 147.9 L180.9 148.0 L181.4 148.8 L181.8 149.4 L182.0 149.6 L182.5 150.5 L182.6 150.7 L183.1 151.4 L183.5 152.0 L183.7 152.2 L184.2 153.1 L184.4 153.4 L184.8 154.0 L185.2 154.7 L185.3 154.8 L185.9 155.7 L186.1 156.0 L186.5 156.6 L187.0 157.4 L187.0 157.4 L187.6 158.3 L187.8 158.7 L188.1 159.2 L188.7 160.0 L188.7 160.0 L189.2 160.9 L189.6 161.4 L189.8 161.8 L190.4 162.6 L190.4 162.8 L190.9 163.5 L191.3 164.2 L191.4 164.4 L191.9 165.2 L191.3 165.6 L190.6 165.2 L190.4 165.2 L189.6 164.6 L189.2 164.4 L188.7 164.0 L187.8 163.5 L187.8 163.5 L187.0 162.9 L186.5 162.6 L186.1 162.4 L185.2 161.8 L185.1 161.8 L184.4 161.3 L183.8 160.9 L183.5 160.7 L182.6 160.2 L182.4 160.0 L181.8 159.6 L181.1 159.2 L180.9 159.1 L180.0 158.5 L179.7 158.3 L179.2 157.9 L178.4 157.4 L178.3 157.4 L177.4 156.8 L177.0 156.6 L176.6 156.3 L175.7 155.7 L175.7 155.7 L174.8 155.1 L174.4 154.8 L174.0 154.6 L173.1 154.0 L173.0 154.0 L172.2 153.5 L171.7 153.1 L171.4 152.9 L170.5 152.3 L170.4 152.2 L169.6 151.8 L169.1 151.4 L168.8 151.2 L167.9 150.6 L167.8 150.5 L167.0 150.0 L166.4 149.6 L166.2 149.5 L165.3 148.9 L165.1 148.8 L164.5 148.3 L163.8 147.9 L163.6 147.7 L162.7 147.2 L162.5 147.0 L161.9 146.6 L161.3 146.2 L161.0 146.0 L160.1 145.4 L160.0 145.3 L159.3 144.8 L158.7 144.5 L158.4 144.2 L157.5 143.6 L157.4 143.6 L156.7 143.0 L156.2 142.7 L155.8 142.4 L154.9 141.9 L154.9 141.9 L154.1 141.2 L153.7 141.0 L153.2 140.6 L152.4 140.1 L152.3 140.0 L151.5 139.4 L151.2 139.3 L150.6 138.8 L150.0 138.4 L149.7 138.2 L148.9 137.6 L148.8 137.5 L148.0 137.0 L147.6 136.7 L147.1 136.3 L146.4 135.8 L146.3 135.7 L145.4 135.1 L145.2 134.9 L144.5 134.4 L144.0 134.1 L143.7 133.8 L142.8 133.2 L142.8 133.2 L141.9 132.5 L141.7 132.3 L141.1 131.9 L140.5 131.5 L140.2 131.2 L139.4 130.6 L139.3 130.5 L138.5 129.9 L138.3 129.7 L137.6 129.2 L137.2 128.9 L136.7 128.5 L136.1 128.0 L135.9 127.8 L135.0 127.2 L135.0 127.1 L134.1 126.5 L133.9 126.3 L133.3 125.8 L132.8 125.4 L132.4 125.1 L131.8 124.5 L131.5 124.3 L130.7 123.7 L130.7 123.6 L129.8 122.9 L129.7 122.8 L128.9 122.2 L128.7 121.9 L128.1 121.4 L127.7 121.1 L127.2 120.7 L126.7 120.2 L126.3 119.9 L125.7 119.3 L125.5 119.2 L124.7 118.5 L124.6 118.4 L123.8 117.6 L123.7 117.6 L122.9 116.8 L122.8 116.7 L122.0 116.0 L121.9 115.9 L121.1 115.2 L121.0 115.0 L120.3 114.3 L120.1 114.1 L119.4 113.5 L119.2 113.3 L118.5 112.6 L118.3 112.4 L117.7 111.8 L117.5 111.5 L116.8 110.9 L116.6 110.7 L115.9 110.0 L115.8 109.8 L115.1 109.0 L115.0 108.9 L114.2 108.1 L114.2 108.1 L113.4 107.2 L113.4 107.1 L112.7 106.3 L112.5 106.1 L111.9 105.5 L111.6 105.1 L111.2 104.6 L110.8 104.1 L110.5 103.7 L109.9 103.0 L109.8 102.9 L109.1 102.0 L109.0 101.9 L108.5 101.1 L108.2 100.7 L107.8 100.3 L107.3 99.5 L107.2 99.4 L106.6 98.5 L106.4 98.2 L106.1 97.7 L105.6 96.9 L105.5 96.8 L105.0 95.9 L104.7 95.5 L104.5 95.1 L104.0 94.2 L103.8 94.0 L103.5 93.4 L103.1 92.5 L103.0 92.3 L102.6 91.6 L102.3 90.8 L102.1 90.4 L101.9 89.9 L101.6 89.0 L101.3 88.2 L101.2 88.0 L101.0 87.3 L100.8 86.4 L100.6 85.6 L100.5 84.7 L100.4 83.8 L100.4 83.5" fill="none" stroke="#6d6d75" stroke-width="1.4" opacity="0.7"/>
+<path d="M192.2 166.2 L192.0 166.1 L192.2 165.8 L192.3 166.1 L192.2 166.2" fill="none" stroke="#6d6d75" stroke-width="1.4" opacity="0.7"/>
+<path d="M193.9 168.0 L193.8 167.8 L193.9 167.7 L194.2 167.8 L193.9 168.0" fill="none" stroke="#6d6d75" stroke-width="1.4" opacity="0.7"/>
+<path d="M194.8 169.4 L194.4 168.7 L194.8 168.1 L195.6 168.6 L195.8 168.7 L196.5 169.1 L197.2 169.6 L197.4 169.6 L198.2 170.2 L198.6 170.4 L199.1 170.8 L200.0 171.3 L200.0 171.3 L200.8 171.9 L201.3 172.2 L201.7 172.4 L202.6 173.0 L202.6 173.0 L203.4 173.5 L204.0 173.9 L204.3 174.1 L205.2 174.7 L205.3 174.8 L206.0 175.2 L206.6 175.6 L206.9 175.8 L207.8 176.3 L208.0 176.5 L208.6 176.9 L209.3 177.4 L209.5 177.5 L210.4 178.0 L210.6 178.2 L211.2 178.6 L212.0 179.1 L212.1 179.2 L213.0 179.8 L213.3 180.0 L213.8 180.3 L214.6 180.8 L214.7 180.9 L215.5 181.5 L215.9 181.7 L216.4 182.0 L217.2 182.6 L217.3 182.6 L218.1 183.2 L218.5 183.4 L219.0 183.8 L219.8 184.3 L219.9 184.4 L220.7 185.0 L221.0 185.2 L221.6 185.5 L222.3 186.0 L222.5 186.1 L223.3 186.7 L223.6 186.9 L224.2 187.3 L224.9 187.8 L225.1 187.9 L225.9 188.5 L226.1 188.6 L226.8 189.1 L227.4 189.5 L227.7 189.7 L228.5 190.3 L228.6 190.4 L229.4 190.9 L229.8 191.2 L230.3 191.5 L231.1 192.1 L231.1 192.1 L232.0 192.8 L232.3 193.0 L232.9 193.4 L233.5 193.8 L233.7 194.0 L234.6 194.6 L234.7 194.7 L235.5 195.3 L235.9 195.5 L236.3 195.9 L237.0 196.4 L237.2 196.5 L238.1 197.2 L238.2 197.3 L238.9 197.8 L239.4 198.1 L239.8 198.5 L240.5 199.0 L240.7 199.1 L241.5 199.8 L241.7 199.9 L242.4 200.4 L242.8 200.7 L243.3 201.1 L243.9 201.6 L244.1 201.8 L245.0 202.5 L245.0 202.5 L245.9 203.1 L246.1 203.3 L246.7 203.8 L247.2 204.2 L247.6 204.5 L248.3 205.1 L248.5 205.2 L249.3 205.9 L249.3 205.9 L250.2 206.6 L250.4 206.8 L251.1 207.4 L251.4 207.7 L251.9 208.1 L252.5 208.5 L252.8 208.8 L253.5 209.4 L253.7 209.6 L254.5 210.3 L254.5 210.3 L255.4 211.1 L255.5 211.1 L256.3 211.8 L256.5 212.0 L257.1 212.6 L257.4 212.9 L258.0 213.4 L258.4 213.7 L258.9 214.2 L259.3 214.6 L259.7 215.0 L260.2 215.5 L260.6 215.8 L261.2 216.3 L261.5 216.6 L262.1 217.2 L262.3 217.4 L263.0 218.1 L263.2 218.3 L263.8 218.9 L264.1 219.2 L264.7 219.8 L264.9 220.0 L265.5 220.7 L265.8 220.9 L266.4 221.5 L266.6 221.8 L267.2 222.4 L267.5 222.8 L268.0 223.3 L268.4 223.7 L268.8 224.1 L269.2 224.7 L269.5 225.0 L270.1 225.7 L270.3 225.9 L271.0 226.7 L271.0 226.7 L271.8 227.6 L271.8 227.7 L272.5 228.5 L272.7 228.8 L273.2 229.3 L273.6 229.9 L273.8 230.2 L274.4 231.0 L274.5 231.1 L275.1 231.9 L275.3 232.2 L275.8 232.8 L276.2 233.4 L276.4 233.7 L277.0 234.5 L277.0 234.6 L277.5 235.4 L277.9 236.0 L278.1 236.3 L278.6 237.1 L278.8 237.4 L279.1 238.0 L279.6 238.9 L279.6 238.9 L280.1 239.7 L280.5 240.5 L280.6 240.6 L281.0 241.5 L281.4 242.2 L281.4 242.3 L281.8 243.2 L282.2 244.1 L282.2 244.2 L282.5 244.9 L282.8 245.8 L283.1 246.6 L283.1 246.7 L283.3 247.5 L283.6 248.4 L283.7 249.2 L283.9 250.1 L284.0 250.7 L284.0 251.0 L284.1 251.8 L284.1 252.7 L284.0 253.6 L284.0 253.8 L283.9 254.4 L283.6 255.3 L283.3 256.2 L283.1 256.6 L282.8 257.0 L282.2 257.7 L282.1 257.9 L281.4 258.5 L280.9 258.8 L280.5 259.0 L279.6 259.3 L278.8 259.5 L277.9 259.6 L277.6 259.6 L277.0 259.7 L276.5 259.6 L276.2 259.6 L275.3 259.5 L274.4 259.4 L273.6 259.2 L272.7 259.0 L272.0 258.8 L271.8 258.7 L271.0 258.4 L270.1 258.1 L269.6 257.9 L269.2 257.7 L268.4 257.4 L267.7 257.0 L267.5 256.9 L266.6 256.5 L266.0 256.2 L265.8 256.0 L264.9 255.5 L264.5 255.3 L264.1 255.0 L263.2 254.5 L263.1 254.4 L262.3 253.9 L261.8 253.6 L261.5 253.4 L260.6 252.8 L260.5 252.7 L259.7 252.2 L259.3 251.8 L258.9 251.5 L258.1 251.0 L258.0 250.9 L257.1 250.2 L257.0 250.1 L256.3 249.5 L255.9 249.2 L255.4 248.8 L254.9 248.4 L254.5 248.1 L253.9 247.5 L253.7 247.3 L252.9 246.6 L252.8 246.6 L251.9 245.8 L251.9 245.8 L251.1 245.0 L251.0 244.9 L250.2 244.2 L250.0 244.1 L249.3 243.4 L249.1 243.2 L248.5 242.5 L248.2 242.3 L247.6 241.7 L247.4 241.5 L246.7 240.8 L246.5 240.6 L245.9 239.9 L245.7 239.7 L245.0 239.0 L244.8 238.9 L244.1 238.1 L244.0 238.0 L243.3 237.2 L243.2 237.1 L242.4 236.3 L242.4 236.2 L241.6 235.4 L241.5 235.3 L240.8 234.5 L240.7 234.3 L240.1 233.7 L239.8 233.3 L239.3 232.8 L238.9 232.3 L238.6 231.9 L238.1 231.3 L237.8 231.1 L237.2 230.3 L237.1 230.2 L236.4 229.3 L236.3 229.3 L235.7 228.5 L235.5 228.2 L234.9 227.6 L234.6 227.2 L234.2 226.7 L233.7 226.1 L233.5 225.9 L232.9 225.0 L232.8 225.0 L232.2 224.1 L232.0 223.9 L231.5 223.3 L231.1 222.8 L230.8 222.4 L230.3 221.7 L230.1 221.5 L229.5 220.7 L229.4 220.6 L228.8 219.8 L228.5 219.5 L228.1 218.9 L227.7 218.3 L227.5 218.1 L226.8 217.2 L226.8 217.2 L226.2 216.3 L225.9 216.0 L225.6 215.5 L225.1 214.8 L224.9 214.6 L224.3 213.7 L224.2 213.6 L223.7 212.9 L223.3 212.4 L223.0 212.0 L222.5 211.2 L222.4 211.1 L221.8 210.3 L221.6 210.0 L221.2 209.4 L220.7 208.8 L220.6 208.5 L220.0 207.7 L219.9 207.6 L219.4 206.8 L219.0 206.3 L218.8 205.9 L218.1 205.1 L218.1 205.1 L217.6 204.2 L217.3 203.8 L217.0 203.3 L216.4 202.6 L216.4 202.5 L215.8 201.6 L215.5 201.3 L215.2 200.7 L214.7 200.0 L214.6 199.9 L214.0 199.0 L213.8 198.7 L213.4 198.1 L213.0 197.5 L212.8 197.3 L212.3 196.4 L212.1 196.2 L211.7 195.5 L211.2 194.9 L211.1 194.7 L210.5 193.8 L210.4 193.6 L210.0 193.0 L209.5 192.2 L209.4 192.1 L208.8 191.2 L208.6 190.9 L208.2 190.4 L207.8 189.6 L207.7 189.5 L207.1 188.6 L206.9 188.3 L206.5 187.8 L206.0 187.0 L206.0 186.9 L205.4 186.0 L205.2 185.6 L204.9 185.2 L204.3 184.3 L204.3 184.3 L203.7 183.4 L203.4 183.0 L203.2 182.6 L202.6 181.7 L202.6 181.6 L202.1 180.8 L201.7 180.3 L201.5 180.0 L200.9 179.1 L200.8 178.9 L200.4 178.2 L200.0 177.6 L199.8 177.4 L199.3 176.5 L199.1 176.2 L198.7 175.6 L198.2 174.9 L198.2 174.8 L197.6 173.9 L197.4 173.5 L197.1 173.0 L196.5 172.2 L196.5 172.2 L196.0 171.3 L195.6 170.8 L195.4 170.4 L194.8 169.6 L194.8 169.4" fill="none" stroke="#6d6d75" stroke-width="1.4" opacity="0.7"/>
+<path d="M83.0 77.7 L82.9 76.9 L82.8 76.0 L82.7 75.2 L82.7 74.3 L82.7 73.4 L82.7 72.6 L82.7 71.7 L82.8 70.8 L82.9 70.0 L83.0 69.3 L83.1 69.1 L83.3 68.2 L83.6 67.4 L83.9 66.5 L83.9 66.5 L84.3 65.6 L84.8 64.9 L84.8 64.8 L85.5 63.9 L85.6 63.7 L86.3 63.0 L86.5 62.8 L87.2 62.2 L87.4 62.1 L88.2 61.5 L88.5 61.3 L89.1 61.0 L90.0 60.6 L90.2 60.4 L90.8 60.2 L91.7 59.9 L92.6 59.7 L93.2 59.6 L93.4 59.5 L94.3 59.4 L95.2 59.3 L96.0 59.2 L96.9 59.2 L97.8 59.2 L98.6 59.2 L99.5 59.2 L100.4 59.3 L101.2 59.4 L102.1 59.5 L102.6 59.6 L103.0 59.6 L103.8 59.8 L104.7 60.0 L105.6 60.1 L106.4 60.3 L106.8 60.4 L107.3 60.6 L108.2 60.8 L109.0 61.1 L109.9 61.3 L109.9 61.3 L110.8 61.6 L111.6 61.9 L112.4 62.2 L112.5 62.2 L113.4 62.5 L114.2 62.9 L114.6 63.0 L115.1 63.2 L115.9 63.6 L116.7 63.9 L116.8 64.0 L117.7 64.4 L118.5 64.8 L118.6 64.8 L119.4 65.2 L120.3 65.6 L120.3 65.6 L121.1 66.1 L122.0 66.5 L122.0 66.5 L122.9 67.0 L123.6 67.4 L123.7 67.5 L124.6 68.0 L125.1 68.2 L125.5 68.5 L126.3 69.0 L126.5 69.1 L127.2 69.5 L127.9 70.0 L128.1 70.1 L128.9 70.6 L129.3 70.8 L129.8 71.2 L130.6 71.7 L130.7 71.7 L131.5 72.3 L131.9 72.6 L132.4 72.9 L133.1 73.4 L133.3 73.5 L134.1 74.1 L134.4 74.3 L135.0 74.8 L135.5 75.2 L135.9 75.4 L136.7 76.0 L136.7 76.1 L137.6 76.7 L137.8 76.9 L138.5 77.4 L139.0 77.8 L139.3 78.1 L140.0 78.6 L140.2 78.7 L141.1 79.4 L141.1 79.5 L141.9 80.2 L142.2 80.4 L142.8 80.9 L143.2 81.2 L143.7 81.6 L144.2 82.1 L144.5 82.3 L145.3 83.0 L145.4 83.1 L146.3 83.8 L146.3 83.8 L147.1 84.6 L147.2 84.7 L148.0 85.4 L148.2 85.6 L148.9 86.1 L149.2 86.4 L149.7 86.9 L150.1 87.3 L150.6 87.7 L151.1 88.2 L151.5 88.5 L152.0 89.0 L152.3 89.3 L152.9 89.9 L153.2 90.2 L153.8 90.8 L154.1 91.0 L154.7 91.6 L154.9 91.8 L155.6 92.5 L155.8 92.7 L156.5 93.4 L156.7 93.5 L157.4 94.2 L157.5 94.4 L158.3 95.1 L158.4 95.2 L159.1 95.9 L159.3 96.1 L160.0 96.8 L160.1 96.9 L160.8 97.7 L161.0 97.8 L161.7 98.5 L161.9 98.7 L162.5 99.4 L162.7 99.6 L163.4 100.3 L163.6 100.5 L164.2 101.1 L164.5 101.4 L165.1 102.0 L165.3 102.3 L165.9 102.9 L166.2 103.2 L166.7 103.7 L167.0 104.1 L167.5 104.6 L167.9 105.0 L168.4 105.5 L168.8 105.9 L169.2 106.3 L169.6 106.8 L170.0 107.2 L170.5 107.8 L170.8 108.1 L171.4 108.7 L171.6 108.9 L172.2 109.6 L172.4 109.8 L173.1 110.5 L173.2 110.7 L174.0 111.5 L174.0 111.5 L174.8 112.4 L174.8 112.4 L175.7 113.3 L175.7 113.3 L176.5 114.1 L176.6 114.3 L177.3 115.0 L177.4 115.2 L178.1 115.9 L178.3 116.1 L178.8 116.7 L179.2 117.1 L179.6 117.6 L180.0 118.0 L180.4 118.5 L180.9 119.0 L181.2 119.3 L181.8 119.9 L182.0 120.2 L182.6 120.8 L182.8 121.1 L183.5 121.8 L183.6 121.9 L184.4 122.7 L184.4 122.8 L185.2 123.7 L185.2 123.7 L186.0 124.5 L186.1 124.6 L186.8 125.4 L187.0 125.5 L187.6 126.3 L187.8 126.5 L188.4 127.1 L188.7 127.4 L189.2 128.0 L189.6 128.3 L190.0 128.9 L190.4 129.3 L190.9 129.7 L191.3 130.2 L191.7 130.6 L192.2 131.1 L192.5 131.5 L193.0 132.1 L193.3 132.3 L193.9 133.0 L194.1 133.2 L194.8 133.9 L194.9 134.1 L195.6 134.8 L195.7 134.9 L196.5 135.7 L196.5 135.8 L197.4 136.6 L197.4 136.7 L198.2 137.5 L198.2 137.6 L199.0 138.4 L199.1 138.5 L199.8 139.3 L200.0 139.4 L200.7 140.1 L200.8 140.3 L201.5 141.0 L201.7 141.2 L202.3 141.9 L202.6 142.1 L203.2 142.7 L203.4 143.0 L204.0 143.6 L204.3 143.9 L204.9 144.5 L205.2 144.7 L205.7 145.3 L206.0 145.6 L206.6 146.2 L206.9 146.5 L207.4 147.0 L207.8 147.4 L208.3 147.9 L208.6 148.3 L209.1 148.8 L209.5 149.1 L210.0 149.6 L210.4 150.0 L210.9 150.5 L211.2 150.9 L211.7 151.4 L212.1 151.7 L212.6 152.2 L213.0 152.6 L213.5 153.1 L213.8 153.4 L214.4 154.0 L214.7 154.3 L215.3 154.8 L215.5 155.1 L216.1 155.7 L216.4 156.0 L217.0 156.6 L217.3 156.8 L217.9 157.4 L218.1 157.7 L218.8 158.3 L219.0 158.5 L219.7 159.2 L219.9 159.3 L220.6 160.0 L220.7 160.2 L221.5 160.9 L221.6 161.0 L222.4 161.8 L222.5 161.8 L223.3 162.6 L223.4 162.6 L224.2 163.5 L224.3 163.5 L225.1 164.3 L225.2 164.4 L225.9 165.1 L226.1 165.2 L226.8 165.9 L227.0 166.1 L227.7 166.7 L227.9 167.0 L228.5 167.5 L228.9 167.8 L229.4 168.3 L229.8 168.7 L230.3 169.1 L230.7 169.6 L231.1 170.0 L231.7 170.4 L232.0 170.8 L232.6 171.3 L232.9 171.6 L233.5 172.2 L233.7 172.4 L234.5 173.0 L234.6 173.2 L235.4 173.9 L235.5 174.0 L236.3 174.8 L236.3 174.8 L237.2 175.6 L237.3 175.6 L238.1 176.4 L238.2 176.5 L238.9 177.2 L239.2 177.4 L239.8 178.0 L240.1 178.2 L240.7 178.8 L241.0 179.1 L241.5 179.6 L242.0 180.0 L242.4 180.4 L242.9 180.8 L243.3 181.2 L243.9 181.7 L244.1 181.9 L244.8 182.6 L245.0 182.7 L245.7 183.4 L245.9 183.5 L246.7 184.3 L246.7 184.3 L247.6 185.2 L247.6 185.2 L248.5 186.0 L248.5 186.0 L249.3 186.8 L249.5 186.9 L250.2 187.6 L250.4 187.8 L251.1 188.4 L251.3 188.6 L251.9 189.2 L252.2 189.5 L252.8 190.0 L253.2 190.4 L253.7 190.8 L254.1 191.2 L254.5 191.6 L255.0 192.1 L255.4 192.5 L255.9 193.0 L256.3 193.3 L256.8 193.8 L257.1 194.1 L257.7 194.7 L258.0 194.9 L258.6 195.5 L258.9 195.8 L259.5 196.4 L259.7 196.6 L260.4 197.3 L260.6 197.5 L261.3 198.1 L261.5 198.3 L262.2 199.0 L262.3 199.2 L263.1 199.9 L263.2 200.0 L263.9 200.7 L264.1 200.9 L264.8 201.6 L264.9 201.7 L265.6 202.5 L265.8 202.6 L266.5 203.3 L266.6 203.5 L267.3 204.2 L267.5 204.4 L268.2 205.1 L268.4 205.3 L269.0 205.9 L269.2 206.2 L269.8 206.8 L270.1 207.1 L270.7 207.7 L271.0 208.0 L271.5 208.5 L271.8 208.9 L272.3 209.4 L272.7 209.9 L273.1 210.3 L273.6 210.8 L273.9 211.1 L274.4 211.8 L274.6 212.0 L275.3 212.8 L275.4 212.9 L276.2 213.7 L276.2 213.7 L276.9 214.6 L277.0 214.7 L277.7 215.5 L277.9 215.8 L278.4 216.3 L278.8 216.8 L279.1 217.2 L279.6 217.8 L279.8 218.1 L280.5 218.9 L280.6 218.9 L281.3 219.8 L281.4 220.0 L281.9 220.7 L282.2 221.0 L282.6 221.5 L283.1 222.2 L283.3 222.4 L283.9 223.3 L284.0 223.3 L284.6 224.1 L284.8 224.5 L285.2 225.0 L285.7 225.6 L285.9 225.9 L286.5 226.7 L286.6 226.9 L287.1 227.6 L287.4 228.1 L287.7 228.5 L288.3 229.3 L288.3 229.4 L288.8 230.2 L289.2 230.7 L289.4 231.1 L289.9 231.9 L290.0 232.1 L290.5 232.8 L290.9 233.5 L291.0 233.7 L291.5 234.5 L291.8 234.9 L292.0 235.4 L292.5 236.3 L292.6 236.4 L293.0 237.1 L293.5 238.0 L293.5 238.0 L293.9 238.9 L294.4 239.7 L294.4 239.7 L294.8 240.6 L295.2 241.4 L295.2 241.5 L295.6 242.3 L296.0 243.2 L296.1 243.3 L296.4 244.1 L296.8 244.9 L297.0 245.4 L297.1 245.8 L297.5 246.6 L297.8 247.5 L297.8 247.6 L298.1 248.4 L298.4 249.2 L298.7 250.1 L298.7 250.1 L298.9 251.0 L299.2 251.8 L299.4 252.7 L299.6 253.2 L299.7 253.6 L299.9 254.4 L300.0 255.3 L300.2 256.2 L300.4 257.0 L300.4 257.4 L300.5 257.9 L300.6 258.8 L300.7 259.6 L300.8 260.5 L300.8 261.4 L300.8 262.2 L300.8 263.1 L300.8 264.0 L300.7 264.8 L300.6 265.7 L300.5 266.6 L300.4 266.8 L300.3 267.4 L300.1 268.3 L299.8 269.2 L299.6 269.8 L299.4 270.0 L299.0 270.9 L298.7 271.5 L298.5 271.8 L297.9 272.6 L297.8 272.8 L297.2 273.5 L297.0 273.7 L296.3 274.4 L296.1 274.5 L295.2 275.2 L295.1 275.2 L294.4 275.7 L293.5 276.1 L293.5 276.1 L292.6 276.4 L291.8 276.7 L290.9 276.9 L290.7 277.0 L290.0 277.1 L289.2 277.2 L288.3 277.3 L287.4 277.3 L286.6 277.3 L285.7 277.3 L284.8 277.3 L284.0 277.2 L283.1 277.1 L282.3 277.0 L282.2 277.0 L281.4 276.8 L280.5 276.6 L279.6 276.4 L278.8 276.2 L278.3 276.1 L277.9 276.0 L277.0 275.7 L276.2 275.5 L275.5 275.2 L275.3 275.2 L274.4 274.9 L273.6 274.5 L273.1 274.4 L272.7 274.2 L271.8 273.8 L271.0 273.5 L271.0 273.5 L270.1 273.1 L269.2 272.7 L269.1 272.6 L268.4 272.3 L267.5 271.8 L267.4 271.8 L266.6 271.4 L265.8 270.9 L265.7 270.9 L264.9 270.5 L264.1 270.0 L264.1 270.0 L263.2 269.5 L262.6 269.2 L262.3 269.0 L261.5 268.4 L261.2 268.3 L260.6 267.9 L259.8 267.4 L259.7 267.4 L258.9 266.8 L258.5 266.6 L258.0 266.2 L257.2 265.7 L257.1 265.6 L256.3 265.0 L256.0 264.8 L255.4 264.4 L254.8 264.0 L254.5 263.8 L253.7 263.2 L253.6 263.1 L252.8 262.5 L252.4 262.2 L251.9 261.9 L251.3 261.4 L251.1 261.2 L250.2 260.5 L250.2 260.5 L249.3 259.8 L249.1 259.6 L248.5 259.1 L248.0 258.8 L247.6 258.4 L247.0 257.9 L246.7 257.7 L246.0 257.0 L245.9 257.0 L245.0 256.2 L244.9 256.2 L244.1 255.5 L243.9 255.3 L243.3 254.7 L243.0 254.4 L242.4 253.9 L242.0 253.6 L241.5 253.2 L241.0 252.7 L240.7 252.4 L240.1 251.8 L239.8 251.6 L239.1 251.0 L238.9 250.8 L238.2 250.1 L238.1 250.0 L237.3 249.2 L237.2 249.1 L236.4 248.4 L236.3 248.3 L235.5 247.5 L235.5 247.5 L234.6 246.6 L234.6 246.6 L233.7 245.8 L233.7 245.8 L232.9 244.9 L232.9 244.9 L232.0 244.1 L232.0 244.1 L231.1 243.2 L231.1 243.2 L230.3 242.3 L230.3 242.3 L229.4 241.5 L229.4 241.4 L228.6 240.6 L228.5 240.5 L227.8 239.7 L227.7 239.6 L226.9 238.9 L226.8 238.7 L226.1 238.0 L225.9 237.8 L225.3 237.1 L225.1 236.9 L224.5 236.3 L224.2 236.0 L223.7 235.4 L223.3 235.1 L222.8 234.5 L222.5 234.1 L222.0 233.7 L221.6 233.2 L221.2 232.8 L220.7 232.3 L220.4 231.9 L219.9 231.3 L219.6 231.1 L219.0 230.4 L218.8 230.2 L218.1 229.4 L218.0 229.3 L217.3 228.5 L217.3 228.5 L216.5 227.6 L216.4 227.5 L215.7 226.7 L215.5 226.6 L214.9 225.9 L214.7 225.6 L214.1 225.0 L213.8 224.7 L213.3 224.1 L213.0 223.7 L212.5 223.3 L212.1 222.8 L211.8 222.4 L211.2 221.8 L211.0 221.5 L210.4 220.8 L210.2 220.7 L209.5 219.9 L209.4 219.8 L208.6 218.9 L208.6 218.9 L207.9 218.1 L207.8 217.9 L207.1 217.2 L206.9 217.0 L206.3 216.3 L206.0 216.0 L205.5 215.5 L205.2 215.1 L204.7 214.6 L204.3 214.1 L204.0 213.7 L203.4 213.1 L203.2 212.9 L202.6 212.2 L202.4 212.0 L201.7 211.2 L201.6 211.1 L200.8 210.3 L200.8 210.3 L200.1 209.4 L200.0 209.3 L199.3 208.5 L199.1 208.3 L198.5 207.7 L198.2 207.4 L197.7 206.8 L197.4 206.4 L196.9 205.9 L196.5 205.5 L196.1 205.1 L195.6 204.5 L195.3 204.2 L194.8 203.6 L194.5 203.3 L193.9 202.7 L193.7 202.5 L193.0 201.7 L192.9 201.6 L192.2 200.8 L192.1 200.7 L191.3 199.9 L191.3 199.9 L190.5 199.0 L190.4 198.9 L189.7 198.1 L189.6 198.0 L188.9 197.3 L188.7 197.1 L188.1 196.4 L187.8 196.2 L187.3 195.5 L187.0 195.3 L186.4 194.7 L186.1 194.3 L185.6 193.8 L185.2 193.4 L184.8 193.0 L184.4 192.5 L183.9 192.1 L183.5 191.6 L183.1 191.2 L182.6 190.7 L182.3 190.4 L181.8 189.8 L181.4 189.5 L180.9 188.9 L180.6 188.6 L180.0 188.1 L179.7 187.8 L179.2 187.2 L178.9 186.9 L178.3 186.3 L178.0 186.0 L177.4 185.4 L177.2 185.2 L176.6 184.6 L176.3 184.3 L175.7 183.7 L175.4 183.4 L174.8 182.8 L174.6 182.6 L174.0 182.0 L173.7 181.7 L173.1 181.1 L172.8 180.8 L172.2 180.3 L171.9 180.0 L171.4 179.4 L171.1 179.1 L170.5 178.6 L170.2 178.2 L169.6 177.7 L169.3 177.4 L168.8 176.9 L168.4 176.5 L167.9 176.1 L167.5 175.6 L167.0 175.2 L166.6 174.8 L166.2 174.4 L165.7 173.9 L165.3 173.6 L164.7 173.0 L164.5 172.7 L163.8 172.2 L163.6 171.9 L162.9 171.3 L162.7 171.1 L162.0 170.4 L161.9 170.3 L161.1 169.6 L161.0 169.5 L160.1 168.7 L160.1 168.7 L159.3 167.9 L159.2 167.8 L158.4 167.1 L158.3 167.0 L157.5 166.3 L157.3 166.1 L156.7 165.5 L156.4 165.2 L155.8 164.7 L155.5 164.4 L154.9 163.9 L154.5 163.5 L154.1 163.1 L153.6 162.6 L153.2 162.3 L152.6 161.8 L152.3 161.5 L151.7 160.9 L151.5 160.7 L150.7 160.0 L150.6 159.9 L149.7 159.2 L149.7 159.2 L148.9 158.4 L148.8 158.3 L148.0 157.6 L147.8 157.4 L147.1 156.8 L146.9 156.6 L146.3 156.0 L145.9 155.7 L145.4 155.3 L144.9 154.8 L144.5 154.5 L144.0 154.0 L143.7 153.7 L143.0 153.1 L142.8 152.9 L142.1 152.2 L141.9 152.1 L141.1 151.4 L141.1 151.4 L140.2 150.6 L140.1 150.5 L139.3 149.8 L139.2 149.6 L138.5 149.0 L138.2 148.8 L137.6 148.2 L137.2 147.9 L136.7 147.5 L136.3 147.0 L135.9 146.7 L135.3 146.2 L135.0 145.9 L134.4 145.3 L134.1 145.1 L133.4 144.5 L133.3 144.3 L132.5 143.6 L132.4 143.5 L131.5 142.7 L131.5 142.7 L130.7 142.0 L130.6 141.9 L129.8 141.2 L129.6 141.0 L128.9 140.4 L128.7 140.1 L128.1 139.6 L127.7 139.3 L127.2 138.8 L126.8 138.4 L126.3 138.0 L125.9 137.5 L125.5 137.2 L124.9 136.7 L124.6 136.3 L124.0 135.8 L123.7 135.5 L123.1 134.9 L122.9 134.7 L122.2 134.1 L122.0 133.9 L121.3 133.2 L121.1 133.1 L120.4 132.3 L120.3 132.2 L119.5 131.5 L119.4 131.4 L118.6 130.6 L118.5 130.6 L117.7 129.7 L117.7 129.7 L116.8 128.9 L116.8 128.9 L115.9 128.0 L115.9 128.0 L115.1 127.1 L115.1 127.1 L114.2 126.3 L114.2 126.3 L113.4 125.4 L113.4 125.4 L112.5 124.5 L112.5 124.5 L111.7 123.7 L111.6 123.6 L110.9 122.8 L110.8 122.7 L110.0 121.9 L109.9 121.8 L109.2 121.1 L109.0 120.9 L108.4 120.2 L108.2 119.9 L107.6 119.3 L107.3 119.0 L106.8 118.5 L106.4 118.0 L106.1 117.6 L105.6 117.0 L105.3 116.7 L104.7 116.1 L104.5 115.9 L103.8 115.1 L103.8 115.0 L103.0 114.1 L103.0 114.0 L102.3 113.3 L102.1 113.0 L101.6 112.4 L101.2 112.0 L100.9 111.5 L100.4 110.9 L100.2 110.7 L99.5 109.8 L99.5 109.8 L98.8 108.9 L98.6 108.7 L98.1 108.1 L97.8 107.6 L97.5 107.2 L96.9 106.4 L96.8 106.3 L96.2 105.5 L96.0 105.2 L95.6 104.6 L95.2 104.0 L95.0 103.7 L94.4 102.9 L94.3 102.8 L93.8 102.0 L93.4 101.5 L93.2 101.1 L92.6 100.3 L92.6 100.2 L92.1 99.4 L91.7 98.8 L91.6 98.5 L91.0 97.7 L90.8 97.4 L90.5 96.8 L90.0 95.9 L90.0 95.9 L89.5 95.1 L89.1 94.3 L89.1 94.2 L88.6 93.4 L88.2 92.6 L88.2 92.5 L87.7 91.6 L87.4 90.9 L87.3 90.8 L86.9 89.9 L86.5 89.0 L86.5 89.0 L86.2 88.2 L85.8 87.3 L85.6 86.9 L85.5 86.4 L85.1 85.6 L84.8 84.7 L84.8 84.5 L84.5 83.8 L84.3 83.0 L84.0 82.1 L83.9 81.7 L83.8 81.2 L83.6 80.4 L83.4 79.5 L83.2 78.6 L83.0 77.8 L83.0 77.7" fill="none" stroke="#6d6d75" stroke-width="0.9" opacity="0.7"/>
+<path d="M64.9 75.1 L64.7 74.3 L64.6 73.4 L64.5 72.6 L64.4 71.7 L64.4 70.8 L64.3 70.0 L64.2 69.1 L64.2 68.2 L64.1 67.4 L64.1 66.5 L64.1 65.6 L64.1 64.8 L64.1 63.9 L64.1 63.0 L64.2 62.2 L64.2 61.3 L64.3 60.4 L64.4 59.6 L64.5 58.7 L64.7 57.8 L64.8 57.0 L64.9 56.8 L65.0 56.1 L65.2 55.2 L65.5 54.4 L65.7 53.7 L65.8 53.5 L66.1 52.6 L66.5 51.8 L66.6 51.6 L67.0 50.9 L67.4 50.1 L67.5 50.0 L68.1 49.2 L68.3 48.9 L68.8 48.3 L69.2 47.9 L69.7 47.4 L70.0 47.1 L70.7 46.6 L70.9 46.4 L71.8 45.9 L72.0 45.7 L72.6 45.4 L73.5 44.9 L73.6 44.9 L74.4 44.5 L75.2 44.2 L75.9 44.0 L76.1 43.9 L77.0 43.7 L77.8 43.4 L78.7 43.2 L79.2 43.1 L79.6 43.1 L80.4 42.9 L81.3 42.8 L82.2 42.7 L83.0 42.6 L83.9 42.5 L84.8 42.4 L85.6 42.4 L86.5 42.3 L87.4 42.3 L88.2 42.3 L89.1 42.3 L90.0 42.3 L90.8 42.3 L91.7 42.3 L92.6 42.3 L93.4 42.4 L94.3 42.4 L95.2 42.5 L96.0 42.6 L96.9 42.6 L97.8 42.7 L98.6 42.8 L99.5 42.9 L100.4 43.0 L101.2 43.1 L101.3 43.1 L102.1 43.2 L103.0 43.4 L103.8 43.5 L104.7 43.7 L105.6 43.8 L106.4 44.0 L106.5 44.0 L107.3 44.1 L108.2 44.3 L109.0 44.5 L109.9 44.7 L110.6 44.9 L110.8 44.9 L111.6 45.1 L112.5 45.3 L113.4 45.6 L113.9 45.7 L114.2 45.8 L115.1 46.1 L115.9 46.3 L116.8 46.6 L116.9 46.6 L117.7 46.8 L118.5 47.1 L119.4 47.4 L119.5 47.4 L120.3 47.7 L121.1 48.0 L122.0 48.3 L122.0 48.3 L122.9 48.7 L123.7 49.0 L124.2 49.2 L124.6 49.3 L125.5 49.7 L126.3 50.0 L126.3 50.1 L127.2 50.4 L128.1 50.8 L128.3 50.9 L128.9 51.2 L129.8 51.6 L130.2 51.8 L130.7 52.0 L131.5 52.4 L132.0 52.6 L132.4 52.8 L133.3 53.3 L133.7 53.5 L134.1 53.7 L135.0 54.2 L135.4 54.4 L135.9 54.6 L136.7 55.1 L137.0 55.2 L137.6 55.6 L138.5 56.1 L138.5 56.1 L139.3 56.6 L140.0 57.0 L140.2 57.1 L141.1 57.6 L141.5 57.8 L141.9 58.1 L142.8 58.6 L142.9 58.7 L143.7 59.2 L144.3 59.6 L144.5 59.7 L145.4 60.3 L145.6 60.4 L146.3 60.9 L147.0 61.3 L147.1 61.4 L148.0 62.0 L148.2 62.2 L148.9 62.6 L149.5 63.0 L149.7 63.2 L150.6 63.8 L150.7 63.9 L151.5 64.4 L152.0 64.8 L152.3 65.0 L153.2 65.6 L153.2 65.7 L154.1 66.3 L154.3 66.5 L154.9 66.9 L155.5 67.4 L155.8 67.6 L156.6 68.2 L156.7 68.2 L157.5 68.9 L157.8 69.1 L158.4 69.6 L158.9 70.0 L159.3 70.3 L160.0 70.8 L160.1 70.9 L161.0 71.6 L161.1 71.7 L161.9 72.3 L162.1 72.6 L162.7 73.0 L163.2 73.4 L163.6 73.8 L164.2 74.3 L164.5 74.5 L165.3 75.2 L165.3 75.2 L166.2 75.9 L166.3 76.0 L167.0 76.7 L167.3 76.9 L167.9 77.4 L168.3 77.8 L168.8 78.2 L169.3 78.6 L169.6 78.9 L170.3 79.5 L170.5 79.7 L171.3 80.4 L171.4 80.4 L172.2 81.2 L172.3 81.2 L173.1 82.0 L173.2 82.1 L174.0 82.8 L174.2 83.0 L174.8 83.5 L175.2 83.8 L175.7 84.3 L176.1 84.7 L176.6 85.1 L177.0 85.6 L177.4 85.9 L178.0 86.4 L178.3 86.7 L178.9 87.3 L179.2 87.5 L179.9 88.2 L180.0 88.3 L180.8 89.0 L180.9 89.1 L181.7 89.9 L181.8 90.0 L182.6 90.8 L182.6 90.8 L183.5 91.6 L183.5 91.6 L184.4 92.4 L184.4 92.5 L185.2 93.3 L185.3 93.4 L186.1 94.1 L186.2 94.2 L187.0 94.9 L187.1 95.1 L187.8 95.8 L188.0 95.9 L188.7 96.6 L188.9 96.8 L189.6 97.4 L189.8 97.7 L190.4 98.3 L190.7 98.5 L191.3 99.1 L191.6 99.4 L192.2 100.0 L192.5 100.3 L193.0 100.8 L193.3 101.1 L193.9 101.7 L194.2 102.0 L194.8 102.5 L195.1 102.9 L195.6 103.4 L196.0 103.7 L196.5 104.3 L196.9 104.6 L197.4 105.1 L197.7 105.5 L198.2 106.0 L198.6 106.3 L199.1 106.8 L199.5 107.2 L200.0 107.7 L200.3 108.1 L200.8 108.6 L201.2 108.9 L201.7 109.4 L202.1 109.8 L202.6 110.3 L202.9 110.7 L203.4 111.2 L203.8 111.5 L204.3 112.0 L204.7 112.4 L205.2 112.9 L205.5 113.3 L206.0 113.8 L206.4 114.1 L206.9 114.6 L207.3 115.0 L207.8 115.5 L208.1 115.9 L208.6 116.4 L209.0 116.7 L209.5 117.2 L209.8 117.6 L210.4 118.1 L210.7 118.5 L211.2 119.0 L211.6 119.3 L212.1 119.9 L212.4 120.2 L213.0 120.7 L213.3 121.1 L213.8 121.6 L214.2 121.9 L214.7 122.5 L215.0 122.8 L215.5 123.3 L215.9 123.7 L216.4 124.2 L216.7 124.5 L217.3 125.1 L217.6 125.4 L218.1 125.9 L218.5 126.3 L219.0 126.8 L219.3 127.1 L219.9 127.7 L220.2 128.0 L220.7 128.6 L221.1 128.9 L221.6 129.4 L221.9 129.7 L222.5 130.3 L222.8 130.6 L223.3 131.2 L223.6 131.5 L224.2 132.0 L224.5 132.3 L225.1 132.9 L225.4 133.2 L225.9 133.8 L226.2 134.1 L226.8 134.6 L227.1 134.9 L227.7 135.5 L228.0 135.8 L228.5 136.4 L228.8 136.7 L229.4 137.2 L229.7 137.5 L230.3 138.1 L230.6 138.4 L231.1 138.9 L231.4 139.3 L232.0 139.8 L232.3 140.1 L232.9 140.7 L233.2 141.0 L233.7 141.5 L234.1 141.9 L234.6 142.4 L234.9 142.7 L235.5 143.3 L235.8 143.6 L236.3 144.1 L236.7 144.5 L237.2 145.0 L237.5 145.3 L238.1 145.8 L238.4 146.2 L238.9 146.7 L239.3 147.0 L239.8 147.6 L240.1 147.9 L240.7 148.4 L241.0 148.8 L241.5 149.3 L241.9 149.6 L242.4 150.2 L242.8 150.5 L243.3 151.0 L243.6 151.4 L244.1 151.9 L244.5 152.2 L245.0 152.7 L245.4 153.1 L245.9 153.6 L246.2 154.0 L246.7 154.5 L247.1 154.8 L247.6 155.3 L248.0 155.7 L248.5 156.2 L248.8 156.6 L249.3 157.1 L249.7 157.4 L250.2 157.9 L250.6 158.3 L251.1 158.8 L251.4 159.2 L251.9 159.7 L252.3 160.0 L252.8 160.5 L253.2 160.9 L253.7 161.4 L254.0 161.8 L254.5 162.3 L254.9 162.6 L255.4 163.1 L255.7 163.5 L256.3 164.0 L256.6 164.4 L257.1 164.9 L257.5 165.2 L258.0 165.8 L258.3 166.1 L258.9 166.7 L259.2 167.0 L259.7 167.5 L260.0 167.8 L260.6 168.4 L260.9 168.7 L261.5 169.3 L261.7 169.6 L262.3 170.2 L262.6 170.4 L263.2 171.1 L263.4 171.3 L264.1 172.0 L264.2 172.2 L264.9 172.9 L265.1 173.0 L265.8 173.8 L265.9 173.9 L266.6 174.7 L266.7 174.8 L267.5 175.6 L267.6 175.6 L268.4 176.5 L268.4 176.5 L269.2 177.4 L269.2 177.4 L270.0 178.2 L270.1 178.3 L270.9 179.1 L271.0 179.2 L271.7 180.0 L271.8 180.1 L272.5 180.8 L272.7 181.1 L273.3 181.7 L273.6 182.0 L274.1 182.6 L274.4 183.0 L274.9 183.4 L275.3 183.9 L275.7 184.3 L276.2 184.8 L276.5 185.2 L277.0 185.8 L277.2 186.0 L277.9 186.8 L278.0 186.9 L278.8 187.7 L278.8 187.8 L279.6 188.6 L279.6 188.7 L280.3 189.5 L280.5 189.7 L281.1 190.4 L281.4 190.7 L281.8 191.2 L282.2 191.7 L282.6 192.1 L283.1 192.7 L283.3 193.0 L284.0 193.7 L284.1 193.8 L284.8 194.7 L284.8 194.7 L285.5 195.5 L285.7 195.8 L286.2 196.4 L286.6 196.8 L287.0 197.3 L287.4 197.9 L287.7 198.1 L288.3 198.9 L288.4 199.0 L289.1 199.9 L289.2 200.0 L289.7 200.7 L290.0 201.1 L290.4 201.6 L290.9 202.2 L291.1 202.5 L291.8 203.3 L291.8 203.4 L292.4 204.2 L292.6 204.5 L293.1 205.1 L293.5 205.7 L293.7 205.9 L294.3 206.8 L294.4 206.8 L295.0 207.7 L295.2 208.0 L295.6 208.5 L296.1 209.3 L296.2 209.4 L296.8 210.3 L297.0 210.5 L297.4 211.1 L297.8 211.8 L298.0 212.0 L298.6 212.9 L298.7 213.0 L299.1 213.7 L299.6 214.4 L299.7 214.6 L300.3 215.5 L300.4 215.7 L300.8 216.3 L301.3 217.1 L301.4 217.2 L301.9 218.1 L302.2 218.5 L302.4 218.9 L302.9 219.8 L303.0 220.0 L303.4 220.7 L303.9 221.5 L303.9 221.5 L304.4 222.4 L304.8 223.0 L304.9 223.3 L305.4 224.1 L305.6 224.6 L305.8 225.0 L306.3 225.9 L306.5 226.3 L306.7 226.7 L307.2 227.6 L307.4 228.0 L307.6 228.5 L308.0 229.3 L308.2 229.8 L308.4 230.2 L308.8 231.1 L309.1 231.7 L309.2 231.9 L309.6 232.8 L309.9 233.7 L310.0 233.7 L310.3 234.5 L310.7 235.4 L310.8 235.8 L311.0 236.3 L311.3 237.1 L311.7 238.0 L311.7 238.0 L312.0 238.9 L312.3 239.7 L312.6 240.5 L312.6 240.6 L312.9 241.5 L313.2 242.3 L313.4 243.1 L313.4 243.2 L313.7 244.1 L313.9 244.9 L314.2 245.8 L314.3 246.1 L314.4 246.6 L314.7 247.5 L314.9 248.4 L315.1 249.2 L315.1 249.4 L315.3 250.1 L315.5 251.0 L315.7 251.8 L315.9 252.7 L316.0 253.5 L316.0 253.6 L316.2 254.4 L316.3 255.3 L316.5 256.2 L316.6 257.0 L316.8 257.9 L316.9 258.7 L316.9 258.8 L317.0 259.6 L317.1 260.5 L317.2 261.4 L317.3 262.2 L317.4 263.1 L317.4 264.0 L317.5 264.8 L317.6 265.7 L317.6 266.6 L317.7 267.4 L317.7 268.3 L317.7 269.2 L317.7 270.0 L317.7 270.9 L317.7 271.8 L317.7 272.6 L317.7 273.5 L317.6 274.4 L317.6 275.2 L317.5 276.1 L317.4 277.0 L317.3 277.8 L317.2 278.7 L317.1 279.6 L316.9 280.4 L316.9 280.8 L316.8 281.3 L316.6 282.2 L316.3 283.0 L316.1 283.9 L316.0 284.1 L315.8 284.8 L315.5 285.6 L315.1 286.4 L315.1 286.5 L314.6 287.4 L314.3 288.0 L314.1 288.2 L313.6 289.1 L313.4 289.3 L312.9 290.0 L312.6 290.3 L312.1 290.8 L311.7 291.2 L311.1 291.7 L310.8 291.9 L310.0 292.5 L309.9 292.6 L309.1 293.0 L308.4 293.4 L308.2 293.5 L307.4 293.9 L306.5 294.2 L306.3 294.3 L305.6 294.5 L304.8 294.8 L303.9 295.0 L303.2 295.1 L303.0 295.2 L302.2 295.3 L301.3 295.5 L300.4 295.6 L299.6 295.7 L298.7 295.8 L297.8 295.8 L297.0 295.9 L296.1 295.9 L295.2 295.9 L294.4 295.9 L293.5 295.9 L292.6 295.9 L291.8 295.8 L290.9 295.8 L290.0 295.7 L289.2 295.6 L288.3 295.6 L287.4 295.5 L286.6 295.4 L285.7 295.3 L284.9 295.1 L284.8 295.1 L284.0 295.0 L283.1 294.8 L282.2 294.7 L281.4 294.5 L280.5 294.4 L280.1 294.3 L279.6 294.2 L278.8 294.0 L277.9 293.8 L277.0 293.6 L276.4 293.4 L276.2 293.4 L275.3 293.1 L274.4 292.9 L273.6 292.6 L273.3 292.6 L272.7 292.4 L271.8 292.1 L271.0 291.8 L270.6 291.7 L270.1 291.5 L269.2 291.2 L268.4 290.9 L268.1 290.8 L267.5 290.6 L266.6 290.3 L265.8 290.0 L265.8 290.0 L264.9 289.6 L264.1 289.2 L263.7 289.1 L263.2 288.9 L262.3 288.5 L261.7 288.2 L261.5 288.1 L260.6 287.7 L259.8 287.4 L259.7 287.3 L258.9 286.9 L258.0 286.5 L258.0 286.5 L257.1 286.1 L256.3 285.6 L256.3 285.6 L255.4 285.2 L254.6 284.8 L254.5 284.7 L253.7 284.2 L253.0 283.9 L252.8 283.8 L251.9 283.3 L251.5 283.0 L251.1 282.8 L250.2 282.3 L250.0 282.2 L249.3 281.7 L248.6 281.3 L248.5 281.2 L247.6 280.7 L247.2 280.4 L246.7 280.1 L245.9 279.6 L245.8 279.6 L245.0 279.0 L244.5 278.7 L244.1 278.5 L243.3 277.9 L243.2 277.8 L242.4 277.3 L241.9 277.0 L241.5 276.7 L240.7 276.1 L240.7 276.1 L239.8 275.5 L239.4 275.2 L238.9 274.9 L238.2 274.4 L238.1 274.2 L237.2 273.6 L237.1 273.5 L236.3 273.0 L235.9 272.6 L235.5 272.3 L234.8 271.8 L234.6 271.6 L233.7 271.0 L233.6 270.9 L232.9 270.3 L232.5 270.0 L232.0 269.6 L231.4 269.2 L231.1 268.9 L230.4 268.3 L230.3 268.2 L229.4 267.5 L229.3 267.4 L228.5 266.8 L228.2 266.6 L227.7 266.1 L227.2 265.7 L226.8 265.4 L226.2 264.8 L225.9 264.6 L225.2 264.0 L225.1 263.9 L224.2 263.2 L224.1 263.1 L223.3 262.4 L223.1 262.2 L222.5 261.7 L222.2 261.4 L221.6 260.9 L221.2 260.5 L220.7 260.1 L220.2 259.6 L219.9 259.3 L219.2 258.8 L219.0 258.6 L218.3 257.9 L218.1 257.8 L217.3 257.0 L217.3 257.0 L216.4 256.2 L216.4 256.2 L215.5 255.4 L215.4 255.3 L214.7 254.6 L214.5 254.4 L213.8 253.8 L213.6 253.6 L213.0 253.0 L212.7 252.7 L212.1 252.2 L211.8 251.8 L211.2 251.3 L210.8 251.0 L210.4 250.5 L209.9 250.1 L209.5 249.7 L209.0 249.2 L208.6 248.9 L208.1 248.4 L207.8 248.0 L207.2 247.5 L206.9 247.2 L206.3 246.6 L206.0 246.3 L205.5 245.8 L205.2 245.5 L204.6 244.9 L204.3 244.6 L203.7 244.1 L203.4 243.8 L202.8 243.2 L202.6 242.9 L201.9 242.3 L201.7 242.1 L201.1 241.5 L200.8 241.2 L200.2 240.6 L200.0 240.4 L199.3 239.7 L199.1 239.5 L198.5 238.9 L198.2 238.6 L197.6 238.0 L197.4 237.8 L196.7 237.1 L196.5 236.9 L195.9 236.3 L195.6 236.0 L195.0 235.4 L194.8 235.1 L194.2 234.5 L193.9 234.3 L193.3 233.7 L193.0 233.4 L192.4 232.8 L192.2 232.5 L191.6 231.9 L191.3 231.6 L190.7 231.1 L190.4 230.8 L189.9 230.2 L189.6 229.9 L189.0 229.3 L188.7 229.0 L188.2 228.5 L187.8 228.1 L187.3 227.6 L187.0 227.2 L186.5 226.7 L186.1 226.4 L185.6 225.9 L185.2 225.5 L184.8 225.0 L184.4 224.6 L183.9 224.1 L183.5 223.7 L183.1 223.3 L182.6 222.8 L182.2 222.4 L181.8 221.9 L181.4 221.5 L180.9 221.1 L180.5 220.7 L180.0 220.2 L179.7 219.8 L179.2 219.3 L178.8 218.9 L178.3 218.4 L178.0 218.1 L177.4 217.5 L177.1 217.2 L176.6 216.6 L176.3 216.3 L175.7 215.8 L175.4 215.5 L174.8 214.9 L174.6 214.6 L174.0 214.0 L173.7 213.7 L173.1 213.1 L172.9 212.9 L172.2 212.2 L172.0 212.0 L171.4 211.4 L171.2 211.1 L170.5 210.5 L170.3 210.3 L169.6 209.6 L169.4 209.4 L168.8 208.7 L168.6 208.5 L167.9 207.9 L167.7 207.7 L167.0 207.0 L166.9 206.8 L166.2 206.1 L166.0 205.9 L165.3 205.2 L165.2 205.1 L164.5 204.4 L164.3 204.2 L163.6 203.5 L163.4 203.3 L162.7 202.6 L162.6 202.5 L161.9 201.8 L161.7 201.6 L161.0 200.9 L160.8 200.7 L160.1 200.0 L160.0 199.9 L159.3 199.2 L159.1 199.0 L158.4 198.3 L158.2 198.1 L157.5 197.4 L157.4 197.3 L156.7 196.6 L156.5 196.4 L155.8 195.7 L155.6 195.5 L154.9 194.8 L154.8 194.7 L154.1 194.0 L153.9 193.8 L153.2 193.1 L153.0 193.0 L152.3 192.3 L152.1 192.1 L151.5 191.4 L151.3 191.2 L150.6 190.6 L150.4 190.4 L149.7 189.7 L149.5 189.5 L148.9 188.8 L148.6 188.6 L148.0 188.0 L147.8 187.8 L147.1 187.1 L146.9 186.9 L146.3 186.3 L146.0 186.0 L145.4 185.4 L145.1 185.2 L144.5 184.6 L144.2 184.3 L143.7 183.7 L143.4 183.4 L142.8 182.9 L142.5 182.6 L141.9 182.0 L141.6 181.7 L141.1 181.2 L140.7 180.8 L140.2 180.3 L139.8 180.0 L139.3 179.5 L138.9 179.1 L138.5 178.6 L138.1 178.2 L137.6 177.8 L137.2 177.4 L136.7 176.9 L136.3 176.5 L135.9 176.1 L135.4 175.6 L135.0 175.2 L134.5 174.8 L134.1 174.4 L133.6 173.9 L133.3 173.5 L132.8 173.0 L132.4 172.7 L131.9 172.2 L131.5 171.8 L131.0 171.3 L130.7 171.0 L130.1 170.4 L129.8 170.1 L129.2 169.6 L128.9 169.3 L128.4 168.7 L128.1 168.4 L127.5 167.8 L127.2 167.6 L126.6 167.0 L126.3 166.7 L125.7 166.1 L125.5 165.8 L124.9 165.2 L124.6 165.0 L124.0 164.4 L123.7 164.1 L123.1 163.5 L122.9 163.3 L122.2 162.6 L122.0 162.4 L121.4 161.8 L121.1 161.5 L120.5 160.9 L120.3 160.7 L119.6 160.0 L119.4 159.8 L118.8 159.2 L118.5 158.9 L117.9 158.3 L117.7 158.1 L117.1 157.4 L116.8 157.2 L116.2 156.6 L115.9 156.3 L115.4 155.7 L115.1 155.4 L114.5 154.8 L114.2 154.5 L113.7 154.0 L113.4 153.7 L112.8 153.1 L112.5 152.8 L112.0 152.2 L111.6 151.9 L111.1 151.4 L110.8 151.0 L110.3 150.5 L109.9 150.1 L109.5 149.6 L109.0 149.2 L108.7 148.8 L108.2 148.2 L107.8 147.9 L107.3 147.3 L107.0 147.0 L106.4 146.4 L106.2 146.2 L105.6 145.5 L105.4 145.3 L104.7 144.6 L104.6 144.5 L103.8 143.6 L103.8 143.6 L103.0 142.7 L103.0 142.7 L102.2 141.9 L102.1 141.7 L101.4 141.0 L101.2 140.8 L100.7 140.1 L100.4 139.8 L99.9 139.3 L99.5 138.8 L99.1 138.4 L98.6 137.8 L98.3 137.5 L97.8 136.9 L97.6 136.7 L96.9 135.9 L96.8 135.8 L96.1 134.9 L96.0 134.8 L95.4 134.1 L95.2 133.8 L94.6 133.2 L94.3 132.8 L93.9 132.3 L93.4 131.8 L93.2 131.5 L92.6 130.7 L92.5 130.6 L91.8 129.7 L91.7 129.6 L91.1 128.9 L90.8 128.6 L90.4 128.0 L90.0 127.5 L89.7 127.1 L89.1 126.4 L89.0 126.3 L88.4 125.4 L88.2 125.2 L87.7 124.5 L87.4 124.1 L87.0 123.7 L86.5 122.9 L86.4 122.8 L85.8 121.9 L85.6 121.8 L85.1 121.1 L84.8 120.6 L84.5 120.2 L83.9 119.3 L83.9 119.3 L83.3 118.5 L83.0 118.1 L82.7 117.6 L82.2 116.8 L82.1 116.7 L81.5 115.9 L81.3 115.5 L81.0 115.0 L80.4 114.2 L80.4 114.1 L79.9 113.3 L79.6 112.8 L79.3 112.4 L78.8 111.5 L78.7 111.4 L78.3 110.7 L77.8 110.0 L77.7 109.8 L77.2 108.9 L77.0 108.5 L76.7 108.1 L76.2 107.2 L76.1 107.0 L75.8 106.3 L75.3 105.5 L75.2 105.4 L74.8 104.6 L74.4 103.7 L74.4 103.7 L73.9 102.9 L73.5 102.0 L73.5 102.0 L73.1 101.1 L72.7 100.3 L72.6 100.2 L72.3 99.4 L71.9 98.5 L71.8 98.3 L71.5 97.7 L71.1 96.8 L70.9 96.3 L70.8 95.9 L70.4 95.1 L70.0 94.2 L70.0 94.2 L69.7 93.4 L69.4 92.5 L69.2 91.9 L69.1 91.6 L68.8 90.8 L68.5 89.9 L68.3 89.4 L68.2 89.0 L67.9 88.2 L67.6 87.3 L67.4 86.7 L67.4 86.4 L67.1 85.6 L66.9 84.7 L66.6 83.8 L66.6 83.6 L66.4 83.0 L66.2 82.1 L66.0 81.2 L65.8 80.4 L65.7 79.9 L65.6 79.5 L65.5 78.6 L65.3 77.8 L65.2 76.9 L65.0 76.0 L64.9 75.2 L64.9 75.1" fill="none" stroke="#6d6d75" stroke-width="0.9" opacity="0.7"/>
+<path d="M236.3 299.5 L235.5 299.2 L234.6 299.0 L233.7 298.7 L233.5 298.6 L232.9 298.4 L232.0 298.1 L231.1 297.7 L231.1 297.7 L230.3 297.4 L229.4 297.0 L229.0 296.9 L228.5 296.7 L227.7 296.3 L227.0 296.0 L226.8 295.9 L225.9 295.5 L225.2 295.1 L225.1 295.1 L224.2 294.7 L223.4 294.3 L223.3 294.2 L222.5 293.8 L221.7 293.4 L221.6 293.3 L220.7 292.9 L220.1 292.6 L219.9 292.4 L219.0 291.9 L218.6 291.7 L218.1 291.4 L217.3 290.9 L217.1 290.8 L216.4 290.4 L215.6 290.0 L215.5 289.9 L214.7 289.4 L214.2 289.1 L213.8 288.8 L213.0 288.3 L212.8 288.2 L212.1 287.8 L211.5 287.4 L211.2 287.2 L210.4 286.6 L210.1 286.5 L209.5 286.0 L208.8 285.6 L208.6 285.5 L207.8 284.9 L207.6 284.8 L206.9 284.3 L206.3 283.9 L206.0 283.7 L205.2 283.1 L205.1 283.0 L204.3 282.4 L203.9 282.2 L203.4 281.8 L202.7 281.3 L202.6 281.2 L201.7 280.5 L201.5 280.4 L200.8 279.9 L200.4 279.6 L200.0 279.2 L199.2 278.7 L199.1 278.6 L198.2 277.9 L198.1 277.8 L197.4 277.3 L197.0 277.0 L196.5 276.6 L195.9 276.1 L195.6 275.9 L194.8 275.2 L194.8 275.2 L193.9 274.5 L193.7 274.4 L193.0 273.8 L192.6 273.5 L192.2 273.1 L191.6 272.6 L191.3 272.4 L190.5 271.8 L190.4 271.7 L189.6 271.0 L189.5 270.9 L188.7 270.2 L188.5 270.0 L187.8 269.5 L187.4 269.2 L187.0 268.8 L186.4 268.3 L186.1 268.0 L185.4 267.4 L185.2 267.3 L184.4 266.6 L184.4 266.6 L183.5 265.8 L183.4 265.7 L182.6 265.0 L182.4 264.8 L181.8 264.3 L181.4 264.0 L180.9 263.5 L180.4 263.1 L180.0 262.8 L179.5 262.2 L179.2 262.0 L178.5 261.4 L178.3 261.2 L177.5 260.5 L177.4 260.4 L176.6 259.7 L176.6 259.6 L175.7 258.9 L175.6 258.8 L174.8 258.1 L174.7 257.9 L174.0 257.3 L173.7 257.0 L173.1 256.5 L172.8 256.2 L172.2 255.7 L171.8 255.3 L171.4 254.9 L170.9 254.4 L170.5 254.1 L169.9 253.6 L169.6 253.3 L169.0 252.7 L168.8 252.5 L168.1 251.8 L167.9 251.7 L167.2 251.0 L167.0 250.9 L166.2 250.1 L166.2 250.1 L165.3 249.2 L165.3 249.2 L164.5 248.4 L164.4 248.4 L163.6 247.6 L163.5 247.5 L162.7 246.8 L162.6 246.6 L161.9 245.9 L161.7 245.8 L161.0 245.1 L160.8 244.9 L160.1 244.3 L159.9 244.1 L159.3 243.5 L159.0 243.2 L158.4 242.6 L158.1 242.3 L157.5 241.8 L157.2 241.5 L156.7 241.0 L156.3 240.6 L155.8 240.1 L155.4 239.7 L154.9 239.3 L154.5 238.9 L154.1 238.4 L153.6 238.0 L153.2 237.6 L152.7 237.1 L152.3 236.7 L151.8 236.3 L151.5 235.9 L150.9 235.4 L150.6 235.1 L150.1 234.5 L149.7 234.2 L149.2 233.7 L148.9 233.4 L148.3 232.8 L148.0 232.5 L147.4 231.9 L147.1 231.7 L146.5 231.1 L146.3 230.8 L145.6 230.2 L145.4 229.9 L144.8 229.3 L144.5 229.1 L143.9 228.5 L143.7 228.2 L143.0 227.6 L142.8 227.4 L142.2 226.7 L141.9 226.5 L141.3 225.9 L141.1 225.7 L140.4 225.0 L140.2 224.8 L139.5 224.1 L139.3 223.9 L138.7 223.3 L138.5 223.1 L137.8 222.4 L137.6 222.2 L136.9 221.5 L136.7 221.3 L136.1 220.7 L135.9 220.5 L135.2 219.8 L135.0 219.6 L134.3 218.9 L134.1 218.7 L133.5 218.1 L133.3 217.8 L132.6 217.2 L132.4 217.0 L131.8 216.3 L131.5 216.1 L130.9 215.5 L130.7 215.2 L130.1 214.6 L129.8 214.4 L129.2 213.7 L128.9 213.5 L128.3 212.9 L128.1 212.6 L127.5 212.0 L127.2 211.7 L126.6 211.1 L126.3 210.8 L125.8 210.3 L125.5 209.9 L124.9 209.4 L124.6 209.1 L124.1 208.5 L123.7 208.2 L123.3 207.7 L122.9 207.3 L122.4 206.8 L122.0 206.4 L121.6 205.9 L121.1 205.5 L120.7 205.1 L120.3 204.6 L119.9 204.2 L119.4 203.7 L119.0 203.3 L118.5 202.8 L118.2 202.5 L117.7 201.9 L117.4 201.6 L116.8 201.0 L116.5 200.7 L115.9 200.1 L115.7 199.9 L115.1 199.2 L114.9 199.0 L114.2 198.3 L114.1 198.1 L113.4 197.4 L113.2 197.3 L112.5 196.5 L112.4 196.4 L111.6 195.6 L111.6 195.5 L110.8 194.7 L110.8 194.7 L109.9 193.8 L109.9 193.8 L109.1 193.0 L109.0 192.8 L108.3 192.1 L108.2 191.9 L107.5 191.2 L107.3 191.0 L106.7 190.4 L106.4 190.1 L105.9 189.5 L105.6 189.1 L105.1 188.6 L104.7 188.2 L104.3 187.8 L103.8 187.2 L103.5 186.9 L103.0 186.3 L102.7 186.0 L102.1 185.3 L101.9 185.2 L101.2 184.4 L101.1 184.3 L100.4 183.4 L100.3 183.4 L99.6 182.6 L99.5 182.5 L98.8 181.7 L98.6 181.5 L98.0 180.8 L97.8 180.5 L97.2 180.0 L96.9 179.6 L96.5 179.1 L96.0 178.6 L95.7 178.2 L95.2 177.6 L95.0 177.4 L94.3 176.6 L94.2 176.5 L93.4 175.6 L93.4 175.6 L92.7 174.8 L92.6 174.6 L92.0 173.9 L91.7 173.6 L91.2 173.0 L90.8 172.6 L90.5 172.2 L90.0 171.5 L89.8 171.3 L89.1 170.5 L89.0 170.4 L88.3 169.6 L88.2 169.5 L87.6 168.7 L87.4 168.4 L86.9 167.8 L86.5 167.4 L86.2 167.0 L85.6 166.3 L85.5 166.1 L84.8 165.2 L84.8 165.2 L84.1 164.4 L83.9 164.1 L83.4 163.5 L83.0 163.0 L82.7 162.6 L82.2 161.9 L82.1 161.8 L81.4 160.9 L81.3 160.8 L80.8 160.0 L80.4 159.6 L80.1 159.2 L79.6 158.5 L79.5 158.3 L78.8 157.4 L78.7 157.3 L78.2 156.6 L77.8 156.1 L77.6 155.7 L77.0 154.9 L76.9 154.8 L76.3 154.0 L76.1 153.7 L75.7 153.1 L75.2 152.4 L75.1 152.2 L74.5 151.4 L74.4 151.2 L74.0 150.5 L73.5 149.9 L73.4 149.6 L72.8 148.8 L72.6 148.5 L72.2 147.9 L71.8 147.2 L71.7 147.0 L71.2 146.2 L70.9 145.8 L70.6 145.3 L70.1 144.5 L70.0 144.4 L69.6 143.6 L69.2 142.9 L69.1 142.7 L68.6 141.9 L68.3 141.4 L68.1 141.0 L67.6 140.1 L67.4 139.9 L67.1 139.3 L66.7 138.4 L66.6 138.3 L66.2 137.5 L65.8 136.7 L65.7 136.6 L65.3 135.8 L64.9 134.9 L64.9 134.8 L64.5 134.1 L64.1 133.2 L64.0 133.0 L63.7 132.3 L63.3 131.5 L63.1 131.0 L63.0 130.6 L62.6 129.7 L62.3 128.9 L62.3 128.9 L61.9 128.0 L61.6 127.1 L61.4 126.5 L61.3 126.3 L61.0 125.4 L60.8 124.5 L60.5 123.7" fill="none" stroke="#6d6d75" stroke-width="0.9" opacity="0.7"/>
+<path d="M319.5 204.7 L319.3 204.2 L319.0 203.3 L318.8 202.5 L318.6 202.0 L318.5 201.6 L318.2 200.7 L317.9 199.9 L317.7 199.6 L317.5 199.0 L317.2 198.1 L316.9 197.5 L316.8 197.3 L316.4 196.4 L316.0 195.5 L316.0 195.5 L315.6 194.7 L315.2 193.8 L315.1 193.6 L314.8 193.0 L314.4 192.1 L314.3 191.8 L314.0 191.2 L313.5 190.4 L313.4 190.1 L313.1 189.5 L312.6 188.6 L312.6 188.5 L312.1 187.8 L311.7 187.0 L311.6 186.9 L311.2 186.0 L310.8 185.4 L310.7 185.2 L310.1 184.3 L310.0 184.0 L309.6 183.4 L309.1 182.6 L309.1 182.5 L308.6 181.7 L308.2 181.1 L308.0 180.8 L307.5 180.0 L307.4 179.8 L306.9 179.1 L306.5 178.4 L306.3 178.2 L305.8 177.4 L305.6 177.1 L305.2 176.5 L304.8 175.9 L304.6 175.6 L304.0 174.8 L303.9 174.6 L303.4 173.9 L303.0 173.4 L302.8 173.0 L302.2 172.2 L302.2 172.1 L301.6 171.3 L301.3 170.9 L300.9 170.4 L300.4 169.7 L300.3 169.6 L299.7 168.7 L299.6 168.6 L299.0 167.8 L298.7 167.4 L298.4 167.0 L297.8 166.3 L297.7 166.1 L297.0 165.2 L297.0 165.2 L296.4 164.4 L296.1 164.0 L295.7 163.5 L295.2 162.9 L295.0 162.6 L294.4 161.8 L294.3 161.8 L293.6 160.9 L293.5 160.8 L292.9 160.0 L292.6 159.7 L292.2 159.2 L291.8 158.6 L291.5 158.3 L290.9 157.6 L290.8 157.4 L290.1 156.6 L290.0 156.5 L289.3 155.7 L289.2 155.5 L288.6 154.8 L288.3 154.5 L287.9 154.0 L287.4 153.4 L287.2 153.1 L286.6 152.4 L286.4 152.2 L285.7 151.4 L285.7 151.4 L284.9 150.5 L284.8 150.4 L284.2 149.6 L284.0 149.4 L283.4 148.8 L283.1 148.4 L282.6 147.9 L282.2 147.5 L281.9 147.0 L281.4 146.5 L281.1 146.2 L280.5 145.5 L280.3 145.3 L279.6 144.5 L279.6 144.5 L278.8 143.6 L278.8 143.6 L278.0 142.7 L277.9 142.6 L277.2 141.9 L277.0 141.7 L276.4 141.0 L276.2 140.7 L275.6 140.1 L275.3 139.8 L274.8 139.3 L274.4 138.8 L274.1 138.4 L273.6 137.9 L273.3 137.5 L272.7 136.9 L272.4 136.7 L271.8 136.0 L271.6 135.8 L271.0 135.1 L270.8 134.9 L270.1 134.2 L270.0 134.1 L269.2 133.2 L269.2 133.2 L268.4 132.3 L268.4 132.3 L267.6 131.5 L267.5 131.4 L266.8 130.6 L266.6 130.5 L265.9 129.7 L265.8 129.6 L265.1 128.9 L264.9 128.7 L264.3 128.0 L264.1 127.8 L263.4 127.1 L263.2 126.9 L262.6 126.3 L262.3 126.0 L261.8 125.4 L261.5 125.1 L260.9 124.5 L260.6 124.2 L260.1 123.7 L259.7 123.3 L259.3 122.8 L258.9 122.4 L258.4 121.9 L258.0 121.5 L257.6 121.1 L257.1 120.6 L256.7 120.2 L256.3 119.7 L255.9 119.3 L255.4 118.8 L255.0 118.5 L254.5 118.0 L254.2 117.6 L253.7 117.1 L253.3 116.7 L252.8 116.2 L252.5 115.9 L251.9 115.3 L251.6 115.0 L251.1 114.4 L250.8 114.1 L250.2 113.6 L249.9 113.3 L249.3 112.7 L249.0 112.4 L248.5 111.8 L248.2 111.5 L247.6 111.0 L247.3 110.7 L246.7 110.1 L246.4 109.8 L245.9 109.2 L245.6 108.9 L245.0 108.4 L244.7 108.1 L244.1 107.5 L243.8 107.2 L243.3 106.7 L242.9 106.3 L242.4 105.8 L242.0 105.5 L241.5 105.0 L241.2 104.6 L240.7 104.1 L240.3 103.7 L239.8 103.3 L239.4 102.9 L238.9 102.4 L238.5 102.0 L238.1 101.6 L237.6 101.1 L237.2 100.7 L236.7 100.3 L236.3 99.9 L235.8 99.4 L235.5 99.1 L234.9 98.5 L234.6 98.2 L234.0 97.7 L233.7 97.4 L233.1 96.8 L232.9 96.6 L232.2 95.9 L232.0 95.7 L231.3 95.1 L231.1 94.9 L230.4 94.2 L230.3 94.1 L229.5 93.4 L229.4 93.2 L228.6 92.5 L228.5 92.4 L227.7 91.6 L227.7 91.6 L226.8 90.8 L226.8 90.8 L225.9 90.0 L225.8 89.9 L225.1 89.2 L224.9 89.0 L224.2 88.4 L224.0 88.2 L223.3 87.6 L223.1 87.3 L222.5 86.7 L222.1 86.4 L221.6 85.9 L221.2 85.6 L220.7 85.2 L220.2 84.7 L219.9 84.4 L219.3 83.8 L219.0 83.6 L218.3 83.0 L218.1 82.8 L217.4 82.1 L217.3 82.0 L216.4 81.2 L216.4 81.2 L215.5 80.4 L215.5 80.4 L214.7 79.7 L214.5 79.5 L213.8 78.9 L213.5 78.6 L213.0 78.1 L212.5 77.8 L212.1 77.4 L211.6 76.9 L211.2 76.6 L210.6 76.0 L210.4 75.8 L209.6 75.2 L209.5 75.1 L208.6 74.3 L208.6 74.3 L207.8 73.6 L207.6 73.4 L206.9 72.8 L206.6 72.6 L206.0 72.1 L205.5 71.7 L205.2 71.4 L204.5 70.8 L204.3 70.7 L203.5 70.0 L203.4 69.9 L202.6 69.2 L202.4 69.1 L201.7 68.5 L201.4 68.2 L200.8 67.8 L200.3 67.4 L200.0 67.1 L199.2 66.5 L199.1 66.4 L198.2 65.7 L198.2 65.6 L197.4 65.0 L197.1 64.8 L196.5 64.3 L196.0 63.9 L195.6 63.6 L194.8 63.0 L194.8 63.0 L193.9 62.3 L193.7 62.2 L193.0 61.6 L192.6 61.3 L192.2 61.0 L191.4 60.4 L191.3 60.3 L190.4 59.7 L190.3 59.6 L189.6 59.1 L189.1 58.7 L188.7 58.4 L187.9 57.8 L187.8 57.8 L187.0 57.2 L186.6 57.0 L186.1 56.6 L185.4 56.1 L185.2 56.0 L184.4 55.4 L184.1 55.2 L183.5 54.8 L182.9 54.4 L182.6 54.2 L181.8 53.7 L181.6 53.5 L180.9 53.1 L180.2 52.6 L180.0 52.5 L179.2 52.0 L178.9 51.8 L178.3 51.4 L177.5 50.9 L177.4 50.9 L176.6 50.4 L176.0 50.0 L175.7 49.9 L174.8 49.3 L174.6 49.2 L174.0 48.8 L173.1 48.4 L173.0 48.3 L172.2 47.9 L171.5 47.4 L171.4 47.4 L170.5 46.9 L169.9 46.6 L169.6 46.5 L168.8 46.0 L168.2 45.7 L167.9 45.6 L167.0 45.2 L166.4 44.9 L166.2 44.8 L165.3 44.4 L164.5 44.0 L164.5 44.0 L163.6 43.6 L162.7 43.2 L162.5 43.1 L161.9 42.8 L161.0 42.5 L160.4 42.3 L160.1 42.1 L159.3 41.8 L158.4 41.5 L158.0 41.4 L157.5 41.2 L156.7 41.0 L155.8 40.7 L155.3 40.5" fill="none" stroke="#6d6d75" stroke-width="0.9" opacity="0.7"/>
+<path d="M183.7 299.5 L183.5 299.4 L182.6 299.0 L181.8 298.7 L181.6 298.6 L180.9 298.3 L180.0 297.9 L179.7 297.7 L179.2 297.5 L178.3 297.0 L178.0 296.9 L177.4 296.6 L176.6 296.1 L176.4 296.0 L175.7 295.6 L174.8 295.2 L174.8 295.1 L174.0 294.7 L173.3 294.3 L173.1 294.2 L172.2 293.6 L171.9 293.4 L171.4 293.1 L170.5 292.6 L170.5 292.6 L169.6 292.0 L169.1 291.7 L168.8 291.5 L167.9 290.9 L167.8 290.8 L167.0 290.3 L166.5 290.0 L166.2 289.7 L165.3 289.2 L165.2 289.1 L164.5 288.6 L164.0 288.2 L163.6 287.9 L162.7 287.4 L162.7 287.3 L161.9 286.7 L161.5 286.5 L161.0 286.1 L160.3 285.6 L160.1 285.5 L159.3 284.8 L159.2 284.8 L158.4 284.2 L158.0 283.9 L157.5 283.5 L156.9 283.0 L156.7 282.9 L155.8 282.2 L155.7 282.2 L154.9 281.5 L154.6 281.3 L154.1 280.8 L153.5 280.4 L153.2 280.2 L152.4 279.6 L152.3 279.5 L151.5 278.8 L151.4 278.7 L150.6 278.1 L150.3 277.8 L149.7 277.4 L149.2 277.0 L148.9 276.7 L148.2 276.1 L148.0 275.9 L147.1 275.2 L147.1 275.2 L146.3 274.5 L146.1 274.4 L145.4 273.8 L145.1 273.5 L144.5 273.0 L144.1 272.6 L143.7 272.3 L143.0 271.8 L142.8 271.5 L142.0 270.9 L141.9 270.8 L141.1 270.0 L141.0 270.0 L140.2 269.3 L140.1 269.2 L139.3 268.5 L139.1 268.3 L138.5 267.8 L138.1 267.4 L137.6 267.0 L137.1 266.6 L136.7 266.2 L136.2 265.7 L135.9 265.4 L135.2 264.8 L135.0 264.7 L134.2 264.0 L134.1 263.9 L133.3 263.1 L133.3 263.1 L132.4 262.3 L132.3 262.2 L131.5 261.5 L131.4 261.4 L130.7 260.7 L130.5 260.5 L129.8 259.9 L129.5 259.6 L128.9 259.1 L128.6 258.8 L128.1 258.3 L127.7 257.9 L127.2 257.5 L126.8 257.0 L126.3 256.6 L125.9 256.2 L125.5 255.8 L124.9 255.3 L124.6 255.0 L124.0 254.4 L123.7 254.2 L123.1 253.6 L122.9 253.3 L122.2 252.7 L122.0 252.5 L121.3 251.8 L121.1 251.7 L120.5 251.0 L120.3 250.8 L119.6 250.1 L119.4 250.0 L118.7 249.2 L118.5 249.1 L117.8 248.4 L117.7 248.3 L116.9 247.5 L116.8 247.4 L116.0 246.6 L115.9 246.6 L115.2 245.8 L115.1 245.7 L114.3 244.9 L114.2 244.8 L113.4 244.1 L113.4 244.0 L112.6 243.2 L112.5 243.1 L111.7 242.3 L111.6 242.2 L110.9 241.5 L110.8 241.3 L110.0 240.6 L109.9 240.4 L109.2 239.7 L109.0 239.5 L108.3 238.9 L108.2 238.7 L107.5 238.0 L107.3 237.8 L106.7 237.1 L106.4 236.9 L105.8 236.3 L105.6 236.0 L105.0 235.4 L104.7 235.1 L104.2 234.5 L103.8 234.1 L103.4 233.7 L103.0 233.2 L102.5 232.8 L102.1 232.3 L101.7 231.9 L101.2 231.4 L100.9 231.1 L100.4 230.5 L100.1 230.2 L99.5 229.5 L99.3 229.3 L98.6 228.6 L98.5 228.5 L97.8 227.7 L97.7 227.6 L96.9 226.7 L96.9 226.7 L96.1 225.9 L96.0 225.8 L95.3 225.0 L95.2 224.8 L94.6 224.1 L94.3 223.8 L93.8 223.3 L93.4 222.9 L93.0 222.4 L92.6 221.9 L92.2 221.5 L91.7 220.9 L91.5 220.7 L90.8 219.9 L90.7 219.8 L90.0 219.0 L90.0 218.9 L89.2 218.1 L89.1 218.0 L88.5 217.2 L88.2 217.0 L87.7 216.3 L87.4 215.9 L87.0 215.5 L86.5 214.9 L86.2 214.6 L85.6 213.9 L85.5 213.7 L84.8 212.9 L84.8 212.9 L84.1 212.0 L83.9 211.8 L83.3 211.1 L83.0 210.8 L82.6 210.3 L82.2 209.7 L81.9 209.4 L81.3 208.6 L81.2 208.5 L80.5 207.7 L80.4 207.6 L79.8 206.8 L79.6 206.5 L79.2 205.9 L78.7 205.4 L78.5 205.1 L77.8 204.3 L77.8 204.2 L77.1 203.3 L77.0 203.1 L76.5 202.5 L76.1 202.0 L75.8 201.6 L75.2 200.8 L75.2 200.7 L74.5 199.9 L74.4 199.7 L73.9 199.0 L73.5 198.5 L73.3 198.1 L72.7 197.3 L72.6 197.3 L72.1 196.4 L71.8 196.0 L71.4 195.5 L70.9 194.8 L70.8 194.7 L70.3 193.8 L70.0 193.5 L69.7 193.0 L69.2 192.2 L69.1 192.1 L68.5 191.2 L68.3 190.9 L68.0 190.4 L67.4 189.5 L67.4 189.5 L66.9 188.6 L66.6 188.1 L66.4 187.8 L65.8 186.9 L65.7 186.7 L65.3 186.0 L64.9 185.2 L64.8 185.2 L64.4 184.3 L64.0 183.6 L63.9 183.4 L63.4 182.6 L63.1 182.0 L63.0 181.7 L62.5 180.8 L62.3 180.3 L62.1 180.0 L61.7 179.1 L61.4 178.4 L61.3 178.2 L61.0 177.4 L60.6 176.5 L60.5 176.3" fill="none" stroke="#6d6d75" stroke-width="0.9" opacity="0.7"/>
+<path d="M319.5 151.8 L319.3 151.4 L319.0 150.5 L318.6 149.7 L318.6 149.6 L318.2 148.8 L317.8 147.9 L317.7 147.8 L317.4 147.0 L317.0 146.2 L316.9 146.0 L316.5 145.3 L316.0 144.5 L316.0 144.4 L315.6 143.6 L315.1 142.8 L315.1 142.7 L314.6 141.9 L314.3 141.3 L314.1 141.0 L313.6 140.1 L313.4 139.9 L313.0 139.3 L312.6 138.5 L312.5 138.4 L311.9 137.5 L311.7 137.1 L311.4 136.7 L310.8 135.8 L310.8 135.8 L310.3 134.9 L310.0 134.5 L309.7 134.1 L309.1 133.2 L309.1 133.2 L308.5 132.3 L308.2 131.9 L307.9 131.5 L307.4 130.7 L307.3 130.6 L306.7 129.7 L306.5 129.5 L306.0 128.9 L305.6 128.3 L305.4 128.0 L304.8 127.1 L304.8 127.1 L304.1 126.3 L303.9 126.0 L303.4 125.4 L303.0 124.8 L302.8 124.5 L302.2 123.7 L302.1 123.7 L301.5 122.8 L301.3 122.6 L300.8 121.9 L300.4 121.5 L300.1 121.1 L299.6 120.4 L299.4 120.2 L298.7 119.3 L298.7 119.3 L298.0 118.5 L297.8 118.3 L297.3 117.6 L297.0 117.2 L296.6 116.7 L296.1 116.2 L295.9 115.9 L295.2 115.1 L295.1 115.0 L294.4 114.1 L294.4 114.1 L293.7 113.3 L293.5 113.1 L292.9 112.4 L292.6 112.1 L292.2 111.5 L291.8 111.1 L291.4 110.7 L290.9 110.1 L290.7 109.8 L290.0 109.1 L289.9 108.9 L289.2 108.1 L289.2 108.1 L288.4 107.2 L288.3 107.1 L287.6 106.3 L287.4 106.1 L286.8 105.5 L286.6 105.2 L286.0 104.6 L285.7 104.2 L285.3 103.7 L284.8 103.3 L284.5 102.9 L284.0 102.3 L283.7 102.0 L283.1 101.4 L282.9 101.1 L282.2 100.5 L282.1 100.3 L281.4 99.5 L281.3 99.4 L280.5 98.6 L280.4 98.5 L279.6 97.7 L279.6 97.7 L278.8 96.8 L278.8 96.8 L278.0 95.9 L277.9 95.9 L277.1 95.1 L277.0 95.0 L276.3 94.2 L276.2 94.1 L275.5 93.4 L275.3 93.2 L274.6 92.5 L274.4 92.3 L273.8 91.6 L273.6 91.4 L272.9 90.8 L272.7 90.6 L272.0 89.9 L271.8 89.7 L271.2 89.0 L271.0 88.8 L270.3 88.2 L270.1 88.0 L269.4 87.3 L269.2 87.1 L268.6 86.4 L268.4 86.2 L267.7 85.6 L267.5 85.4 L266.8 84.7 L266.6 84.5 L265.9 83.8 L265.8 83.7 L265.0 83.0 L264.9 82.9 L264.1 82.1 L264.1 82.0 L263.2 81.2 L263.2 81.2 L262.3 80.4 L262.3 80.4 L261.5 79.6 L261.4 79.5 L260.6 78.7 L260.5 78.6 L259.7 77.9 L259.5 77.8 L258.9 77.1 L258.6 76.9 L258.0 76.3 L257.7 76.0 L257.1 75.5 L256.7 75.2 L256.3 74.7 L255.8 74.3 L255.4 74.0 L254.8 73.4 L254.5 73.2 L253.9 72.6 L253.7 72.4 L252.9 71.7 L252.8 71.6 L251.9 70.8 L251.9 70.8 L251.1 70.1 L250.9 70.0 L250.2 69.3 L249.9 69.1 L249.3 68.6 L248.9 68.2 L248.5 67.8 L247.9 67.4 L247.6 67.1 L246.9 66.5 L246.7 66.3 L245.9 65.6 L245.9 65.6 L245.0 64.9 L244.9 64.8 L244.1 64.1 L243.8 63.9 L243.3 63.4 L242.8 63.0 L242.4 62.7 L241.7 62.2 L241.5 62.0 L240.7 61.3 L240.7 61.3 L239.8 60.6 L239.6 60.4 L238.9 59.9 L238.5 59.6 L238.1 59.2 L237.4 58.7 L237.2 58.5 L236.3 57.9 L236.3 57.8 L235.5 57.2 L235.2 57.0 L234.6 56.6 L234.0 56.1 L233.7 55.9 L232.9 55.2 L232.9 55.2 L232.0 54.6 L231.7 54.4 L231.1 54.0 L230.5 53.5 L230.3 53.3 L229.4 52.7 L229.3 52.6 L228.5 52.1 L228.1 51.8 L227.7 51.5 L226.8 50.9 L226.8 50.9 L225.9 50.3 L225.5 50.0 L225.1 49.7 L224.2 49.2 L224.2 49.2 L223.3 48.6 L222.9 48.3 L222.5 48.1 L221.6 47.5 L221.5 47.4 L220.7 47.0 L220.1 46.6 L219.9 46.4 L219.0 45.9 L218.7 45.7 L218.1 45.4 L217.3 44.9 L217.2 44.9 L216.4 44.4 L215.6 44.0 L215.5 44.0 L214.7 43.5 L214.0 43.1 L213.8 43.0 L213.0 42.6 L212.2 42.3 L212.1 42.2 L211.2 41.8 L210.4 41.4 L210.3 41.4 L209.5 41.0 L208.6 40.7 L208.2 40.5" fill="none" stroke="#6d6d75" stroke-width="0.9" opacity="0.7"/>
+<path d="M128.7 299.5 L128.1 299.2 L127.2 298.7 L127.0 298.6 L126.3 298.3 L125.5 297.8 L125.4 297.7 L124.6 297.3 L123.9 296.9 L123.7 296.8 L122.9 296.3 L122.5 296.0 L122.0 295.7 L121.1 295.2 L121.1 295.1 L120.3 294.6 L119.8 294.3 L119.4 294.0 L118.5 293.4 L118.5 293.4 L117.7 292.8 L117.3 292.6 L116.8 292.2 L116.1 291.7 L115.9 291.6 L115.1 291.0 L114.9 290.8 L114.2 290.3 L113.7 290.0 L113.4 289.7 L112.6 289.1 L112.5 289.0 L111.6 288.3 L111.5 288.2 L110.8 287.6 L110.4 287.4 L109.9 287.0 L109.3 286.5 L109.0 286.3 L108.2 285.6 L108.2 285.5 L107.3 284.8 L107.2 284.8 L106.4 284.1 L106.2 283.9 L105.6 283.4 L105.1 283.0 L104.7 282.6 L104.1 282.2 L103.8 281.9 L103.1 281.3 L103.0 281.1 L102.1 280.4 L102.1 280.4 L101.2 279.6 L101.2 279.6 L100.4 278.8 L100.2 278.7 L99.5 278.1 L99.2 277.8 L98.6 277.3 L98.3 277.0 L97.8 276.5 L97.4 276.1 L96.9 275.7 L96.4 275.2 L96.0 274.9 L95.5 274.4 L95.2 274.0 L94.6 273.5 L94.3 273.2 L93.7 272.6 L93.4 272.4 L92.8 271.8 L92.6 271.5 L91.9 270.9 L91.7 270.7 L91.1 270.0 L90.8 269.8 L90.2 269.2 L90.0 268.9 L89.3 268.3 L89.1 268.1 L88.5 267.4 L88.2 267.2 L87.6 266.6 L87.4 266.3 L86.8 265.7 L86.5 265.4 L86.0 264.8 L85.6 264.5 L85.1 264.0 L84.8 263.6 L84.3 263.1 L83.9 262.6 L83.5 262.2 L83.0 261.7 L82.7 261.4 L82.2 260.8 L81.9 260.5 L81.3 259.8 L81.2 259.6 L80.4 258.8 L80.4 258.8 L79.6 257.9 L79.6 257.9 L78.9 257.0 L78.7 256.9 L78.1 256.2 L77.8 255.9 L77.4 255.3 L77.0 254.9 L76.6 254.4 L76.1 253.8 L75.9 253.6 L75.2 252.8 L75.2 252.7 L74.5 251.8 L74.4 251.8 L73.7 251.0 L73.5 250.7 L73.0 250.1 L72.6 249.6 L72.4 249.2 L71.8 248.5 L71.7 248.4 L71.0 247.5 L70.9 247.4 L70.3 246.6 L70.0 246.3 L69.7 245.8 L69.2 245.1 L69.0 244.9 L68.4 244.1 L68.3 243.9 L67.8 243.2 L67.4 242.7 L67.2 242.3 L66.6 241.5 L66.6 241.5 L66.0 240.6 L65.7 240.2 L65.4 239.7 L64.9 238.9 L64.8 238.9 L64.3 238.0 L64.0 237.5 L63.7 237.1 L63.2 236.3 L63.1 236.1 L62.7 235.4 L62.3 234.6 L62.2 234.5 L61.7 233.7 L61.4 233.0 L61.3 232.8 L60.8 231.9 L60.5 231.3" fill="none" stroke="#6d6d75" stroke-width="0.9" opacity="0.7"/>
+<path d="M319.5 96.9 L319.4 96.8 L319.0 95.9 L318.6 95.2 L318.6 95.1 L318.1 94.2 L317.7 93.6 L317.6 93.4 L317.1 92.5 L316.9 92.1 L316.6 91.6 L316.0 90.8 L316.0 90.7 L315.5 89.9 L315.1 89.4 L314.9 89.0 L314.3 88.2 L314.3 88.1 L313.7 87.3 L313.4 86.9 L313.1 86.4 L312.6 85.7 L312.5 85.6 L311.8 84.7 L311.7 84.5 L311.2 83.8 L310.8 83.4 L310.5 83.0 L310.0 82.2 L309.8 82.1 L309.2 81.2 L309.1 81.1 L308.5 80.4 L308.2 80.0 L307.8 79.5 L307.4 79.0 L307.1 78.6 L306.5 77.9 L306.3 77.8 L305.6 76.9 L305.6 76.9 L304.9 76.0 L304.8 75.9 L304.1 75.2 L303.9 74.9 L303.4 74.3 L303.0 73.9 L302.6 73.4 L302.2 72.9 L301.8 72.6 L301.3 72.0 L301.0 71.7 L300.4 71.0 L300.2 70.8 L299.6 70.1 L299.4 70.0 L298.7 69.2 L298.6 69.1 L297.8 68.3 L297.8 68.2 L297.0 67.4 L297.0 67.4 L296.1 66.5 L296.1 66.5 L295.3 65.6 L295.2 65.6 L294.4 64.8 L294.4 64.7 L293.5 63.9 L293.5 63.9 L292.6 63.0 L292.6 63.0 L291.8 62.2 L291.7 62.2 L290.9 61.4 L290.8 61.3 L290.0 60.6 L289.9 60.4 L289.2 59.8 L289.0 59.6 L288.3 59.0 L288.0 58.7 L287.4 58.2 L287.1 57.8 L286.6 57.4 L286.1 57.0 L285.7 56.6 L285.1 56.1 L284.8 55.9 L284.1 55.2 L284.0 55.1 L283.1 54.4 L283.1 54.4 L282.2 53.7 L282.1 53.5 L281.4 52.9 L281.0 52.6 L280.5 52.2 L280.0 51.8 L279.6 51.5 L278.9 50.9 L278.8 50.8 L277.9 50.2 L277.8 50.0 L277.0 49.5 L276.6 49.2 L276.2 48.8 L275.5 48.3 L275.3 48.2 L274.4 47.5 L274.3 47.4 L273.6 46.9 L273.1 46.6 L272.7 46.3 L271.9 45.7 L271.8 45.7 L271.0 45.1 L270.6 44.9 L270.1 44.5 L269.3 44.0 L269.2 44.0 L268.4 43.4 L267.9 43.1 L267.5 42.9 L266.6 42.4 L266.4 42.3 L265.8 41.9 L264.9 41.4 L264.8 41.4 L264.1 41.0 L263.2 40.6 L263.1 40.5" fill="none" stroke="#6d6d75" stroke-width="0.9" opacity="0.7"/>
+<path d="M86.0 274.0 L285.1 274.0 L285.1 253.0 L272.8 253.0 L272.8 244.5 L267.0 244.5 L267.0 240.0 L263.8 240.0 L263.8 237.5 L258.3 233.0" fill="none" stroke="#2c5f8a" stroke-width="1.8"/>
+<circle cx="86.0" cy="274.0" r="2.4" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<circle cx="285.1" cy="274.0" r="2.4" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<circle cx="285.1" cy="253.0" r="2.4" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<circle cx="272.8" cy="253.0" r="2.4" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<circle cx="272.8" cy="244.5" r="2.4" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<circle cx="267.0" cy="244.5" r="2.4" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<circle cx="267.0" cy="240.0" r="2.4" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<circle cx="263.8" cy="240.0" r="2.4" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<circle cx="263.8" cy="237.5" r="2.4" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<path d="M127.0 233.0 L258.3 101.7" fill="none" stroke="#9c4d2f" stroke-width="1.4" stroke-dasharray="4 3"/>
+<circle cx="127.0" cy="233.0" r="4.5" fill="#fdfcf9" stroke="#9c4d2f" stroke-width="1.6"/>
+<circle cx="258.3" cy="101.7" r="4.5" fill="#fdfcf9" stroke="#9c4d2f" stroke-width="1.6"/>
+<circle cx="258.3" cy="233.0" r="4.5" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<circle cx="127.0" cy="101.7" r="4.5" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<circle cx="193.1" cy="166.9" r="4.5" fill="#a8741a" stroke="#a8741a" stroke-width="1.6"/>
+<path d="M400.0 300.0 L660.0 40.0" fill="none" stroke="#6d6d75" stroke-width="1" stroke-dasharray="3 3"/>
+<path d="M400.0 63.6 L401.3 64.1 L402.6 64.6 L403.9 65.1 L405.2 65.6 L406.5 66.1 L407.8 66.6 L409.1 67.1 L410.4 67.7 L411.7 68.2 L413.0 68.8 L414.3 69.4 L415.6 69.9 L416.9 70.5 L418.2 71.1 L419.5 71.7 L420.8 72.4 L422.1 73.0 L423.4 73.6 L424.7 74.3 L426.0 74.9 L427.3 75.6 L428.6 76.3 L429.9 77.0 L431.2 77.7 L432.5 78.4 L433.8 79.1 L435.1 79.9 L436.4 80.6 L437.7 81.4 L439.0 82.1 L440.3 82.9 L441.6 83.7 L442.9 84.5 L444.2 85.4 L445.5 86.2 L446.8 87.0 L448.1 87.9 L449.4 88.7 L450.7 89.6 L452.0 90.5 L453.3 91.4 L454.6 92.3 L455.9 93.3 L457.2 94.2 L458.5 95.2 L459.8 96.1 L461.1 97.1 L462.4 98.1 L463.7 99.1 L465.0 100.1 L466.3 101.1 L467.6 102.1 L468.9 103.2 L470.2 104.3 L471.5 105.3 L472.8 106.4 L474.1 107.5 L475.4 108.6 L476.7 109.7 L478.0 110.9 L479.3 112.0 L480.6 113.2 L481.9 114.3 L483.2 115.5 L484.5 116.7 L485.8 117.9 L487.1 119.1 L488.4 120.3 L489.7 121.5 L491.0 122.8 L492.3 124.0 L493.6 125.3 L494.9 126.5 L496.2 127.8 L497.5 129.1 L498.8 130.4 L500.1 131.7 L501.4 133.0 L502.7 134.3 L504.0 135.7 L505.3 137.0 L506.6 138.3 L507.9 139.7 L509.2 141.1 L510.5 142.4 L511.8 143.8 L513.1 145.2 L514.4 146.5 L515.7 147.9 L517.0 149.3 L518.3 150.7 L519.6 152.1 L520.9 153.5 L522.2 154.9 L523.5 156.4 L524.8 157.8 L526.1 159.2 L527.4 160.6 L528.7 162.1 L530.0 163.5 L531.3 164.9 L532.6 166.3 L533.9 167.8 L535.2 169.2 L536.5 170.6 L537.8 172.1 L539.1 173.5 L540.4 174.9 L541.7 176.4 L543.0 177.8 L544.3 179.2 L545.6 180.6 L546.9 182.1 L548.2 183.5 L549.5 184.9 L550.8 186.3 L552.1 187.7 L553.4 189.1 L554.7 190.5 L556.0 191.9 L557.3 193.3 L558.6 194.7 L559.9 196.1 L561.2 197.4 L562.5 198.8 L563.8 200.2 L565.1 201.5 L566.4 202.8 L567.7 204.2 L569.0 205.5 L570.3 206.8 L571.6 208.1 L572.9 209.5 L574.2 210.7 L575.5 212.0 L576.8 213.3 L578.1 214.6 L579.4 215.8 L580.7 217.1 L582.0 218.3 L583.3 219.6 L584.6 220.8 L585.9 222.0 L587.2 223.2 L588.5 224.4 L589.8 225.5 L591.1 226.7 L592.4 227.9 L593.7 229.0 L595.0 230.1 L596.3 231.3 L597.6 232.4 L598.9 233.5 L600.2 234.5 L601.5 235.6 L602.8 236.7 L604.1 237.7 L605.4 238.8 L606.7 239.8 L608.0 240.8 L609.3 241.8 L610.6 242.8 L611.9 243.8 L613.2 244.7 L614.5 245.7 L615.8 246.6 L617.1 247.6 L618.4 248.5 L619.7 249.4 L621.0 250.3 L622.3 251.2 L623.6 252.0 L624.9 252.9 L626.2 253.7 L627.5 254.6 L628.8 255.4 L630.1 256.2 L631.4 257.0 L632.7 257.8 L634.0 258.5 L635.3 259.3 L636.6 260.1 L637.9 260.8 L639.2 261.5 L640.5 262.2 L641.8 262.9 L643.1 263.6 L644.4 264.3 L645.7 265.0 L647.0 265.7 L648.3 266.3 L649.6 266.9 L650.9 267.6 L652.2 268.2 L653.5 268.8 L654.8 269.4 L656.1 270.0 L657.4 270.6 L658.7 271.1 L660.0 271.7" fill="none" stroke="#0f5f57" stroke-width="2"/>
+<path d="M426.0 300.0 L426.0 74.9 L625.1 74.9 L625.1 253.0 L447.0 253.0 L447.0 87.2 L612.8 87.2 L612.8 244.5 L455.5 244.5 L455.5 93.0 L607.0 93.0 L607.0 240.0 L460.0 240.0 L460.0 96.2 L603.8 96.2 L603.8 237.5 L462.5 237.5 L462.5 98.2 L601.8 98.2 L601.8 235.9 L464.1 235.9 L464.1 99.4 L600.6 99.4 L600.6 234.9 L465.1 234.9 L465.1 100.2 L599.8 100.2 L599.8 234.2 L465.8 234.2" fill="none" stroke="#9c4d2f" stroke-width="1.3"/>
+<circle cx="533.1" cy="166.9" r="4.5" fill="#a8741a" stroke="#a8741a" stroke-width="1.6"/>
+<circle cx="467.0" cy="101.7" r="4.5" fill="#fdfcf9" stroke="#9c4d2f" stroke-width="1.6"/>
+<circle cx="598.3" cy="233.0" r="4.5" fill="#fdfcf9" stroke="#9c4d2f" stroke-width="1.6"/>
+<text x="190.0" y="28.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">free energy over the square of beliefs</text>
+<text x="530.0" y="28.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">the update map R and the simultaneous iteration</text>
+<circle cx="40" cy="352" r="4" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<text x="49.0" y="356.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">sequential updates from (0.1, 0.1)</text>
+<circle cx="290" cy="352" r="4" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<text x="299.0" y="356.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">minima</text>
+<circle cx="370" cy="352" r="4" fill="#a8741a" stroke="#a8741a" stroke-width="1.6"/>
+<text x="379.0" y="356.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">saddle</text>
+<circle cx="450" cy="352" r="4" fill="#fdfcf9" stroke="#9c4d2f" stroke-width="1.6"/>
+<text x="459.0" y="356.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">two-cycle of simultaneous updates</text>
+</svg><figcaption><span class="fno">Figure 4.2.2.</span> Left: contours of the mean-field free energy $\mathcal{F}(q_1, q_2)$ on the noisy-OR model after a shake, with the two minima, the saddle on the diagonal (the heavier contour passes through it), the sequential path from $(0.1, 0.1)$, and the two diagonal points between which simultaneous updates alternate. Right: the map $R$ with the diagonal; the cobweb from $q = 0.1$ moves away from the fixed point, where the slope of $R$ is steeper than $-1$, and settles on the two-cycle.</figcaption></figure>
+<h2 id="unknown-sensory-precision"><span class="secno">4</span>Unknown sensory precision</h2>
+<p>Free-form mean-field is not limited to discrete tables. For a continuous factor, <a class="eqref" href="#eq-cavi-update">(4.2.4)</a> reads $\ln \hat q_i(s_i) = \mathbb{E}_{Q_{\setminus i}}[\ln P(o, s)] + \text{const}$, and when the right-hand side is a recognisable log density, the form of $\hat q_i$ is determined by the model rather than chosen.</p>
+<p>Take <a href="../week-02/reading-the-update.html">Week&nbsp;2, Lesson&nbsp;4</a>'s linear model, with the sensory precision $\Pi_u &gt; 0$ now unknown as well:
+<div class="eqn"><div class="eqbody">$$d \;\sim\; \mathcal{N}(d_p, \Sigma_p), \qquad
+\Pi_u \;\sim\; \mathrm{Gamma}(k_0, r_0), \qquad
+u \mid d, \Pi_u \;\sim\; \mathcal{N}(d, \Pi_u^{-1}).$$</div></div>
+The Gamma density with shape $k &gt; 0$ and rate $r &gt; 0$ is
+<div class="eqn"><div class="eqbody">$$\mathrm{Gamma}(\Pi; k, r) \;=\; \frac{r^{k}}{\Gamma(k)}\,\Pi^{k - 1} e^{-r\Pi}, \qquad \Pi &gt; 0,$$</div></div>
+where $\Gamma(k) = \int_0^\infty t^{k - 1}e^{-t}\,\mathrm{d}t$ is the gamma function; its mean is $k/r$. A Gamma density on a precision is the same as an inverse-gamma density on the variance $1/\Pi$, the family of the hyperprior in <a href="../week-03/what-the-mode-leaves-out.html">Week&nbsp;3, Lesson&nbsp;4</a>. Impose only the factorisation $Q(d, \Pi_u) = q_d(d)\,q_\Pi(\Pi_u)$.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Gaussian and Gamma factors from the free-form update</span></div><p>Keep the terms of $\ln P(u, d, \Pi_u) = \ln P(d) + \ln P(\Pi_u) + \ln P(u \mid d, \Pi_u)$ that depend on $d$ or $\Pi_u$:
+<div class="eqn"><div class="eqbody">$$\ln P(u, d, \Pi_u)
+\;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;+\; (k_0 - 1)\ln \Pi_u - r_0 \Pi_u \;+\; \frac{1}{2}\ln \Pi_u - \frac{\Pi_u}{2}(u - d)^2 \;+\; \text{const}.$$</div></div></p>
+<ol>
+<li>
+<p><em>The factor for $d$.</em> Average over $q_\Pi$; terms without $d$ go into the constant:
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+\ln \hat{q}_d(d)
+&\;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \frac{\mathbb{E}_{q_\Pi}[\Pi_u]}{2}(u - d)^2 \;+\; \text{const} \\
+&\;=\; -\frac{1}{2}\!\left(\frac{1}{\Sigma_p} + \mathbb{E}_{q_\Pi}[\Pi_u]\right) d^2 \;+\; \left(\frac{d_p}{\Sigma_p} + \mathbb{E}_{q_\Pi}[\Pi_u]\,u\right) d \;+\; \text{const}.
+\end{aligned}$$</div></div>
+This is a quadratic in $d$ with negative leading coefficient, so $\hat q_d = \mathcal{N}(m_d, \Sigma_d)$, and completing the square as in Week&nbsp;2, Lesson&nbsp;4 gives
+<div class="eqn" id="eq-ng-qd"><div class="eqbody">$$\frac{1}{\Sigma_d} \;=\; \frac{1}{\Sigma_p} + \mathbb{E}_{q_\Pi}[\Pi_u],
+\qquad
+m_d \;=\; \Sigma_d\!\left(\frac{d_p}{\Sigma_p} + \mathbb{E}_{q_\Pi}[\Pi_u]\,u\right).$$</div><div class="eqno"><a href="#eq-ng-qd" title="Link to equation 4.2.12">(4.2.12)</a></div></div></p>
+</li>
+<li>
+<p><em>The factor for $\Pi_u$.</em> Average over $q_d$, using $\mathbb{E}_{q_d}[(u - d)^2] = \mathbb{E}_{q_d}\big[((u - m_d) - (d - m_d))^2\big] = (u - m_d)^2 + \Sigma_d$, since the cross term has mean zero:
+<div class="eqn"><div class="eqbody">$$\ln \hat{q}_\Pi(\Pi_u)
+\;=\; \left(k_0 + \tfrac{1}{2} - 1\right)\ln \Pi_u \;-\; \left[r_0 + \tfrac{1}{2}\Big((u - m_d)^2 + \Sigma_d\Big)\right]\Pi_u \;+\; \text{const}.$$</div></div>
+This is the logarithm of a Gamma density, with
+<div class="eqn" id="eq-ng-qpi"><div class="eqbody">$$k_q \;=\; k_0 + \tfrac{1}{2},
+\qquad
+r_q \;=\; r_0 + \tfrac{1}{2}\Big((u - m_d)^2 + \Sigma_d\Big),
+\qquad
+\mathbb{E}_{q_\Pi}[\Pi_u] \;=\; \frac{k_q}{r_q}.$$</div><div class="eqno"><a href="#eq-ng-qpi" title="Link to equation 4.2.13">(4.2.13)</a></div></div></p>
+</li>
+</ol></div>
+<p>The two updates exchange two numbers. The factor for $d$ needs only $\mathbb{E}_{q_\Pi}[\Pi_u]$, and the factor for $\Pi_u$ needs only $(u - m_d)^2 + \Sigma_d = \mathbb{E}_{q_d}[(u - d)^2]$. These expected statistics are what the messages of <a class="eqref" href="#eq-vmp-message">(4.2.8)</a> carry in this model.</p>
+<p>The term $\Sigma_d$ in $r_q$ is the posterior variance of the hidden state added to the squared residual. Week&nbsp;3, Lesson&nbsp;4 found that the point rule for a sensory variance uses the squared residual at the mode alone, and that this omission biases it. The free-form update includes the term because it averages over $q_d$ rather than evaluating at its mean. Week&nbsp;8 returns to precisions that are learned and how they weight prediction errors.</p>
+<h3 id="the-free-energy-of-the-product">The free energy of the product</h3>
+<p>Checking convergence needs $\mathcal{F}$ itself, and that needs two expectations under a Gamma density.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The mean of a logarithm and the entropy under a Gamma density</span></div><p>For $\Pi \sim \mathrm{Gamma}(k, r)$, the normalisation integral is $\int_0^\infty \Pi^{k-1}e^{-r\Pi}\,\mathrm{d}\Pi = \Gamma(k)/r^{k}$. Differentiate both sides with respect to $k$; on the left, $\frac{\partial}{\partial k}\Pi^{k-1} = \Pi^{k-1}\ln\Pi$:
+<div class="eqn"><div class="eqbody">$$\int_0^\infty \ln \Pi \;\Pi^{k-1}e^{-r\Pi}\,\mathrm{d}\Pi \;=\; \frac{\Gamma'(k)}{r^{k}} - \frac{\Gamma(k)\ln r}{r^{k}}.$$</div></div>
+Divide by $\Gamma(k)/r^k$:
+<div class="eqn" id="eq-gamma-elog"><div class="eqbody">$$\mathbb{E}[\ln \Pi] \;=\; \psi(k) - \ln r, \qquad \psi(k) \;=\; \frac{\Gamma'(k)}{\Gamma(k)}.$$</div><div class="eqno"><a href="#eq-gamma-elog" title="Link to equation 4.2.14">(4.2.14)</a></div></div>
+Here $\psi$ is the <strong>digamma function</strong>, unrelated to the score $\psi(d)$ of Week&nbsp;3, Lesson&nbsp;4. The entropy follows from $\ln \mathrm{Gamma}(\Pi; k, r) = k\ln r - \ln\Gamma(k) + (k - 1)\ln\Pi - r\Pi$ and $\mathbb{E}[\Pi] = k/r$:
+<div class="eqn" id="eq-gamma-entropy"><div class="eqbody">$$\mathrm{H}[\mathrm{Gamma}(k, r)] \;=\; -k\ln r + \ln\Gamma(k) - (k - 1)\big(\psi(k) - \ln r\big) + k
+\;=\; k - \ln r + \ln\Gamma(k) + (1 - k)\psi(k).$$</div><div class="eqno"><a href="#eq-gamma-entropy" title="Link to equation 4.2.15">(4.2.15)</a></div></div></p></div>
+<p>With these, each term of $\mathcal{F} = -\mathbb{E}_Q[\ln P(d)] - \mathbb{E}_Q[\ln P(\Pi_u)] - \mathbb{E}_Q[\ln P(u \mid d, \Pi_u)] - \mathrm{H}[q_d] - \mathrm{H}[q_\Pi]$ is in closed form. Write $\bar\Pi = k_q/r_q$ and $\overline{\ln\Pi} = \psi(k_q) - \ln r_q$:
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+\mathbb{E}_Q[\ln P(d)] &\;=\; -\tfrac12\ln(2\pi\Sigma_p) - \frac{\Sigma_d + (m_d - d_p)^2}{2\Sigma_p}, \\
+\mathbb{E}_Q[\ln P(\Pi_u)] &\;=\; k_0\ln r_0 - \ln\Gamma(k_0) + (k_0 - 1)\,\overline{\ln\Pi} - r_0\,\bar\Pi, \\
+\mathbb{E}_Q[\ln P(u \mid d, \Pi_u)] &\;=\; -\tfrac12\ln 2\pi + \tfrac12\,\overline{\ln\Pi} - \tfrac12\,\bar\Pi\,\big((u - m_d)^2 + \Sigma_d\big),
+\end{aligned}$$</div></div>
+with $\mathrm{H}[q_d] = \tfrac12\ln(2\pi e\Sigma_d)$, the Gaussian entropy of Lesson&nbsp;1, and $\mathrm{H}[q_\Pi]$ from <a class="eqref" href="#eq-gamma-entropy">(4.2.15)</a>. The third line uses the independence of $d$ and $\Pi_u$ under $Q$, so that $\mathbb{E}_Q[\Pi_u (u - d)^2] = \bar\Pi\,\mathbb{E}_{q_d}[(u - d)^2]$.</p>
+<p>Given $\Pi_u$, $u$ is Gaussian with mean $d_p$ and variance $\Sigma_p + 1/\Pi_u$, so $P(u)$ is a one-dimensional integral over $\Pi_u$. We evaluate it by Gauss&ndash;Legendre quadrature in $\ln\Pi_u$, with $\Pi_u$ between $10^{-6}$ and $10^{4}$. Doubling the number of nodes and widening the range to $\Pi_u$ between $10^{-8}$ and $10^{5}$ changes the result by less than $10^{-12}$; that is numerical convergence, not an error bound.</p>
+<p>Take $d_p = 2$, $\Sigma_p = 1$, $k_0 = 2$, $r_0 = 0.2$ (prior mean precision $10$) and $u = 0.5$, and start from $q_\Pi$ equal to the prior. Each sweep updates $q_d$ by <a class="eqref" href="#eq-ng-qd">(4.2.12)</a> and then $q_\Pi$ by <a class="eqref" href="#eq-ng-qpi">(4.2.13)</a>. The shape is $k_q = 2.5$ from the first sweep on, so only $m_d$, $\Sigma_d$ and $r_q$ change.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Sweep</th>
+<th style="text-align: right;">$m_d$</th>
+<th style="text-align: right;">$\Sigma_d$</th>
+<th style="text-align: right;">$\mathbb{E}_{q_\Pi}[\Pi_u]$</th>
+<th style="text-align: right;">$\mathcal{F}$ (nats)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$1$</td>
+<td style="text-align: right;">$0.636364$</td>
+<td style="text-align: right;">$0.090909$</td>
+<td style="text-align: right;">$9.813463$</td>
+<td style="text-align: right;">$2.10862449$</td>
+</tr>
+<tr>
+<td>$2$</td>
+<td style="text-align: right;">$0.638716$</td>
+<td style="text-align: right;">$0.092477$</td>
+<td style="text-align: right;">$9.770979$</td>
+<td style="text-align: right;">$2.10849830$</td>
+</tr>
+<tr>
+<td>$5$</td>
+<td style="text-align: right;">$0.639420$</td>
+<td style="text-align: right;">$0.092947$</td>
+<td style="text-align: right;">$9.758286$</td>
+<td style="text-align: right;">$2.10849116$</td>
+</tr>
+<tr>
+<td>limit</td>
+<td style="text-align: right;">$0.639430$</td>
+<td style="text-align: right;">$0.092953$</td>
+<td style="text-align: right;">$9.758123$</td>
+<td style="text-align: right;">$2.10849115$</td>
+</tr>
+</tbody>
+</table></div>
+<p>The limit row is where $r_q$ stops changing by more than $10^{-15}$, after $22$ sweeps; $\mathcal{F}$ falls at every sweep, as <a class="eqref" href="#eq-cavi-drop">(4.2.5)</a> requires. At the limit $r_q = 0.2562$ and $\mathbb{E}_{q_\Pi}[\ln \Pi_u] = 2.0650$, and $\mathcal{F}$ is $0.1423$ nats above the surprise $1.9662$. The observation $u = 0.5$ is far from the prior mean $d_p = 2$, so the residual is large, and the learned expected precision $9.76$ is below the prior mean $10$.</p>
+<h2 id="why-the-form-is-fixed"><span class="secno">5</span>Why the form is fixed</h2>
+<p>Change the observation in this model to <a href="../week-02/index.html">Week&nbsp;2</a>'s inverse-square link, $u \mid d \sim \mathcal{N}(\theta/d^2, \Sigma_u)$. Step 1 of the derivation above then gives a log density for $d$ containing $-d^2$, $+u\theta d^{-2}/\Sigma_u$ and $-\theta^2 d^{-4}/(2\Sigma_u)$, which is not the log of a Gaussian or of any other density whose normaliser the conjugate calculation provides. The free-form update still defines $\hat q_d$, and with one continuous unknown it could be computed by one-dimensional quadrature, as Week&nbsp;2 computed the exact posterior. So the obstacle is not computation.</p>
+<p>The obstacle is representation. <a href="../week-02/two-rules.html">Week&nbsp;2, Lesson&nbsp;1</a> required the agent's beliefs to be carried by a finite set of physical quantities that change by local rules. A Gaussian is carried by two numbers, a mean and a variance; the free-form $\hat q_d$ on a nonlinear model is a whole function, and each update produces a new function. Fixing the form of $Q$ keeps the belief to a few numbers, at the cost of a further approximation. Lesson&nbsp;3 fixes the form to a Gaussian, and Weeks 5 to 8 build the continuous theory on that choice.</p></article><nav class="pagenav"><a class="pv" href="../week-04/bounding-surprise.html"><span class="dir">Previous</span><span class="ttl">Bounding surprise</span></a><a class="nx" href="../week-04/laplace-approximation.html"><span class="dir">Next</span><span class="ttl">The Laplace approximation</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script>
+</body>
+</html>

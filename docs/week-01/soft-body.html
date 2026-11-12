@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -364,8 +367,9 @@ feedback alone does not establish that proposal.</p>
 <h2 id="a-feedback-model"><span class="secno">1</span>A feedback model</h2>
 <p>Call the set of physiological states compatible with survival the <strong>viable set</strong>.
 For a small example, take two regulated variables and measure each as a deviation
-from its target. Scale their units so that the viable set is the circle of radius
-one. This circular boundary is an assumption of the example, not a claim about the
+from its target. Scale their units so that the viable set is the closed disc of
+radius one, $\{x\in\mathbb R^2:\lVert x\rVert\le1\}$: the circle of radius one
+and everything inside it. This circular boundary is an assumption of the example, not a claim about the
 shape of a real organism's physiological limits.</p>
 <p>Write $x_t\in\mathbb R^2$ for the displacement at time step $t$, starting at
 $x_0=0$. The subscript labels time. At each step the controller removes a fraction
@@ -379,11 +383,11 @@ $\sigma$ sets the size of a disturbance in each coordinate, in the units of $x$.
 The <strong>feedback gain</strong> $\kappa$ is dimensionless. It is the fraction of the present
 displacement removed per step. A gain of $0.15$ removes fifteen per cent, leaving
 eighty-five per cent before the next disturbance arrives.</p>
-<p>For the survival simulation, stop the trajectory when $\lVert x_t\rVert>1$.
+<p>For the survival simulation, stop the trajectory when $\lVert x_t\rVert&gt;1$.
 This is an <strong>absorbing boundary</strong>: crossing ends the run, even if the recursion
 would subsequently return inside. We will also study the recursion without that
 boundary to understand its spread. These are two different processes.</p>
-<figure class="widget" id="fig-1-1-1"><div class="wmount" data-widget="homeostasis-drift"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.1.1.</span> Two regulated coordinates, measured relative to their targets. The solid circle is the absorbing boundary at radius one. The dashed circle shows the root-mean-square radius $\sqrt{2v}$ of the unabsorbed stationary process, with $v$ defined below; it is not a safety guarantee. The right panel records the entropy of the empirical visit histogram on a $26\times26$ grid. Its reference maximum is $\ln 676=6.516$ nats for uniform occupancy of the whole square grid. The absorbing circle prevents this run from exploring the whole square. A nat is an information unit based on natural logarithms, defined in the entropy section.</figcaption></figure>
+<figure class="widget" id="fig-1-1-1"><div class="wmount" data-widget="homeostasis-drift"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.1.1.</span> Two regulated coordinates, measured relative to their targets. The solid circle is the absorbing boundary at radius one. The dashed circle shows the root-mean-square radius $\sqrt{2v}$ of the unabsorbed stationary process, with $v$ defined below; it is not a safety guarantee. It is drawn only when $0&lt;\kappa&lt;2$, where that stationary process exists, so at the starting gain $\kappa=0$ there is no dashed circle. The right panel records the entropy of the empirical histogram of positions inside the disc, on a $26\times26$ grid. Its reference maximum is $\ln 676=6.516$ nats for uniform occupancy of the whole square grid. The absorbing circle prevents this run from exploring the whole square. A nat is an information unit based on natural logarithms, defined in the entropy section.</figcaption></figure>
 <h3 id="without-feedback">Without feedback</h3>
 <p>At $\kappa=0$, repeated substitution in <a class="eqref" href="#eq-homeostat">(1.1.1)</a> gives</p>
 <div class="eqn"><div class="eqbody">$$x_t=\sigma\sum_{j=0}^{t-1}\xi_j.$$</div></div>
@@ -395,7 +399,7 @@ to the squared boundary radius gives the rough timescale
 $t\approx1/(2\sigma^2)$. At $\sigma=0.035$, that is about
 408 steps. It is not an exact expected first-crossing time:
 a path can cross the boundary earlier and return before time $t$.</p>
-<p>The boundary is eventually crossed with probability one when $\sigma>0$.
+<p>The boundary is eventually crossed with probability one when $\sigma&gt;0$.
 One way to see this is to look at the unabsorbed position: it is Gaussian with
 covariance $t\sigma^2I_2$, so the probability of being inside the unit circle
 tends to zero. The event of never having left by time $t$ is contained in the
@@ -413,8 +417,8 @@ term when we take the variance of <a class="eqref" href="#eq-homeostat">(1.1.1)<
 <p>Expanding the square gives $1-(1-\kappa)^2=2\kappa-\kappa^2$, hence</p>
 <div class="eqn" id="eq-stationary-var"><div class="eqbody">$$v=\frac{\sigma^2}{\kappa(2-\kappa)}.$$</div><div class="eqno"><a href="#eq-stationary-var" title="Link to equation 1.1.3">(1.1.3)</a></div></div>
 <p>For this value to be attracting, the multiplier of $v_t$ must be below one:
-$(1-\kappa)^2<1$. Solving that inequality gives</p>
-<div class="eqn" id="eq-stability"><div class="eqbody">$$0<\kappa<2.$$</div><div class="eqno"><a href="#eq-stability" title="Link to equation 1.1.4">(1.1.4)</a></div></div>
+$(1-\kappa)^2&lt;1$. Solving that inequality gives</p>
+<div class="eqn" id="eq-stability"><div class="eqbody">$$0&lt;\kappa&lt;2.$$</div><div class="eqno"><a href="#eq-stability" title="Link to equation 1.1.4">(1.1.4)</a></div></div>
 <p>Under this condition, repeated substitution shows that the initial variance is
 multiplied by $(1-\kappa)^{2t}$ and tends to zero, while the accumulated noise
 variance is a convergent geometric sum. The stationary distribution is Gaussian,
@@ -422,7 +426,9 @@ with independent coordinates of variance $v$.</p></div>
 <p>At $\sigma=0.035$ and $\kappa=0.15$, the variance is
 $0.00441$ per coordinate, giving standard deviation
 $0.0664$. Since the mean is zero,
-$\mathbb E[\lVert x\rVert^2]=2v$, which explains the dashed circle in the widget.</p>
+$\mathbb E[\lVert x\rVert^2]=2v$, so the root-mean-square radius is
+$\sqrt{2v}=0.0940$. That is the radius of the dashed circle in the
+widget at these settings.</p>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -438,7 +444,7 @@ $\mathbb E[\lVert x\rVert^2]=2v$, which explains the dashed circle in the widget
 <td>No finite stationary variance</td>
 </tr>
 <tr>
-<td>$0<\kappa<1$</td>
+<td>$0&lt;\kappa&lt;1$</td>
 <td>Displacement decreases without changing sign</td>
 <td>$\sigma^2/[\kappa(2-\kappa)]$</td>
 </tr>
@@ -448,7 +454,7 @@ $\mathbb E[\lVert x\rVert^2]=2v$, which explains the dashed circle in the widget
 <td>$\sigma^2$</td>
 </tr>
 <tr>
-<td>$1<\kappa<2$</td>
+<td>$1&lt;\kappa&lt;2$</td>
 <td>Displacement decreases while alternating in sign</td>
 <td>$\sigma^2/[\kappa(2-\kappa)]$</td>
 </tr>
@@ -571,7 +577,7 @@ Lesson&nbsp;2 gives a small interactive calculation of this distinction.</p>
 <p>Active inference uses a quantity called variational free energy to construct
 inference and, with further assumptions, learning and action rules. For a fixed
 observation it bounds surprise from above; changing the approximate belief can
-reduce the gap without changing surprise itself. Week&nbsp;4 derives this bound.
+reduce the gap without changing surprise itself. <a href="../week-04/index.html">Week&nbsp;4</a> derives this bound.
 Planning also needs preferences over outcomes and predictions of the consequences
 of actions. These do not follow just from the existence of a stable feedback loop.</p>
 <p>The task for the course is to build these ingredients and show what follows from

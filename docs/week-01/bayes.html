@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -373,9 +376,11 @@ each column is a probability distribution over observations and sums to one.
 When an observation arrives you pick out the corresponding row and read it
 across the states. That row is not a distribution and there is no reason at all
 for it to sum to one. The axes determine which variable is fixed and which varies.</p>
-<aside class="mn"><span class="mnl">Rows and columns</span><p>From Week&nbsp;9 this matrix is written $\mathbf{A}$, with
-$A_{ij} = P(o = i \mid s = j)$, and the problems at the end of this week already
-use that name. Columns sum to one. The discrete chapters use the same convention.</p></aside>
+<p>Write this table as the matrix $\mathbf{A}$, with
+$A_{ij} = P(o = i \mid s = j)$: the row index $i$ is the observation and the
+column index $j$ is the state, so each column sums to one. The problems at the
+end of this week use that name, and the discrete models from Week&nbsp;9 use the
+same matrix with the same convention.</p>
 <p>The evidence averages the likelihood of the observation across the model's possible states, weighted by the prior. Direct enumeration visits each state, although a factorisation can let an algorithm reuse partial calculations.</p>
 <h2 id="a-discrete-worked-example"><span class="secno">2</span>A discrete worked example</h2>
 <p>You are on a mountain path at dusk. Three states of the world concern you:
@@ -517,7 +522,7 @@ In general $D_{\mathrm{KL}}[Q\|P]\ne D_{\mathrm{KL}}[P\|Q]$.</p>
 </tr>
 </tbody>
 </table></div>
-<p>summing to $0.940$ nats. Notice that the last term is <strong>negative</strong>:
+<p>summing to $0.940$ nats. Notice that the last term is negative:
 the observation pushed probability mass <em>off</em> the "nothing" hypothesis, and a
 state whose probability falls contributes negatively. Individual terms of a KL
 divergence carry either sign. Only the total is guaranteed non-negative, and that
@@ -525,7 +530,7 @@ guarantee is a theorem about the sum, not about its parts.</p>
 <p>For the shaking branch the same computation gives $0.524$ nats, and
 for quiet $0.225$. The observation that surprised you most also taught you most,
 which is intuitive and, as the exercises will show, not a theorem.</p>
-<figure class="widget" id="fig-1-3-1"><div class="wmount" data-widget="bayes-discrete"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.1.</span> The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the ambiguity slider and watch it stop responding to data at all.</figcaption></figure>
+<figure class="widget" id="fig-1-3-1"><div class="wmount" data-widget="bayes-discrete"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.3.1.</span> The same calculation, live. The middle bars are the likelihood row for whichever observation you select. Move the priors and watch the posterior swing; move the channel-noise slider and watch it stop responding to data at all.</figcaption></figure>
 <h2 id="varying-the-observation-channel"><span class="secno">3</span>Varying the observation channel</h2>
 <p>The figure's third slider is a dimensionless parameter $\alpha \in [0,1]$ that
 blends the likelihood towards a uniform one. Writing $U$ for the matrix every one
@@ -569,7 +574,7 @@ For other models an approximation can be preferable.</p>
 <p>Write $Q(s)$ for an <strong>approximate posterior</strong>, a probability distribution on the
 same states as $P(s\mid o)$. Choosing its representation and objective is part
 of designing an algorithm. <a href="../week-01/inverse-problem.html">Lesson&nbsp;4</a> shows what a factorised representation
-loses; Week&nbsp;4 develops the variational objective.</p>
+loses; <a href="../week-04/index.html">Week&nbsp;4</a> develops the variational objective.</p>
 <div class="box exercise"><div class="boxhd">Exercise 1.3.1<span class="bt">Bayes with a hostile prior</span></div><p>Using the same likelihood matrix, suppose you are a nervous hiker with prior
 $P(s) = (0.40,\ 0.30,\ 0.30)$. You observe <strong>quiet</strong>. Compute the evidence, the
 posterior, and the surprise, and compare the surprise with the $0.422$ nats

@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -386,7 +389,7 @@ your model has $n$ factors with $k$ values each, that turns $k^n$ into $nk$, and
 the problem evaporates.</p>
 <p>Independent prior factors need not remain independent after observing data. We can test that possibility with two competing causes.</p>
 <p>Take two independent causes. This is a new and smaller model than the three-
-state one of Lesson 3, chosen because two competing causes are the fewest that
+state one of <a href="../week-01/bayes.html">Lesson&nbsp;3</a>, chosen because two competing causes are the fewest that
 can compete: a <strong>gust</strong> of wind, and a <strong>baboon</strong>. Either can
 make a branch shake. Each is uncommon on its own:</p>
 <div class="eqn"><div class="eqbody">$$P(s_{\text{gust}} = 1) = P(s_{\text{bab}} = 1) = 0.1,$$</div></div>
@@ -395,7 +398,7 @@ We can construct the likelihood from independent attempts to produce the observa
 <p>Suppose each cause, when present, makes its own independent attempt to shake the
 branch, and succeeds with probability $w$. Suppose also the branch sometimes
 shakes for no reason at all, with probability $\lambda$; treat that as a third,
-always-present cause. Then the branch fails to shake only if <strong>every</strong> attempt
+always-present cause. Then the branch fails to shake only if every attempt
 fails, and those failures are independent, so their probabilities multiply:</p>
 <div class="eqn" id="eq-noisy-and"><div class="eqbody">$$P(o = 0 \mid s) \;=\; (1 - w\,s_{\text{gust}})(1 - w\,s_{\text{bab}})(1 - \lambda).$$</div><div class="eqno"><a href="#eq-noisy-and" title="Link to equation 1.4.1">(1.4.1)</a></div></div>
 <p>A cause that is absent has $s = 0$ and contributes a factor of $1$, which is
@@ -500,7 +503,7 @@ a tour of them.</p>
 <p><strong>Solve it exactly, where the model lets you.</strong> Some pairings of prior and
 likelihood have posteriors in closed form. If the likelihood is Gaussian with
 known variance and the prior over the mean is Gaussian, the posterior is
-Gaussian and you can write down its parameters in two lines. This is <strong>conjugacy</strong>: a prior family and a likelihood family are conjugate when the posterior always lands back in the prior's family, so updating changes the parameters and never the form. That is stronger than merely having a closed form, and it is what lets the update be applied over and over without the expression growing. It is the backbone of Week&nbsp;2, and remains useful for models whose assumptions match the task.</p>
+Gaussian and you can write down its parameters in two lines. This is <strong>conjugacy</strong>: a prior family and a likelihood family are conjugate when the posterior always lands back in the prior's family, so updating changes the parameters and never the form. That is stronger than merely having a closed form, and it is what lets the update be applied over and over without the expression growing. It is the backbone of <a href="../week-02/index.html">Week&nbsp;2</a>, and remains useful for models whose assumptions match the task.</p>
 <p><strong>Sample from it.</strong> Do not compute $P(s\mid o)$; draw from it. Markov chain
 Monte Carlo needs only ratios of posterior values, and the intractable $P(o)$
 cancels in every ratio. Finite sampling has error, and an MCMC chain can mix slowly or fail to explore
@@ -511,7 +514,7 @@ Sampling methods and optimisation methods can both provide evolving estimates.</
 of distributions $Q(s)$ you can compute with, define a measure of how far $Q$ is
 from the true posterior, and descend it. Because the measure can be arranged so
 that the intractable term drops out, you can minimise a distance to something
-you cannot evaluate. That trick is variational inference, and the quantity you descend is the <strong>free energy</strong>. Week&nbsp;4 builds it, but the shape is already visible from <a class="eqref" href="#eq-two-kls">(1.4.4)</a>: it is the reverse divergence minus $\ln P(o)$, which makes it computable from $Q$ and the generative model alone, and an upper bound on the surprise. It occupies Week&nbsp;4 and everything after.</p>
+you cannot evaluate. That trick is variational inference, and the quantity you descend is the <strong>free energy</strong>. <a href="../week-04/index.html">Week&nbsp;4</a> builds it, but its shape can be stated now. It is the divergence $\sum_s Q(s)\ln[Q(s)/P(s\mid o)]$, the expected log ratio of the approximation to the true posterior under the approximation, minus $\ln P(o)$. That makes it computable from $Q$ and the generative model alone, and an upper bound on the surprise. It occupies Week&nbsp;4 and everything after.</p>
 <p>A variational distribution gives a current approximation during optimisation.
 That approximation may be useful before convergence, but convergence and accuracy
 are separate: even an optimised member of a restricted family can be far from
@@ -524,29 +527,29 @@ or $Q(s_1, s_2) = Q(s_1)Q(s_2)$ once we stop naming them. Look back at
 <a class="eqref" href="#eq-explaining-away">(1.4.3)</a>. That family cannot represent the true posterior, because
 the true posterior is correlated and no product of marginals is.</p></div>
 <h2 id="comparing-factorised-approximations"><span class="secno">4</span>Comparing factorised approximations</h2>
-<p>That question hides a choice, and the choice decides the answer. Make it explicit now, because Week&nbsp;4 rests on it.</p>
+<p>Measuring how far a factorised $Q$ is from the true posterior needs a measure of distance between distributions, and the choice of measure decides the answer. Make it explicit now, because Week&nbsp;4 rests on it.</p>
 <p>The Kullback&ndash;Leibler divergence is not symmetric, so there are two ways to
-ask how far a factorised $Q$ sits from the true posterior $P$:</p>
-<div class="eqn" id="eq-two-kls"><div class="eqbody">$$D_{\mathrm{KL}}\big[P \,\|\, Q\big] = \sum_{s} P(s)\ln\frac{P(s)}{Q(s)},
+ask how far a factorised $Q$ sits from the true posterior $P(s\mid o)$:</p>
+<div class="eqn" id="eq-two-kls"><div class="eqbody">$$D_{\mathrm{KL}}\big[P \,\|\, Q\big] = \sum_{s} P(s\mid o)\ln\frac{P(s\mid o)}{Q(s)},
 \qquad
-D_{\mathrm{KL}}\big[Q \,\|\, P\big] = \sum_{s} Q(s)\ln\frac{Q(s)}{P(s)},$$</div><div class="eqno"><a href="#eq-two-kls" title="Link to equation 1.4.4">(1.4.4)</a></div></div>
-<p>with $s$ running over the four joint states of the table. Call the first the
+D_{\mathrm{KL}}\big[Q \,\|\, P\big] = \sum_{s} Q(s)\ln\frac{Q(s)}{P(s\mid o)},$$</div><div class="eqno"><a href="#eq-two-kls" title="Link to equation 1.4.4">(1.4.4)</a></div></div>
+<p>with $s$ running over the four joint states of the table and $o$ the observed shake. Inside the brackets, $P$ abbreviates the posterior $P(\cdot\mid o)$, not the prior. Call the first the
 <strong>forward</strong> direction and the second the <strong>reverse</strong>. They disagree, and not by a
 little.</p>
 <div class="box derivation"><div class="boxhd">Derivation<span class="bt">The forward direction matches the marginals</span></div><p>Minimise the left of <a class="eqref" href="#eq-two-kls">(1.4.4)</a> over products, writing $q_1$ and $q_2$ for the
 two factors so that $Q(s) = q_1(s_{\text{gust}})\,q_2(s_{\text{bab}})$. Split the
 logarithm:</p>
 <div class="eqn"><div class="eqbody">$$D_{\mathrm{KL}}[P \,\|\, Q]
-= \underbrace{\sum_s P(s)\ln P(s)}_{\text{minus the entropy of } P,\ \text{no } Q \text{ in it}}
-\; -\; \sum_{s} P(s)\big[\ln q_1(s_{\text{gust}}) + \ln q_2(s_{\text{bab}})\big].$$</div></div>
+= \underbrace{\sum_s P(s\mid o)\ln P(s\mid o)}_{\text{minus the entropy of } P,\ \text{no } Q \text{ in it}}
+\; -\; \sum_{s} P(s\mid o)\big[\ln q_1(s_{\text{gust}}) + \ln q_2(s_{\text{bab}})\big].$$</div></div>
 <p>Only the second term can be optimised. In it, sum out the variable that does not
 appear:</p>
-<div class="eqn"><div class="eqbody">$$\sum_{s} P(s)\,\ln q_1(s_{\text{gust}})
+<div class="eqn"><div class="eqbody">$$\sum_{s} P(s\mid o)\,\ln q_1(s_{\text{gust}})
 \;=\; \sum_{s_{\text{gust}}} P_1(s_{\text{gust}})\,\ln q_1(s_{\text{gust}}),$$</div></div>
-<p>where $P_1$ is the true marginal of the first cause, and likewise for the second.
+<p>where $P_1$ is the true posterior marginal of the first cause, and likewise for the second.
 The problem has separated into two independent ones, each of the form "choose a
 distribution $q$ maximising $\sum_x p(x)\ln q(x)$". By <strong>Gibbs' inequality</strong>, which says that for any two distributions on the same set $\sum_x p(x)\ln q(x) \le \sum_x p(x)\ln p(x)$, with equality only when $q = p$, that is solved by $q = p$. (The inequality is itself just the non-negativity of $D_{\mathrm{KL}}[p\,\|\,q]$, rearranged.)</p>
-<p>So the forward-optimal $Q$ has <strong>exactly the true marginals</strong>, here
+<p>So the forward-optimal $Q$ has exactly the true marginals, here
 $0.5050 $ for each cause, and leaves a gap of
 $0.3687$ nats. This is a lemma, not an accident of these
 numbers: forward KL over a product family always returns the marginals.</p></div>
@@ -558,7 +561,8 @@ estimates of their gradients.</p>
 <div class="box derivation"><div class="boxhd">Derivation<span class="bt">The reverse direction picks a side</span></div><p>Write $x=s_{\mathrm{gust}}$, $y=s_{\mathrm{bab}}$ temporarily, and hold $q_2$
 fixed. The part of the reverse KL that depends on $q_1$ is</p>
 <div class="eqn"><div class="eqbody">$$J(q_1)=\sum_x q_1(x)\ln q_1(x)
--\sum_xq_1(x)\sum_yq_2(y)\ln P(x,y)+\text{const}.$$</div></div>
+-\sum_xq_1(x)\sum_yq_2(y)\ln P(x,y)+\text{const},$$</div></div>
+<p>where $P(x,y)$ is the posterior table entry $P(s_{\mathrm{gust}}=x,s_{\mathrm{bab}}=y\mid o)$.</p>
 <p>The $q_2\ln q_2$ term is constant because $\sum_xq_1(x)=1$. Define
 $B(x)=\sum_yq_2(y)\ln P(x,y)$, an expected log probability. Add a Lagrange
 multiplier $c$ for the constraint $\sum_xq_1(x)=1$. Differentiating with respect
@@ -570,7 +574,7 @@ constant:</p>
 <p>Returning to the original labels,</p>
 <div class="eqn" id="eq-cavi"><div class="eqbody">$$\ln q_1(s_{\mathrm{gust}})
 =\mathbb E_{q_2}[\ln P(s_{\mathrm{gust}},s_{\mathrm{bab}})]+\text{const}.$$</div><div class="eqno"><a href="#eq-cavi" title="Link to equation 1.4.5">(1.4.5)</a></div></div>
-<p>The entropy term has second derivative $1/q_1(x)>0$ in each positive entry;
+<p>The entropy term has second derivative $1/q_1(x)&gt;0$ in each positive entry;
 the remaining term is linear. This is the minimiser for one factor with the
 other held fixed. Alternating the two updates is coordinate descent on reverse
 KL, equivalently <strong>coordinate ascent</strong> on the negative free energy. It need not
@@ -593,7 +597,16 @@ interchangeably and the answer has stopped treating them that way.</p></div>
 <p>For comparison, score the product of the true posterior marginals, both
 marginals at $0.5050$, under the reverse divergence and you get
 $0.5130$ nats, higher than the asymmetric
-$0.4989$. This compares two particular products; it does not establish that every symmetric product is worse.</p>
+$0.4989$. This compares two particular products; it does not establish that every symmetric product is worse. The next derivation establishes that.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Every symmetric product is worse</span></div><p>A symmetric product gives both causes the same factor, $q_1(1)=q_2(1)=q$. Write $P_{ab}$ for the posterior entry with $s_{\mathrm{gust}}=a$ and $s_{\mathrm{bab}}=b$, and $J(q)$ for the reverse divergence of $Q=q_1q_2$ from $P$. The four entries of $Q$ are $(1-q)^2$, $q(1-q)$, $q(1-q)$ and $q^2$, so</p>
+<div class="eqn"><div class="eqbody">$$J(q)=\sum_{a,b}Q_{ab}\ln Q_{ab}-\sum_{a,b}Q_{ab}\ln P_{ab}.$$</div></div>
+<p>The first sum is minus the entropy of a product, which is the sum of the two factors' terms:</p>
+<div class="eqn"><div class="eqbody">$$\sum_{a,b}Q_{ab}\ln Q_{ab}=2\big[q\ln q+(1-q)\ln(1-q)\big].$$</div></div>
+<p>The second sum is a quadratic in $q$:</p>
+<div class="eqn"><div class="eqbody">$$\sum_{a,b}Q_{ab}\ln P_{ab}=(1-q)^2\ln P_{00}+q(1-q)\big(\ln P_{01}+\ln P_{10}\big)+q^2\ln P_{11}.$$</div></div>
+<p>Differentiate twice. The first sum gives $2[1/q+1/(1-q)]=2/[q(1-q)]$. In the second, $(1-q)^2$, $q(1-q)$ and $q^2$ have second derivatives $2$, $-2$ and $2$, so</p>
+<div class="eqn" id="eq-diag-curvature"><div class="eqbody">$$J''(q)=\frac{2}{q(1-q)}-2\ln\frac{P_{00}P_{11}}{P_{01}P_{10}}.$$</div><div class="eqno"><a href="#eq-diag-curvature" title="Link to equation 1.4.6">(1.4.6)</a></div></div>
+<p>From the table, $\ln[P_{00}P_{11}/(P_{01}P_{10})]=-4.4066$, which is negative because the posterior puts little mass on the two corners. The first term is at least $8$, its value at $q=1/2$, so $J''(q)\ge 16.8132&gt;0$ for every $q$ in $(0,1)$. A function with positive second derivative on an interval has at most one stationary point there, and that point is its minimum. Solving $J'(q)=0$ numerically puts it at $q=0.5119$, where $J=0.5126$ nats. That is the smallest reverse divergence any symmetric product can reach, and it exceeds the asymmetric $0.4989$. The symmetric product of the true marginals scored above is one point on this curve, at $q=0.5050$.</p></div>
 <p>The reason is visible in the table. The true posterior puts its mass on the two
 states where exactly one cause fired, and almost none on $(1,1)$ or $(0,0)$. A
 product cannot do that. If $q_1$ and $q_2$ both sit near a half so as to cover
@@ -653,16 +666,16 @@ be valid.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 1.4.2<span class="bt">Counting the cost</span></div><p>An agent tracks $n = 15$ binary state factors. Give the number of terms in the
 evidence sum, and state how many factors could be added before the sum exceeds
 the number of nanoseconds since the Big Bang, roughly $4.4 \times 10^{26}$.</p><details><summary>Solution</summary><p>With $k = 2$ and $n = 15$ the sum has $2^{15} = 32,768$ terms, before counting the cost of evaluating each term.</p>
-<p>For the second part, $2^n > 4.4\times10^{26}$ requires
-$n > \log_2(4.4\times10^{26}) = 88.51$, so
+<p>For the second part, $2^n &gt; 4.4 \times 10^{26}$ requires
+$n &gt; \log_2(4.4 \times 10^{26}) = 88.51$, so
 $n = 89$ factors. Working in base ten instead,
-$\log_{10}(4.4\times10^{26}) = 26.643$, and dividing by
+$\log_{10}(4.4 \times 10^{26}) = 26.643$, and dividing by
 $\log_{10}2$ gives the same answer. Keep the third decimal: rounding that to
 $26.6$ before dividing costs you more than a tenth of a factor. Adding 74 binary variables exceeds this illustrative enumeration budget. A structured model may still admit a much cheaper exact algorithm; Lesson&nbsp;5 provides one.</p></details></div>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
 <li>Name the three separate ways in which model inversion is harder than model evaluation.</li>
 <li>Two causes have independent priors. After a shared observation, are they independent? Under what condition on the likelihood would they remain so?</li>
-<li>Which of the three solution families does not require evaluating $P(o)$, and why?</li>
+<li>Which of the three solution families avoid evaluating $P(o)$, and how does each one avoid it?</li>
 <li>What property of the true posterior can a factorised $Q$ never represent?</li>
 </ul></div></article><nav class="pagenav"><a class="pv" href="../week-01/bayes.html"><span class="dir">Previous</span><span class="ttl">Bayes with states and observations</span></a><a class="nx" href="../week-01/the-denominator.html"><span class="dir">Next</span><span class="ttl">Computing the marginal likelihood</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>

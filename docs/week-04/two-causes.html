@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A mean-field learning failure · Active Inference</title><meta name="description" content="Variational EM with three mean-field families on a two-cause model, compared with exact EM computed by numerical integration, with each source of error in the learned prior rates derived and then measured."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+:root{
+  --paper:#fdfcf9; --card:#ffffff;
+  --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
+  --rule:#e4e1d9; --rule2:#d3cfc4;
+  --accent:#0f5f57; --accent2:#14837a; --accent-tint:#e9f2f0; --accent-deep:#0a423d;
+  --clay:#9c4d2f; --clay-tint:#f9efe9;
+  --gold:#8a6d1f; --gold-tint:#faf5e6;
+  --tint:#f4f2ec; --code-bg:#f5f4f0;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SF Mono',Menlo,Consolas,monospace;
+  --measure:44rem; --margincol:13rem; --gap:2.5rem; --shell:80rem;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);
+     font-variant-numeric:oldstyle-nums proportional-nums;line-height:1.6}
+::selection{background:var(--accent);color:#fff}
+img,svg,canvas{max-width:100%}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2)}
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.topbar{position:sticky;top:0;z-index:60;background:var(--accent-deep);
+        border-bottom:2px solid var(--accent);}
+.topbar .tin{max-width:var(--shell);margin:0 auto;padding:0 2rem;height:3rem;
+             display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.topbar a.home{font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.13em;
+               text-transform:uppercase;color:rgba(255,255,255,.82)}
+.topbar a.home:hover{color:#fff}
+.topbar .tcode{font-family:var(--sans);font-size:.7rem;font-weight:500;letter-spacing:.2em;
+               text-transform:uppercase;color:rgba(255,255,255,.42)}
+.tocbtn{display:none;font-family:var(--sans);font-size:.75rem;letter-spacing:.1em;
+        text-transform:uppercase;color:rgba(255,255,255,.82);background:none;border:0;cursor:pointer}
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:14rem minmax(0,1fr);gap:0 var(--gap);
+       max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.maincol{min-width:0;max-width:calc(var(--measure) + var(--margincol) + var(--gap))}
+
+/* ── side nav ────────────────────────────────────────────────────────── */
+.sidenav{position:sticky;top:3rem;align-self:start;max-height:calc(100vh - 3rem);
+         overflow-y:auto;padding:2.6rem 0 3rem;scrollbar-width:thin}
+.sidenav::-webkit-scrollbar{width:0}
+.sidenav .part{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--faint);margin:1.6rem 0 .55rem}
+.sidenav .part:first-child{margin-top:0}
+.sidenav a.wk{display:block;font-family:var(--sans);font-size:.83rem;line-height:1.35;
+              color:var(--ink2);padding:.34rem 0 .34rem .8rem;border-left:2px solid var(--rule)}
+.sidenav a.wk:hover{color:var(--accent);border-left-color:var(--rule2)}
+.sidenav a.wk.cur{color:var(--accent);font-weight:500;border-left-color:var(--accent)}
+.sidenav a.wk .n{color:var(--faint);font-variant-numeric:tabular-nums;margin-right:.45rem}
+.sidenav a.wk.cur .n{color:var(--accent2)}
+.sidenav .lessons{margin:.15rem 0 .5rem .8rem;border-left:1px solid var(--rule)}
+.sidenav .lessons a{display:block;font-family:var(--sans);font-size:.76rem;line-height:1.35;
+                    color:var(--muted);padding:.28rem 0 .28rem .75rem;border-left:2px solid transparent;margin-left:-1px}
+.sidenav .lessons a:hover{color:var(--accent)}
+.sidenav .lessons a.cur{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.sidenav .navhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.16em;
+                text-transform:uppercase;color:var(--accent);padding-bottom:.6rem;
+                margin-bottom:1rem;border-bottom:1px solid var(--rule)}
+
+/* ── article head ────────────────────────────────────────────────────── */
+.ahead{padding:3.2rem 0 1.7rem;border-bottom:1px solid var(--rule);max-width:var(--measure)}
+.ahead .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.2em;
+                text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.ahead h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.2vw,2.9rem);
+          line-height:1.08;letter-spacing:-.015em;color:var(--ink);margin-bottom:.85rem;
+          font-variant-numeric:lining-nums}
+.ahead .deck{font-family:var(--serif);font-style:italic;font-size:1.18rem;line-height:1.5;
+             color:var(--muted)}
+.ahead .meta{font-family:var(--sans);font-size:.74rem;letter-spacing:.06em;color:var(--faint);
+             margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap}
+
+/* ── body ────────────────────────────────────────────────────────────── */
+.abody{padding:2rem 0 1rem;font-size:1.115rem;max-width:var(--measure)}
+.abody > *{max-width:var(--measure)}
+.abody p{margin:0 0 1.15rem;color:var(--ink);text-wrap:pretty}
+.abody p.lede{font-size:1.24rem;line-height:1.55;color:var(--ink2)}
+.abody strong{font-weight:600}
+.abody em{font-style:italic}
+.abody a{border-bottom:1px solid var(--rule2)}
+.abody a:hover{border-bottom-color:var(--accent2)}
+.abody h2{font-family:var(--serif);font-weight:500;font-size:1.72rem;line-height:1.16;
+          color:var(--ink);letter-spacing:-.01em;margin:2.9rem 0 .9rem;padding-top:1.6rem;
+          border-top:1px solid var(--rule);scroll-margin-top:4rem}
+.abody h2 .secno{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.6rem;font-weight:400}
+.abody h3{font-family:var(--serif);font-weight:600;font-size:1.24rem;color:var(--ink);
+          margin:2rem 0 .6rem;scroll-margin-top:4rem}
+.abody h4{font-family:var(--sans);font-weight:600;font-size:.78rem;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--accent);margin:1.6rem 0 .5rem}
+.abody ul,.abody ol{margin:0 0 1.25rem;padding-left:1.5rem}
+.abody li{margin-bottom:.45rem;color:var(--ink)}
+.abody ul>li::marker{color:var(--accent)}
+.abody ol>li::marker{color:var(--accent);font-family:var(--sans);font-size:.9em}
+.abody li>ul,.abody li>ol{margin:.45rem 0 .2rem}
+.abody blockquote{border-left:2px solid var(--accent);padding:.15rem 0 .15rem 1.3rem;
+                  margin:1.6rem 0;color:var(--ink2);font-style:italic}
+.abody blockquote p:last-child{margin-bottom:0}
+.abody hr{border:0;border-top:1px solid var(--rule);margin:2.4rem 0}
+
+/* ── code ────────────────────────────────────────────────────────────── */
+.abody code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);
+            padding:.1em .35em;border-radius:2px;border:1px solid var(--rule)}
+.abody pre{background:var(--code-bg);border:1px solid var(--rule);border-left:2px solid var(--accent);
+           padding:1rem 1.15rem;overflow-x:auto;margin:1.5rem 0;line-height:1.55}
+.abody pre code{background:none;border:0;padding:0;font-size:.83rem;color:var(--ink2)}
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.abody .tablewrap{overflow-x:auto;margin:1.7rem 0;
+           width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+.abody table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.86rem}
+.abody th{text-align:left;font-weight:600;color:var(--accent);border-bottom:1.5px solid var(--accent);
+          padding:.5rem .7rem;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;
+          vertical-align:bottom}
+.abody td{padding:.55rem .7rem;border-bottom:1px solid var(--rule);color:var(--ink2);vertical-align:top}
+.abody tbody tr:hover td{background:var(--tint)}
+
+/* ── maths ───────────────────────────────────────────────────────────── */
+.katex{font-size:1.045em}
+.katex-display{margin:0;padding:.15rem 0;overflow-x:auto;overflow-y:hidden}
+.eqn{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;max-width:var(--measure);
+     scroll-margin-top:4.5rem}
+.eqn > .eqbody{flex:1;min-width:0}
+.eqn > .eqno{flex:0 0 auto;font-family:var(--sans);font-size:.8rem;color:var(--faint);
+             font-variant-numeric:tabular-nums}
+.eqn > .eqno a{color:var(--faint);border:0}
+.eqn > .eqno a:hover{color:var(--accent)}
+.eqn:target{background:var(--gold-tint);box-shadow:0 0 0 .7rem var(--gold-tint);border-radius:2px}
+.eqn:target > .eqno a{color:var(--gold)}
+a.eqref{font-variant-numeric:tabular-nums;white-space:nowrap;border-bottom:1px solid var(--rule2)}
+
+/* ── margin notes ────────────────────────────────────────────────────── */
+.mn{float:right;clear:right;width:var(--margincol);
+    margin:.3rem calc(-1 * (var(--margincol) + var(--gap))) 1.1rem var(--gap);
+    font-family:var(--sans);font-size:.775rem;line-height:1.5;color:var(--muted)}
+.mn .mnl{display:block;font-weight:600;font-size:.66rem;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.mn p{margin:0 0 .5rem;font-size:inherit;line-height:inherit;color:inherit}
+.mn p:last-child{margin-bottom:0}
+.mn code{font-size:.85em}
+.mn a{border-bottom:1px solid var(--rule2)}
+
+/* ── boxes ───────────────────────────────────────────────────────────── */
+.box{margin:1.9rem 0;padding:1.15rem 1.35rem;border:1px solid var(--rule);
+     background:var(--card);max-width:var(--measure)}
+.box > :last-child{margin-bottom:0}
+.box .boxhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.15em;
+            text-transform:uppercase;margin-bottom:.6rem;display:flex;gap:.5rem;align-items:baseline}
+.box .boxhd .bt{color:var(--ink2);font-weight:500;letter-spacing:.02em;text-transform:none;
+                font-size:.95rem;font-family:var(--serif);font-style:italic}
+.box p,.box li{font-size:1.03rem}
+
+.box.definition,.box.theorem,.box.proposition,.box.lemma{
+  border-left:2px solid var(--accent);background:var(--card)}
+.box.definition .boxhd,.box.theorem .boxhd,.box.proposition .boxhd,.box.lemma .boxhd{color:var(--accent)}
+
+.box.keyidea{border:0;border-left:2px solid var(--accent);background:var(--accent-tint);
+             padding:1.2rem 1.4rem}
+.box.keyidea .boxhd{color:var(--accent)}
+
+.box.remark,.box.aside{border-left:2px solid var(--rule2);background:var(--tint)}
+.box.remark .boxhd,.box.aside .boxhd{color:var(--muted)}
+
+.box.warning{border-left:2px solid var(--clay);background:var(--clay-tint)}
+.box.warning .boxhd{color:var(--clay)}
+
+.box.derivation{border:1px solid var(--rule);border-left:2px solid var(--gold);background:#fdfcf7;
+                padding:1.25rem 1.45rem}
+.box.derivation .boxhd{color:var(--gold)}
+.box.derivation .eqn{margin:1rem 0}
+.box.derivation p{color:var(--ink2)}
+
+.box.exercise{border-left:2px solid var(--clay)}
+.box.exercise .boxhd{color:var(--clay)}
+.box.exercise details{margin-top:.9rem;border-top:1px solid var(--rule);padding-top:.7rem}
+.box.exercise summary{font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.11em;
+                      text-transform:uppercase;color:var(--clay);cursor:pointer;list-style:none}
+.box.exercise summary::-webkit-details-marker{display:none}
+.box.exercise summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+.box.exercise details[open] summary::before{content:'▾ '}
+.box.exercise details > :nth-child(2){margin-top:.8rem}
+
+.box.checkpoint{border-left:2px solid var(--accent2);background:var(--accent-tint)}
+.box.checkpoint .boxhd{color:var(--accent)}
+.box.checkpoint ul{margin-bottom:0}
+
+/* ── figures & widgets ───────────────────────────────────────────────── */
+.abody figure{margin:2.2rem 0;width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+figure{margin:2.2rem 0}
+figure figcaption{font-family:var(--sans);font-size:.79rem;line-height:1.5;color:var(--muted);
+                  margin-top:.7rem;max-width:var(--measure)}
+figure figcaption .fno{font-weight:600;color:var(--accent);letter-spacing:.03em}
+figure.widget .wmount{border:1px solid var(--rule2);background:var(--card);padding:1rem}
+figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:var(--muted);
+                                 padding:2rem 1rem;text-align:center}
+
+/* widget internals (used by aif-widgets.js) */
+.wpanel{display:grid;gap:1rem}
+.wrow{display:flex;flex-wrap:wrap;gap:1.1rem 1.6rem;align-items:flex-start}
+.wctl{font-family:var(--sans);font-size:.78rem;color:var(--ink2);display:flex;
+      flex-direction:column;gap:.28rem;min-width:11rem;flex:1 1 11rem}
+.wctl .wlab{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline}
+.wctl .wlab b{font-weight:500;color:var(--ink2)}
+.wctl .wlab .wval{font-family:var(--mono);font-size:.76rem;color:var(--accent);
+                  font-variant-numeric:tabular-nums}
+.wctl input[type=range]{width:100%;accent-color:var(--accent);height:1.1rem;cursor:pointer}
+.wbtn{font-family:var(--sans);font-size:.76rem;font-weight:500;letter-spacing:.04em;
+      background:var(--accent);color:#fff;border:0;padding:.42rem .9rem;cursor:pointer;
+      border-radius:2px}
+.wbtn:hover{background:var(--accent2)}
+.wbtn.ghost{background:transparent;color:var(--accent);border:1px solid var(--rule2)}
+.wbtn.ghost:hover{background:var(--accent-tint)}
+.wbtns{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.wnote{font-family:var(--sans);font-size:.78rem;line-height:1.5;color:var(--muted);
+       border-top:1px solid var(--rule);padding-top:.7rem}
+.wnote b{color:var(--accent);font-weight:600}
+.wreadout{font-family:var(--mono);font-size:.78rem;color:var(--ink2);display:flex;
+          flex-wrap:wrap;gap:.4rem 1.3rem;font-variant-numeric:tabular-nums}
+.wreadout span b{color:var(--faint);font-weight:500}
+.wtabs{display:flex;gap:.3rem;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.wtab{font-family:var(--sans);font-size:.75rem;padding:.34rem .75rem;cursor:pointer;
+      color:var(--muted);border:1px solid transparent;border-bottom:0;background:none}
+.wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
+canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
+
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
+
+/* ── footer nav ──────────────────────────────────────────────────────── */
+.pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
+         border-top:1px solid var(--rule);margin-top:3.5rem;padding:1.7rem 0 0;
+         max-width:var(--measure)}
+.pagenav a{display:flex;flex-direction:column;gap:.22rem;max-width:20rem;border:0}
+.pagenav a.nx{text-align:right;margin-left:auto}
+.pagenav .dir{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.16em;
+              text-transform:uppercase;color:var(--accent)}
+.pagenav .ttl{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);line-height:1.3}
+.pagenav a:hover .ttl{color:var(--accent)}
+.sitefoot{border-top:1px solid var(--rule);margin-top:3rem;padding:1.6rem 0 3.5rem;
+          font-family:var(--sans);font-size:.76rem;line-height:1.65;color:var(--faint);
+          max-width:var(--measure)}
+.sitefoot a{color:var(--muted);border-bottom:1px solid var(--rule)}
+.sitefoot a:hover{color:var(--accent)}
+.sitefoot p{margin-bottom:.4rem}
+
+/* ── landing page ────────────────────────────────────────────────────── */
+.cover{background:var(--accent-deep);color:#fff;padding:4.5rem 0 3.6rem;margin-bottom:0}
+.cover .cin{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.cover .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.22em;
+                text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1.3rem}
+.cover h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,6vw,4.2rem);
+          line-height:1.04;letter-spacing:-.02em;max-width:24ch;margin-bottom:1.2rem}
+.cover .sub{font-family:var(--serif);font-style:italic;font-size:1.25rem;line-height:1.5;
+            color:rgba(255,255,255,.72);max-width:44rem}
+.cover .rule{width:3rem;height:2px;background:var(--accent2);margin:0 0 1.2rem}
+.wide{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.weeklist{border-top:1px solid var(--rule)}
+.landing .abody>*{max-width:none}
+.landing .abody .introcopy{max-width:44rem}
+.weekrow{display:flex;gap:2.2rem;padding:1.7rem 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.weekrow .wn{flex:0 0 3.4rem;text-align:right}
+.weekrow .wn .l{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.18em;
+                text-transform:uppercase;color:var(--faint)}
+.weekrow .wn .n{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--accent);
+                line-height:1;font-variant-numeric:lining-nums}
+.weekrow .wc{flex:1 1 20rem;min-width:0}
+.weekrow .wc h3{font-family:var(--serif);font-weight:500;font-size:1.28rem;margin-bottom:.3rem}
+.weekrow .wc h3 a{color:var(--ink);border:0}
+.weekrow .wc h3 a:hover{color:var(--accent)}
+.weekrow .wc p{font-family:var(--sans);font-size:.86rem;line-height:1.6;color:var(--muted);
+               margin-bottom:.55rem;max-width:46rem}
+.weekrow .wc ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+.weekrow .wc ul li{font-family:var(--sans);font-size:.79rem;margin:0}
+.weekrow .wc ul li a{color:var(--ink2);border-bottom:1px solid var(--rule)}
+.weekrow .wc ul li a:hover{color:var(--accent);border-bottom-color:var(--accent2)}
+.partband{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.2em;
+          text-transform:uppercase;color:var(--accent);padding:2.2rem 0 .5rem}
+.partband span{color:var(--faint);font-weight:400;letter-spacing:.04em;text-transform:none;
+               font-family:var(--serif);font-style:italic;font-size:1rem;margin-left:.8rem}
+
+/* ── responsive ──────────────────────────────────────────────────────── */
+@media (max-width:1280px){
+  .shell{grid-template-columns:13rem minmax(0,1fr);gap:0 2rem;padding:0 1.6rem}
+  .maincol{max-width:var(--measure)}
+  .mn{float:none;clear:both;width:auto;margin:1rem 0 1.3rem;padding-left:1rem;
+      border-left:2px solid var(--rule2)}
+  .abody .tablewrap,.abody figure{width:auto;max-width:100%}
+  .cover .cin,.wide{padding:0 1.6rem}
+}
+@media (max-width:860px){
+  html{font-size:97%}
+  .shell{grid-template-columns:minmax(0,1fr);padding:0 1.3rem}
+  .sidenav{position:static;max-height:none;padding:1rem 0 0;display:none;
+           border-bottom:1px solid var(--rule);margin-bottom:1rem}
+  .sidenav.open{display:block}
+  .tocbtn{display:block}
+  .topbar .tin{padding:0 1.3rem}
+  .cover{padding:3rem 0 2.4rem}
+  .cover .cin,.wide{padding:0 1.3rem}
+  .abody{font-size:1.06rem}
+  .weekrow{gap:1rem}
+  .weekrow .wn{flex-basis:2.6rem}
+  .eqn{gap:.5rem}
+  .eqn > .eqno{font-size:.72rem}
+}
+@media print{
+  .topbar,.sidenav,.pagenav,.wbtns,.wctl{display:none}
+  .shell{display:block;max-width:none}
+  body{background:#fff}
+}
+</style><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script><script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(!window.renderMathInElement) return;
+  renderMathInElement(document.body,{
+    delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'\\[',right:'\\]',display:true},
+      {left:'$',right:'$',display:false},
+      {left:'\\(',right:'\\)',display:false}
+    ],
+    ignoredTags:['script','noscript','style','textarea','pre','code','option'],
+    throwOnError:false,
+    macros:{
+      '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
+      '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
+      // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
+      // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.querySelector('.tocbtn'),n=document.querySelector('.sidenav');
+  if(b&&n){b.addEventListener('click',function(){n.classList.toggle('open');});}
+});
+</script>
+</head>
+<body>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk cur" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="lessons"><a class="" href="../week-04/bounding-surprise.html">Bounding surprise</a><a class="" href="../week-04/mean-field-and-messages.html">Mean-field and variational messages</a><a class="" href="../week-04/laplace-approximation.html">The Laplace approximation</a><a class="" href="../week-04/learning.html">Learning with free energy</a><a class="cur" href="../week-04/two-causes.html">A mean-field learning failure</a><a class="" href="../week-04/exercises.html">Problems and code</a></div><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Variational free energy</div><h1>A mean-field learning failure</h1><p class="deck">Variational EM with three mean-field families on a two-cause model, compared with exact EM computed by numerical integration, with each source of error in the learned prior rates derived and then measured.</p><div class="meta"><span>Week 4</span><span>&#167;5</span><span>100 min</span></div></header><article class="abody"><p><a href="../week-04/learning.html">Lesson&nbsp;4</a> ended with the objective that variational EM minimises,
+<div class="eqn"><div class="eqbody">$$\min_{Q_n \in \mathcal{Q}}\,\mathcal{F}_{\mathrm{tot}}[Q_{1:N}; \omega]
+\;=\; -\ln P(u_{1:N} \mid \omega) \;+\; \sum_{n=1}^{N}\min_{Q_n \in \mathcal{Q}} D_{\mathrm{KL}}\!\big[Q_n \,\big\|\, P(\cdot \mid u_n, \omega)\big],$$</div></div>
+and with the observation that the optimised divergence term can shift the stationary point that variational EM reaches away from a stationary point of the evidence, wherever the divergence's derivative in $\omega$ is nonzero there. This lesson measures how far, on a model with two positive hidden causes and a restricted family whose parameters are learned. Exact EM is computed alongside by numerical integration, so every learned value can be compared with the exact-EM fit on the same data.</p>
+<p>Four separate effects turn out to act on the learned parameters. They are listed here so that the rest of the lesson can refer to them by number:</p>
+<ol>
+<li>a recognition family whose coefficient of variation is fixed, which forces the posterior means down;</li>
+<li>a learning rule that averages the wrong quantity across trials;</li>
+<li>the closed loop between E-steps and M-steps, which multiplies whatever error one M-step makes;</li>
+<li>the mean-field factorisation itself, which narrows each factor of $Q$ and, on this model, lowers the means.</li>
+</ol>
+<p>Effects 1 and 4 are properties of the recognition family. Effect 2 is a property of the learning rule and not of variational inference. Effect 3 is present in exact EM too, and it creates no error of its own.</p>
+<h2 id="the-two-cause-model"><span class="secno">1</span>The two-cause model</h2>
+<p>Two positive hidden causes $s_1, s_2 &gt; 0$ have independent exponential priors with rates $\lambda_1, \lambda_2 &gt; 0$:
+<div class="eqn" id="eq-tc-prior"><div class="eqbody">$$P(s_i \mid \lambda_i) \;=\; \lambda_i e^{-\lambda_i s_i}, \qquad s_i &gt; 0, \quad i = 1, 2,$$</div><div class="eqno"><a href="#eq-tc-prior" title="Link to equation 4.5.1">(4.5.1)</a></div></div>
+with prior means $\mathbb{E}[s_i] = 1/\lambda_i$. In this lesson $\lambda_i$ is an exponential rate, in inverse units of $s_i$; it is unrelated to the noisy-OR leak $\lambda$ of <a href="../week-01/inverse-problem.html">Week&nbsp;1, Lesson&nbsp;4</a>. Two sensors report products of the causes with unit-variance Gaussian noise,
+<div class="eqn" id="eq-tc-obs"><div class="eqbody">$$u_1 \;=\; s_2 s_1^2 + z_1, \qquad u_2 \;=\; s_1 s_2^2 + z_2, \qquad z_1, z_2 \sim \mathcal{N}(0, 1) \text{ independent}.$$</div><div class="eqno"><a href="#eq-tc-obs" title="Link to equation 4.5.2">(4.5.2)</a></div></div>
+The log joint for one trial is
+<div class="eqn" id="eq-tc-logjoint"><div class="eqbody">$$\ln P(u, s \mid \lambda) \;=\; \sum_{i=1}^{2}\big(\ln\lambda_i - \lambda_i s_i\big) \;-\; \tfrac12\big(u_1 - s_2 s_1^2\big)^2 \;-\; \tfrac12\big(u_2 - s_1 s_2^2\big)^2 \;-\; \ln 2\pi,$$</div><div class="eqno"><a href="#eq-tc-logjoint" title="Link to equation 4.5.3">(4.5.3)</a></div></div>
+with $u = (u_1, u_2)$, $s = (s_1, s_2)$ and $\lambda = (\lambda_1, \lambda_2)$.</p>
+<p>The generative process uses the same model with rates $\lambda^{*} = (0.9, 0.7)$, so the prior means of the causes are $1.1111$ and $1.4286$. One seeded sample of $N = 500$ trials is drawn and held fixed for the whole lesson, and every learner starts from $\lambda^{(0)} = (2.0, 0.5)$. Every number below is a comparison on this one sample.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">One sample, one pair of rates</span></div><p>The percentages in this lesson are measured on one sample of $500$ trials at one pair of true rates and one starting point. They show that each effect exists and how large it is here. They are not general rates of error for these families, and a different sample or different true rates would give different numbers.</p></div>
+<h3 id="the-shape-of-the-posterior">The shape of the posterior</h3>
+<p>Fix an observation, $u = (2.5, 3.0)$, which the lesson uses throughout as its representative trial. The likelihood is large where $s_2 s_1^2 \approx 2.5$ and $s_1 s_2^2 \approx 3.0$, two curves in the $(s_1, s_2)$ plane that cross, and the noise widens each into a band. Along the first curve a larger $s_1$ needs a smaller $s_2$. The posterior is therefore a curved ridge on which the two causes are negatively correlated. At the true rates its correlation is $-0.7409$, its means are $(1.1754, 1.5684)$ and its standard deviations are $(0.4636, 0.6003)$. Across all $500$ trials the posterior correlation averages $-0.5429$, ranges from $-0.9684$ to $-0.3620$, and exceeds $0.5$ in magnitude on $38.8$ per cent of trials.</p>
+<figure id="fig-4-5-1"><svg viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Contours of the exact posterior over the two causes for the observation (2.5, 3.0), a curved ridge, with the contours of the free-form, Gamma and Exponential mean-field products.">
+<rect x="1" y="1" width="678" height="338" fill="#fdfcf9" stroke="#e4e1d9"/>
+<line x1="60" y1="300" x2="320" y2="300" stroke="#3c3c42"/>
+<line x1="60" y1="300" x2="60" y2="36" stroke="#3c3c42"/>
+<line x1="60.0" y1="300" x2="60.0" y2="304" stroke="#3c3c42"/>
+<text x="60.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="141.2" y1="300" x2="141.2" y2="304" stroke="#3c3c42"/>
+<text x="141.2" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="222.5" y1="300" x2="222.5" y2="304" stroke="#3c3c42"/>
+<text x="222.5" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2</text>
+<line x1="303.8" y1="300" x2="303.8" y2="304" stroke="#3c3c42"/>
+<text x="303.8" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">3</text>
+<line x1="56" y1="300.0" x2="60" y2="300.0" stroke="#3c3c42"/>
+<text x="53.0" y="303.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="56" y1="240.0" x2="60" y2="240.0" stroke="#3c3c42"/>
+<text x="53.0" y="243.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="56" y1="180.0" x2="60" y2="180.0" stroke="#3c3c42"/>
+<text x="53.0" y="183.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2</text>
+<line x1="56" y1="120.0" x2="60" y2="120.0" stroke="#3c3c42"/>
+<text x="53.0" y="123.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">3</text>
+<line x1="56" y1="60.0" x2="60" y2="60.0" stroke="#3c3c42"/>
+<text x="53.0" y="63.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">4</text>
+<text x="190.0" y="331.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75">s1</text>
+<text x="26" y="168.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75" transform="rotate(-90 26 168.0)">s2</text>
+<line x1="400" y1="300" x2="660" y2="300" stroke="#3c3c42"/>
+<line x1="400" y1="300" x2="400" y2="36" stroke="#3c3c42"/>
+<line x1="400.0" y1="300" x2="400.0" y2="304" stroke="#3c3c42"/>
+<text x="400.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="481.2" y1="300" x2="481.2" y2="304" stroke="#3c3c42"/>
+<text x="481.2" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="562.5" y1="300" x2="562.5" y2="304" stroke="#3c3c42"/>
+<text x="562.5" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2</text>
+<line x1="643.8" y1="300" x2="643.8" y2="304" stroke="#3c3c42"/>
+<text x="643.8" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">3</text>
+<line x1="396" y1="300.0" x2="400" y2="300.0" stroke="#3c3c42"/>
+<text x="393.0" y="303.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="396" y1="240.0" x2="400" y2="240.0" stroke="#3c3c42"/>
+<text x="393.0" y="243.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="396" y1="180.0" x2="400" y2="180.0" stroke="#3c3c42"/>
+<text x="393.0" y="183.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2</text>
+<line x1="396" y1="120.0" x2="400" y2="120.0" stroke="#3c3c42"/>
+<text x="393.0" y="123.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">3</text>
+<line x1="396" y1="60.0" x2="400" y2="60.0" stroke="#3c3c42"/>
+<text x="393.0" y="63.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">4</text>
+<text x="530.0" y="331.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75">s1</text>
+<text x="366" y="168.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75" transform="rotate(-90 366 168.0)">s2</text>
+<path d="M121.1 183.3 L121.0 183.1 L120.8 182.0 L120.7 180.9 L120.6 179.8 L120.6 178.7 L120.7 177.6 L121.0 176.5 L121.1 176.1 L121.4 175.4 L122.1 174.3 L122.2 174.2 L123.2 173.4 L123.7 173.2 L124.3 173.0 L125.4 172.9 L126.5 172.9 L127.6 173.0 L128.6 173.2 L128.8 173.2 L129.7 173.4 L130.8 173.8 L131.9 174.1 L132.3 174.3 L133.0 174.5 L134.1 175.0 L135.0 175.4 L135.1 175.5 L136.2 176.0 L137.3 176.5 L137.3 176.5 L138.4 177.0 L139.5 177.6 L139.5 177.6 L140.5 178.2 L141.5 178.7 L141.6 178.8 L142.7 179.4 L143.5 179.8 L143.8 180.0 L144.9 180.6 L145.4 180.9 L145.9 181.2 L147.0 181.9 L147.2 182.0 L148.1 182.6 L149.0 183.1 L149.2 183.2 L150.3 183.9 L150.7 184.2 L151.3 184.6 L152.4 185.3 L152.4 185.3 L153.5 186.0 L154.1 186.4 L154.6 186.7 L155.7 187.4 L155.7 187.5 L156.8 188.2 L157.3 188.6 L157.8 188.9 L158.9 189.7 L158.9 189.7 L160.0 190.4 L160.5 190.8 L161.1 191.2 L162.0 191.9 L162.2 192.0 L163.2 192.7 L163.6 193.0 L164.3 193.5 L165.1 194.1 L165.4 194.3 L166.5 195.1 L166.5 195.2 L167.6 196.0 L168.0 196.3 L168.6 196.8 L169.4 197.4 L169.7 197.6 L170.8 198.5 L170.8 198.5 L171.9 199.3 L172.2 199.6 L173.0 200.2 L173.6 200.7 L174.1 201.1 L174.9 201.8 L175.1 201.9 L176.2 202.9 L176.2 202.9 L177.3 203.8 L177.5 204.0 L178.4 204.7 L178.8 205.1 L179.5 205.6 L180.0 206.1 L180.5 206.6 L181.3 207.2 L181.6 207.6 L182.5 208.3 L182.7 208.5 L183.7 209.4 L183.8 209.6 L184.8 210.5 L184.9 210.6 L185.9 211.6 L186.0 211.6 L187.0 212.7 L187.1 212.7 L188.1 213.8 L188.1 213.8 L189.2 214.9 L189.2 214.9 L190.2 216.0 L190.3 216.1 L191.2 217.1 L191.3 217.3 L192.2 218.2 L192.4 218.5 L193.1 219.3 L193.5 219.8 L194.0 220.4 L194.6 221.2 L194.9 221.5 L195.7 222.6 L195.7 222.6 L196.5 223.7 L196.8 224.2 L197.2 224.8 L197.8 225.9 L197.8 225.9 L198.4 227.0 L198.9 228.0 L199.0 228.1 L199.4 229.2 L199.8 230.3 L200.0 231.3 L200.0 231.4 L200.1 232.5 L200.1 233.6 L200.0 233.8 L199.7 234.7 L199.1 235.8 L198.9 236.0 L197.8 236.9 L197.8 236.9 L196.8 237.4 L195.7 237.8 L195.0 238.0 L194.6 238.1 L193.5 238.3 L192.4 238.4 L191.3 238.4 L190.3 238.4 L189.2 238.4 L188.1 238.4 L187.0 238.3 L185.9 238.2 L184.9 238.0 L184.7 238.0 L183.8 237.8 L182.7 237.6 L181.6 237.4 L180.5 237.2 L179.5 236.9 L179.2 236.9 L178.4 236.7 L177.3 236.4 L176.2 236.1 L175.2 235.8 L175.1 235.8 L174.1 235.4 L173.0 235.1 L171.9 234.7 L171.9 234.7 L170.8 234.3 L169.7 233.9 L169.0 233.6 L168.6 233.5 L167.6 233.0 L166.5 232.6 L166.3 232.5 L165.4 232.1 L164.3 231.6 L163.9 231.4 L163.2 231.1 L162.2 230.6 L161.6 230.3 L161.1 230.0 L160.0 229.5 L159.5 229.2 L158.9 228.9 L157.8 228.3 L157.5 228.1 L156.8 227.7 L155.7 227.0 L155.7 227.0 L154.6 226.3 L153.9 225.9 L153.5 225.7 L152.4 225.0 L152.2 224.8 L151.3 224.2 L150.6 223.7 L150.3 223.5 L149.2 222.7 L149.1 222.6 L148.1 221.9 L147.6 221.5 L147.0 221.1 L146.2 220.4 L145.9 220.2 L144.9 219.3 L144.9 219.3 L143.8 218.4 L143.6 218.2 L142.7 217.4 L142.3 217.1 L141.6 216.5 L141.2 216.0 L140.5 215.4 L140.0 214.9 L139.5 214.4 L138.9 213.8 L138.4 213.3 L137.8 212.7 L137.3 212.1 L136.8 211.6 L136.2 211.0 L135.8 210.5 L135.1 209.7 L134.9 209.4 L134.1 208.4 L134.0 208.3 L133.1 207.2 L133.0 207.1 L132.3 206.1 L131.9 205.7 L131.4 205.1 L130.8 204.2 L130.7 204.0 L129.9 202.9 L129.7 202.6 L129.2 201.8 L128.6 200.9 L128.5 200.7 L127.8 199.6 L127.6 199.2 L127.1 198.5 L126.5 197.4 L126.5 197.3 L125.9 196.3 L125.4 195.2 L125.4 195.2 L124.8 194.1 L124.3 193.0 L124.3 193.0 L123.8 191.9 L123.4 190.8 L123.2 190.4 L122.9 189.7 L122.5 188.6 L122.2 187.5 L122.2 187.5 L121.8 186.4 L121.5 185.3 L121.3 184.2 L121.1 183.3" fill="none" stroke="#0f5f57" stroke-width="2.2" opacity="1"/>
+<path d="M84.3 125.7 L84.3 124.9 L84.2 123.8 L84.2 122.7 L84.1 121.6 L84.1 120.5 L84.1 119.4 L84.1 118.3 L84.1 117.2 L84.1 116.1 L84.1 115.0 L84.2 113.9 L84.3 112.8 L84.3 112.6 L84.5 111.7 L84.7 110.6 L85.0 109.5 L85.4 108.7 L85.7 108.5 L86.5 108.0 L87.6 108.3 L87.8 108.5 L88.6 109.0 L89.2 109.5 L89.7 110.0 L90.2 110.6 L90.8 111.2 L91.2 111.7 L91.9 112.5 L92.1 112.8 L93.0 113.9 L93.0 113.9 L93.8 115.0 L94.1 115.3 L94.7 116.1 L95.1 116.7 L95.5 117.2 L96.2 118.1 L96.4 118.3 L97.2 119.4 L97.3 119.6 L98.0 120.5 L98.4 121.0 L98.9 121.6 L99.5 122.3 L99.7 122.7 L100.5 123.7 L100.6 123.8 L101.5 124.9 L101.6 125.1 L102.4 126.0 L102.7 126.4 L103.3 127.1 L103.8 127.7 L104.2 128.2 L104.9 129.0 L105.1 129.3 L105.9 130.3 L106.0 130.4 L107.0 131.5 L107.0 131.5 L108.0 132.6 L108.1 132.8 L108.9 133.7 L109.2 134.0 L109.9 134.8 L110.3 135.2 L111.0 135.9 L111.3 136.3 L112.0 137.0 L112.4 137.5 L113.0 138.1 L113.5 138.6 L114.1 139.2 L114.6 139.7 L115.2 140.3 L115.7 140.8 L116.3 141.4 L116.8 141.9 L117.4 142.5 L117.8 142.9 L118.5 143.6 L118.9 144.0 L119.6 144.7 L120.0 145.0 L120.8 145.8 L121.1 146.0 L122.0 146.9 L122.2 147.0 L123.2 148.0 L123.2 148.1 L124.3 149.0 L124.4 149.1 L125.4 150.0 L125.6 150.2 L126.5 151.0 L126.8 151.3 L127.6 151.9 L128.1 152.4 L128.6 152.8 L129.3 153.5 L129.7 153.8 L130.6 154.6 L130.8 154.7 L131.9 155.6 L131.9 155.7 L133.0 156.5 L133.2 156.8 L134.1 157.4 L134.6 157.8 L135.1 158.3 L135.9 158.9 L136.2 159.2 L137.2 160.0 L137.3 160.1 L138.4 161.0 L138.6 161.1 L139.5 161.8 L140.0 162.2 L140.5 162.7 L141.3 163.3 L141.6 163.6 L142.7 164.4 L142.7 164.4 L143.8 165.3 L144.1 165.5 L144.9 166.1 L145.5 166.6 L145.9 167.0 L146.9 167.7 L147.0 167.8 L148.1 168.6 L148.3 168.8 L149.2 169.5 L149.8 169.9 L150.3 170.3 L151.2 171.0 L151.3 171.2 L152.4 172.0 L152.6 172.1 L153.5 172.8 L154.0 173.2 L154.6 173.6 L155.5 174.3 L155.7 174.5 L156.8 175.3 L156.9 175.4 L157.8 176.1 L158.3 176.5 L158.9 176.9 L159.8 177.6 L160.0 177.8 L161.1 178.6 L161.2 178.7 L162.2 179.4 L162.7 179.8 L163.2 180.2 L164.1 180.9 L164.3 181.1 L165.4 181.9 L165.5 182.0 L166.5 182.7 L166.9 183.1 L167.6 183.6 L168.4 184.2 L168.6 184.4 L169.7 185.2 L169.8 185.3 L170.8 186.1 L171.2 186.4 L171.9 186.9 L172.6 187.5 L173.0 187.7 L174.0 188.6 L174.1 188.6 L175.1 189.4 L175.4 189.7 L176.2 190.3 L176.8 190.8 L177.3 191.1 L178.2 191.9 L178.4 192.0 L179.5 192.8 L179.6 193.0 L180.5 193.7 L181.0 194.1 L181.6 194.6 L182.4 195.2 L182.7 195.4 L183.7 196.3 L183.8 196.3 L184.9 197.2 L185.1 197.4 L185.9 198.0 L186.5 198.5 L187.0 198.9 L187.8 199.6 L188.1 199.8 L189.1 200.7 L189.2 200.7 L190.3 201.6 L190.5 201.8 L191.3 202.5 L191.8 202.9 L192.4 203.4 L193.1 204.0 L193.5 204.3 L194.4 205.1 L194.6 205.2 L195.7 206.1 L195.7 206.1 L196.8 207.0 L197.0 207.2 L197.8 208.0 L198.3 208.3 L198.9 208.9 L199.6 209.4 L200.0 209.8 L200.8 210.5 L201.1 210.8 L202.1 211.6 L202.2 211.7 L203.2 212.7 L203.3 212.7 L204.3 213.6 L204.6 213.8 L205.4 214.6 L205.8 214.9 L206.5 215.5 L207.0 216.0 L207.6 216.5 L208.2 217.1 L208.6 217.5 L209.5 218.2 L209.7 218.5 L210.6 219.3 L210.8 219.5 L211.8 220.4 L211.9 220.5 L213.0 221.5 L213.0 221.5 L214.0 222.5 L214.2 222.6 L215.1 223.5 L215.4 223.7 L216.2 224.5 L216.5 224.8 L217.3 225.5 L217.7 225.9 L218.4 226.6 L218.8 227.0 L219.5 227.6 L220.0 228.1 L220.5 228.7 L221.1 229.2 L221.6 229.7 L222.2 230.3 L222.7 230.8 L223.3 231.4 L223.8 231.9 L224.4 232.5 L224.9 232.9 L225.5 233.6 L225.9 234.0 L226.6 234.7 L227.0 235.1 L227.7 235.8 L228.1 236.3 L228.7 236.9 L229.2 237.4 L229.8 238.0 L230.3 238.5 L230.8 239.1 L231.3 239.7 L231.8 240.2 L232.4 240.8 L232.9 241.3 L233.5 242.0 L233.9 242.4 L234.6 243.2 L234.8 243.5 L235.7 244.4 L235.8 244.6 L236.7 245.7 L236.8 245.7 L237.7 246.8 L237.8 247.0 L238.6 247.9 L238.9 248.3 L239.4 249.0 L240.0 249.7 L240.2 250.1 L241.0 251.2 L241.1 251.2 L241.8 252.3 L242.2 252.9 L242.5 253.4 L243.1 254.4 L243.2 254.8 L243.6 255.5 L244.0 256.6 L244.3 257.7 L244.3 258.0 L244.4 258.8 L244.3 259.6 L244.3 259.9 L243.8 261.0 L243.2 261.8 L242.9 262.1 L242.2 262.7 L241.2 263.2 L241.1 263.3 L240.0 263.7 L238.9 264.0 L237.8 264.3 L237.7 264.3 L236.8 264.5 L235.7 264.7 L234.6 264.8 L233.5 264.9 L232.4 265.0 L231.3 265.1 L230.3 265.2 L229.2 265.2 L228.1 265.2 L227.0 265.2 L225.9 265.2 L224.9 265.2 L223.8 265.2 L222.7 265.1 L221.6 265.1 L220.5 265.0 L219.5 265.0 L218.4 264.9 L217.3 264.8 L216.2 264.7 L215.1 264.7 L214.0 264.6 L213.0 264.4 L211.9 264.3 L210.8 264.2 L209.7 264.1 L208.6 264.0 L207.6 263.8 L206.5 263.7 L205.4 263.5 L204.3 263.4 L203.4 263.2 L203.2 263.2 L202.2 263.1 L201.1 262.9 L200.0 262.7 L198.9 262.5 L197.8 262.3 L196.8 262.1 L196.7 262.1 L195.7 261.9 L194.6 261.7 L193.5 261.5 L192.4 261.3 L191.3 261.1 L191.1 261.0 L190.3 260.9 L189.2 260.6 L188.1 260.4 L187.0 260.1 L186.2 259.9 L185.9 259.9 L184.9 259.6 L183.8 259.4 L182.7 259.1 L181.7 258.8 L181.6 258.8 L180.5 258.5 L179.5 258.3 L178.4 258.0 L177.6 257.7 L177.3 257.7 L176.2 257.4 L175.1 257.0 L174.1 256.7 L173.9 256.6 L173.0 256.4 L171.9 256.0 L170.8 255.7 L170.4 255.5 L169.7 255.3 L168.6 255.0 L167.6 254.6 L167.1 254.4 L166.5 254.2 L165.4 253.9 L164.3 253.4 L164.1 253.4 L163.2 253.1 L162.2 252.6 L161.2 252.3 L161.1 252.2 L160.0 251.8 L158.9 251.3 L158.5 251.2 L157.8 250.9 L156.8 250.4 L155.9 250.1 L155.7 250.0 L154.6 249.5 L153.5 249.0 L153.5 249.0 L152.4 248.5 L151.3 248.0 L151.2 247.9 L150.3 247.4 L149.2 246.9 L149.0 246.8 L148.1 246.3 L147.0 245.8 L146.9 245.7 L145.9 245.2 L144.9 244.6 L144.8 244.6 L143.8 244.0 L142.9 243.5 L142.7 243.3 L141.6 242.7 L141.1 242.4 L140.5 242.0 L139.5 241.4 L139.3 241.3 L138.4 240.7 L137.6 240.2 L137.3 240.0 L136.2 239.2 L136.0 239.1 L135.1 238.5 L134.4 238.0 L134.1 237.7 L133.0 236.9 L132.9 236.9 L131.9 236.1 L131.5 235.8 L130.8 235.3 L130.1 234.7 L129.7 234.4 L128.7 233.6 L128.6 233.5 L127.6 232.6 L127.4 232.5 L126.5 231.7 L126.1 231.4 L125.4 230.7 L124.9 230.3 L124.3 229.7 L123.7 229.2 L123.2 228.7 L122.6 228.1 L122.2 227.7 L121.5 227.0 L121.1 226.6 L120.4 225.9 L120.0 225.4 L119.4 224.8 L118.9 224.3 L118.4 223.7 L117.8 223.1 L117.4 222.6 L116.8 221.8 L116.5 221.5 L115.7 220.5 L115.6 220.4 L114.7 219.3 L114.6 219.2 L113.8 218.2 L113.5 217.8 L113.0 217.1 L112.4 216.4 L112.2 216.0 L111.4 214.9 L111.3 214.9 L110.6 213.8 L110.3 213.3 L109.9 212.7 L109.2 211.7 L109.1 211.6 L108.4 210.5 L108.1 210.0 L107.7 209.4 L107.1 208.3 L107.0 208.3 L106.4 207.2 L105.9 206.4 L105.8 206.1 L105.2 205.1 L104.9 204.5 L104.5 204.0 L104.0 202.9 L103.8 202.5 L103.4 201.8 L102.8 200.7 L102.7 200.4 L102.3 199.6 L101.7 198.5 L101.6 198.2 L101.2 197.4 L100.7 196.3 L100.5 195.9 L100.2 195.2 L99.7 194.1 L99.5 193.4 L99.3 193.0 L98.8 191.9 L98.4 190.8 L98.3 190.8 L97.9 189.7 L97.5 188.6 L97.3 188.1 L97.0 187.5 L96.6 186.4 L96.2 185.3 L96.2 185.2 L95.8 184.2 L95.5 183.1 L95.1 182.1 L95.1 182.0 L94.7 180.9 L94.4 179.8 L94.1 178.8 L94.0 178.7 L93.7 177.6 L93.3 176.5 L93.0 175.4 L93.0 175.2 L92.7 174.3 L92.4 173.2 L92.1 172.1 L91.9 171.4 L91.8 171.0 L91.5 169.9 L91.2 168.8 L90.9 167.7 L90.8 167.2 L90.7 166.6 L90.4 165.5 L90.1 164.4 L89.9 163.3 L89.7 162.6 L89.6 162.2 L89.4 161.1 L89.1 160.0 L88.9 158.9 L88.7 157.8 L88.6 157.6 L88.5 156.8 L88.3 155.7 L88.0 154.6 L87.8 153.5 L87.6 152.4 L87.6 151.9 L87.4 151.3 L87.3 150.2 L87.1 149.1 L86.9 148.0 L86.7 146.9 L86.5 145.8 L86.5 145.3 L86.4 144.7 L86.2 143.6 L86.1 142.5 L85.9 141.4 L85.8 140.3 L85.6 139.2 L85.5 138.1 L85.4 137.4 L85.4 137.0 L85.2 135.9 L85.1 134.8 L85.0 133.7 L84.9 132.6 L84.8 131.5 L84.7 130.4 L84.6 129.3 L84.5 128.2 L84.4 127.1 L84.3 126.0 L84.3 125.7" fill="none" stroke="#0f5f57" stroke-width="2.2" opacity="0.55"/>
+<path d="M211.9 264.3 L211.9 264.3" fill="none" stroke="#0f5f57" stroke-width="2.2" opacity="0.55"/>
+<path d="M134.1 214.3 L133.8 213.8 L133.5 212.7 L133.2 211.6 L133.1 210.5 L133.0 209.4 L133.0 208.3 L133.1 207.2 L133.4 206.1 L133.7 205.1 L134.1 204.2 L134.2 204.0 L134.7 202.9 L135.1 202.2 L135.5 201.8 L136.2 200.8 L136.3 200.7 L137.3 199.6 L137.3 199.6 L138.4 198.6 L138.5 198.5 L139.5 197.7 L140.0 197.4 L140.5 197.0 L141.6 196.3 L141.6 196.3 L142.7 195.7 L143.7 195.2 L143.8 195.1 L144.9 194.6 L145.9 194.2 L146.2 194.1 L147.0 193.8 L148.1 193.4 L149.2 193.1 L149.5 193.0 L150.3 192.8 L151.3 192.5 L152.4 192.3 L153.5 192.1 L154.6 191.9 L155.1 191.9 L155.7 191.8 L156.8 191.7 L157.8 191.7 L158.9 191.6 L160.0 191.6 L161.1 191.7 L162.2 191.7 L163.2 191.9 L163.3 191.9 L164.3 192.0 L165.4 192.2 L166.5 192.4 L167.6 192.7 L168.4 193.0 L168.6 193.1 L169.7 193.4 L170.8 193.9 L171.2 194.1 L171.9 194.4 L173.0 195.0 L173.2 195.2 L174.1 195.7 L174.8 196.3 L175.1 196.5 L176.1 197.4 L176.2 197.4 L177.2 198.5 L177.3 198.6 L178.1 199.6 L178.4 200.0 L178.8 200.7 L179.5 201.8 L179.5 201.8 L180.0 202.9 L180.4 204.0 L180.5 204.5 L180.7 205.1 L180.9 206.1 L181.1 207.2 L181.2 208.3 L181.2 209.4 L181.2 210.5 L181.0 211.6 L180.9 212.7 L180.6 213.8 L180.5 214.1 L180.3 214.9 L179.9 216.0 L179.5 217.1 L179.5 217.1 L178.9 218.2 L178.4 219.3 L178.3 219.3 L177.7 220.4 L177.3 221.0 L176.9 221.5 L176.2 222.4 L176.0 222.6 L175.1 223.6 L175.0 223.7 L174.1 224.6 L173.9 224.8 L173.0 225.6 L172.5 225.9 L171.9 226.4 L170.9 227.0 L170.8 227.1 L169.7 227.7 L169.0 228.1 L168.6 228.3 L167.6 228.7 L166.5 229.1 L166.3 229.2 L165.4 229.5 L164.3 229.8 L163.2 230.0 L162.2 230.1 L161.1 230.2 L160.2 230.3 L160.0 230.3 L158.9 230.3 L158.4 230.3 L157.8 230.3 L156.8 230.2 L155.7 230.1 L154.6 229.9 L153.5 229.7 L152.4 229.4 L151.8 229.2 L151.3 229.1 L150.3 228.7 L149.2 228.3 L148.8 228.1 L148.1 227.8 L147.0 227.3 L146.5 227.0 L145.9 226.7 L144.9 226.1 L144.5 225.9 L143.8 225.4 L142.9 224.8 L142.7 224.7 L141.6 223.9 L141.4 223.7 L140.5 223.0 L140.1 222.6 L139.5 222.0 L139.0 221.5 L138.4 220.9 L137.9 220.4 L137.3 219.7 L137.0 219.3 L136.2 218.3 L136.2 218.2 L135.4 217.1 L135.1 216.6 L134.8 216.0 L134.3 214.9 L134.1 214.3" fill="none" stroke="#2c5f8a" stroke-width="1.8" opacity="1"/>
+<path d="M105.9 211.9 L105.9 211.6 L105.8 210.5 L105.7 209.4 L105.8 208.3 L105.8 207.2 L105.9 206.6 L106.0 206.1 L106.2 205.1 L106.5 204.0 L106.9 202.9 L107.0 202.7 L107.4 201.8 L108.0 200.7 L108.1 200.5 L108.6 199.6 L109.2 198.8 L109.4 198.5 L110.2 197.4 L110.3 197.3 L111.2 196.3 L111.3 196.1 L112.2 195.2 L112.4 195.0 L113.4 194.1 L113.5 194.0 L114.6 193.0 L114.7 193.0 L115.7 192.2 L116.1 191.9 L116.8 191.4 L117.6 190.8 L117.8 190.6 L118.9 189.9 L119.3 189.7 L120.0 189.3 L121.1 188.6 L121.2 188.6 L122.2 188.0 L123.2 187.5 L123.2 187.5 L124.3 186.9 L125.4 186.4 L125.4 186.4 L126.5 185.9 L127.6 185.4 L127.9 185.3 L128.6 185.0 L129.7 184.5 L130.7 184.2 L130.8 184.1 L131.9 183.7 L133.0 183.4 L133.8 183.1 L134.1 183.0 L135.1 182.6 L136.2 182.3 L137.3 182.0 L137.4 182.0 L138.4 181.7 L139.5 181.4 L140.5 181.2 L141.6 180.9 L141.8 180.9 L142.7 180.7 L143.8 180.5 L144.9 180.2 L145.9 180.1 L147.0 179.9 L147.6 179.8 L148.1 179.7 L149.2 179.6 L150.3 179.4 L151.3 179.3 L152.4 179.2 L153.5 179.1 L154.6 179.0 L155.7 179.0 L156.8 178.9 L157.8 178.9 L158.9 178.9 L160.0 178.9 L161.1 178.9 L162.2 178.9 L163.2 179.0 L164.3 179.1 L165.4 179.2 L166.5 179.3 L167.6 179.4 L168.6 179.6 L169.7 179.8 L170.0 179.8 L170.8 179.9 L171.9 180.2 L173.0 180.4 L174.1 180.7 L174.7 180.9 L175.1 181.0 L176.2 181.3 L177.3 181.7 L178.0 182.0 L178.4 182.1 L179.5 182.5 L180.5 183.0 L180.6 183.1 L181.6 183.6 L182.7 184.1 L182.8 184.2 L183.8 184.8 L184.6 185.3 L184.9 185.4 L185.9 186.2 L186.2 186.4 L187.0 187.0 L187.6 187.5 L188.1 187.9 L188.8 188.6 L189.2 188.9 L189.9 189.7 L190.3 190.1 L190.9 190.8 L191.3 191.4 L191.8 191.9 L192.4 192.8 L192.5 193.0 L193.2 194.1 L193.5 194.6 L193.9 195.2 L194.4 196.3 L194.6 196.7 L194.9 197.4 L195.3 198.5 L195.7 199.5 L195.7 199.6 L196.0 200.7 L196.3 201.8 L196.6 202.9 L196.7 204.0 L196.8 204.0 L196.9 205.1 L197.0 206.1 L197.1 207.2 L197.2 208.3 L197.2 209.4 L197.1 210.5 L197.1 211.6 L197.0 212.7 L196.9 213.8 L196.8 214.5 L196.7 214.9 L196.5 216.0 L196.3 217.1 L196.1 218.2 L195.8 219.3 L195.7 219.8 L195.5 220.4 L195.2 221.5 L194.9 222.6 L194.6 223.3 L194.5 223.7 L194.1 224.8 L193.6 225.9 L193.5 226.2 L193.2 227.0 L192.7 228.1 L192.4 228.6 L192.1 229.2 L191.6 230.3 L191.3 230.7 L191.0 231.4 L190.4 232.5 L190.3 232.6 L189.7 233.6 L189.2 234.4 L189.0 234.7 L188.3 235.8 L188.1 236.0 L187.5 236.9 L187.0 237.5 L186.7 238.0 L185.9 238.9 L185.8 239.1 L184.9 240.2 L184.9 240.2 L183.9 241.3 L183.8 241.4 L182.8 242.4 L182.7 242.5 L181.7 243.5 L181.6 243.5 L180.5 244.5 L180.5 244.6 L179.5 245.4 L179.2 245.7 L178.4 246.3 L177.7 246.8 L177.3 247.1 L176.2 247.8 L176.1 247.9 L175.1 248.5 L174.3 249.0 L174.1 249.1 L173.0 249.6 L172.1 250.1 L171.9 250.2 L170.8 250.6 L169.7 251.0 L169.4 251.2 L168.6 251.4 L167.6 251.8 L166.5 252.0 L165.5 252.3 L165.4 252.3 L164.3 252.5 L163.2 252.6 L162.2 252.8 L161.1 252.9 L160.0 252.9 L158.9 252.9 L157.8 252.9 L156.8 252.8 L155.7 252.7 L154.6 252.6 L153.5 252.4 L152.7 252.3 L152.4 252.2 L151.3 252.0 L150.3 251.7 L149.2 251.4 L148.3 251.2 L148.1 251.1 L147.0 250.8 L145.9 250.4 L145.1 250.1 L144.9 250.0 L143.8 249.6 L142.7 249.1 L142.4 249.0 L141.6 248.6 L140.5 248.1 L140.0 247.9 L139.5 247.6 L138.4 247.0 L137.9 246.8 L137.3 246.5 L136.2 245.9 L135.9 245.7 L135.1 245.2 L134.1 244.6 L134.0 244.6 L133.0 243.9 L132.3 243.5 L131.9 243.2 L130.8 242.5 L130.6 242.4 L129.7 241.8 L129.0 241.3 L128.6 241.0 L127.6 240.2 L127.5 240.2 L126.5 239.4 L126.1 239.1 L125.4 238.5 L124.7 238.0 L124.3 237.7 L123.4 236.9 L123.2 236.8 L122.2 235.8 L122.1 235.8 L121.1 234.9 L120.9 234.7 L120.0 233.9 L119.7 233.6 L118.9 232.9 L118.5 232.5 L117.8 231.8 L117.4 231.4 L116.8 230.7 L116.4 230.3 L115.7 229.5 L115.4 229.2 L114.6 228.3 L114.4 228.1 L113.5 227.0 L112.6 225.9 L112.4 225.6 L111.8 224.8 L111.3 224.2 L111.0 223.7 L110.3 222.6 L110.3 222.5 L109.6 221.5 L109.2 220.7 L109.0 220.4 L108.4 219.3 L108.1 218.7 L107.9 218.2 L107.4 217.1 L107.0 216.1 L107.0 216.0 L106.6 214.9 L106.3 213.8 L106.1 212.7 L105.9 211.9" fill="none" stroke="#2c5f8a" stroke-width="1.8" opacity="0.55"/>
+<path d="M113.5 227.0 L113.5 227.0" fill="none" stroke="#2c5f8a" stroke-width="1.8" opacity="0.55"/>
+<path d="M461.1 183.3 L461.0 183.1 L460.8 182.0 L460.7 180.9 L460.6 179.8 L460.6 178.7 L460.7 177.6 L461.0 176.5 L461.1 176.1 L461.4 175.4 L462.1 174.3 L462.2 174.2 L463.2 173.4 L463.7 173.2 L464.3 173.0 L465.4 172.9 L466.5 172.9 L467.6 173.0 L468.6 173.2 L468.8 173.2 L469.7 173.4 L470.8 173.8 L471.9 174.1 L472.3 174.3 L473.0 174.5 L474.1 175.0 L475.0 175.4 L475.1 175.5 L476.2 176.0 L477.3 176.5 L477.3 176.5 L478.4 177.0 L479.5 177.6 L479.5 177.6 L480.5 178.2 L481.5 178.7 L481.6 178.8 L482.7 179.4 L483.5 179.8 L483.8 180.0 L484.9 180.6 L485.4 180.9 L485.9 181.2 L487.0 181.9 L487.2 182.0 L488.1 182.6 L489.0 183.1 L489.2 183.2 L490.3 183.9 L490.7 184.2 L491.3 184.6 L492.4 185.3 L492.4 185.3 L493.5 186.0 L494.1 186.4 L494.6 186.7 L495.7 187.4 L495.7 187.5 L496.8 188.2 L497.3 188.6 L497.8 188.9 L498.9 189.7 L498.9 189.7 L500.0 190.4 L500.5 190.8 L501.1 191.2 L502.0 191.9 L502.2 192.0 L503.2 192.7 L503.6 193.0 L504.3 193.5 L505.1 194.1 L505.4 194.3 L506.5 195.1 L506.5 195.2 L507.6 196.0 L508.0 196.3 L508.6 196.8 L509.4 197.4 L509.7 197.6 L510.8 198.5 L510.8 198.5 L511.9 199.3 L512.2 199.6 L513.0 200.2 L513.6 200.7 L514.1 201.1 L514.9 201.8 L515.1 201.9 L516.2 202.9 L516.2 202.9 L517.3 203.8 L517.5 204.0 L518.4 204.7 L518.8 205.1 L519.5 205.6 L520.0 206.1 L520.5 206.6 L521.3 207.2 L521.6 207.6 L522.5 208.3 L522.7 208.5 L523.7 209.4 L523.8 209.6 L524.8 210.5 L524.9 210.6 L525.9 211.6 L526.0 211.6 L527.0 212.7 L527.1 212.7 L528.1 213.8 L528.1 213.8 L529.2 214.9 L529.2 214.9 L530.2 216.0 L530.3 216.1 L531.2 217.1 L531.3 217.3 L532.2 218.2 L532.4 218.5 L533.1 219.3 L533.5 219.8 L534.0 220.4 L534.6 221.2 L534.9 221.5 L535.7 222.6 L535.7 222.6 L536.5 223.7 L536.8 224.2 L537.2 224.8 L537.8 225.9 L537.8 225.9 L538.4 227.0 L538.9 228.0 L539.0 228.1 L539.4 229.2 L539.8 230.3 L540.0 231.3 L540.0 231.4 L540.1 232.5 L540.1 233.6 L540.0 233.8 L539.7 234.7 L539.1 235.8 L538.9 236.0 L537.8 236.9 L537.8 236.9 L536.8 237.4 L535.7 237.8 L535.0 238.0 L534.6 238.1 L533.5 238.3 L532.4 238.4 L531.3 238.4 L530.3 238.4 L529.2 238.4 L528.1 238.4 L527.0 238.3 L525.9 238.2 L524.9 238.0 L524.7 238.0 L523.8 237.8 L522.7 237.6 L521.6 237.4 L520.5 237.2 L519.5 236.9 L519.2 236.9 L518.4 236.7 L517.3 236.4 L516.2 236.1 L515.2 235.8 L515.1 235.8 L514.1 235.4 L513.0 235.1 L511.9 234.7 L511.9 234.7 L510.8 234.3 L509.7 233.9 L509.0 233.6 L508.6 233.5 L507.6 233.0 L506.5 232.6 L506.3 232.5 L505.4 232.1 L504.3 231.6 L503.9 231.4 L503.2 231.1 L502.2 230.6 L501.6 230.3 L501.1 230.0 L500.0 229.5 L499.5 229.2 L498.9 228.9 L497.8 228.3 L497.5 228.1 L496.8 227.7 L495.7 227.0 L495.7 227.0 L494.6 226.3 L493.9 225.9 L493.5 225.7 L492.4 225.0 L492.2 224.8 L491.3 224.2 L490.6 223.7 L490.3 223.5 L489.2 222.7 L489.1 222.6 L488.1 221.9 L487.6 221.5 L487.0 221.1 L486.2 220.4 L485.9 220.2 L484.9 219.3 L484.9 219.3 L483.8 218.4 L483.6 218.2 L482.7 217.4 L482.3 217.1 L481.6 216.5 L481.2 216.0 L480.5 215.4 L480.0 214.9 L479.5 214.4 L478.9 213.8 L478.4 213.3 L477.8 212.7 L477.3 212.1 L476.8 211.6 L476.2 211.0 L475.8 210.5 L475.1 209.7 L474.9 209.4 L474.1 208.4 L474.0 208.3 L473.1 207.2 L473.0 207.1 L472.3 206.1 L471.9 205.7 L471.4 205.1 L470.8 204.2 L470.7 204.0 L469.9 202.9 L469.7 202.6 L469.2 201.8 L468.6 200.9 L468.5 200.7 L467.8 199.6 L467.6 199.2 L467.1 198.5 L466.5 197.4 L466.5 197.3 L465.9 196.3 L465.4 195.2 L465.4 195.2 L464.8 194.1 L464.3 193.0 L464.3 193.0 L463.8 191.9 L463.4 190.8 L463.2 190.4 L462.9 189.7 L462.5 188.6 L462.2 187.5 L462.2 187.5 L461.8 186.4 L461.5 185.3 L461.3 184.2 L461.1 183.3" fill="none" stroke="#0f5f57" stroke-width="2.2" opacity="1"/>
+<path d="M424.3 125.7 L424.3 124.9 L424.2 123.8 L424.2 122.7 L424.1 121.6 L424.1 120.5 L424.1 119.4 L424.1 118.3 L424.1 117.2 L424.1 116.1 L424.1 115.0 L424.2 113.9 L424.3 112.8 L424.3 112.6 L424.5 111.7 L424.7 110.6 L425.0 109.5 L425.4 108.7 L425.7 108.5 L426.5 108.0 L427.6 108.3 L427.8 108.5 L428.6 109.0 L429.2 109.5 L429.7 110.0 L430.2 110.6 L430.8 111.2 L431.2 111.7 L431.9 112.5 L432.1 112.8 L433.0 113.9 L433.0 113.9 L433.8 115.0 L434.1 115.3 L434.7 116.1 L435.1 116.7 L435.5 117.2 L436.2 118.1 L436.4 118.3 L437.2 119.4 L437.3 119.6 L438.0 120.5 L438.4 121.0 L438.9 121.6 L439.5 122.3 L439.7 122.7 L440.5 123.7 L440.6 123.8 L441.5 124.9 L441.6 125.1 L442.4 126.0 L442.7 126.4 L443.3 127.1 L443.8 127.7 L444.2 128.2 L444.9 129.0 L445.1 129.3 L445.9 130.3 L446.0 130.4 L447.0 131.5 L447.0 131.5 L448.0 132.6 L448.1 132.8 L448.9 133.7 L449.2 134.0 L449.9 134.8 L450.3 135.2 L451.0 135.9 L451.4 136.3 L452.0 137.0 L452.4 137.5 L453.0 138.1 L453.5 138.6 L454.1 139.2 L454.6 139.7 L455.2 140.3 L455.7 140.8 L456.3 141.4 L456.8 141.9 L457.4 142.5 L457.8 142.9 L458.5 143.6 L458.9 144.0 L459.6 144.7 L460.0 145.0 L460.8 145.8 L461.1 146.0 L462.0 146.9 L462.2 147.0 L463.2 148.0 L463.2 148.1 L464.3 149.0 L464.4 149.1 L465.4 150.0 L465.6 150.2 L466.5 151.0 L466.8 151.3 L467.6 151.9 L468.1 152.4 L468.6 152.8 L469.3 153.5 L469.7 153.8 L470.6 154.6 L470.8 154.7 L471.9 155.6 L471.9 155.7 L473.0 156.5 L473.2 156.8 L474.1 157.4 L474.6 157.8 L475.1 158.3 L475.9 158.9 L476.2 159.2 L477.2 160.0 L477.3 160.1 L478.4 161.0 L478.6 161.1 L479.5 161.8 L480.0 162.2 L480.5 162.7 L481.3 163.3 L481.6 163.6 L482.7 164.4 L482.7 164.4 L483.8 165.3 L484.1 165.5 L484.9 166.1 L485.5 166.6 L485.9 167.0 L486.9 167.7 L487.0 167.8 L488.1 168.6 L488.3 168.8 L489.2 169.5 L489.8 169.9 L490.3 170.3 L491.2 171.0 L491.3 171.2 L492.4 172.0 L492.6 172.1 L493.5 172.8 L494.0 173.2 L494.6 173.6 L495.5 174.3 L495.7 174.5 L496.8 175.3 L496.9 175.4 L497.8 176.1 L498.3 176.5 L498.9 176.9 L499.8 177.6 L500.0 177.8 L501.1 178.6 L501.2 178.7 L502.2 179.4 L502.7 179.8 L503.2 180.2 L504.1 180.9 L504.3 181.1 L505.4 181.9 L505.5 182.0 L506.5 182.7 L506.9 183.1 L507.6 183.6 L508.4 184.2 L508.6 184.4 L509.7 185.2 L509.8 185.3 L510.8 186.1 L511.2 186.4 L511.9 186.9 L512.6 187.5 L513.0 187.7 L514.0 188.6 L514.1 188.6 L515.1 189.4 L515.4 189.7 L516.2 190.3 L516.8 190.8 L517.3 191.1 L518.2 191.9 L518.4 192.0 L519.5 192.8 L519.6 193.0 L520.5 193.7 L521.0 194.1 L521.6 194.6 L522.4 195.2 L522.7 195.4 L523.7 196.3 L523.8 196.3 L524.9 197.2 L525.1 197.4 L525.9 198.0 L526.5 198.5 L527.0 198.9 L527.8 199.6 L528.1 199.8 L529.1 200.7 L529.2 200.7 L530.3 201.6 L530.5 201.8 L531.3 202.5 L531.8 202.9 L532.4 203.4 L533.1 204.0 L533.5 204.3 L534.4 205.1 L534.6 205.2 L535.7 206.1 L535.7 206.1 L536.8 207.0 L537.0 207.2 L537.8 208.0 L538.3 208.3 L538.9 208.9 L539.6 209.4 L540.0 209.8 L540.8 210.5 L541.1 210.8 L542.1 211.6 L542.2 211.7 L543.2 212.7 L543.3 212.7 L544.3 213.6 L544.6 213.8 L545.4 214.6 L545.8 214.9 L546.5 215.5 L547.0 216.0 L547.6 216.5 L548.2 217.1 L548.6 217.5 L549.5 218.2 L549.7 218.5 L550.6 219.3 L550.8 219.5 L551.8 220.4 L551.9 220.5 L553.0 221.5 L553.0 221.5 L554.0 222.5 L554.2 222.6 L555.1 223.5 L555.4 223.7 L556.2 224.5 L556.5 224.8 L557.3 225.5 L557.7 225.9 L558.4 226.6 L558.8 227.0 L559.5 227.6 L560.0 228.1 L560.5 228.7 L561.1 229.2 L561.6 229.7 L562.2 230.3 L562.7 230.8 L563.3 231.4 L563.8 231.9 L564.4 232.5 L564.9 232.9 L565.5 233.6 L565.9 234.0 L566.6 234.7 L567.0 235.1 L567.7 235.8 L568.1 236.3 L568.7 236.9 L569.2 237.4 L569.8 238.0 L570.3 238.5 L570.8 239.1 L571.3 239.7 L571.8 240.2 L572.4 240.8 L572.9 241.3 L573.5 242.0 L573.9 242.4 L574.6 243.2 L574.8 243.5 L575.7 244.4 L575.8 244.6 L576.7 245.7 L576.8 245.7 L577.7 246.8 L577.8 247.0 L578.6 247.9 L578.9 248.3 L579.4 249.0 L580.0 249.7 L580.2 250.1 L581.0 251.2 L581.1 251.2 L581.8 252.3 L582.2 252.9 L582.5 253.4 L583.1 254.4 L583.2 254.8 L583.6 255.5 L584.0 256.6 L584.3 257.7 L584.3 258.0 L584.4 258.8 L584.3 259.6 L584.3 259.9 L583.8 261.0 L583.2 261.8 L582.9 262.1 L582.2 262.7 L581.2 263.2 L581.1 263.3 L580.0 263.7 L578.9 264.0 L577.8 264.3 L577.7 264.3 L576.8 264.5 L575.7 264.7 L574.6 264.8 L573.5 264.9 L572.4 265.0 L571.3 265.1 L570.3 265.2 L569.2 265.2 L568.1 265.2 L567.0 265.2 L565.9 265.2 L564.9 265.2 L563.8 265.2 L562.7 265.1 L561.6 265.1 L560.5 265.0 L559.5 265.0 L558.4 264.9 L557.3 264.8 L556.2 264.7 L555.1 264.7 L554.0 264.6 L553.0 264.4 L551.9 264.3 L550.8 264.2 L549.7 264.1 L548.6 264.0 L547.6 263.8 L546.5 263.7 L545.4 263.5 L544.3 263.4 L543.4 263.2 L543.2 263.2 L542.2 263.1 L541.1 262.9 L540.0 262.7 L538.9 262.5 L537.8 262.3 L536.8 262.1 L536.7 262.1 L535.7 261.9 L534.6 261.7 L533.5 261.5 L532.4 261.3 L531.3 261.1 L531.1 261.0 L530.3 260.9 L529.2 260.6 L528.1 260.4 L527.0 260.1 L526.2 259.9 L525.9 259.9 L524.9 259.6 L523.8 259.4 L522.7 259.1 L521.7 258.8 L521.6 258.8 L520.5 258.5 L519.5 258.3 L518.4 258.0 L517.6 257.7 L517.3 257.7 L516.2 257.4 L515.1 257.0 L514.1 256.7 L513.9 256.6 L513.0 256.4 L511.9 256.0 L510.8 255.7 L510.4 255.5 L509.7 255.3 L508.6 255.0 L507.6 254.6 L507.1 254.4 L506.5 254.2 L505.4 253.9 L504.3 253.4 L504.1 253.4 L503.2 253.1 L502.2 252.6 L501.2 252.3 L501.1 252.2 L500.0 251.8 L498.9 251.3 L498.5 251.2 L497.8 250.9 L496.8 250.4 L495.9 250.1 L495.7 250.0 L494.6 249.5 L493.5 249.0 L493.5 249.0 L492.4 248.5 L491.3 248.0 L491.2 247.9 L490.3 247.4 L489.2 246.9 L489.0 246.8 L488.1 246.3 L487.0 245.8 L486.9 245.7 L485.9 245.2 L484.9 244.6 L484.8 244.6 L483.8 244.0 L482.9 243.5 L482.7 243.3 L481.6 242.7 L481.1 242.4 L480.5 242.0 L479.5 241.4 L479.3 241.3 L478.4 240.7 L477.6 240.2 L477.3 240.0 L476.2 239.2 L476.0 239.1 L475.1 238.5 L474.4 238.0 L474.1 237.7 L473.0 236.9 L472.9 236.9 L471.9 236.1 L471.5 235.8 L470.8 235.3 L470.1 234.7 L469.7 234.4 L468.7 233.6 L468.6 233.5 L467.6 232.6 L467.4 232.5 L466.5 231.7 L466.1 231.4 L465.4 230.7 L464.9 230.3 L464.3 229.7 L463.7 229.2 L463.2 228.7 L462.6 228.1 L462.2 227.7 L461.5 227.0 L461.1 226.6 L460.4 225.9 L460.0 225.4 L459.4 224.8 L458.9 224.3 L458.4 223.7 L457.8 223.1 L457.4 222.6 L456.8 221.8 L456.5 221.5 L455.7 220.5 L455.6 220.4 L454.7 219.3 L454.6 219.2 L453.8 218.2 L453.5 217.8 L453.0 217.1 L452.4 216.4 L452.2 216.0 L451.4 214.9 L451.4 214.9 L450.6 213.8 L450.3 213.3 L449.9 212.7 L449.2 211.7 L449.1 211.6 L448.4 210.5 L448.1 210.0 L447.7 209.4 L447.1 208.3 L447.0 208.3 L446.4 207.2 L445.9 206.4 L445.8 206.1 L445.2 205.1 L444.9 204.5 L444.5 204.0 L444.0 202.9 L443.8 202.5 L443.4 201.8 L442.8 200.7 L442.7 200.4 L442.3 199.6 L441.7 198.5 L441.6 198.2 L441.2 197.4 L440.7 196.3 L440.5 195.9 L440.2 195.2 L439.7 194.1 L439.5 193.4 L439.3 193.0 L438.8 191.9 L438.4 190.8 L438.4 190.8 L437.9 189.7 L437.5 188.6 L437.3 188.1 L437.1 187.5 L436.6 186.4 L436.2 185.3 L436.2 185.2 L435.8 184.2 L435.5 183.1 L435.1 182.1 L435.1 182.0 L434.7 180.9 L434.4 179.8 L434.1 178.8 L434.0 178.7 L433.7 177.6 L433.3 176.5 L433.0 175.4 L433.0 175.2 L432.7 174.3 L432.4 173.2 L432.1 172.1 L431.9 171.4 L431.8 171.0 L431.5 169.9 L431.2 168.8 L430.9 167.7 L430.8 167.2 L430.7 166.6 L430.4 165.5 L430.1 164.4 L429.9 163.3 L429.7 162.6 L429.6 162.2 L429.4 161.1 L429.1 160.0 L428.9 158.9 L428.7 157.8 L428.6 157.6 L428.5 156.8 L428.3 155.7 L428.0 154.6 L427.8 153.5 L427.6 152.4 L427.6 151.9 L427.4 151.3 L427.3 150.2 L427.1 149.1 L426.9 148.0 L426.7 146.9 L426.5 145.8 L426.5 145.3 L426.4 144.7 L426.2 143.6 L426.1 142.5 L425.9 141.4 L425.8 140.3 L425.6 139.2 L425.5 138.1 L425.4 137.4 L425.4 137.0 L425.2 135.9 L425.1 134.8 L425.0 133.7 L424.9 132.6 L424.8 131.5 L424.7 130.4 L424.6 129.3 L424.5 128.2 L424.4 127.1 L424.3 126.0 L424.3 125.7" fill="none" stroke="#0f5f57" stroke-width="2.2" opacity="0.55"/>
+<path d="M551.9 264.3 L551.9 264.3" fill="none" stroke="#0f5f57" stroke-width="2.2" opacity="0.55"/>
+<path d="M473.0 219.6 L472.9 219.3 L472.6 218.2 L472.4 217.1 L472.3 216.0 L472.2 214.9 L472.3 213.8 L472.4 212.7 L472.5 211.6 L472.8 210.5 L473.0 209.9 L473.1 209.4 L473.5 208.3 L474.0 207.2 L474.1 207.1 L474.5 206.1 L475.1 205.1 L475.2 205.1 L475.9 204.0 L476.2 203.6 L476.8 202.9 L477.3 202.3 L477.9 201.8 L478.4 201.3 L479.1 200.7 L479.5 200.3 L480.5 199.6 L480.6 199.6 L481.6 198.9 L482.4 198.5 L482.7 198.3 L483.8 197.8 L484.9 197.4 L485.0 197.4 L485.9 197.0 L487.0 196.8 L488.1 196.5 L489.2 196.4 L490.3 196.3 L490.3 196.3 L491.3 196.2 L492.4 196.2 L493.5 196.3 L493.7 196.3 L494.6 196.4 L495.7 196.5 L496.8 196.7 L497.8 196.9 L498.9 197.2 L499.4 197.4 L500.0 197.6 L501.1 198.0 L502.2 198.4 L502.3 198.5 L503.2 198.9 L504.3 199.5 L504.4 199.6 L505.4 200.1 L506.2 200.7 L506.5 200.9 L507.6 201.6 L507.7 201.8 L508.6 202.5 L509.0 202.9 L509.7 203.6 L510.1 204.0 L510.8 204.7 L511.1 205.1 L511.9 206.1 L512.0 206.1 L512.7 207.2 L513.0 207.7 L513.3 208.3 L513.8 209.4 L514.1 210.0 L514.3 210.5 L514.6 211.6 L514.8 212.7 L515.0 213.8 L515.0 214.9 L514.9 216.0 L514.8 217.1 L514.5 218.2 L514.1 219.3 L514.1 219.5 L513.6 220.4 L513.0 221.5 L513.0 221.5 L512.2 222.6 L511.9 223.0 L511.3 223.7 L510.8 224.2 L510.1 224.8 L509.7 225.2 L508.8 225.9 L508.6 226.0 L507.6 226.7 L507.2 227.0 L506.5 227.4 L505.4 228.0 L505.2 228.1 L504.3 228.5 L503.2 228.9 L502.6 229.2 L502.2 229.3 L501.1 229.7 L500.0 230.0 L498.9 230.3 L498.8 230.3 L497.8 230.5 L496.8 230.7 L495.7 230.8 L494.6 231.0 L493.5 231.0 L492.4 231.1 L491.3 231.1 L490.3 231.0 L489.2 230.9 L488.1 230.8 L487.0 230.6 L485.9 230.4 L485.5 230.3 L484.9 230.1 L483.8 229.8 L482.7 229.4 L482.1 229.2 L481.6 229.0 L480.5 228.4 L479.9 228.1 L479.5 227.8 L478.4 227.1 L478.3 227.0 L477.3 226.2 L477.0 225.9 L476.2 225.1 L475.9 224.8 L475.1 223.8 L475.0 223.7 L474.3 222.6 L474.1 222.1 L473.7 221.5 L473.3 220.4 L473.0 219.6" fill="none" stroke="#6b4c7a" stroke-width="1.8" opacity="1" stroke-dasharray="5 3"/>
+<path d="M458.9 221.0 L458.8 220.4 L458.6 219.3 L458.5 218.2 L458.4 217.1 L458.3 216.0 L458.3 214.9 L458.3 213.8 L458.4 212.7 L458.5 211.6 L458.6 210.5 L458.7 209.4 L458.9 208.3 L458.9 208.3 L459.1 207.2 L459.3 206.1 L459.6 205.1 L459.9 204.0 L460.0 203.7 L460.3 202.9 L460.6 201.8 L461.1 200.7 L461.1 200.6 L461.5 199.6 L462.0 198.5 L462.2 198.1 L462.5 197.4 L463.1 196.3 L463.2 196.0 L463.7 195.2 L464.3 194.2 L464.4 194.1 L465.1 193.0 L465.4 192.6 L465.9 191.9 L466.5 191.1 L466.8 190.8 L467.6 189.8 L467.7 189.7 L468.6 188.6 L468.7 188.6 L469.7 187.6 L469.8 187.5 L470.8 186.6 L471.0 186.4 L471.9 185.7 L472.4 185.3 L473.0 184.9 L474.0 184.2 L474.1 184.1 L475.1 183.5 L475.8 183.1 L476.2 182.8 L477.3 182.3 L477.9 182.0 L478.4 181.8 L479.5 181.3 L480.5 180.9 L480.6 180.9 L481.6 180.5 L482.7 180.2 L483.8 179.9 L484.4 179.8 L484.9 179.7 L485.9 179.5 L487.0 179.3 L488.1 179.2 L489.2 179.1 L490.3 179.0 L491.3 179.0 L492.4 179.0 L493.5 179.0 L494.6 179.1 L495.7 179.2 L496.8 179.3 L497.8 179.4 L498.9 179.6 L500.0 179.8 L500.0 179.8 L501.1 180.0 L502.2 180.3 L503.2 180.6 L504.3 180.9 L504.4 180.9 L505.4 181.2 L506.5 181.6 L507.6 182.0 L507.6 182.0 L508.6 182.4 L509.7 182.8 L510.3 183.1 L510.8 183.3 L511.9 183.8 L512.7 184.2 L513.0 184.3 L514.1 184.9 L514.8 185.3 L515.1 185.5 L516.2 186.1 L516.7 186.4 L517.3 186.8 L518.4 187.5 L518.4 187.5 L519.5 188.2 L520.0 188.6 L520.5 189.0 L521.5 189.7 L521.6 189.8 L522.7 190.7 L522.9 190.8 L523.8 191.6 L524.1 191.9 L524.9 192.5 L525.4 193.0 L525.9 193.5 L526.5 194.1 L527.0 194.6 L527.6 195.2 L528.1 195.8 L528.5 196.3 L529.2 197.0 L529.5 197.4 L530.3 198.4 L530.3 198.5 L531.1 199.6 L531.3 199.9 L531.9 200.7 L532.4 201.5 L532.6 201.8 L533.2 202.9 L533.5 203.4 L533.8 204.0 L534.3 205.1 L534.6 205.7 L534.8 206.1 L535.2 207.2 L535.6 208.3 L535.7 208.7 L535.9 209.4 L536.1 210.5 L536.3 211.6 L536.5 212.7 L536.6 213.8 L536.6 214.9 L536.5 216.0 L536.4 217.1 L536.3 218.2 L536.1 219.3 L535.8 220.4 L535.7 220.6 L535.4 221.5 L534.9 222.6 L534.6 223.3 L534.4 223.7 L533.8 224.8 L533.5 225.3 L533.1 225.9 L532.4 226.9 L532.3 227.0 L531.4 228.1 L531.3 228.2 L530.4 229.2 L530.3 229.4 L529.3 230.3 L529.2 230.4 L528.1 231.4 L528.1 231.4 L527.0 232.2 L526.7 232.5 L525.9 233.1 L525.2 233.6 L524.9 233.8 L523.8 234.5 L523.5 234.7 L522.7 235.1 L521.6 235.7 L521.5 235.8 L520.5 236.3 L519.5 236.8 L519.3 236.9 L518.4 237.3 L517.3 237.8 L516.8 238.0 L516.2 238.2 L515.1 238.7 L514.1 239.0 L513.9 239.1 L513.0 239.4 L511.9 239.8 L510.8 240.1 L510.4 240.2 L509.7 240.4 L508.6 240.7 L507.6 240.9 L506.5 241.2 L506.0 241.3 L505.4 241.4 L504.3 241.6 L503.2 241.8 L502.2 242.0 L501.1 242.1 L500.0 242.3 L499.1 242.4 L498.9 242.4 L497.8 242.5 L496.8 242.6 L495.7 242.7 L494.6 242.7 L493.5 242.8 L492.4 242.8 L491.3 242.8 L490.3 242.8 L489.2 242.7 L488.1 242.7 L487.0 242.6 L485.9 242.5 L485.2 242.4 L484.9 242.3 L483.8 242.2 L482.7 242.0 L481.6 241.8 L480.5 241.6 L479.5 241.3 L479.3 241.3 L478.4 241.1 L477.3 240.7 L476.2 240.4 L475.7 240.2 L475.1 240.0 L474.1 239.5 L473.0 239.1 L473.0 239.0 L471.9 238.5 L470.9 238.0 L470.8 237.9 L469.7 237.3 L469.2 236.9 L468.6 236.5 L467.7 235.8 L467.6 235.7 L466.5 234.8 L466.4 234.7 L465.4 233.8 L465.2 233.6 L464.3 232.6 L464.2 232.5 L463.4 231.4 L463.2 231.2 L462.6 230.3 L462.2 229.6 L461.9 229.2 L461.3 228.1 L461.1 227.6 L460.8 227.0 L460.3 225.9 L460.0 225.0 L459.9 224.8 L459.6 223.7 L459.3 222.6 L459.0 221.5 L458.9 221.0" fill="none" stroke="#6b4c7a" stroke-width="1.8" opacity="0.55" stroke-dasharray="5 3"/>
+<path d="M465.2 299.5 L464.3 298.7 L463.9 298.4 L463.2 297.8 L462.6 297.3 L462.2 296.9 L461.3 296.2 L461.1 295.9 L460.1 295.1 L460.0 295.0 L458.9 294.1 L458.8 294.0 L457.8 293.1 L457.5 292.9 L456.8 292.2 L456.3 291.8 L455.7 291.3 L455.0 290.7 L454.6 290.3 L453.7 289.6 L453.5 289.4 L452.4 288.5 L452.4 288.5 L451.4 287.5 L451.2 287.4 L450.3 286.6 L449.9 286.3 L449.2 285.7 L448.6 285.2 L448.1 284.7 L447.4 284.1 L447.0 283.8 L446.1 283.0 L445.9 282.9 L444.9 281.9 L444.8 281.9 L443.8 281.0 L443.5 280.8 L442.7 280.1 L442.3 279.7 L441.6 279.1 L441.0 278.6 L440.5 278.2 L439.7 277.5 L439.5 277.3 L438.4 276.4 L438.4 276.3 L437.3 275.4 L437.2 275.3 L436.2 274.5 L435.9 274.2 L435.1 273.5 L434.6 273.1 L434.1 272.6 L433.4 272.0 L433.0 271.7 L432.1 270.9 L431.9 270.7 L430.8 269.8 L430.8 269.8 L429.7 268.9 L429.5 268.7 L428.6 267.9 L428.3 267.6 L427.6 267.0 L427.0 266.5 L426.5 266.1 L425.7 265.4 L425.4 265.1 L424.4 264.3 L424.3 264.2 L423.2 263.3 L423.2 263.2 L422.2 262.4 L421.9 262.1 L421.1 261.4 L420.6 261.0 L420.0 260.5 L419.4 259.9 L418.9 259.5 L418.1 258.8 L417.8 258.6 L416.8 257.7 L416.8 257.7 L415.7 256.8 L415.5 256.6 L414.6 255.8 L414.3 255.5 L413.5 254.9 L413.0 254.4 L412.4 253.9 L411.7 253.4 L411.4 253.0 L410.5 252.3 L410.3 252.1 L409.2 251.2 L409.2 251.2 L408.1 250.2 L407.9 250.1 L407.0 249.3 L406.6 249.0 L405.9 248.4 L405.4 247.9 L404.9 247.4 L404.1 246.8 L403.8 246.5 L402.8 245.7 L402.7 245.6 L401.6 244.6 L401.6 244.6 L400.5 243.7" fill="none" stroke="#9c4d2f" stroke-width="1.8" opacity="1" stroke-dasharray="2 3"/>
+<path d="M551.3 299.5 L550.8 299.0 L550.1 298.4 L549.7 298.1 L548.8 297.3 L548.6 297.1 L547.6 296.2 L547.5 296.2 L546.5 295.3 L546.2 295.1 L545.4 294.3 L545.0 294.0 L544.3 293.4 L543.7 292.9 L543.2 292.5 L542.4 291.8 L542.2 291.5 L541.2 290.7 L541.1 290.6 L540.0 289.7 L539.9 289.6 L538.9 288.7 L538.6 288.5 L537.8 287.8 L537.3 287.4 L536.8 286.9 L536.1 286.3 L535.7 285.9 L534.8 285.2 L534.6 285.0 L533.5 284.1 L533.5 284.1 L532.4 283.1 L532.3 283.0 L531.3 282.2 L531.0 281.9 L530.3 281.3 L529.7 280.8 L529.2 280.3 L528.4 279.7 L528.1 279.4 L527.2 278.6 L527.0 278.5 L525.9 277.5 L525.9 277.5 L524.9 276.6 L524.6 276.4 L523.8 275.7 L523.4 275.3 L522.7 274.7 L522.1 274.2 L521.6 273.8 L520.8 273.1 L520.5 272.9 L519.5 272.0 L519.5 271.9 L518.4 271.0 L518.3 270.9 L517.3 270.1 L517.0 269.8 L516.2 269.1 L515.7 268.7 L515.1 268.2 L514.4 267.6 L514.1 267.3 L513.2 266.5 L513.0 266.3 L511.9 265.4 L511.9 265.4 L510.8 264.5 L510.6 264.3 L509.7 263.6 L509.4 263.2 L508.6 262.6 L508.1 262.1 L507.6 261.7 L506.8 261.0 L506.5 260.7 L505.5 259.9 L505.4 259.8 L504.3 258.9 L504.3 258.8 L503.2 258.0 L503.0 257.7 L502.2 257.0 L501.7 256.6 L501.1 256.1 L500.4 255.5 L500.0 255.2 L499.2 254.4 L498.9 254.2 L497.9 253.4 L497.8 253.3 L496.8 252.4 L496.6 252.3 L495.7 251.4 L495.4 251.2 L494.6 250.5 L494.1 250.1 L493.5 249.6 L492.8 249.0 L492.4 248.6 L491.5 247.9 L491.3 247.7 L490.3 246.8 L490.3 246.8 L489.2 245.8 L489.0 245.7 L488.1 244.9 L487.7 244.6 L487.0 244.0 L486.5 243.5 L485.9 243.0 L485.2 242.4 L484.9 242.1 L483.9 241.3 L483.8 241.2 L482.7 240.2 L482.6 240.2 L481.6 239.3 L481.4 239.1 L480.5 238.4 L480.1 238.0 L479.5 237.4 L478.8 236.9 L478.4 236.5 L477.6 235.8 L477.3 235.6 L476.3 234.7 L476.2 234.6 L475.1 233.7 L475.0 233.6 L474.1 232.8 L473.7 232.5 L473.0 231.8 L472.5 231.4 L471.9 230.9 L471.2 230.3 L470.8 230.0 L469.9 229.2 L469.7 229.0 L468.6 228.1 L468.6 228.1 L467.6 227.2 L467.4 227.0 L466.5 226.2 L466.1 225.9 L465.4 225.3 L464.8 224.8 L464.3 224.4 L463.6 223.7 L463.2 223.4 L462.3 222.6 L462.2 222.5 L461.1 221.6 L461.0 221.5 L460.0 220.6 L459.7 220.4 L458.9 219.7 L458.5 219.3 L457.8 218.8 L457.2 218.2 L456.8 217.8 L455.9 217.1 L455.7 216.9 L454.6 216.0 L454.6 216.0 L453.5 215.0 L453.4 214.9 L452.4 214.1 L452.1 213.8 L451.4 213.2 L450.8 212.7 L450.3 212.2 L449.6 211.6 L449.2 211.3 L448.3 210.5 L448.1 210.4 L447.0 209.4 L447.0 209.4 L445.9 208.5 L445.7 208.3 L444.9 207.6 L444.5 207.2 L443.8 206.6 L443.2 206.1 L442.7 205.7 L441.9 205.1 L441.6 204.8 L440.7 204.0 L440.5 203.9 L439.5 202.9 L439.4 202.9 L438.4 202.0 L438.1 201.8 L437.3 201.0 L436.8 200.7 L436.2 200.1 L435.6 199.6 L435.1 199.2 L434.3 198.5 L434.1 198.3 L433.0 197.4 L433.0 197.3 L431.9 196.4 L431.8 196.3 L430.8 195.5 L430.5 195.2 L429.7 194.5 L429.2 194.1 L428.6 193.6 L427.9 193.0 L427.6 192.7 L426.7 191.9 L426.5 191.7 L425.4 190.8 L425.4 190.8 L424.3 189.9 L424.1 189.7 L423.2 188.9 L422.8 188.6 L422.2 188.0 L421.6 187.5 L421.1 187.1 L420.3 186.4 L420.0 186.1 L419.0 185.3 L418.9 185.2 L417.8 184.3 L417.8 184.2 L416.8 183.3 L416.5 183.1 L415.7 182.4 L415.2 182.0 L414.6 181.5 L413.9 180.9 L413.5 180.5 L412.7 179.8 L412.4 179.6 L411.4 178.7 L411.4 178.7 L410.3 177.7 L410.1 177.6 L409.2 176.8 L408.8 176.5 L408.1 175.9 L407.6 175.4 L407.0 174.9 L406.3 174.3 L405.9 174.0 L405.0 173.2 L404.9 173.1 L403.8 172.1 L403.8 172.1 L402.7 171.2 L402.5 171.0 L401.6 170.3 L401.2 169.9 L400.5 169.3" fill="none" stroke="#9c4d2f" stroke-width="1.8" opacity="0.55" stroke-dasharray="2 3"/>
+<text x="190.0" y="24.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">exact posterior and free-form product</text>
+<text x="530.0" y="24.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">Gamma and Exponential products</text>
+<line x1="206" y1="62" x2="228" y2="62" stroke="#0f5f57" stroke-width="2"/>
+<text x="234.0" y="66.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">exact</text>
+<line x1="206" y1="80" x2="228" y2="80" stroke="#2c5f8a" stroke-width="2"/>
+<text x="234.0" y="84.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">free-form</text>
+<line x1="546" y1="62" x2="568" y2="62" stroke="#0f5f57" stroke-width="2"/>
+<text x="574.0" y="66.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">exact</text>
+<line x1="546" y1="80" x2="568" y2="80" stroke="#6b4c7a" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="574.0" y="84.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">Gamma</text>
+<line x1="546" y1="98" x2="568" y2="98" stroke="#9c4d2f" stroke-width="2" stroke-dasharray="2 3"/>
+<text x="574.0" y="102.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">Exponential</text>
+</svg><figcaption><span class="fno">Figure 4.5.1.</span> The posterior for the representative observation $u = (2.5, 3.0)$ at the true rates, with contours enclosing 50 and 90 per cent of the probability of each density. Left: the exact posterior (green) and the free-form mean-field product (blue). Right: the exact posterior with the Gamma product (purple, dashed) and the Exponential product (clay, dotted). The three families are defined below. All four densities are computed on one grid from the same arrays the lesson's numbers come from.</figcaption></figure>
+<h3 id="the-m-step-for-a-prior-rate">The M-step for a prior rate</h3>
+<p>Variational EM needs one M-step, and it has the same form for every recognition family. In $\mathcal{F}_{\mathrm{tot}} = \sum_n \mathcal{F}[Q_n, u_n; \lambda]$ the rate $\lambda_i$ appears only in the prior term of <a class="eqref" href="#eq-tc-logjoint">(4.5.3)</a>, so</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The M-step for an exponential rate</span></div><p>For trial $n$, the part of $\mathcal{F}[Q_n, u_n; \lambda] = \mathbb{E}_{Q_n}[\ln Q_n] - \mathbb{E}_{Q_n}[\ln P(u_n, s \mid \lambda)]$ that depends on $\lambda_i$ is
+<div class="eqn"><div class="eqbody">$$-\mathbb{E}_{Q_n}\big[\ln\lambda_i - \lambda_i s_i\big] \;=\; -\ln\lambda_i + \lambda_i\,\mathbb{E}_{Q_n}[s_i].$$</div></div>
+Summing over trials and writing $\bar m_i = \frac{1}{N}\sum_n \mathbb{E}_{Q_n}[s_i]$ for the average recognition mean of cause $i$,
+<div class="eqn"><div class="eqbody">$$\mathcal{F}_{\mathrm{tot}} \;=\; -N\ln\lambda_i + N\lambda_i \bar m_i + (\text{terms free of } \lambda_i).$$</div></div>
+The derivative is $-N/\lambda_i + N\bar m_i$, zero at $\lambda_i = 1/\bar m_i$, and the second derivative $N/\lambda_i^2$ is positive, so this is the unique minimiser:
+<div class="eqn" id="eq-tc-mstep"><div class="eqbody">$$\lambda_i \;\leftarrow\; \frac{1}{\bar m_i} \;=\; \left(\frac{1}{N}\sum_{n=1}^{N}\mathbb{E}_{Q_n}[s_i]\right)^{-1}.$$</div><div class="eqno"><a href="#eq-tc-mstep" title="Link to equation 4.5.4">(4.5.4)</a></div></div></p></div>
+<p>The M-step uses the recognition densities only through their means. For exact EM, where $Q_n$ is the posterior $P(s \mid u_n, \lambda)$, a fixed point of <a class="eqref" href="#eq-tc-mstep">(4.5.4)</a> is a stationary point of the evidence. By Fisher's identity (<a href="../week-03/what-the-mode-leaves-out.html">Week&nbsp;3, Lesson&nbsp;4</a>, and the exercise at the end of Lesson&nbsp;4),
+<div class="eqn" id="eq-tc-score"><div class="eqbody">$$\frac{\partial}{\partial\lambda_i}\ln P(u_{1:N} \mid \lambda)
+\;=\; \sum_{n=1}^{N}\mathbb{E}_{P(s \mid u_n, \lambda)}\!\left[\frac{1}{\lambda_i} - s_i\right]
+\;=\; \frac{N}{\lambda_i} - \sum_{n=1}^{N}\mathbb{E}[s_i \mid u_n, \lambda],$$</div><div class="eqno"><a href="#eq-tc-score" title="Link to equation 4.5.5">(4.5.5)</a></div></div>
+which is zero exactly when $\lambda_i = 1/\bar m_i$. So exact EM, run to convergence, returns a stationary point $\hat\lambda$ of the likelihood of this sample. A zero score and a converged EM run do not prove that it is the global maximum, and the lesson calls it the exact-EM fit. That, not $\lambda^{*}$, is the benchmark for the variational rows below. On this sample $\hat\lambda = (0.9345, 0.6862)$, and the largest component of <a class="eqref" href="#eq-tc-score">(4.5.5)</a> there is $1.5 \times 10^{-9}$.</p>
+<h3 id="an-online-rule-that-averages-rates">An online rule that averages rates</h3>
+<p>Here is a rule that suggests itself when each $Q_n$ is an exponential density with mean $m_{n,i}$, and so with rate $1/m_{n,i}$, the same kind of quantity as $\lambda_i$: after each trial, move the prior rate a little towards the trial's rate,
+<div class="eqn" id="eq-tc-online"><div class="eqbody">$$\lambda_i \;\leftarrow\; 0.99\,\lambda_i + 0.01\,\frac{1}{m_{n,i}}.$$</div><div class="eqno"><a href="#eq-tc-online" title="Link to equation 4.5.6">(4.5.6)</a></div></div>
+Run once through the $500$ trials from $\lambda^{(0)}$, with each trial's exponential recognition density (defined below) taken as the best of 25 starts at the current rates, it ends at $(3.099, 2.069)$, which is $3.44$ and $2.96$ times the true rates. It has not settled: over the last 100 trials $\lambda_1$ stayed between $3.067$ and $3.157$ and $\lambda_2$ between $2.022$ and $2.080$. The rest of the lesson takes this result apart.</p>
+<p><a class="eqref" href="#eq-tc-online">(4.5.6)</a> is an online version of the arithmetic mean of the trials' rates, $\lambda_i^{\mathrm{AM}} = \frac1N\sum_n 1/m_{n,i}$. The M-step <a class="eqref" href="#eq-tc-mstep">(4.5.4)</a> is instead the reciprocal of the arithmetic mean of $m_{n,i}$, which is the harmonic mean of the rates $1/m_{n,i}$. The two differ in a known direction. The function $x \mapsto 1/x$ is strictly convex on $(0, \infty)$, so Jensen's inequality for a convex function (<a href="../week-04/bounding-surprise.html">Lesson&nbsp;1</a>) gives
+<div class="eqn" id="eq-tc-am-hm"><div class="eqbody">$$\frac{1}{\bar m_i} \;=\; \frac{1}{\frac1N\sum_n m_{n,i}} \;\le\; \frac{1}{N}\sum_{n=1}^{N}\frac{1}{m_{n,i}} \;=\; \lambda_i^{\mathrm{AM}},$$</div><div class="eqno"><a href="#eq-tc-am-hm" title="Link to equation 4.5.7">(4.5.7)</a></div></div>
+with equality only when every $m_{n,i}$ is the same. So averaging rates always gives a rate at least as large as the M-step, and $\lambda^{\mathrm{AM}}$ is not a minimiser of $\mathcal{F}_{\mathrm{tot}}$ over $\lambda$: under it, $\mathcal{F}_{\mathrm{tot}}$ can rise. This is effect 2. It belongs to the rule, and the remedy is the M-step.</p>
+<h2 id="the-exact-posterior-by-numerical-integration"><span class="secno">2</span>The exact posterior by numerical integration</h2>
+<p>We evaluate the normaliser and moments of the posterior <a class="eqref" href="#eq-tc-logjoint">(4.5.3)</a> by numerical integration, and the lesson calls the result the exact posterior with that understanding. Two features make a plain grid in $(s_1, s_2)$ unreliable. For large observations the ridge is very thin: the trial with the largest observations, $u = (118.96, 143.00)$ (trial $85$ of the sample, counting from 0), has posterior standard deviations $(0.0281, 0.0302)$ about means $(4.6251, 5.5603)$, with correlation $-0.8048$. And the ridge is curved, so no rectangle of grid points follows it. A change of variables removes both problems.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Coordinates in which the likelihood factorises</span></div><p>Let $y_1 = (s_2 s_1^2)^{1/3}$ and $y_2 = (s_1 s_2^2)^{1/3}$, the cube roots of the two noiseless sensor outputs. Here $y_i$ is a local coordinate, not an observation. Multiplying, $y_1^3 y_2^3 = s_1^3 s_2^3$, so $s_1 s_2 = y_1 y_2$, and then
+<div class="eqn"><div class="eqbody">$$s_1 \;=\; \frac{s_2 s_1^2}{s_1 s_2} \;=\; \frac{y_1^3}{y_1 y_2} \;=\; \frac{y_1^2}{y_2},
+\qquad
+s_2 \;=\; \frac{y_2^2}{y_1}.$$</div></div>
+These formulas define a smooth bijection of the open quadrant $y_1, y_2 &gt; 0$ onto $s_1, s_2 &gt; 0$; substituting back gives $s_2 s_1^2 = (y_2^2/y_1)(y_1^4/y_2^2) = y_1^3$, as required. Its Jacobian matrix is
+<div class="eqn"><div class="eqbody">$$\frac{\partial(s_1, s_2)}{\partial(y_1, y_2)} \;=\;
+\begin{pmatrix} 2y_1/y_2 & -y_1^2/y_2^2 \\ -y_2^2/y_1^2 & 2y_2/y_1 \end{pmatrix},$$</div></div>
+with determinant $4 - 1 = 3$. The evidence becomes
+<div class="eqn" id="eq-tc-evidence-y"><div class="eqbody">$$P(u \mid \lambda) \;=\; \frac{3\lambda_1\lambda_2}{2\pi}\int_0^\infty\!\!\int_0^\infty
+\exp\!\left(-\lambda_1\frac{y_1^2}{y_2} - \lambda_2\frac{y_2^2}{y_1}\right)
+e^{-\frac12(u_1 - y_1^3)^2}\,e^{-\frac12(u_2 - y_2^3)^2}\;\mathrm{d}y_1\,\mathrm{d}y_2 .$$</div><div class="eqno"><a href="#eq-tc-evidence-y" title="Link to equation 4.5.8">(4.5.8)</a></div></div>
+Each sensor factor now depends on one coordinate only, so the integration limits and nodes for $y_1$ can be chosen from $u_1$ alone and those for $y_2$ from $u_2$ alone. Posterior moments are ratios of integrals of the same form with $s_1 = y_1^2/y_2$ and $s_2 = y_2^2/y_1$ inserted.</p></div>
+<p>The nodes for $y_i$ are laid out as follows. The sensor factor is a Gaussian of unit width in $g_i = y_i^3$ centred on $u_i$. The range $g_i \in [\max(0, u_i - L),\, \max(u_i, 0) + L]$ with $L = 10$ is split into panels of width $h = 1.5$ in $g_i$, mapped to $y_i$ by the cube root, and each panel gets a Gauss&ndash;Legendre rule of order $8$. When the range reaches $g_i = 0$, its first panel is replaced by $14$ panels whose widths shrink geometrically by a factor $0.25$ towards $y_i = 0$, because there the prior factor varies over ever shorter distances: $s_1 = y_1^2/y_2$ grows without bound as $y_2 \to 0$. The two axes are combined as a tensor product, about $29303$ nodes per trial on average.</p>
+<p>Truncating the limits has a bound. A point outside the box has $y_1$ or $y_2$ outside its range, and there that coordinate's sensor factor is below $e^{-L^2/2}$ while the other is at most $1$. The prior factor integrates over the whole quadrant to $\int\!\!\int e^{-\lambda_1 s_1 - \lambda_2 s_2}\,\mathrm{d}s_1\,\mathrm{d}s_2/3 = 1/(3\lambda_1\lambda_2)$, since $\mathrm{d}s_1\,\mathrm{d}s_2 = 3\,\mathrm{d}y_1\,\mathrm{d}y_2$. Bounding the two parts of the outside region separately, the part of <a class="eqref" href="#eq-tc-evidence-y">(4.5.8)</a> outside the box is at most $2 \cdot e^{-L^2/2}/(2\pi) = 6.1 \times 10^{-23}$. The largest surprise in the sample at the true rates is $16.1099$ nats, so relative to every trial's evidence the omitted part is below $6.1 \times 10^{-16}$. The bound covers the evidence; the moments have truncation errors of the same kind, which this calculation does not bound.</p>
+<p>The quadrature error inside the box has no such bound. The evidence for it is that refining each setting on its own, over all $500$ trials at the true rates, changes nothing that the lesson uses:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Refinement</th>
+<th style="text-align: right;">Nodes per trial</th>
+<th style="text-align: right;">Surprise (nats)</th>
+<th style="text-align: right;">Means (relative)</th>
+<th style="text-align: right;">Standard deviations (relative)</th>
+<th style="text-align: right;">Correlation (relative)</th>
+<th style="text-align: right;">One-step rates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>panel width $h$ halved to $0.75$</td>
+<td style="text-align: right;">$55972$</td>
+<td style="text-align: right;">$2.7 \times 10^{-8}$</td>
+<td style="text-align: right;">$1.0 \times 10^{-7}$</td>
+<td style="text-align: right;">$2.8 \times 10^{-6}$</td>
+<td style="text-align: right;">$1.4 \times 10^{-6}$</td>
+<td style="text-align: right;">$3.1 \times 10^{-10}$</td>
+</tr>
+<tr>
+<td>limits widened, $L = 14$</td>
+<td style="text-align: right;">$38816$</td>
+<td style="text-align: right;">$2.1 \times 10^{-8}$</td>
+<td style="text-align: right;">$1.5 \times 10^{-8}$</td>
+<td style="text-align: right;">$1.6 \times 10^{-7}$</td>
+<td style="text-align: right;">$1.7 \times 10^{-7}$</td>
+<td style="text-align: right;">$2.0 \times 10^{-10}$</td>
+</tr>
+<tr>
+<td>grading: $24$ panels shrinking by $0.2$</td>
+<td style="text-align: right;">$60129$</td>
+<td style="text-align: right;">$5.4 \times 10^{-8}$</td>
+<td style="text-align: right;">$6.0 \times 10^{-7}$</td>
+<td style="text-align: right;">$5.4 \times 10^{-6}$</td>
+<td style="text-align: right;">$1.2 \times 10^{-5}$</td>
+<td style="text-align: right;">$3.9 \times 10^{-9}$</td>
+</tr>
+<tr>
+<td>Gauss&ndash;Legendre order $12$</td>
+<td style="text-align: right;">$65932$</td>
+<td style="text-align: right;">$2.6 \times 10^{-8}$</td>
+<td style="text-align: right;">$8.2 \times 10^{-8}$</td>
+<td style="text-align: right;">$2.2 \times 10^{-6}$</td>
+<td style="text-align: right;">$1.5 \times 10^{-6}$</td>
+<td style="text-align: right;">$2.7 \times 10^{-10}$</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each entry is the largest change over the $500$ trials, absolute for the surprise and relative for the moments; the last column is the absolute change in the rates $1/\bar m_i$ that one M-step from $\lambda^{*}$ produces. The exact-EM fit was also recomputed with all four refinements at once: one further M-step from it under the refined integration moves it by $1.6 \times 10^{-10}$. This is evidence of numerical convergence, the stability of the result as the numerical settings change; it is not an error bound.</p>
+<h2 id="three-mean-field-families"><span class="secno">3</span>Three mean-field families</h2>
+<p>All three families below are products $Q(s_1, s_2) = q_1(s_1)\,q_2(s_2)$ on the positive quadrant. They differ in how much freedom each factor has.</p>
+<h3 id="exponential-factors">Exponential factors</h3>
+<p>The first family uses the prior's own form for each factor: $q_i$ is exponential with mean $m_i &gt; 0$,
+<div class="eqn" id="eq-tc-q-exp"><div class="eqbody">$$q_i(s_i) \;=\; \frac{1}{m_i}\,e^{-s_i/m_i}, \qquad s_i &gt; 0.$$</div><div class="eqno"><a href="#eq-tc-q-exp" title="Link to equation 4.5.9">(4.5.9)</a></div></div></p>
+<div class="box definition"><div class="boxhd">Definition 4.5.1<span class="bt">Coefficient of variation</span></div><p>For a positive random variable $X$ with mean $\mathbb{E}[X] &gt; 0$, the <strong>coefficient of variation</strong> is the ratio of its standard deviation to its mean, $\mathrm{CV}[X] = \sqrt{\mathrm{Var}(X)}\,/\,\mathbb{E}[X]$. It is dimensionless.</p></div>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Moments, divergence and free energy of the Exponential product</span></div><ol>
+<li>
+<p>Moments. For an integer $r \ge 1$, integrating by parts with $v = -e^{-s/m}$,
+<div class="eqn"><div class="eqbody">$$\int_0^\infty s^r\,\frac{e^{-s/m}}{m}\,\mathrm{d}s
+\;=\; \Big[-s^r e^{-s/m}\Big]_0^\infty + r\int_0^\infty s^{r-1}e^{-s/m}\,\mathrm{d}s
+\;=\; r\,m\int_0^\infty s^{r-1}\,\frac{e^{-s/m}}{m}\,\mathrm{d}s .$$</div></div>
+The boundary term vanishes at both ends. Starting from $\mathbb{E}_q[s^0] = 1$, the recursion gives
+<div class="eqn" id="eq-tc-exp-moments"><div class="eqbody">$$\mathbb{E}_{q}[s^r] \;=\; r!\,m^r,$$</div><div class="eqno"><a href="#eq-tc-exp-moments" title="Link to equation 4.5.10">(4.5.10)</a></div></div>
+so $\mathbb{E}_q[s] = m$, $\mathbb{E}_q[s^2] = 2m^2$, $\mathbb{E}_q[s^4] = 24m^4$, $\mathrm{Var}_q(s) = m^2$, and $\mathrm{CV}[s] = 1$ whatever $m$ is.</p>
+</li>
+<li>
+<p>Complexity. With $\ln q_i(s) = -\ln m_i - s/m_i$ and $\ln P(s \mid \lambda_i) = \ln\lambda_i - \lambda_i s$,
+<div class="eqn" id="eq-tc-exp-kl"><div class="eqbody">$$D_{\mathrm{KL}}\big[q_i \,\|\, P(\cdot \mid \lambda_i)\big]
+\;=\; \mathbb{E}_{q_i}\!\left[-\ln m_i - \frac{s}{m_i} - \ln\lambda_i + \lambda_i s\right]
+\;=\; -\ln m_i - 1 - \ln\lambda_i + \lambda_i m_i .$$</div><div class="eqno"><a href="#eq-tc-exp-kl" title="Link to equation 4.5.11">(4.5.11)</a></div></div></p>
+</li>
+<li>
+<p>Accuracy. Under the product, $s_1$ and $s_2$ are independent, so expectations of products of powers factorise. Expanding the square,
+<div class="eqn"><div class="eqbody">$$\mathbb{E}_Q\big[(u_1 - s_2 s_1^2)^2\big]
+\;=\; u_1^2 - 2u_1\,\mathbb{E}[s_2]\,\mathbb{E}[s_1^2] + \mathbb{E}[s_2^2]\,\mathbb{E}[s_1^4]
+\;=\; u_1^2 - 4u_1 m_1^2 m_2 + 2m_2^2 \cdot 24 m_1^4 ,$$</div></div>
+and the same with the indices exchanged for the second sensor. Adding the two complexities, half of each expected squared residual, and $\ln 2\pi$ from the two Gaussian normalisers,
+<div class="eqn" id="eq-tc-f-exp"><div class="eqbody">$$\begin{aligned}
+\mathcal{F}_{\mathrm{Exp}}(m_1, m_2) \;=\;& \sum_{i=1}^{2}\big(-\ln m_i - 1 - \ln\lambda_i + \lambda_i m_i\big) + \ln 2\pi \\
+&+ \tfrac12\big(u_1^2 - 4u_1 m_1^2 m_2 + 48\,m_1^4 m_2^2\big) + \tfrac12\big(u_2^2 - 4u_2 m_1 m_2^2 + 48\,m_1^2 m_2^4\big).
+\end{aligned}$$</div><div class="eqno"><a href="#eq-tc-f-exp" title="Link to equation 4.5.12">(4.5.12)</a></div></div></p>
+</li>
+</ol></div>
+<h3 id="a-fixed-coefficient-of-variation">A fixed coefficient of variation</h3>
+<p>The coefficient $48$ in <a class="eqref" href="#eq-tc-f-exp">(4.5.12)</a> comes from $\mathbb{E}[s_2^2]\,\mathbb{E}[s_1^4] = 2 \times 24$, and it is where effect 1 enters. Write $\hat g_1 = \mathbb{E}_Q[s_2 s_1^2] = 2m_1^2 m_2$ for the first sensor's predicted mean. Then $\mathbb{E}_Q[(s_2 s_1^2)^2] = 48 m_1^4 m_2^2 = 12\hat g_1^2$, so $\mathrm{Var}_Q(s_2 s_1^2) = 11\hat g_1^2$, and by $\mathbb{E}[(u - X)^2] = (u - \mathbb{E}X)^2 + \mathrm{Var}(X)$ the first sensor's term in <a class="eqref" href="#eq-tc-f-exp">(4.5.12)</a> is
+<div class="eqn" id="eq-tc-locked"><div class="eqbody">$$\tfrac12\,\mathbb{E}_Q\big[(u_1 - s_2 s_1^2)^2\big] \;=\; \tfrac12\big(u_1 - \hat g_1\big)^2 + \tfrac{11}{2}\,\hat g_1^2 .$$</div><div class="eqno"><a href="#eq-tc-locked" title="Link to equation 4.5.13">(4.5.13)</a></div></div>
+Each exponential factor has coefficient of variation $1$, so the predicted sensor output has coefficient of variation $\sqrt{11} = 3.3166$ for every choice of $m_1, m_2$. Its variance cannot be reduced without reducing its mean. As a function of $\hat g_1 &gt; 0$ alone, <a class="eqref" href="#eq-tc-locked">(4.5.13)</a> has its minimum at $\hat g_1 = u_1/12$ when $u_1 &gt; 0$, not at $u_1$. When $u_1 \le 0$, its infimum over $\hat g_1 &gt; 0$ is approached as $\hat g_1$ tends to zero. The additional variance penalty $\tfrac{11}{2}\hat g_1^2$ favours smaller predicted means. The prior term and the second sensor change where the minimum of $\mathcal{F}_{\mathrm{Exp}}$ lies.</p>
+<p>On the representative trial at the true rates, minimising <a class="eqref" href="#eq-tc-f-exp">(4.5.12)</a> gives means $(0.4832, 0.5646)$ against the exact $(1.1754, 1.5684)$. The predicted first sensor output has mean $0.2637$ and standard deviation $0.8745$, for an observation of $2.5$. The free energy is $9.4571$ nats against an exact surprise of $4.8829$, a divergence of $4.5743$ nats from the posterior.</p>
+<p><a class="eqref" href="#eq-tc-f-exp">(4.5.12)</a> is minimised in $a_i = \ln m_i$, which keeps $m_i$ positive without a constraint, by a modified Newton method. At each step the Hessian's eigenvalues are replaced by their absolute values, floored at $10^{-8}$ times the largest, so that the step is a descent direction; each step is limited to $2$ in every coordinate, a factor of $e^2$ in $m_i$; and the step length is halved until the Armijo condition (a decrease of at least $10^{-4}$ times the predicted decrease) holds. A trial stops for one of three reasons: the largest gradient component is below $1 \times 10^{-10}$; the Newton decrement $\mathbf{g}^{\top}\mathbf{H}^{-1}\mathbf{g}$ is at the rounding level of $\mathcal{F}$; or no step along the Newton direction lowers $\mathcal{F}$ in floating point. The first E-step takes the best of $9$ starts, $a_1, a_2 \in \lbrace -2, 0, 1.5 \rbrace$. The analytic gradient and Hessian agree with central differences to a relative $3.8 \times 10^{-10}$ and $8.8 \times 10^{-11}$.</p>
+<h3 id="gamma-factors">Gamma factors</h3>
+<p>Effect 1 comes from having one parameter per factor. The Gamma family adds a second: $q_i$ has mean $m_i &gt; 0$ and shape $k_i &gt; 0$,
+<div class="eqn" id="eq-tc-q-gam"><div class="eqbody">$$q_i(s_i) \;=\; \frac{(k_i/m_i)^{k_i}}{\Gamma(k_i)}\,s_i^{k_i - 1}\,e^{-k_i s_i/m_i}, \qquad s_i &gt; 0,$$</div><div class="eqno"><a href="#eq-tc-q-gam" title="Link to equation 4.5.14">(4.5.14)</a></div></div>
+which is the Gamma density of <a href="../week-04/mean-field-and-messages.html">Lesson&nbsp;2</a> with rate $k_i/m_i$. Here $k_i$ is a shape, not a number of values. At $k_i = 1$ it is the exponential <a class="eqref" href="#eq-tc-q-exp">(4.5.9)</a>.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Moments, divergence and free energy of the Gamma product</span></div><ol>
+<li>
+<p>Moments. With $r_q = k/m$ and $\int_0^\infty s^{k + j - 1}e^{-r_q s}\,\mathrm{d}s = \Gamma(k + j)/r_q^{k + j}$,
+<div class="eqn"><div class="eqbody">$$\mathbb{E}_q[s^j] \;=\; \frac{r_q^{k}}{\Gamma(k)}\cdot\frac{\Gamma(k + j)}{r_q^{k + j}} \;=\; \frac{\Gamma(k + j)}{\Gamma(k)}\left(\frac{m}{k}\right)^{j} \;=\; m^j\prod_{l=0}^{j-1}\frac{k + l}{k},$$</div></div>
+using $\Gamma(z + 1) = z\Gamma(z)$ $j$ times. So $\mathbb{E}_q[s] = m$ and
+<div class="eqn" id="eq-tc-gam-moments"><div class="eqbody">$$\mathbb{E}_q[s^2] \;=\; m^2 c_2(k),\quad c_2(k) = \frac{k + 1}{k};
+\qquad
+\mathbb{E}_q[s^4] \;=\; m^4 c_4(k),\quad c_4(k) = \frac{(k + 1)(k + 2)(k + 3)}{k^3}.$$</div><div class="eqno"><a href="#eq-tc-gam-moments" title="Link to equation 4.5.15">(4.5.15)</a></div></div>
+Then $\mathrm{Var}_q(s) = m^2/k$ and $\mathrm{CV}[s] = 1/\sqrt{k}$, which the shape sets freely. At $k = 1$, $c_2 = 2$ and $c_4 = 24$, the exponential values.</p>
+</li>
+<li>
+<p>Complexity. Lesson&nbsp;2 derived $\mathbb{E}[\ln s] = \psi(k) - \ln r_q$ for a Gamma density with shape $k$ and rate $r_q$, where $\psi$ is the digamma function. Here $r_q = k/m$, so $\mathbb{E}_q[\ln s] = \psi(k) - \ln k + \ln m$. With $\ln q(s) = k\ln(k/m) - \ln\Gamma(k) + (k - 1)\ln s - ks/m$,
+<div class="eqn" id="eq-tc-gam-kl"><div class="eqbody">$$\begin{aligned}
+D_{\mathrm{KL}}\big[q_i \,\|\, P(\cdot \mid \lambda_i)\big]
+&= \mathbb{E}_{q_i}\!\Big[k_i\ln\tfrac{k_i}{m_i} - \ln\Gamma(k_i) + (k_i - 1)\ln s - \tfrac{k_i s}{m_i} - \ln\lambda_i + \lambda_i s\Big] \\
+&= k_i\ln\tfrac{k_i}{m_i} - \ln\Gamma(k_i) + (k_i - 1)\big(\psi(k_i) - \ln k_i + \ln m_i\big) - k_i - \ln\lambda_i + \lambda_i m_i \\
+&= -\ln\Gamma(k_i) + (k_i - 1)\psi(k_i) + \ln k_i - k_i - \ln m_i - \ln\lambda_i + \lambda_i m_i .
+\end{aligned}$$</div><div class="eqno"><a href="#eq-tc-gam-kl" title="Link to equation 4.5.16">(4.5.16)</a></div></div>
+The last line collects $k_i\ln k_i - (k_i - 1)\ln k_i = \ln k_i$ and $-k_i\ln m_i + (k_i - 1)\ln m_i = -\ln m_i$. At $k_i = 1$, $\ln\Gamma(1) = 0$ and the line is <a class="eqref" href="#eq-tc-exp-kl">(4.5.11)</a>.</p>
+</li>
+<li>
+<p>Accuracy. By independence and <a class="eqref" href="#eq-tc-gam-moments">(4.5.15)</a>,
+<div class="eqn"><div class="eqbody">$$\mathbb{E}_Q\big[(u_1 - s_2 s_1^2)^2\big] \;=\; u_1^2 - 2u_1\,m_2\,m_1^2 c_2(k_1) + m_2^2 c_2(k_2)\,m_1^4 c_4(k_1),$$</div></div>
+and the same with the indices exchanged. The free energy $\mathcal{F}_{\mathrm{Gam}}(m_1, m_2, k_1, k_2)$ is the sum of the two divergences, $\ln 2\pi$, and half of each expected squared residual.</p>
+</li>
+</ol></div>
+<p>As $k_1, k_2 \to \infty$ with the means fixed, $c_2$ and $c_4$ tend to $1$ and the expected squared residual tends to $(u_1 - m_2 m_1^2)^2$: the predicted output's variance can be made as small as the divergences allow, so effect 1 is gone. On the representative trial the shapes come out at $(26.84, 34.30)$, the means at $(1.1757, 1.4624)$ against the exact $(1.1754, 1.5684)$, and the divergence from the posterior is $0.6629$ nats, down from $4.5743$.</p>
+<p>$\mathcal{F}_{\mathrm{Gam}}$ is minimised in $(\ln m_1, \ln m_2, \ln k_1, \ln k_2)$ by the same Newton method, with a gradient tolerance of $1 \times 10^{-9}$. The gradient is analytic and agrees with central differences to a relative $3.4 \times 10^{-10}$; the Hessian is the central difference of the analytic gradient. The first E-step takes the best of $9$ starts, $\ln m_1 = \ln m_2 \in \{-1, 0, 1\}$ and $\ln k_1 = \ln k_2 \in \{0, 2, 5\}$. The parameters are unbounded, so the shapes can take any positive value; at the true rates the largest shape in the sample is $95930$, on the thin-ridge trial $85$. With both shapes set to $1$, $\mathcal{F}_{\mathrm{Gam}}$ agrees with $\mathcal{F}_{\mathrm{Exp}}$ to $3.4 \times 10^{-13}$.</p>
+<h3 id="free-form-factors">Free-form factors</h3>
+<p>The third family puts no restriction on either factor beyond independence. By the free-form update of Lesson&nbsp;2, the optimal $q_1$ given $q_2$ is $\ln q_1(s_1) = \mathbb{E}_{q_2}[\ln P(u, s \mid \lambda)] + \text{const}$.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The free-form factors on the two-cause model</span></div><p>Expanding the squares in <a class="eqref" href="#eq-tc-logjoint">(4.5.3)</a> and keeping the terms that contain $s_1$:
+<div class="eqn"><div class="eqbody">$$-\lambda_1 s_1 + u_1 s_2 s_1^2 - \tfrac12 s_2^2 s_1^4 + u_2 s_2^2 s_1 - \tfrac12 s_2^4 s_1^2 .$$</div></div>
+Taking the expectation over $q_2$ and collecting powers of $s_1$,
+<div class="eqn" id="eq-tc-ff-q1"><div class="eqbody">$$\ln q_1(s_1) \;=\; -\tfrac12\,\mathbb{E}_{q_2}[s_2^2]\,s_1^4 + \Big(u_1\,\mathbb{E}_{q_2}[s_2] - \tfrac12\,\mathbb{E}_{q_2}[s_2^4]\Big)s_1^2 + \Big(u_2\,\mathbb{E}_{q_2}[s_2^2] - \lambda_1\Big)s_1 + \text{const}, \qquad s_1 &gt; 0,$$</div><div class="eqno"><a href="#eq-tc-ff-q1" title="Link to equation 4.5.17">(4.5.17)</a></div></div>
+and the same with the indices exchanged (and $u_1, u_2$ exchanged) for $q_2$. The coefficient of $s_1^4$ is negative, so the density is normalisable. It is not a Gamma density: its logarithm is a quartic polynomial in $s_1$ with no $\ln s_1$ term. The update for $q_1$ uses $q_2$ only through $\mathbb{E}[s_2]$, $\mathbb{E}[s_2^2]$ and $\mathbb{E}[s_2^4]$, the variational messages of Lesson&nbsp;2 for this model.</p></div>
+<p>Each factor is a density on $(0, \infty)$ of the form $\exp(a s^4 + b s^2 + c\,s)$ with $a &lt; 0$. Its normaliser and moments are computed by one-dimensional quadrature: a scan of 256 points locates the interval where the exponent is within 60 nats of its maximum, and 32 panels of 8-point Gauss&ndash;Legendre cover that interval. Coordinate ascent updates $q_1$ then $q_2$, starting from $q_2$ equal to the prior, and a trial stops when one sweep changes both means by a relative amount below $1 \times 10^{-12}$. The free energy is checked not to rise from sweep to sweep. At the true rates the median trial takes $43$ sweeps and the slowest $1960$. Starting instead from the moments of a point mass at $s_2 = 5$ changes the means by at most a relative $3.1 \times 10^{-12}$ and the free energy by at most $4.3 \times 10^{-12}$ nats; doubling the panels and scan points and widening the window to 80 nats changes them by at most $8.6 \times 10^{-15}$ and $3.6 \times 10^{-12}$.</p>
+<h2 id="stationarity-warm-starts-and-the-monotone-free-energy"><span class="secno">4</span>Stationarity, warm starts and the monotone free energy</h2>
+<p>In variational EM every E-step after the first starts from the previous iteration's $Q_n$, and the new $Q_n$ replaces the old one only where its free energy is no higher. For the free-form family this holds automatically, since coordinate ascent from the old $Q_n$ never raises $\mathcal{F}$. So each E-step leaves $\mathcal{F}_{\mathrm{tot}}$ no higher, as the proof in Lesson&nbsp;4 requires, and the M-step <a class="eqref" href="#eq-tc-mstep">(4.5.4)</a> is an exact minimisation in $\lambda$. Both are checked in the computation: after every E-step and every M-step, $\mathcal{F}_{\mathrm{tot}}$ is compared with its value before the step, and the run stops with an error if it rose by more than $10^{-10}$ of its size. No run failed this check. The averaging rule of <a class="eqref" href="#eq-tc-am-hm">(4.5.7)</a> is checked after its E-steps only, since it is not a minimisation in $\lambda$. A run ends when one iteration changes both rates by a relative amount below $1 \times 10^{-11}$; the table below gives the number of iterations. In the last iterations the rates change by amounts close to the error left by the E-steps, so on another machine a run can take a few iterations more or fewer, and the Gamma run, whose E-steps stop at the looser gradient tolerance, more than ten. The fitted rates agree to the precision shown.</p>
+<p>The closed-form solvers were checked for stationarity where the rates were fixed:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Family, rates</th>
+<th style="text-align: right;">Largest gradient component</th>
+<th style="text-align: right;">Trials above the tolerance</th>
+<th style="text-align: right;">Further decrease a Newton step predicts on those trials (nats)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exponential, $\lambda^{*}$</td>
+<td style="text-align: right;">$3.9 \times 10^{-9}$</td>
+<td style="text-align: right;">$1$</td>
+<td style="text-align: right;">$2.3 \times 10^{-21}$</td>
+</tr>
+<tr>
+<td>Exponential, fitted</td>
+<td style="text-align: right;">$4.9 \times 10^{-9}$</td>
+<td style="text-align: right;">$63$</td>
+<td style="text-align: right;">$2.3 \times 10^{-17}$</td>
+</tr>
+<tr>
+<td>Gamma, $\lambda^{*}$</td>
+<td style="text-align: right;">$9.9 \times 10^{-10}$</td>
+<td style="text-align: right;">$0$</td>
+<td style="text-align: right;">none</td>
+</tr>
+<tr>
+<td>Gamma, fitted</td>
+<td style="text-align: right;">$2.8 \times 10^{-5}$</td>
+<td style="text-align: right;">$175$</td>
+<td style="text-align: right;">$5.5 \times 10^{-13}$</td>
+</tr>
+</tbody>
+</table></div>
+<p>Trials above the gradient tolerance stopped by the second or third rule. From there the quadratic model predicts a further decrease in $\mathcal{F}$ smaller than the amount in the last column, which is at the rounding level of free energies of this size; this is a diagnostic, not an error bound. At the fitted rates, a fresh multi-start solve finds a free energy lower than the warm-started one by at most $1.8 \times 10^{-12}$ nats per trial for the Exponential family and $3.2 \times 10^{-11}$ for the Gamma family, and coordinate ascent from the second start differs from the warm-started free-form result by at most $1.6 \times 10^{-12}$. These checks show that the solvers reached the best minimum their starts found; they cannot rule out a lower minimum that no start reached.</p>
+<h2 id="factorisation-narrows-the-factors"><span class="secno">5</span>Factorisation narrows the factors</h2>
+<p>Effect 4 is what remains when the factors are free and only their independence is imposed. Its core is a calculation that can be done exactly for a Gaussian target. Write $\Pi = \Sigma^{-1}$ for the precision matrix of a Gaussian with covariance $\Sigma$, as in <a href="../week-02/index.html">Week&nbsp;2</a>.</p>
+<div class="box theorem"><div class="boxhd">Theorem 4.5.1<span class="bt">Free-form mean-field approximation of a Gaussian</span></div><p>Let $P(x) = \mathcal{N}(x; m_P, \Sigma)$ on $\mathbb{R}^K$, with mean vector $m_P$ and $\Sigma$ positive definite and $\Pi = \Sigma^{-1}$. Over products $Q(x) = \prod_i q_i(x_i)$, $D_{\mathrm{KL}}[Q \,\|\, P]$ is minimised uniquely by
+<div class="eqn" id="eq-tc-mf-gauss"><div class="eqbody">$$q_i(x_i) \;=\; \mathcal{N}\big(x_i;\ m_{P,i},\ 1/\Pi_{ii}\big), \qquad i = 1, \dots, K,$$</div><div class="eqno"><a href="#eq-tc-mf-gauss" title="Link to equation 4.5.18">(4.5.18)</a></div></div>
+and the minimum is $\tfrac12\big(\ln\det\Sigma + \sum_i \ln\Pi_{ii}\big)$. For $K = 2$ with standard deviations $\sigma_1, \sigma_2$ and correlation $c$, each factor's standard deviation is $\sqrt{1 - c^2}$ times $\sigma_i$, and the minimum divergence is $-\tfrac12\ln(1 - c^2)$.</p></div>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Proof</span></div><ol>
+<li>
+<p>Every optimal factor is Gaussian. Here $\ln P(x) = -\tfrac12(x - m_P)^{\top}\Pi(x - m_P) + \text{const}$. The terms that contain $x_i$ are
+<div class="eqn"><div class="eqbody">$$-\tfrac12\Pi_{ii}(x_i - m_{P,i})^2 - (x_i - m_{P,i})\sum_{j \ne i}\Pi_{ij}(x_j - m_{P,j}),$$</div></div>
+using the symmetry of $\Pi$. Averaging over the other factors, with $m_j = \mathbb{E}_{q_j}[x_j]$, the free-form update of Lesson&nbsp;2 gives
+<div class="eqn"><div class="eqbody">$$\ln q_i(x_i) \;=\; -\tfrac12\Pi_{ii}(x_i - m_{P,i})^2 - (x_i - m_{P,i})\sum_{j \ne i}\Pi_{ij}(m_j - m_{P,j}) + \text{const},$$</div></div>
+a quadratic in $x_i$ with leading coefficient $-\tfrac12\Pi_{ii} &lt; 0$. So the update returns a Gaussian with variance $1/\Pi_{ii}$, whatever the other factors are, provided their means are finite (if they are not, $\mathbb{E}_Q[(x - m_P)^{\top}\Pi(x - m_P)]$ and with it the divergence is infinite). Start from any product of finite divergence and update each factor once in turn: the divergence does not rise, and afterwards every factor is Gaussian. So the minimum over all products equals the minimum over products of Gaussians.</p>
+</li>
+<li>
+<p>The minimum over Gaussian products. For $Q = \mathcal{N}(m, V)$ with $V = \mathrm{diag}(v_1, \dots, v_K)$, the divergence between two Gaussians is
+<div class="eqn"><div class="eqbody">$$D_{\mathrm{KL}}[Q \,\|\, P] \;=\; \tfrac12\Big(\mathrm{tr}(\Pi V) + (m - m_P)^{\top}\Pi(m - m_P) - K + \ln\det\Sigma - \ln\det V\Big)
+\;=\; \tfrac12\sum_{i}\big(\Pi_{ii}v_i - \ln v_i\big) + \tfrac12(m - m_P)^{\top}\Pi(m - m_P) + \tfrac12\big(\ln\det\Sigma - K\big).$$</div></div>
+The mean term is a positive definite quadratic, zero only at $m = m_P$. Each $\Pi_{ii}v_i - \ln v_i$ has derivative $\Pi_{ii} - 1/v_i$, zero only at $v_i = 1/\Pi_{ii}$, and is convex in $v_i$. So the minimiser is unique and is <a class="eqref" href="#eq-tc-mf-gauss">(4.5.18)</a>. At it $\mathrm{tr}(\Pi V) = \sum_i \Pi_{ii}/\Pi_{ii} = K$, so the minimum is $\tfrac12(\ln\det\Sigma - \ln\det V) = \tfrac12(\ln\det\Sigma + \sum_i\ln\Pi_{ii})$.</p>
+</li>
+<li>
+<p>Two dimensions. With $\Sigma = \begin{pmatrix}\sigma_1^2 & c\sigma_1\sigma_2 \\ c\sigma_1\sigma_2 & \sigma_2^2\end{pmatrix}$, $\det\Sigma = \sigma_1^2\sigma_2^2(1 - c^2)$, and the diagonal of the inverse is $\Pi_{11} = \sigma_2^2/\det\Sigma = 1/\big(\sigma_1^2(1 - c^2)\big)$ and $\Pi_{22} = 1/\big(\sigma_2^2(1 - c^2)\big)$. So $1/\Pi_{ii} = \sigma_i^2(1 - c^2)$, and the minimum is
+<div class="eqn" id="eq-tc-mf-gap"><div class="eqbody">$$\tfrac12\Big(\ln\big(\sigma_1^2\sigma_2^2(1 - c^2)\big) - \ln\big(\sigma_1^2(1 - c^2)\big) - \ln\big(\sigma_2^2(1 - c^2)\big)\Big) \;=\; -\tfrac12\ln(1 - c^2).$$</div><div class="eqno"><a href="#eq-tc-mf-gap" title="Link to equation 4.5.19">(4.5.19)</a></div></div></p>
+</li>
+</ol></div>
+<p>The variance $1/\Pi_{ii}$ is the conditional variance of $x_i$ given all the other coordinates, not its marginal variance $\Sigma_{ii}$. The product has marginal variances no larger than the target's, with equality for a coordinate independent of the others, as the reverse divergence of Week&nbsp;1, Lesson&nbsp;4 predicts: reverse KL penalises assigning appreciable mass where the posterior density is small. For a Gaussian the means are exact, so factorisation costs width and not location.</p>
+<figure id="fig-4-5-2"><svg viewBox="0 0 680 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Contours of a correlated two-dimensional Gaussian and of its free-form mean-field approximation, a circle that fits inside the tilted ellipse.">
+<rect x="1" y="1" width="678" height="328" fill="#fdfcf9" stroke="#e4e1d9"/>
+<line x1="190" y1="290" x2="490" y2="290" stroke="#3c3c42"/>
+<line x1="190" y1="290" x2="190" y2="30" stroke="#3c3c42"/>
+<line x1="224.6" y1="290" x2="224.6" y2="294" stroke="#3c3c42"/>
+<text x="224.6" y="306.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">&#8722;2</text>
+<line x1="282.3" y1="290" x2="282.3" y2="294" stroke="#3c3c42"/>
+<text x="282.3" y="306.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">&#8722;1</text>
+<line x1="340.0" y1="290" x2="340.0" y2="294" stroke="#3c3c42"/>
+<text x="340.0" y="306.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="397.7" y1="290" x2="397.7" y2="294" stroke="#3c3c42"/>
+<text x="397.7" y="306.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="455.4" y1="290" x2="455.4" y2="294" stroke="#3c3c42"/>
+<text x="455.4" y="306.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2</text>
+<line x1="186" y1="260.0" x2="190" y2="260.0" stroke="#3c3c42"/>
+<text x="183.0" y="263.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">&#8722;2</text>
+<line x1="186" y1="210.0" x2="190" y2="210.0" stroke="#3c3c42"/>
+<text x="183.0" y="213.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">&#8722;1</text>
+<line x1="186" y1="160.0" x2="190" y2="160.0" stroke="#3c3c42"/>
+<text x="183.0" y="163.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="186" y1="110.0" x2="190" y2="110.0" stroke="#3c3c42"/>
+<text x="183.0" y="113.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="186" y1="60.0" x2="190" y2="60.0" stroke="#3c3c42"/>
+<text x="183.0" y="63.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2</text>
+<text x="340.0" y="321.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75">x1 / σ1</text>
+<text x="156" y="160.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75" transform="rotate(-90 156 160.0)">x2 / σ2</text>
+<path d="M319.2 178.0 L317.8 176.8 L316.4 175.5 L315.1 174.3 L313.7 173.0 L312.4 171.8 L311.1 170.5 L309.8 169.2 L308.5 167.9 L307.2 166.6 L306.0 165.3 L304.8 164.0 L303.6 162.7 L302.5 161.4 L301.3 160.1 L300.2 158.8 L299.1 157.5 L298.1 156.2 L297.1 154.9 L296.1 153.6 L295.1 152.3 L294.2 151.0 L293.3 149.7 L292.4 148.4 L291.6 147.1 L290.8 145.9 L290.0 144.6 L289.3 143.4 L288.6 142.2 L287.9 140.9 L287.3 139.7 L286.7 138.5 L286.1 137.4 L285.6 136.2 L285.1 135.1 L284.7 133.9 L284.2 132.8 L283.9 131.7 L283.5 130.7 L283.3 129.6 L283.0 128.6 L282.8 127.6 L282.6 126.6 L282.5 125.6 L282.4 124.7 L282.3 123.8 L282.3 122.9 L282.3 122.0 L282.4 121.2 L282.5 120.4 L282.6 119.6 L282.8 118.8 L283.0 118.1 L283.3 117.4 L283.6 116.7 L283.9 116.1 L284.3 115.5 L284.7 114.9 L285.2 114.4 L285.6 113.8 L286.2 113.4 L286.7 112.9 L287.3 112.5 L288.0 112.1 L288.6 111.7 L289.3 111.4 L290.1 111.1 L290.9 110.9 L291.7 110.6 L292.5 110.4 L293.4 110.3 L294.3 110.2 L295.2 110.1 L296.2 110.0 L297.2 110.0 L298.2 110.0 L299.3 110.1 L300.4 110.1 L301.5 110.3 L302.6 110.4 L303.8 110.6 L305.0 110.8 L306.2 111.1 L307.4 111.4 L308.7 111.7 L309.9 112.0 L311.2 112.4 L312.6 112.8 L313.9 113.3 L315.2 113.8 L316.6 114.3 L318.0 114.8 L319.4 115.4 L320.8 116.0 L322.3 116.7 L323.7 117.3 L325.2 118.0 L326.6 118.7 L328.1 119.5 L329.6 120.3 L331.1 121.1 L332.6 121.9 L334.1 122.8 L335.6 123.7 L337.1 124.6 L338.6 125.5 L340.1 126.5 L341.6 127.5 L343.1 128.5 L344.6 129.5 L346.1 130.5 L347.6 131.6 L349.1 132.7 L350.6 133.8 L352.1 134.9 L353.6 136.1 L355.0 137.2 L356.5 138.4 L357.9 139.6 L359.3 140.8 L360.8 142.0 L362.2 143.2 L363.6 144.5 L364.9 145.7 L366.3 147.0 L367.6 148.2 L368.9 149.5 L370.2 150.8 L371.5 152.1 L372.8 153.4 L374.0 154.7 L375.2 156.0 L376.4 157.3 L377.5 158.6 L378.7 159.9 L379.8 161.2 L380.9 162.5 L381.9 163.8 L382.9 165.1 L383.9 166.4 L384.9 167.7 L385.8 169.0 L386.7 170.3 L387.6 171.6 L388.4 172.9 L389.2 174.1 L390.0 175.4 L390.7 176.6 L391.4 177.8 L392.1 179.1 L392.7 180.3 L393.3 181.5 L393.9 182.6 L394.4 183.8 L394.9 184.9 L395.3 186.1 L395.8 187.2 L396.1 188.3 L396.5 189.3 L396.7 190.4 L397.0 191.4 L397.2 192.4 L397.4 193.4 L397.5 194.4 L397.6 195.3 L397.7 196.2 L397.7 197.1 L397.7 198.0 L397.6 198.8 L397.5 199.6 L397.4 200.4 L397.2 201.2 L397.0 201.9 L396.7 202.6 L396.4 203.3 L396.1 203.9 L395.7 204.5 L395.3 205.1 L394.8 205.6 L394.4 206.2 L393.8 206.6 L393.3 207.1 L392.7 207.5 L392.0 207.9 L391.4 208.3 L390.7 208.6 L389.9 208.9 L389.1 209.1 L388.3 209.4 L387.5 209.6 L386.6 209.7 L385.7 209.8 L384.8 209.9 L383.8 210.0 L382.8 210.0 L381.8 210.0 L380.7 209.9 L379.6 209.9 L378.5 209.7 L377.4 209.6 L376.2 209.4 L375.0 209.2 L373.8 208.9 L372.6 208.6 L371.3 208.3 L370.1 208.0 L368.8 207.6 L367.4 207.2 L366.1 206.7 L364.8 206.2 L363.4 205.7 L362.0 205.2 L360.6 204.6 L359.2 204.0 L357.7 203.3 L356.3 202.7 L354.8 202.0 L353.4 201.3 L351.9 200.5 L350.4 199.7 L348.9 198.9 L347.4 198.1 L345.9 197.2 L344.4 196.3 L342.9 195.4 L341.4 194.5 L339.9 193.5 L338.4 192.5 L336.9 191.5 L335.4 190.5 L333.9 189.5 L332.4 188.4 L330.9 187.3 L329.4 186.2 L327.9 185.1 L326.4 183.9 L325.0 182.8 L323.5 181.6 L322.1 180.4 L320.7 179.2 L319.2 178.0 Z" fill="none" stroke="#0f5f57" stroke-width="2.2" opacity="1"/>
+<path d="M378.7 160.0 L378.7 159.1 L378.7 158.2 L378.6 157.4 L378.5 156.5 L378.4 155.6 L378.3 154.7 L378.1 153.9 L377.9 153.0 L377.7 152.2 L377.4 151.3 L377.2 150.5 L376.9 149.6 L376.5 148.8 L376.2 148.0 L375.8 147.1 L375.4 146.3 L375.0 145.5 L374.5 144.8 L374.1 144.0 L373.6 143.2 L373.0 142.5 L372.5 141.7 L371.9 141.0 L371.3 140.3 L370.7 139.6 L370.1 138.9 L369.5 138.2 L368.8 137.5 L368.1 136.9 L367.4 136.3 L366.7 135.6 L365.9 135.0 L365.2 134.5 L364.4 133.9 L363.6 133.4 L362.8 132.8 L361.9 132.3 L361.1 131.8 L360.2 131.4 L359.4 130.9 L358.5 130.5 L357.6 130.1 L356.7 129.7 L355.8 129.3 L354.8 129.0 L353.9 128.6 L352.9 128.3 L352.0 128.1 L351.0 127.8 L350.0 127.6 L349.0 127.3 L348.1 127.2 L347.1 127.0 L346.1 126.8 L345.1 126.7 L344.1 126.6 L343.0 126.5 L342.0 126.5 L341.0 126.4 L340.0 126.4 L339.0 126.4 L338.0 126.5 L337.0 126.5 L335.9 126.6 L334.9 126.7 L333.9 126.8 L332.9 127.0 L331.9 127.2 L331.0 127.3 L330.0 127.6 L329.0 127.8 L328.0 128.1 L327.1 128.3 L326.1 128.6 L325.2 129.0 L324.2 129.3 L323.3 129.7 L322.4 130.1 L321.5 130.5 L320.6 130.9 L319.8 131.4 L318.9 131.8 L318.1 132.3 L317.2 132.8 L316.4 133.4 L315.6 133.9 L314.8 134.5 L314.1 135.0 L313.3 135.6 L312.6 136.3 L311.9 136.9 L311.2 137.5 L310.5 138.2 L309.9 138.9 L309.3 139.6 L308.7 140.3 L308.1 141.0 L307.5 141.7 L307.0 142.5 L306.4 143.2 L305.9 144.0 L305.5 144.8 L305.0 145.5 L304.6 146.3 L304.2 147.1 L303.8 148.0 L303.5 148.8 L303.1 149.6 L302.8 150.5 L302.6 151.3 L302.3 152.2 L302.1 153.0 L301.9 153.9 L301.7 154.7 L301.6 155.6 L301.5 156.5 L301.4 157.4 L301.3 158.2 L301.3 159.1 L301.3 160.0 L301.3 160.9 L301.3 161.8 L301.4 162.6 L301.5 163.5 L301.6 164.4 L301.7 165.3 L301.9 166.1 L302.1 167.0 L302.3 167.8 L302.6 168.7 L302.8 169.5 L303.1 170.4 L303.5 171.2 L303.8 172.0 L304.2 172.9 L304.6 173.7 L305.0 174.5 L305.5 175.2 L305.9 176.0 L306.4 176.8 L307.0 177.5 L307.5 178.3 L308.1 179.0 L308.7 179.7 L309.3 180.4 L309.9 181.1 L310.5 181.8 L311.2 182.5 L311.9 183.1 L312.6 183.7 L313.3 184.4 L314.1 185.0 L314.8 185.5 L315.6 186.1 L316.4 186.6 L317.2 187.2 L318.1 187.7 L318.9 188.2 L319.8 188.6 L320.6 189.1 L321.5 189.5 L322.4 189.9 L323.3 190.3 L324.2 190.7 L325.2 191.0 L326.1 191.4 L327.1 191.7 L328.0 191.9 L329.0 192.2 L330.0 192.4 L331.0 192.7 L331.9 192.8 L332.9 193.0 L333.9 193.2 L334.9 193.3 L335.9 193.4 L337.0 193.5 L338.0 193.5 L339.0 193.6 L340.0 193.6 L341.0 193.6 L342.0 193.5 L343.0 193.5 L344.1 193.4 L345.1 193.3 L346.1 193.2 L347.1 193.0 L348.1 192.8 L349.0 192.7 L350.0 192.4 L351.0 192.2 L352.0 191.9 L352.9 191.7 L353.9 191.4 L354.8 191.0 L355.8 190.7 L356.7 190.3 L357.6 189.9 L358.5 189.5 L359.4 189.1 L360.2 188.6 L361.1 188.2 L361.9 187.7 L362.8 187.2 L363.6 186.6 L364.4 186.1 L365.2 185.5 L365.9 185.0 L366.7 184.4 L367.4 183.7 L368.1 183.1 L368.8 182.5 L369.5 181.8 L370.1 181.1 L370.7 180.4 L371.3 179.7 L371.9 179.0 L372.5 178.3 L373.0 177.5 L373.6 176.8 L374.1 176.0 L374.5 175.2 L375.0 174.5 L375.4 173.7 L375.8 172.9 L376.2 172.0 L376.5 171.2 L376.9 170.4 L377.2 169.5 L377.4 168.7 L377.7 167.8 L377.9 167.0 L378.1 166.1 L378.3 165.3 L378.4 164.4 L378.5 163.5 L378.6 162.6 L378.7 161.8 L378.7 160.9 L378.7 160.0 Z" fill="none" stroke="#2c5f8a" stroke-width="1.8" opacity="1"/>
+<path d="M298.5 196.0 L295.7 193.5 L292.9 191.1 L290.2 188.6 L287.4 186.0 L284.8 183.5 L282.1 181.0 L279.5 178.4 L277.0 175.8 L274.5 173.2 L272.0 170.6 L269.6 168.0 L267.2 165.4 L264.9 162.8 L262.6 160.2 L260.4 157.5 L258.3 154.9 L256.2 152.3 L254.1 149.7 L252.1 147.1 L250.2 144.5 L248.3 141.9 L246.5 139.4 L244.8 136.8 L243.1 134.3 L241.5 131.8 L240.0 129.3 L238.5 126.8 L237.1 124.3 L235.8 121.9 L234.5 119.5 L233.3 117.1 L232.2 114.8 L231.2 112.4 L230.2 110.1 L229.3 107.9 L228.5 105.7 L227.8 103.5 L227.1 101.4 L226.5 99.3 L226.0 97.2 L225.6 95.2 L225.2 93.2 L225.0 91.3 L224.8 89.4 L224.7 87.6 L224.6 85.8 L224.7 84.1 L224.8 82.4 L225.0 80.8 L225.3 79.2 L225.6 77.7 L226.1 76.2 L226.6 74.8 L227.2 73.5 L227.8 72.2 L228.6 71.0 L229.4 69.8 L230.3 68.7 L231.3 67.7 L232.3 66.7 L233.5 65.8 L234.7 64.9 L235.9 64.2 L237.3 63.5 L238.7 62.8 L240.2 62.2 L241.7 61.7 L243.3 61.3 L245.0 60.9 L246.8 60.6 L248.6 60.3 L250.5 60.1 L252.4 60.0 L254.4 60.0 L256.4 60.0 L258.5 60.1 L260.7 60.3 L262.9 60.5 L265.2 60.8 L267.5 61.2 L269.9 61.6 L272.3 62.2 L274.8 62.7 L277.3 63.4 L279.9 64.1 L282.5 64.8 L285.1 65.7 L287.8 66.6 L290.5 67.5 L293.2 68.6 L296.0 69.7 L298.8 70.8 L301.7 72.0 L304.5 73.3 L307.4 74.6 L310.3 76.0 L313.3 77.5 L316.2 79.0 L319.2 80.6 L322.1 82.2 L325.1 83.9 L328.1 85.6 L331.1 87.3 L334.2 89.2 L337.2 91.0 L340.2 93.0 L343.2 94.9 L346.2 96.9 L349.2 99.0 L352.3 101.1 L355.3 103.2 L358.2 105.4 L361.2 107.6 L364.2 109.9 L367.1 112.1 L370.1 114.5 L373.0 116.8 L375.8 119.2 L378.7 121.6 L381.5 124.0 L384.3 126.5 L387.1 128.9 L389.8 131.4 L392.6 134.0 L395.2 136.5 L397.9 139.0 L400.5 141.6 L403.0 144.2 L405.5 146.8 L408.0 149.4 L410.4 152.0 L412.8 154.6 L415.1 157.2 L417.4 159.8 L419.6 162.5 L421.7 165.1 L423.8 167.7 L425.9 170.3 L427.9 172.9 L429.8 175.5 L431.7 178.1 L433.5 180.6 L435.2 183.2 L436.9 185.7 L438.5 188.2 L440.0 190.7 L441.5 193.2 L442.9 195.7 L444.2 198.1 L445.5 200.5 L446.7 202.9 L447.8 205.2 L448.8 207.6 L449.8 209.9 L450.7 212.1 L451.5 214.3 L452.2 216.5 L452.9 218.6 L453.5 220.7 L454.0 222.8 L454.4 224.8 L454.8 226.8 L455.0 228.7 L455.2 230.6 L455.3 232.4 L455.4 234.2 L455.3 235.9 L455.2 237.6 L455.0 239.2 L454.7 240.8 L454.4 242.3 L453.9 243.8 L453.4 245.2 L452.8 246.5 L452.2 247.8 L451.4 249.0 L450.6 250.2 L449.7 251.3 L448.7 252.3 L447.7 253.3 L446.5 254.2 L445.3 255.1 L444.1 255.8 L442.7 256.5 L441.3 257.2 L439.8 257.8 L438.3 258.3 L436.7 258.7 L435.0 259.1 L433.2 259.4 L431.4 259.7 L429.5 259.9 L427.6 260.0 L425.6 260.0 L423.6 260.0 L421.5 259.9 L419.3 259.7 L417.1 259.5 L414.8 259.2 L412.5 258.8 L410.1 258.4 L407.7 257.8 L405.2 257.3 L402.7 256.6 L400.1 255.9 L397.5 255.2 L394.9 254.3 L392.2 253.4 L389.5 252.5 L386.8 251.4 L384.0 250.3 L381.2 249.2 L378.3 248.0 L375.5 246.7 L372.6 245.4 L369.7 244.0 L366.7 242.5 L363.8 241.0 L360.8 239.4 L357.9 237.8 L354.9 236.1 L351.9 234.4 L348.9 232.7 L345.8 230.8 L342.8 229.0 L339.8 227.0 L336.8 225.1 L333.8 223.1 L330.8 221.0 L327.7 218.9 L324.7 216.8 L321.8 214.6 L318.8 212.4 L315.8 210.1 L312.9 207.9 L309.9 205.5 L307.0 203.2 L304.2 200.8 L301.3 198.4 L298.5 196.0 Z" fill="none" stroke="#0f5f57" stroke-width="2.2" opacity="0.55"/>
+<path d="M417.5 160.0 L417.5 158.2 L417.4 156.5 L417.3 154.7 L417.1 153.0 L416.8 151.2 L416.5 149.5 L416.2 147.8 L415.8 146.0 L415.4 144.3 L414.9 142.6 L414.3 140.9 L413.7 139.2 L413.0 137.6 L412.3 135.9 L411.6 134.3 L410.8 132.7 L409.9 131.1 L409.0 129.5 L408.1 128.0 L407.1 126.4 L406.1 124.9 L405.0 123.4 L403.9 122.0 L402.7 120.5 L401.5 119.1 L400.2 117.7 L398.9 116.4 L397.6 115.1 L396.2 113.8 L394.8 112.5 L393.3 111.3 L391.9 110.1 L390.3 108.9 L388.8 107.8 L387.2 106.7 L385.5 105.7 L383.9 104.7 L382.2 103.7 L380.5 102.7 L378.7 101.8 L377.0 101.0 L375.2 100.2 L373.4 99.4 L371.5 98.6 L369.7 98.0 L367.8 97.3 L365.9 96.7 L363.9 96.1 L362.0 95.6 L360.1 95.1 L358.1 94.7 L356.1 94.3 L354.1 94.0 L352.1 93.7 L350.1 93.4 L348.1 93.2 L346.1 93.0 L344.1 92.9 L342.0 92.9 L340.0 92.8 L338.0 92.9 L335.9 92.9 L333.9 93.0 L331.9 93.2 L329.9 93.4 L327.9 93.7 L325.9 94.0 L323.9 94.3 L321.9 94.7 L319.9 95.1 L318.0 95.6 L316.1 96.1 L314.1 96.7 L312.2 97.3 L310.3 98.0 L308.5 98.6 L306.6 99.4 L304.8 100.2 L303.0 101.0 L301.3 101.8 L299.5 102.7 L297.8 103.7 L296.1 104.7 L294.5 105.7 L292.8 106.7 L291.2 107.8 L289.7 108.9 L288.1 110.1 L286.7 111.3 L285.2 112.5 L283.8 113.8 L282.4 115.1 L281.1 116.4 L279.8 117.7 L278.5 119.1 L277.3 120.5 L276.1 122.0 L275.0 123.4 L273.9 124.9 L272.9 126.4 L271.9 128.0 L271.0 129.5 L270.1 131.1 L269.2 132.7 L268.4 134.3 L267.7 135.9 L267.0 137.6 L266.3 139.2 L265.7 140.9 L265.1 142.6 L264.6 144.3 L264.2 146.0 L263.8 147.8 L263.5 149.5 L263.2 151.2 L262.9 153.0 L262.7 154.7 L262.6 156.5 L262.5 158.2 L262.5 160.0 L262.5 161.8 L262.6 163.5 L262.7 165.3 L262.9 167.0 L263.2 168.8 L263.5 170.5 L263.8 172.2 L264.2 174.0 L264.6 175.7 L265.1 177.4 L265.7 179.1 L266.3 180.8 L267.0 182.4 L267.7 184.1 L268.4 185.7 L269.2 187.3 L270.1 188.9 L271.0 190.5 L271.9 192.0 L272.9 193.6 L273.9 195.1 L275.0 196.6 L276.1 198.0 L277.3 199.5 L278.5 200.9 L279.8 202.3 L281.1 203.6 L282.4 204.9 L283.8 206.2 L285.2 207.5 L286.7 208.7 L288.1 209.9 L289.7 211.1 L291.2 212.2 L292.8 213.3 L294.5 214.3 L296.1 215.3 L297.8 216.3 L299.5 217.3 L301.3 218.2 L303.0 219.0 L304.8 219.8 L306.6 220.6 L308.5 221.4 L310.3 222.0 L312.2 222.7 L314.1 223.3 L316.1 223.9 L318.0 224.4 L319.9 224.9 L321.9 225.3 L323.9 225.7 L325.9 226.0 L327.9 226.3 L329.9 226.6 L331.9 226.8 L333.9 227.0 L335.9 227.1 L338.0 227.1 L340.0 227.2 L342.0 227.1 L344.1 227.1 L346.1 227.0 L348.1 226.8 L350.1 226.6 L352.1 226.3 L354.1 226.0 L356.1 225.7 L358.1 225.3 L360.1 224.9 L362.0 224.4 L363.9 223.9 L365.9 223.3 L367.8 222.7 L369.7 222.0 L371.5 221.4 L373.4 220.6 L375.2 219.8 L377.0 219.0 L378.7 218.2 L380.5 217.3 L382.2 216.3 L383.9 215.3 L385.5 214.3 L387.2 213.3 L388.8 212.2 L390.3 211.1 L391.9 209.9 L393.3 208.7 L394.8 207.5 L396.2 206.2 L397.6 204.9 L398.9 203.6 L400.2 202.3 L401.5 200.9 L402.7 199.5 L403.9 198.0 L405.0 196.6 L406.1 195.1 L407.1 193.6 L408.1 192.0 L409.0 190.5 L409.9 188.9 L410.8 187.3 L411.6 185.7 L412.3 184.1 L413.0 182.4 L413.7 180.8 L414.3 179.1 L414.9 177.4 L415.4 175.7 L415.8 174.0 L416.2 172.2 L416.5 170.5 L416.8 168.8 L417.1 167.0 L417.3 165.3 L417.4 163.5 L417.5 161.8 L417.5 160.0 Z" fill="none" stroke="#2c5f8a" stroke-width="1.8" opacity="0.55"/>
+<line x1="512" y1="60" x2="534" y2="60" stroke="#0f5f57" stroke-width="2"/>
+<text x="540.0" y="64.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">exact Gaussian</text>
+<line x1="512" y1="78" x2="534" y2="78" stroke="#2c5f8a" stroke-width="2"/>
+<text x="540.0" y="82.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">mean-field product</text>
+<text x="514.0" y="110.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">correlation &#8722;0.74</text>
+</svg><figcaption><span class="fno">Figure 4.5.2.</span> Contours enclosing 39 and 86 per cent of the probability (one and two standard deviations along each axis of the ellipse) of a two-dimensional Gaussian with unit variances and correlation equal to the representative trial's posterior correlation, $-0.74$ (green), and of its free-form mean-field approximation (blue), a circle of radius $\sqrt{1 - c^2}$ times the green ellipse's marginal standard deviation.</figcaption></figure>
+<p>Apply this to the representative trial, treating its posterior as roughly Gaussian with its own correlation $c = -0.7409$. The Gaussian result predicts standard deviations reduced by the factor $\sqrt{1 - c^2} = 0.6716$ and a divergence of $-\tfrac12\ln(1 - c^2) = 0.3981$ nats. The free-form factors have standard deviations $(0.2602, 0.2909)$, which are $0.5613$ and $0.4847$ of the exact $(0.4636, 0.6003)$, and the divergence is $0.5440$ nats. Both are further from the posterior than the Gaussian calculation predicts, because the posterior is a curved ridge and not an ellipse; the Gaussian result gives the direction and the order of size, not the value. The Gamma factors are narrower still, at $0.4895$ and $0.4160$ of the exact standard deviations.</p>
+<p>On the curved ridge the means move as well. On the representative trial the free-form means are $(1.1627, 1.4432)$ against the exact $(1.1754, 1.5684)$, both lower. Across the sample at the true rates, the free-form mean of $s_1$ averages $0.876$ of the exact posterior mean and is lower on $84.0$ per cent of trials; for $s_2$ the figures are $0.843$ and $89.8$ per cent. For the Gamma family they are $0.844$ and $83.6$ per cent, and $0.810$ and $89.6$ per cent; the representative trial's Gamma mean of $s_1$, $1.1757$ against $1.1754$, is one of the minority that come out higher. The downward shift is measured here, not derived: the Gaussian theorem says nothing about it, since there the means are exact. Its consequence for learning follows from <a class="eqref" href="#eq-tc-mstep">(4.5.4)</a>, where a lower average mean is a higher rate.</p>
+<h2 id="the-closed-loop"><span class="secno">6</span>The closed loop</h2>
+<p>Variational EM alternates the two steps, so its rates follow the map
+<div class="eqn" id="eq-tc-em-map"><div class="eqbody">$$\lambda^{(t)} \;=\; \Lambda\big(\lambda^{(t-1)}\big), \qquad \Lambda_i(\lambda) \;=\; \frac{1}{\bar m_i(\lambda)},$$</div><div class="eqno"><a href="#eq-tc-em-map" title="Link to equation 4.5.20">(4.5.20)</a></div></div>
+where $\bar m_i(\lambda)$ is the average recognition mean after an E-step at rates $\lambda$. Write $J$ for its Jacobian matrix, $J_{ij} = \partial\Lambda_i/\partial\lambda_j$.</p>
+<div class="box theorem"><div class="boxhd">Theorem 4.5.2<span class="bt">The diagonal of the EM map's Jacobian is non-negative</span></div><p>For exact EM,
+<div class="eqn" id="eq-tc-jac-exact"><div class="eqbody">$$\frac{\partial\Lambda_i}{\partial\lambda_j} \;=\; \frac{1}{N\bar m_i^2}\sum_{n=1}^{N}\mathrm{Cov}\big(s_i, s_j \mid u_n, \lambda\big),$$</div><div class="eqno"><a href="#eq-tc-jac-exact" title="Link to equation 4.5.21">(4.5.21)</a></div></div>
+so $J_{ii}$ is the average posterior variance of $s_i$ divided by $\bar m_i^2$, which is positive. For a parametric family in which trial $n$'s E-step returns parameters $\mathbf{x}_n(\lambda)$ at a minimum of $\mathcal{F}_n(\mathbf{x}; \lambda)$ with positive definite Hessian $\mathbf{H}_n$,
+<div class="eqn" id="eq-tc-jac-param"><div class="eqbody">$$\frac{\partial\Lambda_i}{\partial\lambda_j} \;=\; \frac{1}{N\bar m_i^2}\sum_{n=1}^{N}\mathbf{h}_{n,i}^{\top}\mathbf{H}_n^{-1}\mathbf{h}_{n,j}, \qquad \mathbf{h}_{n,i} = \nabla_{\mathbf{x}}\,\mathbb{E}_{Q_{\mathbf{x}}}[s_i]\Big|_{\mathbf{x} = \mathbf{x}_n},$$</div><div class="eqno"><a href="#eq-tc-jac-param" title="Link to equation 4.5.22">(4.5.22)</a></div></div>
+and again $J_{ii} \ge 0$. Here $\mathbf{x}_n$ is a local symbol for the parameters of $Q_n$, such as $(\ln m_1, \ln m_2, \ln k_1, \ln k_2)$ for the Gamma family.</p></div>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Proof</span></div><ol>
+<li>
+<p>From <a class="eqref" href="#eq-tc-em-map">(4.5.20)</a>, $\partial\Lambda_i/\partial\lambda_j = -\bar m_i^{-2}\,\partial\bar m_i/\partial\lambda_j$, and $\bar m_i$ is an average over trials, so it suffices to differentiate one trial's recognition mean.</p>
+</li>
+<li>
+<p>Exact posterior. By <a class="eqref" href="#eq-tc-logjoint">(4.5.3)</a>, $P(s \mid u_n, \lambda) = e^{-\lambda_1 s_1 - \lambda_2 s_2}L_n(s)/Z_n(\lambda)$, where $L_n$ collects the factors free of $\lambda$ and $Z_n(\lambda) = \int e^{-\lambda_1 s_1 - \lambda_2 s_2}L_n(s)\,\mathrm{d}s$. Differentiating under the integral, $\partial Z_n/\partial\lambda_j = -Z_n\,\mathbb{E}[s_j \mid u_n]$, and
+<div class="eqn"><div class="eqbody">$$\frac{\partial}{\partial\lambda_j}\mathbb{E}[s_i \mid u_n]
+\;=\; \frac{\partial}{\partial\lambda_j}\frac{\int s_i\,e^{-\lambda\cdot s}L_n\,\mathrm{d}s}{Z_n}
+\;=\; -\mathbb{E}[s_i s_j \mid u_n] + \mathbb{E}[s_i \mid u_n]\,\mathbb{E}[s_j \mid u_n]
+\;=\; -\mathrm{Cov}(s_i, s_j \mid u_n).$$</div></div>
+Averaging over trials and multiplying by $-\bar m_i^{-2}$ gives <a class="eqref" href="#eq-tc-jac-exact">(4.5.21)</a>.</p>
+</li>
+<li>
+<p>Parametric family. As in the M-step derivation, $\lambda$ enters $\mathcal{F}_n$ only through $\sum_j\big(-\ln\lambda_j + \lambda_j\,\mathbb{E}_{Q_{\mathbf{x}}}[s_j]\big)$, so $\partial_{\lambda_j}\nabla_{\mathbf{x}}\mathcal{F}_n = \mathbf{h}_{n,j}$. The E-step solves $\nabla_{\mathbf{x}}\mathcal{F}_n(\mathbf{x}_n(\lambda); \lambda) = 0$. Since $\mathbf{H}_n$ is invertible, the implicit function theorem makes $\mathbf{x}_n$ differentiable in $\lambda$, and differentiating the stationarity condition in $\lambda_j$ gives
+<div class="eqn"><div class="eqbody">$$\mathbf{H}_n\,\frac{\partial\mathbf{x}_n}{\partial\lambda_j} + \mathbf{h}_{n,j} \;=\; 0
+\quad\Longrightarrow\quad
+\frac{\partial\mathbf{x}_n}{\partial\lambda_j} \;=\; -\mathbf{H}_n^{-1}\mathbf{h}_{n,j}.$$</div></div>
+By the chain rule, $\partial\,\mathbb{E}_{Q_n}[s_i]/\partial\lambda_j = \mathbf{h}_{n,i}^{\top}\,\partial\mathbf{x}_n/\partial\lambda_j = -\mathbf{h}_{n,i}^{\top}\mathbf{H}_n^{-1}\mathbf{h}_{n,j}$, and step 1 gives <a class="eqref" href="#eq-tc-jac-param">(4.5.22)</a>. For $i = j$ each term is a quadratic form in the positive definite $\mathbf{H}_n^{-1}$, so it is non-negative.</p>
+</li>
+</ol></div>
+<p>The free-form family is covered by the second case: its optimal factors lie in the family with log densities $a s^4 + b s^2 + c\,s$ (<a class="eqref" href="#eq-tc-ff-q1">(4.5.17)</a>), so the free-form optimum is also the optimum over that six-parameter family, and the theorem applies wherever that optimum is nondegenerate.</p>
+<p>In words: raising $\lambda_i$ makes large values of $s_i$ less probable a priori, every trial's recognition mean of $s_i$ falls, and the next M-step raises $\lambda_i$ again. For exact EM the off-diagonal entries have the sign of the posterior covariance, which is negative here, so raising one rate lowers the other. At the true rates, <a class="eqref" href="#eq-tc-jac-exact">(4.5.21)</a> gives
+<div class="eqn"><div class="eqbody">$$J_{\mathrm{exact}} \;=\; \begin{pmatrix} 0.2910 & -0.1434 \\ -0.0808 & 0.2629 \end{pmatrix},$$</div></div>
+which agrees with a central-difference Jacobian of the map, computed by running the E-step at perturbed rates, to $7.4 \times 10^{-12}$.</p>
+<h3 id="how-the-loop-multiplies-the-one-step-error">How the loop multiplies the one-step error</h3>
+<p>Let $\Delta = \Lambda(\lambda^{*}) - \lambda^{*}$ be the displacement of one M-step taken from the true rates; call $\Lambda(\lambda^{*})$ the one-step rates. A fixed point $\lambda^{\infty} = \Lambda(\lambda^{\infty})$ near $\lambda^{*}$ satisfies, to first order,
+<div class="eqn"><div class="eqbody">$$\lambda^{\infty} \;=\; \Lambda(\lambda^{\infty}) \;\approx\; \Lambda(\lambda^{*}) + J\,(\lambda^{\infty} - \lambda^{*}) \;=\; \lambda^{*} + \Delta + J\,(\lambda^{\infty} - \lambda^{*}),$$</div></div>
+with $J$ evaluated at $\lambda^{*}$, so
+<div class="eqn" id="eq-tc-gain"><div class="eqbody">$$\lambda^{\infty} - \lambda^{*} \;\approx\; (\mathbf{I} - J)^{-1}\Delta \;=\; \big(\mathbf{I} + J + J^2 + \cdots\big)\Delta,$$</div><div class="eqno"><a href="#eq-tc-gain" title="Link to equation 4.5.23">(4.5.23)</a></div></div>
+the series converging when the spectral radius of $J$ is below $1$. The fixed point's displacement is the one-step displacement, plus its image after one more pass of the loop, and so on. This is effect 3. It needs a nonzero $\Delta$ to act on, and exact EM has one too: there $\Delta$ is the difference between the one-step rates and $\lambda^{*}$ on this finite sample, and <a class="eqref" href="#eq-tc-gain">(4.5.23)</a> carries it to the exact-EM fit.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Family</th>
+<th style="text-align: right;">One-step rates $\Lambda(\lambda^{*})$</th>
+<th style="text-align: right;">Fitted rates predicted by <a class="eqref" href="#eq-tc-gain">(4.5.23)</a></th>
+<th style="text-align: right;">Fitted rates</th>
+<th style="text-align: right;">Diagonal of $(\mathbf{I} - J)^{-1}$</th>
+<th style="text-align: right;">Spectral radius of $J$ at the fit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>exact</td>
+<td style="text-align: right;">$(0.9225, 0.6926)$</td>
+<td style="text-align: right;">$(0.9346, 0.6861)$</td>
+<td style="text-align: right;">$(0.9345, 0.6862)$</td>
+<td style="text-align: right;">$(1.442, 1.387)$</td>
+<td style="text-align: right;">$0.384$</td>
+</tr>
+<tr>
+<td>free-form</td>
+<td style="text-align: right;">$(1.0174, 0.7839)$</td>
+<td style="text-align: right;">$(1.0355, 0.7903)$</td>
+<td style="text-align: right;">$(1.0354, 0.7905)$</td>
+<td style="text-align: right;">$(1.292, 1.237)$</td>
+<td style="text-align: right;">$0.283$</td>
+</tr>
+<tr>
+<td>Gamma</td>
+<td style="text-align: right;">$(1.0378, 0.7991)$</td>
+<td style="text-align: right;">$(1.0618, 0.8083)$</td>
+<td style="text-align: right;">$(1.0615, 0.8084)$</td>
+<td style="text-align: right;">$(1.311, 1.249)$</td>
+<td style="text-align: right;">$0.285$</td>
+</tr>
+<tr>
+<td>Exponential</td>
+<td style="text-align: right;">$(2.0717, 1.7109)$</td>
+<td style="text-align: right;">$(2.3341, 1.7686)$</td>
+<td style="text-align: right;">$(2.3519, 1.8277)$</td>
+<td style="text-align: right;">$(2.167, 1.921)$</td>
+<td style="text-align: right;">$0.560$</td>
+</tr>
+</tbody>
+</table></div>
+<p>For the Exponential and Gamma families $J$ is computed from <a class="eqref" href="#eq-tc-jac-param">(4.5.22)</a>, with the Hessian $\mathbf{H}_n$ of each trial's free energy at its E-step solution and no eigenvalue repair; the smallest eigenvalue of any $\mathbf{H}_n$ is $0.106$. Central differences of $\Lambda$ with steps from $0.001$ to $0.01$ of each rate agree with these to $5.6 \times 10^{-6}$. Much smaller steps would not: the E-step's stopping error and floating-point error are both divided by the step. For the exact and free-form families $J$ is computed by central differences of $\Lambda$, with steps of $10^{-5}$ of each rate; for exact EM these agree with <a class="eqref" href="#eq-tc-jac-exact">(4.5.21)</a> to $7.4 \times 10^{-12}$. For the first three families the linear prediction differs from the fitted rates by at most $0.0003$. For the Exponential family both components of the one-step displacement exceed $1$, and the prediction differs by up to $0.059$, as a first-order expansion may at that distance. The spectral radius at every fitted point is below $1$, so each fixed point attracts nearby iterates. In every row the fitted rates lie further from $\lambda^{*}$ than the one-step rates, in both components: closing the loop enlarged the displacement in every family, the exact one included.</p>
+<h2 id="separating-the-effects"><span class="secno">7</span>Separating the effects</h2>
+<p>Each row of the next table changes one thing relative to the row above it. The one-step columns use the true rates as input, so they show what the E-step and the averaging rule do before any feedback. The fitted columns run the loop to convergence from $\lambda^{(0)}$.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Recognition family and rule</th>
+<th style="text-align: right;">One-step rates</th>
+<th style="text-align: right;">relative to exact (%)</th>
+<th style="text-align: right;">Fitted rates</th>
+<th style="text-align: right;">relative to exact EM (%)</th>
+<th style="text-align: right;">Iterations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>exact posterior, M-step</td>
+<td style="text-align: right;">$(0.9225, 0.6926)$</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;">$(0.9345, 0.6862)$</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;">$27$</td>
+</tr>
+<tr>
+<td>free-form product, M-step</td>
+<td style="text-align: right;">$(1.0174, 0.7839)$</td>
+<td style="text-align: right;">$(+10.3, +13.2)$</td>
+<td style="text-align: right;">$(1.0354, 0.7905)$</td>
+<td style="text-align: right;">$(+10.8, +15.2)$</td>
+<td style="text-align: right;">$21$</td>
+</tr>
+<tr>
+<td>Gamma product, M-step</td>
+<td style="text-align: right;">$(1.0378, 0.7991)$</td>
+<td style="text-align: right;">$(+12.5, +15.4)$</td>
+<td style="text-align: right;">$(1.0615, 0.8084)$</td>
+<td style="text-align: right;">$(+13.6, +17.8)$</td>
+<td style="text-align: right;">$48$</td>
+</tr>
+<tr>
+<td>Exponential product, M-step</td>
+<td style="text-align: right;">$(2.0717, 1.7109)$</td>
+<td style="text-align: right;">$(+124.6, +147.0)$</td>
+<td style="text-align: right;">$(2.3519, 1.8277)$</td>
+<td style="text-align: right;">$(+151.7, +166.4)$</td>
+<td style="text-align: right;">$53$</td>
+</tr>
+<tr>
+<td>Exponential product, average of rates</td>
+<td style="text-align: right;">$(2.3409, 2.0015)$</td>
+<td style="text-align: right;">$(+153.7, +189.0)$</td>
+<td style="text-align: right;">$(2.8345, 2.3068)$</td>
+<td style="text-align: right;">$(+203.3, +236.2)$</td>
+<td style="text-align: right;">$129$</td>
+</tr>
+<tr>
+<td>Exponential product, online rule <a class="eqref" href="#eq-tc-online">(4.5.6)</a></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;">$(3.0992, 2.0689)$ after one pass</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table></div>
+<p>The one-step comparisons are relative to the exact one-step rates and the fitted ones relative to the exact-EM fit, so neither mixes a one-step value with a fitted one. Read down the table:</p>
+<ul>
+<li>Factorisation alone (free-form against exact) raises the one-step rates by $10.3$ and $13.2$ per cent and the fitted rates by $10.8$ and $15.2$ per cent. This is effect 4.</li>
+<li>Restricting each factor to a Gamma density (Gamma against free-form) adds $2.0$ and $1.9$ per cent to the one-step rates and $2.5$ and $2.3$ per cent to the fitted ones. Two parameters per factor come close to the free-form result on this model.</li>
+<li>Fixing the coefficient of variation at $1$ (Exponential against Gamma) adds $100$ and $114$ per cent to the one-step rates and $122$ and $126$ per cent to the fitted ones. This is effect 1, and it is the largest.</li>
+<li>Averaging rates instead of taking the M-step (the last two Exponential rows) adds $13.0$ and $17.0$ per cent in one step and $20.5$ and $26.2$ per cent at the fixed point. This is effect 2. The averaging rule is not a minimisation of $\mathcal{F}_{\mathrm{tot}}$, and in its run $\mathcal{F}_{\mathrm{tot}}$ rose on $38$ of the $129$ iterations.</li>
+<li>Going from the one-step columns to the fitted columns in any row is effect 3, the loop of the previous section.</li>
+</ul>
+<p>The comparisons are differences between neighbouring rows, and they do not add: the loop multiplies whatever displacement the row above it leaves, so the share of the final error that belongs to each effect depends on the order in which they are switched on. What the table shows is that each effect is present, its direction on this sample, and its size here.</p>
+<figure id="fig-4-5-3"><svg viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Paths of the learned prior rates under exact EM and under variational EM with free-form, Gamma and Exponential families, and the online rule, all from the same starting rates.">
+<rect x="1" y="1" width="678" height="338" fill="#fdfcf9" stroke="#e4e1d9"/>
+<line x1="70" y1="300" x2="470" y2="300" stroke="#3c3c42"/>
+<line x1="70" y1="300" x2="70" y2="30" stroke="#3c3c42"/>
+<line x1="127.1" y1="300" x2="127.1" y2="304" stroke="#3c3c42"/>
+<text x="127.1" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="198.6" y1="300" x2="198.6" y2="304" stroke="#3c3c42"/>
+<text x="198.6" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1.5</text>
+<line x1="270.0" y1="300" x2="270.0" y2="304" stroke="#3c3c42"/>
+<text x="270.0" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2</text>
+<line x1="341.4" y1="300" x2="341.4" y2="304" stroke="#3c3c42"/>
+<text x="341.4" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2.5</text>
+<line x1="412.9" y1="300" x2="412.9" y2="304" stroke="#3c3c42"/>
+<text x="412.9" y="316.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">3</text>
+<line x1="66" y1="287.1" x2="70" y2="287.1" stroke="#3c3c42"/>
+<text x="63.0" y="290.6" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.5</text>
+<line x1="66" y1="222.9" x2="70" y2="222.9" stroke="#3c3c42"/>
+<text x="63.0" y="226.4" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="66" y1="158.6" x2="70" y2="158.6" stroke="#3c3c42"/>
+<text x="63.0" y="162.1" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1.5</text>
+<line x1="66" y1="94.3" x2="70" y2="94.3" stroke="#3c3c42"/>
+<text x="63.0" y="97.8" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2</text>
+<line x1="66" y1="30.0" x2="70" y2="30.0" stroke="#3c3c42"/>
+<text x="63.0" y="33.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2.5</text>
+<text x="270.0" y="331.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75">λ1</text>
+<text x="36" y="165.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75" transform="rotate(-90 36 165.0)">λ2</text>
+<path d="M270.0 287.1 L159.1 278.3 L131.6 270.1 L122.8 266.0 L119.7 264.3 L118.5 263.6 L118.1 263.4 L117.9 263.3 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2 L117.8 263.2" fill="none" stroke="#0f5f57" stroke-width="1.6"/>
+<circle cx="117.8" cy="263.2" r="3.5" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<path d="M270.0 287.1 L165.5 263.9 L141.0 254.3 L134.6 251.1 L132.9 250.2 L132.4 249.9 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8 L132.2 249.8" fill="none" stroke="#2c5f8a" stroke-width="1.6"/>
+<circle cx="132.2" cy="249.8" r="3.5" fill="#2c5f8a" stroke="#2c5f8a" stroke-width="1.6"/>
+<path d="M270.0 287.1 L168.6 261.9 L144.7 252.0 L138.4 248.8 L136.6 247.9 L136.1 247.6 L136.0 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5 L135.9 247.5" fill="none" stroke="#6b4c7a" stroke-width="1.6" stroke-dasharray="5 3"/>
+<circle cx="135.9" cy="247.5" r="3.5" fill="#6b4c7a" stroke="#6b4c7a" stroke-width="1.6"/>
+<path d="M270.0 287.1 L365.5 166.5 L354.5 138.5 L340.7 128.0 L331.9 122.9 L326.8 120.1 L323.9 118.5 L322.3 117.6 L321.4 117.1 L320.9 116.8 L320.6 116.6 L320.5 116.5 L320.4 116.5 L320.3 116.5 L320.3 116.5 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4 L320.3 116.4" fill="none" stroke="#9c4d2f" stroke-width="1.6"/>
+<circle cx="320.3" cy="116.4" r="3.5" fill="#9c4d2f" stroke="#9c4d2f" stroke-width="1.6"/>
+<path d="M270.0 287.1 L443.5 144.6 L459.4 108.8 L452.8 93.3 L442.0 84.5 L431.8 78.5 L423.2 74.0 L416.2 70.3 L410.6 67.4 L406.1 65.0 L402.6 63.0 L399.9 61.4 L397.7 60.1 L395.9 59.0 L394.5 58.2 L393.5 57.5 L392.6 57.0 L391.9 56.6 L391.3 56.2 L390.9 55.9 L390.6 55.7 L390.3 55.5 L390.1 55.4 L389.9 55.3 L389.8 55.2 L389.6 55.1 L389.6 55.1 L389.5 55.0 L389.4 55.0 L389.4 54.9 L389.4 54.9 L389.3 54.9 L389.3 54.9 L389.3 54.9 L389.3 54.9 L389.3 54.9 L389.2 54.9 L389.2 54.9 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8 L389.2 54.8" fill="none" stroke="#9c4d2f" stroke-width="1.6" stroke-dasharray="2 3"/>
+<circle cx="389.2" cy="54.8" r="3.5" fill="#9c4d2f" stroke="#9c4d2f" stroke-width="1.6"/>
+<path d="M270.0 287.1 L282.2 279.6 L294.6 272.1 L306.7 266.9 L310.9 260.7 L318.1 255.4 L325.1 249.0 L330.2 244.2 L336.5 238.7 L345.9 233.2 L350.3 229.0 L351.5 227.4 L358.0 221.4 L360.5 217.2 L366.7 214.2 L371.1 209.6 L376.2 204.7 L377.4 200.1 L376.9 198.5 L381.9 194.8 L387.0 191.8 L382.5 186.0 L382.6 180.5 L389.5 174.9 L395.8 171.8 L402.9 171.4 L406.5 169.0 L409.3 166.2 L411.6 162.4 L412.5 159.7 L413.3 158.3 L408.7 156.8 L412.2 152.8 L415.7 150.1 L420.9 149.6 L420.6 148.6 L417.2 149.4 L413.8 147.5 L416.5 144.9 L420.0 143.7 L423.9 142.2 L425.5 140.1 L424.3 139.8 L429.8 136.6 L427.0 134.9 L422.8 133.5 L423.7 131.3 L422.2 128.2 L417.1 126.4 L413.1 125.2 L417.8 122.3 L411.6 124.3 L412.9 122.3 L413.8 120.3 L414.0 118.6 L413.6 117.3 L413.7 116.1 L414.8 112.8 L412.3 112.1 L413.7 110.5 L416.5 108.4 L414.6 108.0 L415.9 104.3 L418.2 103.3 L415.8 104.8 L416.6 103.9 L420.5 101.4 L421.4 102.4 L424.7 99.4 L425.2 100.2 L426.8 98.4 L424.3 98.1 L428.1 95.7 L429.6 93.9 L431.2 90.6 L429.8 92.3 L433.0 89.0 L434.6 87.8 L430.9 92.0 L434.0 88.9 L436.5 88.4 L435.0 90.4 L429.1 91.3 L430.7 89.2 L430.5 87.3 L427.2 88.2 L424.2 90.1 L423.0 90.5 L424.5 89.8 L427.6 88.3 L431.6 88.0 L431.0 89.4 L430.3 88.7 L430.3 86.6 L429.0 86.4 L427.9 88.3 L427.2 86.7 L429.9 85.7 L430.1 84.4 L425.1 86.5 L427.0 85.4" fill="none" stroke="#a8741a" stroke-width="1.2"/>
+<circle cx="427.0" cy="85.4" r="3.5" fill="#a8741a" stroke="#a8741a" stroke-width="1.6"/>
+<circle cx="270.0" cy="287.1" r="3.5" fill="#fdfcf9" stroke="#3c3c42" stroke-width="1.6"/>
+<text x="278.0" y="291.1" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">start</text>
+<path d="M107.9 261.4 L117.9 261.4 M112.9 256.4 L112.9 266.4" stroke="#3c3c42" stroke-width="1.6"/>
+<text x="106.9" y="276.4" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">true</text>
+<line x1="490" y1="60" x2="512" y2="60" stroke="#0f5f57" stroke-width="2"/>
+<text x="518.0" y="64.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">exact EM</text>
+<line x1="490" y1="78" x2="512" y2="78" stroke="#2c5f8a" stroke-width="2"/>
+<text x="518.0" y="82.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">free-form</text>
+<line x1="490" y1="96" x2="512" y2="96" stroke="#6b4c7a" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="518.0" y="100.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">Gamma</text>
+<line x1="490" y1="114" x2="512" y2="114" stroke="#9c4d2f" stroke-width="2"/>
+<text x="518.0" y="118.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">Exponential, M-step</text>
+<line x1="490" y1="132" x2="512" y2="132" stroke="#9c4d2f" stroke-width="2" stroke-dasharray="2 3"/>
+<text x="518.0" y="136.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">Exponential, average of rates</text>
+<line x1="490" y1="150" x2="512" y2="150" stroke="#a8741a" stroke-width="2"/>
+<text x="518.0" y="154.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">online rule</text>
+</svg><figcaption><span class="fno">Figure 4.5.3.</span> Learned rates $(\lambda_1, \lambda_2)$ at every iteration of exact EM, of variational EM with the three families under the M-step, and of the Exponential family under the average of rates (dashed), with the online rule <a class="eqref" href="#eq-tc-online">(4.5.6)</a> every fifth trial, all from the start $\lambda^{(0)}$ (hollow circle). The cross is the true rate pair $\lambda^{*}$. Filled circles mark where each run ended.</figcaption></figure>
+<p>The coefficients of variation tell the same story from the side of $Q$. Averaged over trials, $q(s_1)$ has coefficient of variation $0.7074$ under the exact posterior at the true rates, $0.4963$ under the free-form product, $0.5127$ under the Gamma product and exactly $1$ under the Exponential product. At the fitted rates these are $0.7076$, $0.5071$, $0.5292$ and $1$, computed from the $Q$ of the last E-step of each run. The average divergence from the posterior per trial at the true rates is $0.4632$ nats for the free-form product, $0.5959$ for the Gamma product and $123.60$ for the Exponential product.</p>
+<p>The Exponential divergence is very uneven across trials. Its median is $0.8491$ nats, the largest single trial contributes $25.6$ per cent of the total, and the largest ten contribute $68.3$ per cent. These are trials with large observations. Completing the square in <a class="eqref" href="#eq-tc-locked">(4.5.13)</a>,
+<div class="eqn"><div class="eqbody">$$\tfrac12\big(u_1 - \hat g_1\big)^2 + \tfrac{11}{2}\,\hat g_1^2 \;=\; 6\Big(\hat g_1 - \frac{u_1}{12}\Big)^2 + \tfrac{11}{24}\,u_1^2 \;\ge\; \tfrac{11}{24}\,u_1^2 ,$$</div></div>
+so the first sensor's term cannot fall below $\tfrac{11}{24}u_1^2$ whatever the means, and likewise for the second sensor, so on such trials the Exponential product's free energy stays far above the surprise, and they account for much of the mean.</p>
+<figure class="widget" id="fig-4-5-4"><div class="wmount" data-widget="mean-field-failure"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 4.5.4.</span> Left: contours enclosing 50 and 90 per cent of the probability of the exact posterior (green) and of the free-form (blue), Gamma (purple) and Exponential (clay) products, for the observation and prior rates set by the sliders; the readout gives each family's means, standard deviations and divergence from the posterior. Right: the marginal densities of $s_1$ and $s_2$ under each. The Gamma product is drawn with long dashes and the Exponential product with short dashes.</figcaption></figure>
+<div class="box exercise"><div class="boxhd">Exercise 4.5.1<span class="bt">The Gamma product penalty at large shapes</span></div><p>Show from <a class="eqref" href="#eq-tc-gam-moments">(4.5.15)</a> that, for fixed means $m_1, m_2$,
+<div class="eqn"><div class="eqbody">$$\mathrm{Var}_{Q}(s_2 s_1^2) \;=\; m_2^2 m_1^4\left(\frac{4}{k_1} + \frac{1}{k_2}\right) + O\big(k^{-2}\big)$$</div></div>
+as $k_1, k_2 \to \infty$ together, and compare with the first-order propagation of error, $\mathrm{Var}(s_2 s_1^2) \approx (2 s_1 s_2)^2\,\mathrm{Var}(s_1) + s_1^4\,\mathrm{Var}(s_2)$ evaluated at the means.</p><details><summary>Solution</summary><p>By independence and <a class="eqref" href="#eq-tc-gam-moments">(4.5.15)</a>, $\mathbb{E}_Q[s_2 s_1^2] = m_2 m_1^2 c_2(k_1)$ and $\mathbb{E}_Q[(s_2 s_1^2)^2] = m_2^2 c_2(k_2)\,m_1^4 c_4(k_1)$. Expanding, $c_2(k) = 1 + 1/k$ and
+<div class="eqn"><div class="eqbody">$$c_4(k) \;=\; \Big(1 + \frac1k\Big)\Big(1 + \frac2k\Big)\Big(1 + \frac3k\Big) \;=\; 1 + \frac6k + \frac{11}{k^2} + \frac{6}{k^3}.$$</div></div>
+So $\big(\mathbb{E}_Q[s_2 s_1^2]\big)^2 = m_2^2 m_1^4\big(1 + 2/k_1 + O(k^{-2})\big)$ and $\mathbb{E}_Q[(s_2 s_1^2)^2] = m_2^2 m_1^4\big(1 + 1/k_2\big)\big(1 + 6/k_1 + O(k^{-2})\big) = m_2^2 m_1^4\big(1 + 6/k_1 + 1/k_2 + O(k^{-2})\big)$. Subtracting,
+<div class="eqn"><div class="eqbody">$$\mathrm{Var}_Q(s_2 s_1^2) \;=\; m_2^2 m_1^4\left(\frac{4}{k_1} + \frac{1}{k_2}\right) + O\big(k^{-2}\big).$$</div></div>
+With $\mathrm{Var}(s_i) = m_i^2/k_i$, the propagation formula gives $(2m_1m_2)^2 m_1^2/k_1 + m_1^4 m_2^2/k_2 = m_2^2 m_1^4(4/k_1 + 1/k_2)$, the same leading term.</p></details></div></article><nav class="pagenav"><a class="pv" href="../week-04/learning.html"><span class="dir">Previous</span><span class="ttl">Learning with free energy</span></a><a class="nx" href="../week-04/exercises.html"><span class="dir">Next</span><span class="ttl">Problems and code</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w04.js"></script>
+</body>
+</html>

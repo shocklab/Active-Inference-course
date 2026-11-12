@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -395,7 +398,7 @@ rows and columns sum to one.</p>
 <p>(b) The alarm sounds. Compute the evidence, the posterior probability of
 overheating, and the surprise.</p>
 <p>(c) The <strong>odds</strong> of an event with probability $p$ are $p/(1-p)$. Show that, for
-two states $s_1$ and $s_2$ and an observation with $P(o \mid s_2) > 0$, Bayes'
+two states $s_1$ and $s_2$ and an observation with $P(o \mid s_2) &gt; 0$, Bayes'
 theorem can be written as</p>
 <div class="eqn"><div class="eqbody">$$\frac{P(s_1 \mid o)}{P(s_2 \mid o)}
 = \frac{P(o \mid s_1)}{P(o \mid s_2)} \cdot \frac{P(s_1)}{P(s_2)},$$</div></div>
@@ -491,7 +494,7 @@ everything else are</p>
 <p>Setting this to 1 gives $0.70\rho = 0.051087(1-\rho)$, so
 $\rho = 0.051087 / 0.751087 = 0.0680$.</p>
 <p>So a leopard prior of about 6.8% is the tipping point: the model in
-Lesson&nbsp;3 used $q = 0.08$, which is just above it, which is why the
+Lesson&nbsp;3 used $\rho = 0.08$, which is just above it, which is why the
 posterior came out at $0.544$ rather than exactly a half. The observation is
 strong, but it is only just strong enough to overturn a prior of that size, and
 a slightly more sceptical hiker would have remained unconvinced by the same
@@ -532,7 +535,7 @@ $P(o \mid s)$ does not depend on $s$.</p><details><summary>Solution</summary><p>
 $P(o) = \sum_s c\,P(s) = c$, and</p>
 <div class="eqn"><div class="eqbody">$$P(s \mid o) = \frac{c\,P(s)}{c} = P(s).$$</div></div>
 <p>($\Rightarrow$) Suppose $P(s\mid o) = P(s)$ for every prior. Bayes gives
-$P(o\mid s)P(s) = P(o)P(s)$ for every $s$, so wherever $P(s) > 0$ we may divide
+$P(o\mid s)P(s) = P(o)P(s)$ for every $s$, so wherever $P(s) &gt; 0$ we may divide
 to get $P(o\mid s) = P(o)$, a quantity that does not depend on $s$. Taking a
 prior with full support forces this at every $s$.</p>
 <p>This is the formal content of the ambiguity slider. A sensory channel is useful
@@ -617,7 +620,7 @@ finite sums and use the product rule:</p>
 &= \sum_s \ln P(s) \sum_o P(s, o) \\
 &= \sum_s P(s) \ln P(s) = -\mathrm{H}[P(s)] .
 \end{aligned}$$</div></div>
-<p>The sums over $o$ run over observations with $P(o) > 0$, for which the posterior
+<p>The sums over $o$ run over observations with $P(o) &gt; 0$, for which the posterior
 is defined. Terms with $P(s \mid o) = 0$ contribute zero under the convention
 $0 \ln 0 = 0$ of <a href="../week-01/soft-body.html">Lesson&nbsp;1</a>, and $P(s) = 0$ forces $P(s \mid o) = 0$, so no
 logarithm of zero survives. Together,</p>
@@ -764,7 +767,7 @@ D_{\mathrm{KL}}\big[(1-\alpha)p + \alpha \bar p \,\big\|\, (1-\alpha)q + \alpha 
 $c_1, c_2$ and positive $\phi_1, \phi_2$,</p>
 <div class="eqn"><div class="eqbody">$$(c_1 + c_2) \ln \frac{c_1 + c_2}{\phi_1 + \phi_2} \le c_1 \ln \frac{c_1}{\phi_1} + c_2 \ln \frac{c_2}{\phi_2} .$$</div></div>
 <p>To prove it, let $\zeta(y) = y \ln y$, with $\zeta(0) = 0$. It is convex on
-$y > 0$ because $\zeta''(y) = 1/y > 0$ there, and since it is continuous on
+$y &gt; 0$ because $\zeta''(y) = 1/y &gt; 0$ there, and since it is continuous on
 $y \ge 0$ the convexity inequality extends to $y = 0$ by taking limits. Set
 $\omega = \phi_1/(\phi_1 + \phi_2)$, so that $1 - \omega = \phi_2/(\phi_1+\phi_2)$ and</p>
 <div class="eqn"><div class="eqbody">$$\frac{c_1 + c_2}{\phi_1 + \phi_2} = \omega \frac{c_1}{\phi_1} + (1-\omega)\frac{c_2}{\phi_2} .$$</div></div>
@@ -772,8 +775,8 @@ $\omega = \phi_1/(\phi_1 + \phi_2)$, so that $1 - \omega = \phi_2/(\phi_1+\phi_2
 $\omega\, \zeta(c_1/\phi_1) + (1-\omega)\, \zeta(c_2/\phi_2)$.
 Multiplying through by $\phi_1 + \phi_2$,</p>
 <div class="eqn"><div class="eqbody">$$(\phi_1 + \phi_2)\, \zeta\!\left(\frac{c_1 + c_2}{\phi_1 + \phi_2}\right) \le \phi_1\, \zeta\!\left(\frac{c_1}{\phi_1}\right) + \phi_2\, \zeta\!\left(\frac{c_2}{\phi_2}\right),$$</div></div>
-<p>and writing out $\zeta$ gives the log-sum inequality. Now take $0 < \alpha < 1$
-and assume $q(o) > 0$ for every $o$, which holds for the leopard model because
+<p>and writing out $\zeta$ gives the log-sum inequality. Now take $0 &lt; \alpha &lt; 1$
+and assume $q(o) &gt; 0$ for every $o$, which holds for the leopard model because
 no row of $\mathbf{A}$ is zero. Apply the inequality for each observation $o$
 with $c_1 = (1-\alpha)p(o)$, $c_2 = \alpha \bar p(o)$, $\phi_1 = (1-\alpha)q(o)$
 and $\phi_2 = \alpha \bar p(o)$. The left side is</p>
@@ -810,7 +813,7 @@ each individually gets less of the credit. This comparison concerns these two sp
 <div class="box exercise"><div class="boxhd">Exercise 1.6.9<span class="bt">The survival curve &dagger;</span></div><p>Consider the homeostasis model from Lesson&nbsp;1 with the action strength set
 to zero, $\kappa = 0$. It is then a two-dimensional random walk with independent increments of standard deviation
 $\sigma$ per step in each coordinate, starting at the origin, absorbed when
-$\|x\| > 1$.</p>
+$\|x\| &gt; 1$.</p>
 <p>(a) Use a small-step diffusion approximation to motivate an expected absorption time proportional to $\sigma^{-2}$. Why need this not be exact for a discrete walk?</p>
 <p>(b) The notebook measures this by simulation. Predict the ratio of survival
 times at $\sigma = 0.09$ and $\sigma = 0.035$ before you run it.</p><details><summary>Solution</summary><p>(a) After $n$ steps the walk's displacement has variance $n\sigma^2$ in each
@@ -827,7 +830,7 @@ absorbing boundary can still be crossed. Compare survival distributions at
 fixed observation horizons rather than inferring indefinite survival from
 bounded variance.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 1.6.10<span class="bt">The regulated walk</span></div><p>Take the homeostat $x_{t+1} = (1-\kappa)x_t + \sigma\xi_t$ of Lesson&nbsp;1 with
-$0 < \kappa < 2$ and no absorbing boundary, starting from $x_0 = 0$. Write $v_t$ for the variance of one
+$0 &lt; \kappa &lt; 2$ and no absorbing boundary, starting from $x_0 = 0$. Write $v_t$ for the variance of one
 coordinate of $x_t$, and $v = \sigma^2/[\kappa(2-\kappa)]$ for its stationary variance.</p>
 <p>(a) Solve the recursion $v_{t+1} = (1-\kappa)^2 v_t + \sigma^2$ from Lesson&nbsp;1
 exactly, and show that at fixed $t$ the result tends to $t\sigma^2$ as
@@ -856,10 +859,10 @@ $2\kappa - \kappa^2$. Dividing top and bottom by $\kappa$,</p>
 \quad\text{as } \kappa \to 0 ,$$</div></div>
 <p>which is the variance of the unregulated walk in Lesson&nbsp;1. As a check at a
 small gain, $\kappa = 0.01$ and $t = 10$ give $v_t/\sigma^2 = 9.15$
-against $t = 10$. The limit is taken at fixed $t$. For any fixed $\kappa > 0$ the factor $(1-\kappa)^{2t}$
+against $t = 10$. The limit is taken at fixed $t$. For any fixed $\kappa &gt; 0$ the factor $(1-\kappa)^{2t}$
 eventually becomes negligible, and the variance stops growing and settles at $v$.</p>
 <p>(b) From (a), $v_t \ge 0.95\,v$ exactly when $(1-\kappa)^{2t} \le 0.05$. Taking
-logarithms, and noting that $\ln(1-\kappa) < 0$ reverses the inequality on
+logarithms, and noting that $\ln(1-\kappa) &lt; 0$ reverses the inequality on
 division,</p>
 <div class="eqn"><div class="eqbody">$$t \ge \frac{\ln 0.05}{2\ln(1-\kappa)} = 9.22 ,$$</div></div>
 <p>so the first such step is $t = 10$: after that many steps the
@@ -877,7 +880,7 @@ by independence, so</p>
 <div class="eqn"><div class="eqbody">$$\mathrm{Cov}(x_t, x_{t+j}) = (1-\kappa)^j\,\mathbb{E}[x_t^2] = (1-\kappa)^j v_t ,$$</div></div>
 <p>using that every $x_t$ has mean zero. As $t$ grows this tends to
 $(1-\kappa)^j v$, and the correlation between the two times tends to
-$(1-\kappa)^j$. For $1 < \kappa < 2$ the base $1-\kappa$ is negative, so the
+$(1-\kappa)^j$. For $1 &lt; \kappa &lt; 2$ the base $1-\kappa$ is negative, so the
 correlation alternates in sign with the lag. Each step overcorrects and the
 displacement changes side. At lags 1, 2 and 3, a gain of $0.5$ gives correlations
 $0.5$, $0.25$ and $0.125$, and a gain of
@@ -894,7 +897,7 @@ its distance from the origin. Write $R$ for that distance. In polar coordinates
 the area element is $R\,\mathrm{d}R$ times the element of angle, and integrating
 over the angle gives a factor $2\pi$, so</p>
 <div class="eqn"><div class="eqbody">$$\begin{aligned}
-P(\lVert x_t\rVert > 1) &= \int_1^\infty \frac{R}{v}\, e^{-R^2/(2v)}\,\mathrm{d}R
+P(\lVert x_t\rVert &gt; 1) &= \int_1^\infty \frac{R}{v}\, e^{-R^2/(2v)}\,\mathrm{d}R
 = \Big[-e^{-R^2/(2v)}\Big]_1^\infty \\
 &= e^{-1/(2v)} = \exp\!\left(-\frac{\kappa(2-\kappa)}{2\sigma^2}\right) .
 \end{aligned}$$</div></div>
@@ -1053,15 +1056,16 @@ as independent.</p></details></div>
 <h2 id="further-reading">Further reading</h2>
 <p>Everything here is freely accessible.</p>
 <ul>
-<li>Parr, Pezzulo and Friston, <em>Active Inference: The Free Energy Principle in
-  Mind, Brain, and Behavior</em> (MIT Press, 2022), Chapters 1 and 2. Open access.
+<li>Parr, Pezzulo and Friston, <a href="https://doi.org/10.7551/mitpress/12441.001.0001"><em>Active Inference: The Free Energy Principle in
+  Mind, Brain, and Behavior</em></a>
+  (MIT Press, 2022), Chapters 1 and 2. Open access.
   Read it for the framing; we will do the algebra it skips.</li>
-<li>Smith, Friston and Whyte, "A step-by-step tutorial on active inference and its
-  application to empirical data", <em>Journal of Mathematical Psychology</em> 107
-  (2022). The most practical published introduction to the discrete case, with
+<li>Smith, Friston and Whyte, <a href="https://doi.org/10.1016/j.jmp.2021.102632">"A step-by-step tutorial on active inference and its
+  application to empirical data"</a>,
+  <em>Journal of Mathematical Psychology</em> 107 (2022), 102632. The most practical published introduction to the discrete case, with
   MATLAB code.</li>
-<li>Bruineberg, Dolega, Dewhurst and Baltieri, "The Emperor's New Markov Blankets",
-  <em>Behavioral and Brain Sciences</em> (2022). A careful criticism of exactly the
+<li>Bruineberg, Dołęga, Dewhurst and Baltieri, <a href="https://doi.org/10.1017/S0140525X21002351">"The Emperor's New Markov Blankets"</a>,
+  <em>Behavioral and Brain Sciences</em> 45 (2022), e183. A careful criticism of exactly the
   interface picture drawn in Lesson&nbsp;2. Read it now, and again after Week&nbsp;12.</li>
 </ul></article><nav class="pagenav"><a class="pv" href="../week-01/the-denominator.html"><span class="dir">Previous</span><span class="ttl">Computing the marginal likelihood</span></a><a class="nx" href="../week-02/two-rules.html"><span class="dir">Next</span><span class="ttl">Local computation and learning</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w01.js"></script>

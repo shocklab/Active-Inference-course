@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -367,7 +370,17 @@ integral, then multiply and divide the integrand by $p(d, u; \omega)$:</p>
 the log joint $\ell$. So</p>
 <div class="eqn" id="eq-fisher"><div class="eqbody">$$\frac{\partial \ln p(u; \omega)}{\partial \omega}
 \;=\; \mathbb E_{d\mid u}\!\left[\frac{\partial \ell(d, u; \omega)}{\partial \omega}\right] ,$$</div><div class="eqno"><a href="#eq-fisher" title="Link to equation 3.4.1">(3.4.1)</a></div></div>
-<p>the average over the posterior $p(d \mid u; \omega)$ at the current parameters.</p></div>
+<p>the average over the posterior $p(d \mid u; \omega)$ at the current parameters.</p>
+<p>The first step differentiates under the integral sign. For a fixed observation $u$
+and parameters $(d_p, \theta, \Sigma_p, \Sigma_u)$ in a compact subset of
+$\mathbb R \times (0, \infty)^3$, so that $d_p$ is bounded and $\theta$, $\Sigma_p$ and
+$\Sigma_u$ are each bounded above and bounded away from zero, that is justified by one
+integrable bound on $|\partial p(d, u;\omega)/\partial\omega|$.
+The parameter derivatives multiply $p(d, u; \omega)$ by polynomials in $d$ and
+$1/d$. Near $d = 0$ the likelihood contains $\exp\!\big(-(u - \theta/d^{2})^2/(2\Sigma_u)\big)$,
+which falls like $\exp(-C/d^{4})$ for some $C &gt; 0$ and so goes to zero faster than any
+power of $1/d$ grows; at large $d$ the prior's Gaussian tail goes to zero faster than
+any power of $d$ grows.</p></div>
 <p>The slope of the log evidence is the posterior average of the same partial derivative
 the animal uses. The animal evaluates it at one point, the mode, where <a class="eqref" href="#eq-fisher">(3.4.1)</a>
 averages it over the whole posterior.</p>
@@ -411,23 +424,29 @@ down.</p>
 <h2 id="mean-zero-at-the-truth"><span class="secno">2</span>Mean zero at the truth</h2>
 <p>One trial proves little. By Lesson&nbsp;1, a rule is judged by where its drift
 vanishes and whether that zero attracts.</p>
+<div class="box definition"><div class="boxhd">Definition 3.4.1<span class="bt">Score</span></div><p>The <strong>score</strong> of a parameter is the slope of the log evidence in that parameter,
+$\partial\ln p(u; \omega)/\partial\omega$, as a function of the observation $u$.</p></div>
 <div class="box derivation"><div class="boxhd">Derivation<span class="bt">The score has mean zero</span></div><p>Suppose the world draws $u$ from $p(u; \omega^{*})$, the model's own evidence at some
 true parameter $\omega^{*}$. The expected slope of the log evidence at the truth is</p>
 <div class="eqn"><div class="eqbody">$$\int p(u; \omega^{*})\,\frac{\partial \ln p(u; \omega)}{\partial \omega}\bigg|_{\omega^{*}}\mathrm du
 \;=\; \int \frac{\partial p(u; \omega)}{\partial \omega}\bigg|_{\omega^{*}}\mathrm du
 \;=\; \frac{\partial}{\partial \omega}\int p(u; \omega)\,\mathrm du\,\bigg|_{\omega^{*}}
-\;=\; \frac{\partial}{\partial\omega}\,1 \;=\; 0 .$$</div></div></div>
-<p>The slope of the log evidence is called the <strong>score</strong>, and this is the statement that
-its mean is zero at the true parameter. Combined with <a class="eqref" href="#eq-fisher">(3.4.1)</a>, it says that a rule
+\;=\; \frac{\partial}{\partial\omega}\,1 \;=\; 0 .$$</div></div>
+<p>The second equality moves the derivative outside an integral over $u$. Unlike the
+interchange in <a class="eqref" href="#eq-fisher">(3.4.1)</a>, which has a fixed $u$, this one needs a bound that holds
+over all observations as well, and the lesson assumes it rather than proving it. The
+derivation of the drift below makes the same assumption.</p></div>
+<p>So the score has mean zero at the true parameter. Combined with <a class="eqref" href="#eq-fisher">(3.4.1)</a>, it says that a rule
 which averages $\partial\ell/\partial\omega$ over the posterior, rather than reading it
 at the mode, has zero drift at the truth whenever the world is one of the model's own
 settings.</p>
-<div class="box definition"><div class="boxhd">Definition 3.4.1<span class="bt">Posterior-averaged rule and point rule</span></div><p>The <strong>posterior-averaged rule</strong> changes a parameter on trial $n$ by</p>
+<div class="box definition"><div class="boxhd">Definition 3.4.2<span class="bt">Posterior-averaged rule and point rule</span></div><p>The <strong>posterior-averaged rule</strong> changes a parameter on trial $n$ by</p>
 <div class="eqn" id="eq-post-rule"><div class="eqbody">$$\omega \;\leftarrow\; \omega \;+\; \beta\,\mathbb E_{d\mid u_n}\!\left[\frac{\partial \ell(d, u_n; \omega)}{\partial \omega}\right] .$$</div><div class="eqno"><a href="#eq-post-rule" title="Link to equation 3.4.2">(3.4.2)</a></div></div>
 <p>The rule of Lesson&nbsp;1 reads the same derivative at the mode
 instead, and from here on is called the <strong>point rule</strong>.</p></div>
 <p>The animal does not have the posterior average; the simulations compute it on every
-trial by quadrature over the posterior, on 801 points, so that the two rules can be
+trial by quadrature over the posterior, on at least 801 points and more where the
+result has not stopped changing, so that the two rules can be
 compared on the same trials. Nothing guarantees zero drift at the truth for the point
 rule.</p>
 <div class="box derivation"><div class="boxhd">Derivation<span class="bt">The posterior-averaged rule climbs towards the world</span></div><p>By <a class="eqref" href="#eq-fisher">(3.4.1)</a> the drift of <a class="eqref" href="#eq-post-rule">(3.4.2)</a> is the process average of the score,</p>
@@ -442,10 +461,10 @@ entropy, with the sum there replaced by an integral,</p>
 <p>The drift is minus the slope, in $\omega$, of the divergence of the world's
 distribution of sounds relative to the model's. When the world is one of the model's settings, that divergence
 is zero at the truth and positive elsewhere, so the truth is a minimum of it: the drift
-vanishes there, and where the divergence curves upwards, $\varphi' < 0$ and the truth
+vanishes there, and where the divergence curves upwards, $\varphi' &lt; 0$ and the truth
 attracts. The score argument above is the first half of this; the second half is why
 the posterior-averaged rule returns to the truth after a disturbance.</p>
-<h2 id="the-linear-case-exactly"><span class="secno">3</span>The linear case, exactly</h2>
+<h2 id="the-linear-case"><span class="secno">3</span>The linear case</h2>
 <p>In a linear Gaussian model every expectation can be done by hand, so the size of the
 bias can be computed exactly. Let the world draw $d$ from $\mathcal N(d_p, \Sigma_p^{*})$
 on the whole line, and let $u$ be $d$ plus noise of variance $\Sigma_u$, so that $u$
@@ -473,12 +492,12 @@ $\Sigma_p^{*}\Sigma_u + \Sigma_u^2$, which is positive.</p></div>
 the common denominator $2\Sigma_p(\Sigma_p + \Sigma_u)^2$, is</p>
 <div class="eqn"><div class="eqbody">$$\varphi(\Sigma_p) \;=\; -\,\frac{\Sigma_p^2 + (\Sigma_u - \Sigma_p^{*})\,\Sigma_p + \Sigma_u^2}{2\Sigma_p(\Sigma_p + \Sigma_u)^2} .$$</div></div>
 <p>The denominator is positive, so the drift has the opposite sign to the quadratic in
-<a class="eqref" href="#eq-lin-roots">(3.4.3)</a>. That quadratic is $\Sigma_u^2 > 0$ at $\Sigma_p = 0$ and positive for
+<a class="eqref" href="#eq-lin-roots">(3.4.3)</a>. That quadratic is $\Sigma_u^2 &gt; 0$ at $\Sigma_p = 0$ and positive for
 large $\Sigma_p$, and its discriminant factorises as
 $(\Sigma_p^{*} - \Sigma_u)^2 - 4\Sigma_u^2 = (\Sigma_p^{*} - 3\Sigma_u)(\Sigma_p^{*} + \Sigma_u)$.
 Three cases follow.</p>
 <ul>
-<li>$\Sigma_p^{*} < 3\Sigma_u$: no real root, the quadratic is positive throughout, the
+<li>$\Sigma_p^{*} &lt; 3\Sigma_u$: no real root, the quadratic is positive throughout, the
   drift is negative for every $\Sigma_p$, and the learned variance falls towards zero.</li>
 <li>$\Sigma_p^{*} = 3\Sigma_u$: a double root at $\Sigma_p = \Sigma_u$, where the quadratic
   is $(\Sigma_p - \Sigma_u)^2$. The drift is negative on both sides and zero only there,
@@ -489,7 +508,7 @@ Three cases follow.</p>
   an upward step that can take the variance back above the root. Whether the learner
   eventually collapses is a question about its sample paths that the drift alone does
   not answer.</li>
-<li>$\Sigma_p^{*} > 3\Sigma_u$: two roots. The drift is negative below the smaller,
+<li>$\Sigma_p^{*} &gt; 3\Sigma_u$: two roots. The drift is negative below the smaller,
   positive between them and negative above the larger. The smaller root repels and
   separates collapse from survival; the larger attracts, and is where the point rule
   settles.</li>
@@ -642,9 +661,9 @@ point rule's drift at the truth is $-0.3303$, negative, so on
 average the modes lie below the posterior means, as at Week&nbsp;2's sound. The prior
 location falls until the modes it produces average to its own mean. In that widget's
 world, sources at $d_p^{*} = 3$, the posterior-averaged rule's drift at the
-truth comes out of the quadrature as $5.7 \times 10^{-17}$, which is zero to
+truth comes out of the quadrature as $2.7 \times 10^{-17}$, which is zero to
 rounding.</p>
-<h2 id="where-the-bias-comes-from"><span class="secno">6</span>Where the bias comes from</h2>
+<h2 id="the-source-of-the-bias"><span class="secno">6</span>The source of the bias</h2>
 <p>Both rules use the same per-trial derivative. Write it as a function of the state,
 $\psi(d) = \partial\ell(d, u; \omega)/\partial\omega$, for one trial and the current
 parameters. The point rule uses $\psi(\hat d)$; the posterior-averaged rule uses
@@ -690,11 +709,11 @@ say how each parameter responds.</p>
 <li><strong>Sensory variance.</strong> $\psi$ depends on $d$ through $\delta_u^2/(2\Sigma_u^2)$, and
   $\mathrm d^2\delta_u^2/\mathrm dd^2 = 2g'(d)^2 - 2\delta_u g''(d)$. This $\psi$ is not a
   polynomial in $d$, so <a class="eqref" href="#eq-gap">(3.4.5)</a> is an approximation. Where the residual at the mode is
-  small, $\psi'' > 0$ and the variance term has the same sign as for the prior. The
+  small, $\psi'' &gt; 0$ and the variance term has the same sign as for the prior. The
   quadrature in the table confirms the sign: the learned sensory variance is too
   small.</li>
-<li><strong>Source power.</strong> $\psi = \varepsilon_u h(d)$, and at a small residual $\psi' > 0$ while
-  $\psi'' < 0$ (an exercise asks for both). This $\psi$ is not a polynomial either, and
+<li><strong>Source power.</strong> $\psi = \varepsilon_u h(d)$, and at a small residual $\psi' &gt; 0$ while
+  $\psi'' &lt; 0$ (an exercise asks for both). This $\psi$ is not a polynomial either, and
   the two terms of <a class="eqref" href="#eq-gap">(3.4.5)</a> pull in opposite directions. The full calculation puts the
   learned power $12.0$ per cent from the truth in the world equal to
   Week&nbsp;2's model, an overestimate, and $-11.3$ per cent from it in the
@@ -739,14 +758,16 @@ or after the world changes, it loses a great deal. Week&nbsp;11 keeps counts for
 parameters of discrete models, which is the simplest way to carry that uncertainty.</p></div>
 <h2 id="expectation-maximisation"><span class="secno">7</span>Expectation maximisation</h2>
 <p>The posterior-averaged rule is a stochastic, online form of an algorithm statisticians
-use to fit models with unobserved variables. <strong>Expectation maximisation</strong>, or EM,
-alternates two steps from the current parameter $\omega_{\text{old}}$:</p>
+use to fit models with unobserved variables, given its general form by
+<a href="https://doi.org/10.1111/j.2517-6161.1977.tb01600.x">Dempster, Laird and Rubin (1977)</a>.</p>
+<div class="box definition"><div class="boxhd">Definition 3.4.3<span class="bt">Expectation maximisation</span></div><p><strong>Expectation maximisation</strong>, or EM, alternates two steps from the current parameter
+$\omega_{\text{old}}$:</p>
 <ul>
 <li>the E step computes the posterior $p(d \mid u; \omega_{\text{old}})$;</li>
 <li>the M step chooses the new parameter to maximise
   $\mathbb E_{p(d \mid u;\, \omega_{\text{old}})}\big[\ell(d, u; \omega)\big]$, the log joint
   averaged over that fixed posterior.</li>
-</ul>
+</ul></div>
 <p>At $\omega = \omega_{\text{old}}$ the gradient of the M step's objective is the
 posterior average of $\partial\ell/\partial\omega$, which by <a class="eqref" href="#eq-fisher">(3.4.1)</a> is the slope of
 the log evidence. EM is therefore an ascent method on the evidence; Week&nbsp;4 proves
@@ -764,15 +785,20 @@ displace by order $\beta$. The first changes where the drift vanishes, and that 
 bias computed above.
 <a href="https://doi.org/10.1016/j.jmp.2017.09.004">Buckley et al. (2017)</a>, in their
 introduction, trace the free energy back to work by Hinton and colleagues in which a
-function like it implements a variant of EM.</p>
+function like it implements a variant of EM: the Helmholtz machine of
+<a href="https://doi.org/10.1162/neco.1995.7.5.889">Dayan, Hinton, Neal and Zemel (1995)</a>, which
+fits its parameters by maximising a lower bound on the probability of the
+observations, and <a href="https://doi.org/10.1007/978-94-011-5014-9_12">Neal and Hinton (1998)</a>,
+who justify incremental variants of EM that update the parameters after each
+observation, as the posterior-averaged rule does.</p>
 <h2 id="hyperpriors"><span class="secno">8</span>Hyperpriors</h2>
 <p>Lesson&nbsp;2 noted that the original model forbade small variances outright. A smooth
 alternative is to give the variance a prior of its own. A prior over a parameter of a
 prior or likelihood is a <strong>hyperprior</strong>.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">A hyperprior as imaginary trials</span></div><p>Take the density on $\Sigma > 0$</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">A hyperprior as imaginary trials</span></div><p>Take the density on $\Sigma &gt; 0$</p>
 <div class="eqn"><div class="eqbody">$$p(\Sigma) \;\propto\; \Sigma^{-(n_0/2 + 1)}\exp\!\left(-\frac{n_0\Sigma_0}{2\Sigma}\right),$$</div></div>
-<p>an inverse-gamma density with parameters written so that $n_0 > 0$ and
-$\Sigma_0 > 0$ can be read in a moment. Suppose $N$ trials give residuals $\delta_n$ whose
+<p>an inverse-gamma density with parameters written so that $n_0 &gt; 0$ and
+$\Sigma_0 &gt; 0$ can be read in a moment. Suppose $N$ trials give residuals $\delta_n$ whose
 log likelihood in $\Sigma$ is $\sum_n\big[-\delta_n^2/(2\Sigma) - \tfrac12\ln\Sigma\big]$,
 up to a constant. Adding the log hyperprior,</p>
 <div class="eqn"><div class="eqbody">$$-\frac{\sum_n \delta_n^2 + n_0\Sigma_0}{2\Sigma} \;-\; \frac{N + n_0 + 2}{2}\,\ln\Sigma .$$</div></div>
@@ -816,7 +842,7 @@ the optimisation of precisions.</p>
 <p>In the widget the world's sensory variance is $\Sigma_u^{*} = 0.3$, three
 times what the animal believes. The animal learns $\Sigma_u$ alone with
 $\beta = 0.01$, under either rule, on the same sequence of trials.</p>
-<figure id="fig-3-4-2"><div class="widget" data-widget="precision-learning"></div><figcaption><span class="fno">Figure 3.4.2.</span> Learning the precision of a noisier ear. The learned sensory variance across trials under the point rule and the posterior-averaged rule, against the world's value. The readout gives the ear's share of the curvature at the start, at the truth, and under each learned value.</figcaption></figure>
+<figure class="widget" id="fig-3-4-2"><div class="wmount" data-widget="precision-learning"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 3.4.2.</span> Learning the precision of a noisier ear. The learned sensory variance across trials under the point rule and the posterior-averaged rule, against the world's value. The readout gives the ear's share of the curvature at the start, at the truth, and under each learned value.</figcaption></figure>
 <p>The posterior-averaged rule reaches $0.3000$ by the last trial and
 averages $0.2933$ over the second half. The ear's share should fall
 from $0.385$ to $0.172$, and at that run's average it is

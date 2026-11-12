@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -523,7 +526,7 @@ $0.693147$ nats. The excess is
 $0.005008$ nats.</p>
 <p>The <strong>Kullback&ndash;Leibler divergence</strong> of a finite distribution $p$ relative to $q$
 is $D_{\mathrm{KL}}[p\|q]=\sum_o p(o)\ln[p(o)/q(o)]$.
-Terms with $p(o)=0$ contribute zero; if $p(o)>0$ but $q(o)=0$, the divergence
+Terms with $p(o)=0$ contribute zero; if $p(o)&gt;0$ but $q(o)=0$, the divergence
 is infinite. Here both model probabilities are positive.</p>
 <div class="eqn" id="eq-lamp-kl"><div class="eqbody">$$D_{\mathrm{KL}}\big[P^{*}(o) \,\|\, P_B(o)\big] = 0.005008\ \text{nats},$$</div><div class="eqno"><a href="#eq-lamp-kl" title="Link to equation 1.2.5">(1.2.5)</a></div></div>
 <p>Subtracting the actual
@@ -531,10 +534,10 @@ entropy from the average surprise gives</p>
 <div class="eqn"><div class="eqbody">$$\bar S_X-\mathrm H[P^*]
 =\sum_o P^*(o)[-\ln P_X(o)+\ln P^*(o)]
 =D_{\mathrm{KL}}[P^*\|P_X].$$</div></div>
-<p>Why is this nonnegative? The elementary inequality $\ln z\le z-1$ for $z>0$
+<p>Why is this nonnegative? The elementary inequality $\ln z\le z-1$ for $z&gt;0$
 gives</p>
 <div class="eqn"><div class="eqbody">$$-\sum_o p(o)\ln\frac{q(o)}{p(o)}
-\ge\sum_{o:p(o)>0}[p(o)-q(o)]\ge0.$$</div></div>
+\ge\sum_{o:p(o)&gt;0}[p(o)-q(o)]\ge0.$$</div></div>
 <p>The final inequality allows $q$ to put mass where $p$ is zero. Equality requires
 $p=q$. Thus a model matching the observation frequencies minimises average
 surprise, but matching those frequencies alone need not identify the correct
@@ -617,11 +620,11 @@ of on is $0.800$.</p>
 <p>Represent an approximate belief by $Q(\mathrm{on})=q$ and
 $Q(\mathrm{off})=1-q$. Here $q\in[0,1]$ is a probability, not a state or a
 sensor parameter. Define</p>
-<div class="eqn" id="eq-belief-free-energy"><div class="eqbody">$$F(q)=\sum_s Q(s)\ln\frac{Q(s)}{P(s,\mathrm{bright})}.$$</div><div class="eqno"><a href="#eq-belief-free-energy" title="Link to equation 1.2.6">(1.2.6)</a></div></div>
+<div class="eqn" id="eq-belief-free-energy"><div class="eqbody">$$\mathcal F(q)=\sum_s Q(s)\ln\frac{Q(s)}{P(s,\mathrm{bright})}.$$</div><div class="eqno"><a href="#eq-belief-free-energy" title="Link to equation 1.2.6">(1.2.6)</a></div></div>
 <p>This is the finite-state <strong>variational free energy</strong>. Terms with $Q(s)=0$ are
 interpreted by their limit. Substituting
 $P(s,\mathrm{bright})=P(s\mid\mathrm{bright})P(\mathrm{bright})$ gives</p>
-<div class="eqn" id="eq-belief-gap"><div class="eqbody">$$F(q)=D_{\mathrm{KL}}[Q\|P(s\mid\mathrm{bright})]-\ln P(\mathrm{bright}).$$</div><div class="eqno"><a href="#eq-belief-gap" title="Link to equation 1.2.7">(1.2.7)</a></div></div>
+<div class="eqn" id="eq-belief-gap"><div class="eqbody">$$\mathcal F(q)=D_{\mathrm{KL}}[Q\|P(s\mid\mathrm{bright})]-\ln P(\mathrm{bright}).$$</div><div class="eqno"><a href="#eq-belief-gap" title="Link to equation 1.2.7">(1.2.7)</a></div></div>
 <p>The logarithm splits a product into a sum, and the evidence term comes outside
 the expectation because $\sum_sQ(s)=1$. KL divergence is non-negative and is
 zero when the beliefs equal the exact posterior. Lesson&nbsp;3 examines it in detail.</p>

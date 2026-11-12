@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -354,8 +357,8 @@ document.addEventListener('DOMContentLoaded',function(){
 <body>
 <div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk cur" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><div class="lessons"><a class="" href="../week-02/two-rules.html">Local computation and learning</a><a class="cur" href="../week-02/exact.html">Inferring distance from a sound</a><a class="" href="../week-02/climbing.html">MAP estimation by gradient ascent</a><a class="" href="../week-02/reading-the-update.html">Precision and prediction errors</a><a class="" href="../week-02/exercises.html">Problems and code</a></div><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Hidden state estimation</div><h1>Inferring distance from a sound</h1><p class="deck">A nonlinear observation model, a numerical reference posterior, and the distinction between likelihoods and densities.</p><div class="meta"><span>Week 2</span><span>&#167;2</span><span>30 min</span></div></header><article class="abody"><p>We will infer a sound source's distance from a noisy intensity measurement. The model has one hidden variable, so we can obtain a numerical reference posterior and compare point estimates with the distribution they summarise.</p>
 <h2 id="the-setup"><span class="secno">1</span>The setup</h2>
-<p>An animal hears a sound. Write $d>0$ for the source distance in its model, with
-$d$ chosen for distance. It is a hidden state in the role of $s$ from Week 1.
+<p>An animal hears a sound. Write $d&gt;0$ for the source distance in its model, with
+$d$ chosen for distance. It is a hidden state in the role of $s$ from <a href="../week-01/index.html">Week&nbsp;1</a>.
 We will also use $d$ as the argument at which a density or objective is evaluated.
 An estimate, such as the posterior mode, is a particular value of that argument.</p>
 <p>What the animal can measure is intensity, and intensity falls off as the inverse
@@ -370,7 +373,7 @@ To specify the likelihood we also need a distribution for the measurement noise.
 For example, the same inverse-square function with Gaussian noise and with a
 heavy-tailed noise distribution gives different likelihoods.</p>
 <p>Write $u$ for the intensity registered by the animal, using the notation of
-Bogacz's predictive-coding example. It plays the same role as Week 1's observation
+Bogacz's predictive-coding example. It plays the same role as Week&nbsp;1's observation
 $o$. The observation is held fixed while we compare possible distances.</p>
 <p>Take the sensory error to be Gaussian about the true intensity:</p>
 <div class="eqn" id="eq-likelihood"><div class="eqbody">$$P(u \mid d) \;=\; \mathcal{N}\big(u;\ g(d),\ \Sigma_u\big),
@@ -384,10 +387,10 @@ small means a reliable ear.</p>
 internal states in the blanket partition, rather than a generic mean.</p>
 <p>The animal is not starting from nothing. Sources it cares about tend to be at a
 characteristic sort of range, and that expectation is its prior:</p>
-<div class="eqn" id="eq-prior"><div class="eqbody">$$P(d)=\frac{\mathcal N(d;d_p,\Sigma_p)}{Z_p}\,\mathbf1_{d>0},
+<div class="eqn" id="eq-prior"><div class="eqbody">$$P(d)=\frac{\mathcal N(d;d_p,\Sigma_p)}{Z_p}\,\mathbf1_{d&gt;0},
 \qquad Z_p=\int_0^\infty\mathcal N(x;d_p,\Sigma_p)\,\mathrm dx.$$</div><div class="eqno"><a href="#eq-prior" title="Link to equation 2.2.3">(2.2.3)</a></div></div>
 <p>This is a <strong>truncated Gaussian prior</strong>, restricted and renormalised to positive
-distances. The indicator $\mathbf1_{d>0}$ equals one on the allowed domain and
+distances. The indicator $\mathbf1_{d&gt;0}$ equals one on the allowed domain and
 zero elsewhere. The location $d_p$ and variance parameter $\Sigma_p$ belong to
 the underlying Gaussian; after truncation they are not exactly the prior mean
 and variance. We will call $d_p$ the prior location.</p>
@@ -525,17 +528,21 @@ lean if the link were $g(d) = d^2$ instead of $1/d^2$.</p><details><summary>Solu
 function of $u$. Plotted against $d$ it is not, because $d$ and $u$ are related
 nonlinearly and the map compresses one region while stretching another.</p>
 <p>Concretely, near $d = 1.41$ the derivative
-$g'(d) = -2/d^{3}$ has magnitude about $0.7$, so a given interval in intensity
-corresponds to an interval in distance about $1/0.7$ times as wide. Further out,
-$|g'|$ falls sharply: at $d = 4$ it is about $0.03$, so the same interval in
-intensity spans a range in distance more than twenty times wider. Equal steps in
+$g'(d) = -2/d^{3}$ has magnitude $0.707$, so a short interval in
+intensity corresponds to an interval in distance $1/|g'| = 1.41$
+times as wide. Further out, $|g'|$ falls sharply: at $d = 4$ it is
+$0.03125$, so the same interval in intensity spans a range in
+distance $32$ times as wide. Equal steps in
 intensity become unequal steps in distance, and the further away the source, the
 more distance a given change in loudness buys. The likelihood therefore has a
 long tail to the right.</p>
 <p>With $g(d) = d^{2}$ the situation reverses. There $g'(d) = 2d$ grows with
 distance, so far-away distances are <em>compressed</em> in intensity terms and the tail
-runs the other way, towards small $d$.</p>
-<p>This change in the shape of a likelihood is distinct from transforming a random variable with a density. We derive the latter operation separately because it is needed in the reparameterisation exercise.</p>
+runs the other way, towards small $d$.</p></details></div>
+<h2 id="transforming-a-density"><span class="secno">4</span>Transforming a density</h2>
+<p>The leaning of a likelihood is distinct from transforming a random variable that
+has a density. The reparameterisation exercise in <a href="../week-02/exercises.html">Lesson&nbsp;5</a> needs the second
+operation, so it is derived here.</p>
 <div class="box derivation"><div class="boxhd">Derivation<span class="bt">Changing variables in a density</span></div><p>Let $D$ be a random variable with density $p_D$, and let $\rho = r(D)$ for a
 smooth, strictly increasing $r$. What is the density of $\rho$?</p>
 <p>Densities do not transform simply, but <em>cumulative</em> probabilities do, because
@@ -567,7 +574,7 @@ substituting $g(d)$ into the residual $u-g(d)$.</p>
 $d$ to log-distance $\rho=\ln d$. Then
 $p_\rho(\rho)=p_d(e^\rho)e^\rho$. In contrast the likelihood in that
 parameterisation is $P(u\mid e^\rho)$, without an extra factor.</p>
-<p><a href="../week-02/exercises.html">Lesson&nbsp;5</a> uses <a class="eqref" href="#eq-jacobian">(2.2.6)</a> to compare modes in distance and log-distance.</p></details></div>
+<p>Lesson&nbsp;5 uses <a class="eqref" href="#eq-jacobian">(2.2.6)</a> to compare modes in distance and log-distance.</p>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>
 <li>Why do Gaussian sensory noise and a truncated Gaussian prior fail to give a truncated Gaussian posterior for this observation map?</li>
 <li>Which is larger here, the posterior mean or the posterior mode, and what

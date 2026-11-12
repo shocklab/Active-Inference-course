@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Learning with free energy · Active Inference</title><meta name="description" content="Expectation maximisation as coordinate descent on one free energy, its proof that the evidence never falls, the posterior-variance term that Week 3's point rule lost, and what the Laplace free energy does with that term on Week 2's model."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+:root{
+  --paper:#fdfcf9; --card:#ffffff;
+  --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
+  --rule:#e4e1d9; --rule2:#d3cfc4;
+  --accent:#0f5f57; --accent2:#14837a; --accent-tint:#e9f2f0; --accent-deep:#0a423d;
+  --clay:#9c4d2f; --clay-tint:#f9efe9;
+  --gold:#8a6d1f; --gold-tint:#faf5e6;
+  --tint:#f4f2ec; --code-bg:#f5f4f0;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SF Mono',Menlo,Consolas,monospace;
+  --measure:44rem; --margincol:13rem; --gap:2.5rem; --shell:80rem;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);
+     font-variant-numeric:oldstyle-nums proportional-nums;line-height:1.6}
+::selection{background:var(--accent);color:#fff}
+img,svg,canvas{max-width:100%}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2)}
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.topbar{position:sticky;top:0;z-index:60;background:var(--accent-deep);
+        border-bottom:2px solid var(--accent);}
+.topbar .tin{max-width:var(--shell);margin:0 auto;padding:0 2rem;height:3rem;
+             display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.topbar a.home{font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.13em;
+               text-transform:uppercase;color:rgba(255,255,255,.82)}
+.topbar a.home:hover{color:#fff}
+.topbar .tcode{font-family:var(--sans);font-size:.7rem;font-weight:500;letter-spacing:.2em;
+               text-transform:uppercase;color:rgba(255,255,255,.42)}
+.tocbtn{display:none;font-family:var(--sans);font-size:.75rem;letter-spacing:.1em;
+        text-transform:uppercase;color:rgba(255,255,255,.82);background:none;border:0;cursor:pointer}
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:14rem minmax(0,1fr);gap:0 var(--gap);
+       max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.maincol{min-width:0;max-width:calc(var(--measure) + var(--margincol) + var(--gap))}
+
+/* ── side nav ────────────────────────────────────────────────────────── */
+.sidenav{position:sticky;top:3rem;align-self:start;max-height:calc(100vh - 3rem);
+         overflow-y:auto;padding:2.6rem 0 3rem;scrollbar-width:thin}
+.sidenav::-webkit-scrollbar{width:0}
+.sidenav .part{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--faint);margin:1.6rem 0 .55rem}
+.sidenav .part:first-child{margin-top:0}
+.sidenav a.wk{display:block;font-family:var(--sans);font-size:.83rem;line-height:1.35;
+              color:var(--ink2);padding:.34rem 0 .34rem .8rem;border-left:2px solid var(--rule)}
+.sidenav a.wk:hover{color:var(--accent);border-left-color:var(--rule2)}
+.sidenav a.wk.cur{color:var(--accent);font-weight:500;border-left-color:var(--accent)}
+.sidenav a.wk .n{color:var(--faint);font-variant-numeric:tabular-nums;margin-right:.45rem}
+.sidenav a.wk.cur .n{color:var(--accent2)}
+.sidenav .lessons{margin:.15rem 0 .5rem .8rem;border-left:1px solid var(--rule)}
+.sidenav .lessons a{display:block;font-family:var(--sans);font-size:.76rem;line-height:1.35;
+                    color:var(--muted);padding:.28rem 0 .28rem .75rem;border-left:2px solid transparent;margin-left:-1px}
+.sidenav .lessons a:hover{color:var(--accent)}
+.sidenav .lessons a.cur{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.sidenav .navhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.16em;
+                text-transform:uppercase;color:var(--accent);padding-bottom:.6rem;
+                margin-bottom:1rem;border-bottom:1px solid var(--rule)}
+
+/* ── article head ────────────────────────────────────────────────────── */
+.ahead{padding:3.2rem 0 1.7rem;border-bottom:1px solid var(--rule);max-width:var(--measure)}
+.ahead .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.2em;
+                text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.ahead h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.2vw,2.9rem);
+          line-height:1.08;letter-spacing:-.015em;color:var(--ink);margin-bottom:.85rem;
+          font-variant-numeric:lining-nums}
+.ahead .deck{font-family:var(--serif);font-style:italic;font-size:1.18rem;line-height:1.5;
+             color:var(--muted)}
+.ahead .meta{font-family:var(--sans);font-size:.74rem;letter-spacing:.06em;color:var(--faint);
+             margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap}
+
+/* ── body ────────────────────────────────────────────────────────────── */
+.abody{padding:2rem 0 1rem;font-size:1.115rem;max-width:var(--measure)}
+.abody > *{max-width:var(--measure)}
+.abody p{margin:0 0 1.15rem;color:var(--ink);text-wrap:pretty}
+.abody p.lede{font-size:1.24rem;line-height:1.55;color:var(--ink2)}
+.abody strong{font-weight:600}
+.abody em{font-style:italic}
+.abody a{border-bottom:1px solid var(--rule2)}
+.abody a:hover{border-bottom-color:var(--accent2)}
+.abody h2{font-family:var(--serif);font-weight:500;font-size:1.72rem;line-height:1.16;
+          color:var(--ink);letter-spacing:-.01em;margin:2.9rem 0 .9rem;padding-top:1.6rem;
+          border-top:1px solid var(--rule);scroll-margin-top:4rem}
+.abody h2 .secno{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.6rem;font-weight:400}
+.abody h3{font-family:var(--serif);font-weight:600;font-size:1.24rem;color:var(--ink);
+          margin:2rem 0 .6rem;scroll-margin-top:4rem}
+.abody h4{font-family:var(--sans);font-weight:600;font-size:.78rem;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--accent);margin:1.6rem 0 .5rem}
+.abody ul,.abody ol{margin:0 0 1.25rem;padding-left:1.5rem}
+.abody li{margin-bottom:.45rem;color:var(--ink)}
+.abody ul>li::marker{color:var(--accent)}
+.abody ol>li::marker{color:var(--accent);font-family:var(--sans);font-size:.9em}
+.abody li>ul,.abody li>ol{margin:.45rem 0 .2rem}
+.abody blockquote{border-left:2px solid var(--accent);padding:.15rem 0 .15rem 1.3rem;
+                  margin:1.6rem 0;color:var(--ink2);font-style:italic}
+.abody blockquote p:last-child{margin-bottom:0}
+.abody hr{border:0;border-top:1px solid var(--rule);margin:2.4rem 0}
+
+/* ── code ────────────────────────────────────────────────────────────── */
+.abody code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);
+            padding:.1em .35em;border-radius:2px;border:1px solid var(--rule)}
+.abody pre{background:var(--code-bg);border:1px solid var(--rule);border-left:2px solid var(--accent);
+           padding:1rem 1.15rem;overflow-x:auto;margin:1.5rem 0;line-height:1.55}
+.abody pre code{background:none;border:0;padding:0;font-size:.83rem;color:var(--ink2)}
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.abody .tablewrap{overflow-x:auto;margin:1.7rem 0;
+           width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+.abody table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.86rem}
+.abody th{text-align:left;font-weight:600;color:var(--accent);border-bottom:1.5px solid var(--accent);
+          padding:.5rem .7rem;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;
+          vertical-align:bottom}
+.abody td{padding:.55rem .7rem;border-bottom:1px solid var(--rule);color:var(--ink2);vertical-align:top}
+.abody tbody tr:hover td{background:var(--tint)}
+
+/* ── maths ───────────────────────────────────────────────────────────── */
+.katex{font-size:1.045em}
+.katex-display{margin:0;padding:.15rem 0;overflow-x:auto;overflow-y:hidden}
+.eqn{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;max-width:var(--measure);
+     scroll-margin-top:4.5rem}
+.eqn > .eqbody{flex:1;min-width:0}
+.eqn > .eqno{flex:0 0 auto;font-family:var(--sans);font-size:.8rem;color:var(--faint);
+             font-variant-numeric:tabular-nums}
+.eqn > .eqno a{color:var(--faint);border:0}
+.eqn > .eqno a:hover{color:var(--accent)}
+.eqn:target{background:var(--gold-tint);box-shadow:0 0 0 .7rem var(--gold-tint);border-radius:2px}
+.eqn:target > .eqno a{color:var(--gold)}
+a.eqref{font-variant-numeric:tabular-nums;white-space:nowrap;border-bottom:1px solid var(--rule2)}
+
+/* ── margin notes ────────────────────────────────────────────────────── */
+.mn{float:right;clear:right;width:var(--margincol);
+    margin:.3rem calc(-1 * (var(--margincol) + var(--gap))) 1.1rem var(--gap);
+    font-family:var(--sans);font-size:.775rem;line-height:1.5;color:var(--muted)}
+.mn .mnl{display:block;font-weight:600;font-size:.66rem;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.mn p{margin:0 0 .5rem;font-size:inherit;line-height:inherit;color:inherit}
+.mn p:last-child{margin-bottom:0}
+.mn code{font-size:.85em}
+.mn a{border-bottom:1px solid var(--rule2)}
+
+/* ── boxes ───────────────────────────────────────────────────────────── */
+.box{margin:1.9rem 0;padding:1.15rem 1.35rem;border:1px solid var(--rule);
+     background:var(--card);max-width:var(--measure)}
+.box > :last-child{margin-bottom:0}
+.box .boxhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.15em;
+            text-transform:uppercase;margin-bottom:.6rem;display:flex;gap:.5rem;align-items:baseline}
+.box .boxhd .bt{color:var(--ink2);font-weight:500;letter-spacing:.02em;text-transform:none;
+                font-size:.95rem;font-family:var(--serif);font-style:italic}
+.box p,.box li{font-size:1.03rem}
+
+.box.definition,.box.theorem,.box.proposition,.box.lemma{
+  border-left:2px solid var(--accent);background:var(--card)}
+.box.definition .boxhd,.box.theorem .boxhd,.box.proposition .boxhd,.box.lemma .boxhd{color:var(--accent)}
+
+.box.keyidea{border:0;border-left:2px solid var(--accent);background:var(--accent-tint);
+             padding:1.2rem 1.4rem}
+.box.keyidea .boxhd{color:var(--accent)}
+
+.box.remark,.box.aside{border-left:2px solid var(--rule2);background:var(--tint)}
+.box.remark .boxhd,.box.aside .boxhd{color:var(--muted)}
+
+.box.warning{border-left:2px solid var(--clay);background:var(--clay-tint)}
+.box.warning .boxhd{color:var(--clay)}
+
+.box.derivation{border:1px solid var(--rule);border-left:2px solid var(--gold);background:#fdfcf7;
+                padding:1.25rem 1.45rem}
+.box.derivation .boxhd{color:var(--gold)}
+.box.derivation .eqn{margin:1rem 0}
+.box.derivation p{color:var(--ink2)}
+
+.box.exercise{border-left:2px solid var(--clay)}
+.box.exercise .boxhd{color:var(--clay)}
+.box.exercise details{margin-top:.9rem;border-top:1px solid var(--rule);padding-top:.7rem}
+.box.exercise summary{font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.11em;
+                      text-transform:uppercase;color:var(--clay);cursor:pointer;list-style:none}
+.box.exercise summary::-webkit-details-marker{display:none}
+.box.exercise summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+.box.exercise details[open] summary::before{content:'▾ '}
+.box.exercise details > :nth-child(2){margin-top:.8rem}
+
+.box.checkpoint{border-left:2px solid var(--accent2);background:var(--accent-tint)}
+.box.checkpoint .boxhd{color:var(--accent)}
+.box.checkpoint ul{margin-bottom:0}
+
+/* ── figures & widgets ───────────────────────────────────────────────── */
+.abody figure{margin:2.2rem 0;width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+figure{margin:2.2rem 0}
+figure figcaption{font-family:var(--sans);font-size:.79rem;line-height:1.5;color:var(--muted);
+                  margin-top:.7rem;max-width:var(--measure)}
+figure figcaption .fno{font-weight:600;color:var(--accent);letter-spacing:.03em}
+figure.widget .wmount{border:1px solid var(--rule2);background:var(--card);padding:1rem}
+figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:var(--muted);
+                                 padding:2rem 1rem;text-align:center}
+
+/* widget internals (used by aif-widgets.js) */
+.wpanel{display:grid;gap:1rem}
+.wrow{display:flex;flex-wrap:wrap;gap:1.1rem 1.6rem;align-items:flex-start}
+.wctl{font-family:var(--sans);font-size:.78rem;color:var(--ink2);display:flex;
+      flex-direction:column;gap:.28rem;min-width:11rem;flex:1 1 11rem}
+.wctl .wlab{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline}
+.wctl .wlab b{font-weight:500;color:var(--ink2)}
+.wctl .wlab .wval{font-family:var(--mono);font-size:.76rem;color:var(--accent);
+                  font-variant-numeric:tabular-nums}
+.wctl input[type=range]{width:100%;accent-color:var(--accent);height:1.1rem;cursor:pointer}
+.wbtn{font-family:var(--sans);font-size:.76rem;font-weight:500;letter-spacing:.04em;
+      background:var(--accent);color:#fff;border:0;padding:.42rem .9rem;cursor:pointer;
+      border-radius:2px}
+.wbtn:hover{background:var(--accent2)}
+.wbtn.ghost{background:transparent;color:var(--accent);border:1px solid var(--rule2)}
+.wbtn.ghost:hover{background:var(--accent-tint)}
+.wbtns{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.wnote{font-family:var(--sans);font-size:.78rem;line-height:1.5;color:var(--muted);
+       border-top:1px solid var(--rule);padding-top:.7rem}
+.wnote b{color:var(--accent);font-weight:600}
+.wreadout{font-family:var(--mono);font-size:.78rem;color:var(--ink2);display:flex;
+          flex-wrap:wrap;gap:.4rem 1.3rem;font-variant-numeric:tabular-nums}
+.wreadout span b{color:var(--faint);font-weight:500}
+.wtabs{display:flex;gap:.3rem;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.wtab{font-family:var(--sans);font-size:.75rem;padding:.34rem .75rem;cursor:pointer;
+      color:var(--muted);border:1px solid transparent;border-bottom:0;background:none}
+.wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
+canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
+
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
+
+/* ── footer nav ──────────────────────────────────────────────────────── */
+.pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
+         border-top:1px solid var(--rule);margin-top:3.5rem;padding:1.7rem 0 0;
+         max-width:var(--measure)}
+.pagenav a{display:flex;flex-direction:column;gap:.22rem;max-width:20rem;border:0}
+.pagenav a.nx{text-align:right;margin-left:auto}
+.pagenav .dir{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.16em;
+              text-transform:uppercase;color:var(--accent)}
+.pagenav .ttl{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);line-height:1.3}
+.pagenav a:hover .ttl{color:var(--accent)}
+.sitefoot{border-top:1px solid var(--rule);margin-top:3rem;padding:1.6rem 0 3.5rem;
+          font-family:var(--sans);font-size:.76rem;line-height:1.65;color:var(--faint);
+          max-width:var(--measure)}
+.sitefoot a{color:var(--muted);border-bottom:1px solid var(--rule)}
+.sitefoot a:hover{color:var(--accent)}
+.sitefoot p{margin-bottom:.4rem}
+
+/* ── landing page ────────────────────────────────────────────────────── */
+.cover{background:var(--accent-deep);color:#fff;padding:4.5rem 0 3.6rem;margin-bottom:0}
+.cover .cin{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.cover .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.22em;
+                text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1.3rem}
+.cover h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,6vw,4.2rem);
+          line-height:1.04;letter-spacing:-.02em;max-width:24ch;margin-bottom:1.2rem}
+.cover .sub{font-family:var(--serif);font-style:italic;font-size:1.25rem;line-height:1.5;
+            color:rgba(255,255,255,.72);max-width:44rem}
+.cover .rule{width:3rem;height:2px;background:var(--accent2);margin:0 0 1.2rem}
+.wide{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.weeklist{border-top:1px solid var(--rule)}
+.landing .abody>*{max-width:none}
+.landing .abody .introcopy{max-width:44rem}
+.weekrow{display:flex;gap:2.2rem;padding:1.7rem 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.weekrow .wn{flex:0 0 3.4rem;text-align:right}
+.weekrow .wn .l{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.18em;
+                text-transform:uppercase;color:var(--faint)}
+.weekrow .wn .n{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--accent);
+                line-height:1;font-variant-numeric:lining-nums}
+.weekrow .wc{flex:1 1 20rem;min-width:0}
+.weekrow .wc h3{font-family:var(--serif);font-weight:500;font-size:1.28rem;margin-bottom:.3rem}
+.weekrow .wc h3 a{color:var(--ink);border:0}
+.weekrow .wc h3 a:hover{color:var(--accent)}
+.weekrow .wc p{font-family:var(--sans);font-size:.86rem;line-height:1.6;color:var(--muted);
+               margin-bottom:.55rem;max-width:46rem}
+.weekrow .wc ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+.weekrow .wc ul li{font-family:var(--sans);font-size:.79rem;margin:0}
+.weekrow .wc ul li a{color:var(--ink2);border-bottom:1px solid var(--rule)}
+.weekrow .wc ul li a:hover{color:var(--accent);border-bottom-color:var(--accent2)}
+.partband{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.2em;
+          text-transform:uppercase;color:var(--accent);padding:2.2rem 0 .5rem}
+.partband span{color:var(--faint);font-weight:400;letter-spacing:.04em;text-transform:none;
+               font-family:var(--serif);font-style:italic;font-size:1rem;margin-left:.8rem}
+
+/* ── responsive ──────────────────────────────────────────────────────── */
+@media (max-width:1280px){
+  .shell{grid-template-columns:13rem minmax(0,1fr);gap:0 2rem;padding:0 1.6rem}
+  .maincol{max-width:var(--measure)}
+  .mn{float:none;clear:both;width:auto;margin:1rem 0 1.3rem;padding-left:1rem;
+      border-left:2px solid var(--rule2)}
+  .abody .tablewrap,.abody figure{width:auto;max-width:100%}
+  .cover .cin,.wide{padding:0 1.6rem}
+}
+@media (max-width:860px){
+  html{font-size:97%}
+  .shell{grid-template-columns:minmax(0,1fr);padding:0 1.3rem}
+  .sidenav{position:static;max-height:none;padding:1rem 0 0;display:none;
+           border-bottom:1px solid var(--rule);margin-bottom:1rem}
+  .sidenav.open{display:block}
+  .tocbtn{display:block}
+  .topbar .tin{padding:0 1.3rem}
+  .cover{padding:3rem 0 2.4rem}
+  .cover .cin,.wide{padding:0 1.3rem}
+  .abody{font-size:1.06rem}
+  .weekrow{gap:1rem}
+  .weekrow .wn{flex-basis:2.6rem}
+  .eqn{gap:.5rem}
+  .eqn > .eqno{font-size:.72rem}
+}
+@media print{
+  .topbar,.sidenav,.pagenav,.wbtns,.wctl{display:none}
+  .shell{display:block;max-width:none}
+  body{background:#fff}
+}
+</style><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script><script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(!window.renderMathInElement) return;
+  renderMathInElement(document.body,{
+    delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'\\[',right:'\\]',display:true},
+      {left:'$',right:'$',display:false},
+      {left:'\\(',right:'\\)',display:false}
+    ],
+    ignoredTags:['script','noscript','style','textarea','pre','code','option'],
+    throwOnError:false,
+    macros:{
+      '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
+      '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
+      // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
+      // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.querySelector('.tocbtn'),n=document.querySelector('.sidenav');
+  if(b&&n){b.addEventListener('click',function(){n.classList.toggle('open');});}
+});
+</script>
+</head>
+<body>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk cur" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="lessons"><a class="" href="../week-04/bounding-surprise.html">Bounding surprise</a><a class="" href="../week-04/mean-field-and-messages.html">Mean-field and variational messages</a><a class="" href="../week-04/laplace-approximation.html">The Laplace approximation</a><a class="cur" href="../week-04/learning.html">Learning with free energy</a><a class="" href="../week-04/two-causes.html">A mean-field learning failure</a><a class="" href="../week-04/exercises.html">Problems and code</a></div><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Variational free energy</div><h1>Learning with free energy</h1><p class="deck">Expectation maximisation as coordinate descent on one free energy, its proof that the evidence never falls, the posterior-variance term that Week 3's point rule lost, and what the Laplace free energy does with that term on Week 2's model.</p><div class="meta"><span>Week 4</span><span>&#167;4</span><span>70 min</span></div></header><article class="abody"><p><a href="../week-03/index.html">Week&nbsp;3</a> learned the parameters of the generative model, written $\omega$: the prior location $d_p$, the prior variance $\Sigma_p$, the sensory variance $\Sigma_u$, the source power $\theta$. Its point rule evaluated the derivative of the log joint at the mode of each trial's posterior, and <a href="../week-03/what-the-mode-leaves-out.html">Week&nbsp;3, Lesson&nbsp;4</a> showed that this drops a posterior-variance term and biases the learned variances. Week&nbsp;3, Lesson&nbsp;4 also named expectation maximisation as the remedy and stated that each of its iterations never lowers the evidence. This lesson proves that statement from the free energy, and asks how much of the remedy survives when the posterior is replaced by the Laplace approximation of <a href="../week-04/laplace-approximation.html">Lesson&nbsp;3</a>.</p>
+<h2 id="the-free-energy-of-many-trials"><span class="secno">1</span>The free energy of many trials</h2>
+<p>Take $N$ observations $u_{1:N} = (u_1, \dots, u_N)$, each with its own hidden state $s_n$, generated independently given $\omega$:
+<div class="eqn"><div class="eqbody">$$P(u_{1:N}, s_{1:N} \mid \omega) \;=\; \prod_{n=1}^{N} P(u_n, s_n \mid \omega).$$</div></div>
+Two consequences follow. Summing over $s_{1:N}$ factorises the evidence, $P(u_{1:N} \mid \omega) = \prod_n P(u_n \mid \omega)$. Dividing the joint by the evidence factorises the posterior,
+<div class="eqn"><div class="eqbody">$$P(s_{1:N} \mid u_{1:N}, \omega) \;=\; \prod_{n=1}^{N} \frac{P(u_n, s_n \mid \omega)}{P(u_n \mid \omega)} \;=\; \prod_{n=1}^{N} P(s_n \mid u_n, \omega).$$</div></div>
+So a recognition distribution that is a product over trials, $Q(s_{1:N}) = \prod_n Q_n(s_n)$, contains the exact posterior. This product is not a mean-field approximation in the sense of <a href="../week-04/mean-field-and-messages.html">Lesson&nbsp;2</a>, because the exact posterior already has this form. With such a $Q$, the free energy is a sum of one free energy per trial, by the same steps as the additivity of entropy in Lesson&nbsp;2:
+<div class="eqn" id="eq-total-vfe"><div class="eqbody">$$\mathcal{F}_{\mathrm{tot}}[Q_{1:N}; \omega] \;=\; \sum_{n=1}^{N} \mathcal{F}[Q_n, u_n; \omega],
+\qquad
+\mathcal{F}[Q_n, u_n; \omega] \;=\; \mathbb{E}_{Q_n(s_n)}\!\big[\ln Q_n(s_n) - \ln P(u_n, s_n \mid \omega)\big].$$</div><div class="eqno"><a href="#eq-total-vfe" title="Link to equation 4.4.1">(4.4.1)</a></div></div>
+Applying the divergence-plus-surprise decomposition of <a href="../week-04/bounding-surprise.html">Lesson&nbsp;1</a> to each trial and summing,
+<div class="eqn" id="eq-total-kl"><div class="eqbody">$$-\mathcal{F}_{\mathrm{tot}}[Q_{1:N}; \omega]
+\;=\; \ln P(u_{1:N} \mid \omega) \;-\; \sum_{n=1}^{N} D_{\mathrm{KL}}\!\big[Q_n \,\big\|\, P(\cdot \mid u_n, \omega)\big]
+\;\le\; \ln P(u_{1:N} \mid \omega).$$</div><div class="eqno"><a href="#eq-total-kl" title="Link to equation 4.4.2">(4.4.2)</a></div></div></p>
+<h2 id="expectation-maximisation"><span class="secno">2</span>Expectation maximisation</h2>
+<p>$\mathcal{F}_{\mathrm{tot}}$ is a function of two arguments, the recognition distributions and the parameters. Minimising it in each argument in turn is expectation maximisation.</p>
+<div class="box theorem"><div class="boxhd">Theorem 4.4.1<span class="bt">Expectation maximisation never lowers the evidence</span></div><p>Let $\omega^{(t-1)}$ be the current parameters, with superscript $(t)$ for the iteration. One iteration of expectation maximisation (EM), defined in Week&nbsp;3, Lesson&nbsp;4, is:</p>
+<ol>
+<li>The <strong>E-step</strong>: for each trial set $Q_n^{(t)} = P(s_n \mid u_n, \omega^{(t-1)})$, which minimises $\mathcal{F}[Q_n, u_n; \omega^{(t-1)}]$ over all $Q_n$.</li>
+<li>The <strong>M-step</strong>: choose $\omega^{(t)}$ with $\mathcal{F}_{\mathrm{tot}}[Q_{1:N}^{(t)}; \omega^{(t)}] \le \mathcal{F}_{\mathrm{tot}}[Q_{1:N}^{(t)}; \omega^{(t-1)}]$, for example by minimising $\mathcal{F}_{\mathrm{tot}}$ over $\omega$ with $Q_{1:N}^{(t)}$ held fixed.</li>
+</ol>
+<p>Then
+<div class="eqn" id="eq-em-monotone"><div class="eqbody">$$\ln P(u_{1:N} \mid \omega^{(t)}) \;\ge\; \ln P(u_{1:N} \mid \omega^{(t-1)}),$$</div><div class="eqno"><a href="#eq-em-monotone" title="Link to equation 4.4.3">(4.4.3)</a></div></div>
+with strict inequality if the M-step strictly lowers $\mathcal{F}_{\mathrm{tot}}$.</p></div>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Proof</span></div><p>Follow <a class="eqref" href="#eq-total-kl">(4.4.2)</a> through one iteration.</p>
+<ol>
+<li><em>After the E-step.</em> Each $Q_n^{(t)}$ is the posterior at $\omega^{(t-1)}$, so every divergence in <a class="eqref" href="#eq-total-kl">(4.4.2)</a> is zero and
+<div class="eqn"><div class="eqbody">$$-\mathcal{F}_{\mathrm{tot}}\big[Q_{1:N}^{(t)}; \omega^{(t-1)}\big] \;=\; \ln P\big(u_{1:N} \mid \omega^{(t-1)}\big).$$</div></div></li>
+<li><em>After the M-step.</em> By the choice of $\omega^{(t)}$,
+<div class="eqn"><div class="eqbody">$$-\mathcal{F}_{\mathrm{tot}}\big[Q_{1:N}^{(t)}; \omega^{(t-1)}\big] \;\le\; -\mathcal{F}_{\mathrm{tot}}\big[Q_{1:N}^{(t)}; \omega^{(t)}\big].$$</div></div></li>
+<li><em>At the new parameters.</em> By <a class="eqref" href="#eq-total-kl">(4.4.2)</a> at $\omega^{(t)}$, with the divergences now non-negative,
+<div class="eqn"><div class="eqbody">$$-\mathcal{F}_{\mathrm{tot}}\big[Q_{1:N}^{(t)}; \omega^{(t)}\big] \;\le\; \ln P\big(u_{1:N} \mid \omega^{(t)}\big).$$</div></div></li>
+</ol>
+<p>Chaining the three,
+<div class="eqn" id="eq-em-sandwich"><div class="eqbody">$$\ln P\big(u_{1:N} \mid \omega^{(t-1)}\big)
+\;=\; -\mathcal{F}_{\mathrm{tot}}\big[Q_{1:N}^{(t)}; \omega^{(t-1)}\big]
+\;\le\; -\mathcal{F}_{\mathrm{tot}}\big[Q_{1:N}^{(t)}; \omega^{(t)}\big]
+\;\le\; \ln P\big(u_{1:N} \mid \omega^{(t)}\big).$$</div><div class="eqno"><a href="#eq-em-sandwich" title="Link to equation 4.4.4">(4.4.4)</a></div></div>
+If the middle inequality is strict, so is the outer one.</p></div>
+<p>The M-step needs only the expected energy. In the energy-minus-entropy form, the entropy of $Q_{1:N}^{(t)}$ does not depend on $\omega$, so
+<div class="eqn" id="eq-vem-m-grad"><div class="eqbody">$$-\nabla_\omega \mathcal{F}_{\mathrm{tot}}\big[Q_{1:N}^{(t)}; \omega\big]
+\;=\; \sum_{n=1}^{N} \mathbb{E}_{Q_n^{(t)}(s_n)}\!\big[\nabla_\omega \ln P(u_n, s_n \mid \omega)\big].$$</div><div class="eqno"><a href="#eq-vem-m-grad" title="Link to equation 4.4.5">(4.4.5)</a></div></div>
+With $Q_n^{(t)}$ the exact posterior, this is the posterior-averaged rule of Week&nbsp;3, Lesson&nbsp;4. The point rule replaces each expectation by the value at the mode.</p>
+<figure id="fig-4-4-1"><svg viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The log evidence per trial as a function of the prior variance, with the free-energy bound for the first E-step's recognition densities touching it at the starting value.">
+<rect x="1" y="1" width="678" height="278" fill="#fdfcf9" stroke="#e4e1d9"/>
+<line x1="66" y1="236" x2="640" y2="236" stroke="#3c3c42"/>
+<line x1="66" y1="236" x2="66" y2="30" stroke="#3c3c42"/>
+<line x1="66.0" y1="236" x2="66.0" y2="240" stroke="#3c3c42"/>
+<text x="66.0" y="252.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+<line x1="161.7" y1="236" x2="161.7" y2="240" stroke="#3c3c42"/>
+<text x="161.7" y="252.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.2</text>
+<line x1="257.3" y1="236" x2="257.3" y2="240" stroke="#3c3c42"/>
+<text x="257.3" y="252.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.4</text>
+<line x1="353.0" y1="236" x2="353.0" y2="240" stroke="#3c3c42"/>
+<text x="353.0" y="252.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.6</text>
+<line x1="448.7" y1="236" x2="448.7" y2="240" stroke="#3c3c42"/>
+<text x="448.7" y="252.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0.8</text>
+<line x1="544.3" y1="236" x2="544.3" y2="240" stroke="#3c3c42"/>
+<text x="544.3" y="252.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+<line x1="640.0" y1="236" x2="640.0" y2="240" stroke="#3c3c42"/>
+<text x="640.0" y="252.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1.2</text>
+<line x1="62" y1="201.7" x2="66" y2="201.7" stroke="#3c3c42"/>
+<text x="59.0" y="205.2" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">&#8722;1.9</text>
+<line x1="62" y1="133.0" x2="66" y2="133.0" stroke="#3c3c42"/>
+<text x="59.0" y="136.5" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">&#8722;1.8</text>
+<line x1="62" y1="64.3" x2="66" y2="64.3" stroke="#3c3c42"/>
+<text x="59.0" y="67.8" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">&#8722;1.7</text>
+<text x="353.0" y="267.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75">prior variance Σp</text>
+<text x="32" y="133.0" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75" transform="rotate(-90 32 133.0)">per trial (nats)</text>
+<path d="M85.1 116.2 L87.5 115.1 L89.8 114.1 L92.1 113.1 L94.4 112.0 L96.7 111.0 L99.1 110.0 L101.4 109.1 L103.7 108.1 L106.0 107.2 L108.3 106.3 L110.7 105.3 L113.0 104.4 L115.3 103.6 L117.6 102.7 L120.0 101.8 L122.3 101.0 L124.6 100.2 L126.9 99.4 L129.2 98.6 L131.6 97.8 L133.9 97.0 L136.2 96.3 L138.5 95.5 L140.9 94.8 L143.2 94.1 L145.5 93.3 L147.8 92.6 L150.1 92.0 L152.5 91.3 L154.8 90.6 L157.1 90.0 L159.4 89.3 L161.7 88.7 L164.1 88.1 L166.4 87.5 L168.7 86.9 L171.0 86.3 L173.4 85.7 L175.7 85.1 L178.0 84.6 L180.3 84.0 L182.6 83.5 L185.0 82.9 L187.3 82.4 L189.6 81.9 L191.9 81.4 L194.2 80.9 L196.6 80.4 L198.9 80.0 L201.2 79.5 L203.5 79.0 L205.9 78.6 L208.2 78.1 L210.5 77.7 L212.8 77.3 L215.1 76.8 L217.5 76.4 L219.8 76.0 L222.1 75.6 L224.4 75.2 L226.8 74.9 L229.1 74.5 L231.4 74.1 L233.7 73.8 L236.0 73.4 L238.4 73.1 L240.7 72.7 L243.0 72.4 L245.3 72.1 L247.6 71.7 L250.0 71.4 L252.3 71.1 L254.6 70.8 L256.9 70.5 L259.3 70.2 L261.6 70.0 L263.9 69.7 L266.2 69.4 L268.5 69.2 L270.9 68.9 L273.2 68.6 L275.5 68.4 L277.8 68.2 L280.1 67.9 L282.5 67.7 L284.8 67.5 L287.1 67.2 L289.4 67.0 L291.8 66.8 L294.1 66.6 L296.4 66.4 L298.7 66.2 L301.0 66.0 L303.4 65.8 L305.7 65.7 L308.0 65.5 L310.3 65.3 L312.7 65.2 L315.0 65.0 L317.3 64.8 L319.6 64.7 L321.9 64.5 L324.3 64.4 L326.6 64.3 L328.9 64.1 L331.2 64.0 L333.5 63.9 L335.9 63.7 L338.2 63.6 L340.5 63.5 L342.8 63.4 L345.2 63.3 L347.5 63.2 L349.8 63.1 L352.1 63.0 L354.4 62.9 L356.8 62.8 L359.1 62.7 L361.4 62.7 L363.7 62.6 L366.0 62.5 L368.4 62.4 L370.7 62.4 L373.0 62.3 L375.3 62.2 L377.7 62.2 L380.0 62.1 L382.3 62.1 L384.6 62.0 L386.9 62.0 L389.3 62.0 L391.6 61.9 L393.9 61.9 L396.2 61.9 L398.6 61.8 L400.9 61.8 L403.2 61.8 L405.5 61.8 L407.8 61.7 L410.2 61.7 L412.5 61.7 L414.8 61.7 L417.1 61.7 L419.4 61.7 L421.8 61.7 L424.1 61.7 L426.4 61.7 L428.7 61.7 L431.1 61.7 L433.4 61.7 L435.7 61.8 L438.0 61.8 L440.3 61.8 L442.7 61.8 L445.0 61.8 L447.3 61.9 L449.6 61.9 L451.9 61.9 L454.3 62.0 L456.6 62.0 L458.9 62.0 L461.2 62.1 L463.6 62.1 L465.9 62.2 L468.2 62.2 L470.5 62.3 L472.8 62.3 L475.2 62.4 L477.5 62.4 L479.8 62.5 L482.1 62.6 L484.5 62.6 L486.8 62.7 L489.1 62.7 L491.4 62.8 L493.7 62.9 L496.1 63.0 L498.4 63.0 L500.7 63.1 L503.0 63.2 L505.3 63.3 L507.7 63.3 L510.0 63.4 L512.3 63.5 L514.6 63.6 L517.0 63.7 L519.3 63.8 L521.6 63.9 L523.9 64.0 L526.2 64.1 L528.6 64.2 L530.9 64.3 L533.2 64.4 L535.5 64.5 L537.8 64.6 L540.2 64.7 L542.5 64.8 L544.8 64.9 L547.1 65.0 L549.5 65.1 L551.8 65.2 L554.1 65.3 L556.4 65.4 L558.7 65.6 L561.1 65.7 L563.4 65.8 L565.7 65.9 L568.0 66.0 L570.4 66.2 L572.7 66.3 L575.0 66.4 L577.3 66.5 L579.6 66.7 L582.0 66.8 L584.3 66.9 L586.6 67.1 L588.9 67.2 L591.2 67.3 L593.6 67.5 L595.9 67.6 L598.2 67.7 L600.5 67.9 L602.9 68.0 L605.2 68.2 L607.5 68.3 L609.8 68.4 L612.1 68.6 L614.5 68.7 L616.8 68.9 L619.1 69.0 L621.4 69.2 L623.7 69.3 L626.1 69.5 L628.4 69.6 L630.7 69.8 L633.0 69.9 L635.4 70.1 L637.7 70.2 L640.0 70.4" fill="none" stroke="#0f5f57" stroke-width="2.4"/>
+<path d="M113.0 227.0 L115.3 208.2 L117.6 191.8 L120.0 177.4 L122.3 164.9 L124.6 153.9 L126.9 144.3 L129.2 135.9 L131.6 128.5 L133.9 122.0 L136.2 116.3 L138.5 111.4 L140.9 107.1 L143.2 103.4 L145.5 100.2 L147.8 97.5 L150.1 95.2 L152.5 93.3 L154.8 91.7 L157.1 90.4 L159.4 89.4 L161.7 88.7 L164.1 88.2 L166.4 87.9 L168.7 87.8 L171.0 87.9 L173.4 88.1 L175.7 88.5 L178.0 89.0 L180.3 89.6 L182.6 90.4 L185.0 91.3 L187.3 92.2 L189.6 93.3 L191.9 94.4 L194.2 95.6 L196.6 96.8 L198.9 98.2 L201.2 99.5 L203.5 101.0 L205.9 102.5 L208.2 104.0 L210.5 105.6 L212.8 107.2 L215.1 108.8 L217.5 110.5 L219.8 112.2 L222.1 113.9 L224.4 115.7 L226.8 117.5 L229.1 119.2 L231.4 121.1 L233.7 122.9 L236.0 124.7 L238.4 126.6 L240.7 128.5 L243.0 130.3 L245.3 132.2 L247.6 134.1 L250.0 136.0 L252.3 138.0 L254.6 139.9 L256.9 141.8 L259.3 143.7 L261.6 145.7 L263.9 147.6 L266.2 149.5 L268.5 151.5 L270.9 153.4 L273.2 155.3 L275.5 157.3 L277.8 159.2 L280.1 161.1 L282.5 163.1 L284.8 165.0 L287.1 166.9 L289.4 168.9 L291.8 170.8 L294.1 172.7 L296.4 174.6 L298.7 176.5 L301.0 178.5 L303.4 180.4 L305.7 182.3 L308.0 184.2 L310.3 186.0 L312.7 187.9 L315.0 189.8 L317.3 191.7 L319.6 193.6 L321.9 195.4 L324.3 197.3 L326.6 199.1 L328.9 201.0 L331.2 202.8 L333.5 204.7 L335.9 206.5 L338.2 208.3 L340.5 210.1 L342.8 212.0 L345.2 213.8 L347.5 215.6 L349.8 217.4 L352.1 219.1 L354.4 220.9 L356.8 222.7 L359.1 224.5 L361.4 226.2 L363.7 228.0 L366.0 229.7 L368.4 231.5 L370.7 233.2 L373.0 234.9" fill="none" stroke="#9c4d2f" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="168.9" cy="86.8" r="2.2" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<circle cx="176.7" cy="84.9" r="2.2" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<circle cx="185.3" cy="82.9" r="2.2" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<circle cx="194.7" cy="80.8" r="2.2" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<circle cx="204.9" cy="78.8" r="2.2" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<circle cx="215.8" cy="76.7" r="2.2" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<circle cx="161.7" cy="88.7" r="4" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<text x="153.7" y="79.7" text-anchor="end" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#0f5f57">Σp(0)</text>
+<circle cx="168.9" cy="87.8" r="3.2" fill="#9c4d2f" stroke="#9c4d2f" stroke-width="1.6"/>
+<line x1="171.9" y1="90.8" x2="208.9" y2="121.8" stroke="#9c4d2f" stroke-width="1"/>
+<text x="212.9" y="127.8" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#9c4d2f">bound after the first M-step</text>
+<text x="221.8" y="67.7" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#0f5f57">Σp(6)</text>
+<circle cx="420.4" cy="61.7" r="4" fill="#0f5f57" stroke="#0f5f57" stroke-width="1.6"/>
+<text x="420.4" y="51.7" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#0f5f57">maximum</text>
+<line x1="168.9" y1="87.8" x2="168.9" y2="86.8" stroke="#6d6d75" stroke-dasharray="2 2"/>
+<line x1="380" y1="188" x2="402" y2="188" stroke="#0f5f57" stroke-width="2"/>
+<text x="408.0" y="192.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">log evidence per trial</text>
+<line x1="380" y1="206" x2="402" y2="206" stroke="#9c4d2f" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="408.0" y="210.0" text-anchor="start" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">bound with Q from the E-step at Σp(0)</text>
+</svg><figcaption><span class="fno">Figure 4.4.1.</span> One EM iteration on the prior variance of the worked example below. The green curve is the log evidence per trial as a function of $\Sigma_p$. The dashed curve is $-\mathcal{F}_{\mathrm{tot}}/N$ with the recognition densities fixed at the posteriors for $\Sigma_p^{(0)}$: it touches the evidence there (step 1 of the proof), its maximum is the M-step (step 2), and the evidence at the new value lies above it (step 3). The small dots are the iterates up to $\Sigma_p^{(6)}$.</figcaption></figure>
+<h2 id="expectation-maximisation-on-week-3-s-prior-variance"><span class="secno">3</span>Expectation maximisation on Week 3's prior variance</h2>
+<p>Use Week&nbsp;3, Lesson&nbsp;4's linear model, $d_n \sim \mathcal{N}(d_p, \Sigma_p)$ on the whole line and $u_n \mid d_n \sim \mathcal{N}(d_n, \Sigma_u)$, and learn $\Sigma_p$ alone, with $d_p = 2$ and $\Sigma_u = 1$ held at their true values. The data are $N = 200$ trials drawn with true $\Sigma_p^{*} = 1$, below Week 3's threshold $3\Sigma_u$. Write
+<div class="eqn"><div class="eqbody">$$S \;=\; \frac{1}{N}\sum_{n=1}^{N}(u_n - d_p)^2 \;=\; 1.7410$$</div></div>
+for the mean squared deviation on this seeded sample.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The M-step for the prior variance</span></div><p>The part of $\ln P(u_n, d_n \mid \Sigma_p)$ that depends on $\Sigma_p$ is the log prior, $-\tfrac12\ln(2\pi\Sigma_p) - (d_n - d_p)^2/(2\Sigma_p)$. Its derivative is
+<div class="eqn"><div class="eqbody">$$\frac{\partial}{\partial\Sigma_p}\ln P(u_n, d_n \mid \Sigma_p) \;=\; -\frac{1}{2\Sigma_p} + \frac{(d_n - d_p)^2}{2\Sigma_p^2}.$$</div></div>
+By <a class="eqref" href="#eq-vem-m-grad">(4.4.5)</a> the M-step sets the sum over trials of its $Q_n$-average to zero:
+<div class="eqn"><div class="eqbody">$$\Sigma_p^{(t)} \;=\; \frac{1}{N}\sum_{n=1}^{N}\mathbb{E}_{Q_n^{(t)}}\big[(d_n - d_p)^2\big]
+\;=\; \frac{1}{N}\sum_{n=1}^{N}\Big[\Sigma_{\mathrm{post}} + (m_n - d_p)^2\Big],$$</div></div>
+using $\mathbb{E}[(d - d_p)^2] = \mathrm{Var}[d] + (\mathbb{E}[d] - d_p)^2$ with posterior mean $m_n$ and posterior variance $\Sigma_{\mathrm{post}}$. From <a href="../week-02/reading-the-update.html">Week&nbsp;2, Lesson&nbsp;4</a>, at the current value $\Sigma = \Sigma_p^{(t-1)}$,
+<div class="eqn"><div class="eqbody">$$\Sigma_{\mathrm{post}} \;=\; \frac{\Sigma\,\Sigma_u}{\Sigma + \Sigma_u},
+\qquad
+m_n - d_p \;=\; \frac{\Sigma}{\Sigma + \Sigma_u}\,(u_n - d_p).$$</div></div>
+Substituting, and averaging $(u_n - d_p)^2$ to $S$,
+<div class="eqn" id="eq-em-vp-update"><div class="eqbody">$$\Sigma_p^{(t)} \;=\; \frac{\Sigma\,\Sigma_u}{\Sigma + \Sigma_u} \;+\; \frac{\Sigma^2 S}{(\Sigma + \Sigma_u)^2}.$$</div><div class="eqno"><a href="#eq-em-vp-update" title="Link to equation 4.4.6">(4.4.6)</a></div></div></p></div>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The fixed point is the maximum-likelihood value</span></div><p>A fixed point $\Sigma &gt; 0$ of <a class="eqref" href="#eq-em-vp-update">(4.4.6)</a> satisfies $\Sigma = \frac{\Sigma\Sigma_u}{\Sigma + \Sigma_u} + \frac{\Sigma^2 S}{(\Sigma + \Sigma_u)^2}$. Divide by $\Sigma$ and multiply by $(\Sigma + \Sigma_u)^2$:
+<div class="eqn"><div class="eqbody">$$(\Sigma + \Sigma_u)^2 \;=\; \Sigma_u(\Sigma + \Sigma_u) + \Sigma S
+\quad\Longrightarrow\quad
+(\Sigma + \Sigma_u)\,\Sigma \;=\; \Sigma S
+\quad\Longrightarrow\quad
+\Sigma \;=\; S - \Sigma_u .$$</div></div>
+The evidence is the same value: integrating $d_n$ out gives $u_n - d_p \sim \mathcal{N}(0, \Sigma_p + \Sigma_u)$, so the log evidence per trial is $-\tfrac12\ln\big(2\pi(\Sigma_p + \Sigma_u)\big) - S/\big(2(\Sigma_p + \Sigma_u)\big)$, which is largest at $\Sigma_p + \Sigma_u = S$. Here $\hat\Sigma_p = S - \Sigma_u = 0.7410$.</p></div>
+<p>The point rule replaces each $Q_n$ by a point mass at its mode, so $\Sigma_{\mathrm{post}}$ disappears from the update and only $(m_n - d_p)^2$ remains:
+<div class="eqn"><div class="eqbody">$$\Sigma \;\leftarrow\; \frac{\Sigma^2 S}{(\Sigma + \Sigma_u)^2}.$$</div></div>
+<a href="../week-03/prior-and-noise.html">Week&nbsp;3, Lesson&nbsp;2</a> used this rule as a small online step after each trial; here it is iterated as a batch update with the same data. Its fixed points other than $0$ solve $(\Sigma + \Sigma_u)^2 = \Sigma S$, that is $\Sigma^2 + (2\Sigma_u - S)\Sigma + \Sigma_u^2 = 0$, whose discriminant is $(2\Sigma_u - S)^2 - 4\Sigma_u^2 = S(S - 4\Sigma_u)$. For real roots $S \ge 4\Sigma_u$; since $S$ averages to $\Sigma_p^{*} + \Sigma_u$ over samples, this is Week 3's condition $\Sigma_p^{*} \ge 3\Sigma_u$. On this sample the discriminant is $-3.9329$, so $0$ is the only fixed point, and from $0.20$ the point rule goes to $0.0484$, $0.0037$, $2.37 \times 10^{-5}$ and $9.79 \times 10^{-10}$ in four iterations.</p>
+<p>EM from the same start:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Iteration $t$</th>
+<th style="text-align: right;">$\Sigma_p^{(t)}$</th>
+<th style="text-align: right;">Bound after the M-step, $-\mathcal{F}_{\mathrm{tot}}/N$</th>
+<th style="text-align: right;">Log evidence per trial at $\Sigma_p^{(t)}$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$0$</td>
+<td style="text-align: right;">$0.2000$</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;">$-1.735510$</td>
+</tr>
+<tr>
+<td>$1$</td>
+<td style="text-align: right;">$0.2150$</td>
+<td style="text-align: right;">$-1.734166$</td>
+<td style="text-align: right;">$-1.732761$</td>
+</tr>
+<tr>
+<td>$2$</td>
+<td style="text-align: right;">$0.2315$</td>
+<td style="text-align: right;">$-1.731365$</td>
+<td style="text-align: right;">$-1.729911$</td>
+</tr>
+<tr>
+<td>$3$</td>
+<td style="text-align: right;">$0.2495$</td>
+<td style="text-align: right;">$-1.728473$</td>
+<td style="text-align: right;">$-1.726983$</td>
+</tr>
+<tr>
+<td>$4$</td>
+<td style="text-align: right;">$0.2691$</td>
+<td style="text-align: right;">$-1.725517$</td>
+<td style="text-align: right;">$-1.724006$</td>
+</tr>
+<tr>
+<td>$5$</td>
+<td style="text-align: right;">$0.2903$</td>
+<td style="text-align: right;">$-1.722529$</td>
+<td style="text-align: right;">$-1.721017$</td>
+</tr>
+<tr>
+<td>$6$</td>
+<td style="text-align: right;">$0.3131$</td>
+<td style="text-align: right;">$-1.719550$</td>
+<td style="text-align: right;">$-1.718060$</td>
+</tr>
+<tr>
+<td>$173$</td>
+<td style="text-align: right;">$0.7410$</td>
+<td style="text-align: right;">$-1.696164$</td>
+<td style="text-align: right;">$-1.696164$</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each row checks <a class="eqref" href="#eq-em-sandwich">(4.4.4)</a>: the bound after the M-step lies between the evidence of the previous row and the evidence of its own row. The last row is where successive values first differ by less than $10^{-15}$; there the bound and the evidence agree, and $\Sigma_p$ equals $\hat\Sigma_p$.</p>
+<h2 id="week-3-s-missing-term"><span class="secno">4</span>Week 3's missing term</h2>
+<p>The Laplace free energy of Lesson&nbsp;3 gives a second way to learn $\omega$: minimise $\mathcal{F}_{\mathrm{Lap}}$ for each trial, at its own mode, with respect to $\omega$. Per trial,
+<div class="eqn"><div class="eqbody">$$-\mathcal{F}_{\mathrm{Lap}}(\omega) \;=\; \ell(\hat d(\omega); \omega) \;+\; \tfrac{1}{2}\ln\big(2\pi\hat\Sigma_q(\omega)\big),
+\qquad
+\hat\Sigma_q(\omega) \;=\; -\frac{1}{\ell''(\hat d(\omega); \omega)},$$</div></div>
+where primes are derivatives in $d$ and the mode $\hat d(\omega)$ depends on $\omega$. The point rule of Week&nbsp;3 climbed the first term alone.</p>
+<p>On the linear model the log joint is exactly quadratic in $d$, so by the exercise at the end of Lesson&nbsp;3 the Laplace free energy equals the surprise, and learning with it is learning with the exact evidence. The second term is then $\tfrac12\ln(2\pi\Sigma_{\mathrm{post}})$ with $\Sigma_{\mathrm{post}} = \Sigma_p\Sigma_u/(\Sigma_p + \Sigma_u)$, and its derivative in $\Sigma_p$ is
+<div class="eqn"><div class="eqbody">$$\frac{\partial}{\partial\Sigma_p}\,\tfrac12\ln\Sigma_{\mathrm{post}}
+\;=\; \frac12\left(\frac{1}{\Sigma_p} - \frac{1}{\Sigma_p + \Sigma_u}\right)
+\;=\; \frac{\Sigma_u}{2\Sigma_p(\Sigma_p + \Sigma_u)} \;&gt;\; 0,$$</div></div>
+which is $0.25$ at $\Sigma_p = \Sigma_u = 1$. It always pushes $\Sigma_p$ up. As Week&nbsp;3, Lesson&nbsp;4 showed, the first term, the log joint at the mode, grows without bound as $\Sigma_p \to 0$, because the prior's density at its own peak grows like $1/\sqrt{\Sigma_p}$ and the mode moves to that peak; the width term grows like $\tfrac12\ln\Sigma_p$ towards $-\infty$ and cancels that growth.</p>
+<p>On <a href="../week-02/index.html">Week&nbsp;2</a>'s nonlinear model the Laplace free energy is not exact, and its derivative in $\omega$ has a term the linear case hides.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The derivative of the Laplace free energy in a parameter</span></div><p>Differentiate $-\mathcal{F}_{\mathrm{Lap}}$ with respect to $\omega$, keeping track of the dependence through $\hat d(\omega)$. Write $\partial_\omega$ for the partial derivative at fixed $d$ and $\hat d' = \mathrm{d}\hat d/\mathrm{d}\omega$:
+<div class="eqn"><div class="eqbody">$$-\frac{\mathrm{d}\mathcal{F}_{\mathrm{Lap}}}{\mathrm{d}\omega}
+\;=\; \partial_\omega\ell + \ell'\,\hat d' \;-\; \frac{1}{2}\,\frac{\partial_\omega\ell'' + \ell'''\,\hat d'}{\ell''},$$</div></div>
+all evaluated at $(\hat d(\omega), \omega)$. At the mode $\ell' = 0$, so the second term vanishes; this is the envelope theorem, and it is why the point rule needs no $\hat d'$. The last term keeps $\hat d'$. Differentiating the condition $\ell'(\hat d(\omega); \omega) = 0$ with respect to $\omega$ gives $\ell''\hat d' + \partial_\omega\ell' = 0$, so $\hat d' = -\partial_\omega\ell'/\ell''$, and
+<div class="eqn" id="eq-lap-learn"><div class="eqbody">$$-\frac{\mathrm{d}\mathcal{F}_{\mathrm{Lap}}}{\mathrm{d}\omega}
+\;=\; \partial_\omega\ell \;-\; \frac{1}{2\ell''}\left(\partial_\omega\ell'' \;-\; \frac{\ell'''\,\partial_\omega\ell'}{\ell''}\right).$$</div><div class="eqno"><a href="#eq-lap-learn" title="Link to equation 4.4.7">(4.4.7)</a></div></div>
+The first term is the point rule. The second is the derivative of $\tfrac12\ln(2\pi\hat\Sigma_q)$, and through $\ell'''$ it depends on the skew of the posterior.</p></div>
+<p>Where does each rule come to rest on Week 2's model? Learn one parameter at a time with the others at their true values, and average each rule's per-trial step over trials drawn from the model at the true parameters. A value at which that average step is zero is where the rule can come to rest; whether it does is checked below. The three rules are the point rule, the Laplace rule <a class="eqref" href="#eq-lap-learn">(4.4.7)</a>, and the exact rule, the posterior average <a class="eqref" href="#eq-vem-m-grad">(4.4.5)</a> with the exact posterior. The average over the world uses Gauss&ndash;Legendre quadrature in $d$ over $(0, 7.5]$, which holds a fraction $0.99999998$ of the prior mass, and Gauss&ndash;Hermite quadrature with $120$ nodes in the sensory noise. The exact posterior averages use Gauss&ndash;Legendre quadrature in $g = \theta/d^2$. The exact rule's zero should be the true value, because the posterior-averaged score has mean zero there. Recovering the exact score's zero is a consistency check. Convergence of each approximate rule is checked separately: recomputing every zero with $160$ noise nodes, twice as many panels in $d$ and order $20$ moves the largest of them by about $2.1 \times 10^{-8}$. At every zero in the table the derivative of the average step with respect to $\ln\omega$ is negative; the largest is about $-0.077$. So for sufficiently small deterministic steps each zero attracts nearby values of $\omega$. That is a local statement; it says nothing about where a rule started far away will go.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Parameter (true value)</th>
+<th style="text-align: right;">Point rule</th>
+<th style="text-align: right;">Laplace rule</th>
+<th style="text-align: right;">Exact rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$\Sigma_p$ ($1$)</td>
+<td style="text-align: right;">$0.3839$ ($-61.6\%$)</td>
+<td style="text-align: right;">$0.6274$ ($-37.3\%$)</td>
+<td style="text-align: right;">$1.000000$</td>
+</tr>
+<tr>
+<td>$\Sigma_u$ ($0.1$)</td>
+<td style="text-align: right;">$0.0266$ ($-73.4\%$)</td>
+<td style="text-align: right;">$0.1501$ ($+50.1\%$)</td>
+<td style="text-align: right;">$0.100000$</td>
+</tr>
+</tbody>
+</table></div>
+<p>The point-rule values are Week 3's. The Laplace rule reduces the error in $\Sigma_p$ and reverses the sign of the error in $\Sigma_u$, which it overestimates. Its zero is not the truth because $\mathcal{F}_{\mathrm{Lap}}$ is an approximation to the surprise whose error, the quantity Lesson&nbsp;3 expanded, itself depends on $\omega$, and the Laplace rule follows the derivative of that error too. Restoring the width term changes where learning settles; on this model it does not remove the bias, and the table gives no general rule for its sign.</p>
+<h2 id="variational-em"><span class="secno">5</span>Variational EM</h2>
+<p>When the exact posterior is not available, the E-step can minimise $\mathcal{F}[Q_n, u_n; \omega]$ over a family $\mathcal{Q}$ instead, as in Lesson&nbsp;2 and Lesson&nbsp;3. This is <strong>variational EM</strong>. The E-step now leaves a divergence behind. Minimising <a class="eqref" href="#eq-total-kl">(4.4.2)</a> over the family trial by trial,
+<div class="eqn" id="eq-vem-objective"><div class="eqbody">$$\min_{Q_n \in \mathcal{Q}}\,\mathcal{F}_{\mathrm{tot}}[Q_{1:N}; \omega]
+\;=\; -\ln P(u_{1:N} \mid \omega) \;+\; \sum_{n=1}^{N}\min_{Q_n \in \mathcal{Q}} D_{\mathrm{KL}}\!\big[Q_n \,\big\|\, P(\cdot \mid u_n, \omega)\big].$$</div><div class="eqno"><a href="#eq-vem-objective" title="Link to equation 4.4.8">(4.4.8)</a></div></div>
+The first link of <a class="eqref" href="#eq-em-sandwich">(4.4.4)</a> becomes an inequality: after the E-step, $-\mathcal{F}_{\mathrm{tot}}$ lies below the log evidence by the remaining divergence rather than touching it. Steps 2 and 3 of the proof still hold, so $\mathcal{F}_{\mathrm{tot}}$ never rises, but the log evidence can fall from one iteration to the next. Variational EM decreases <a class="eqref" href="#eq-vem-objective">(4.4.8)</a>, not the surprise alone, and under appropriate regularity conditions it can converge to a local stationary point of that objective. The optimised divergence term can shift that point away from a stationary point of the evidence. Whether it does depends on the derivative of the smallest attainable divergence with respect to $\omega$ at that point, not on its dependence on $\omega$ somewhere else. <a href="../week-04/two-causes.html">Lesson&nbsp;5</a> shows how large the shift can be.</p>
+<div class="box exercise"><div class="boxhd">Exercise 4.4.1<span class="bt">Fisher's identity from the free energy</span></div><p>Suppose $P(o, s \mid \omega)$ is differentiable in $\omega$ and derivatives may be taken under the sum. Let $\hat Q(s) = P(s \mid o, \omega_0)$ be held fixed. Using the divergence-plus-surprise decomposition, show that
+<div class="eqn"><div class="eqbody">$$-\nabla_\omega \mathcal{F}[\hat{Q}, o; \omega]\Big|_{\omega = \omega_0}
+\;=\; \nabla_\omega \ln P(o \mid \omega)\Big|_{\omega = \omega_0},$$</div></div>
+and hence Fisher's identity, which Week&nbsp;3, Lesson&nbsp;4 derived directly.</p><details><summary>Solution</summary><p>With $\hat Q$ fixed,
+<div class="eqn"><div class="eqbody">$$-\mathcal{F}[\hat{Q}, o; \omega] \;=\; \ln P(o \mid \omega) \;-\; D_{\mathrm{KL}}\!\big[\hat{Q} \,\big\|\, P(\cdot \mid o, \omega)\big].$$</div></div>
+The divergence is non-negative for every $\omega$ and zero at $\omega_0$, so $\omega_0$ is a minimum of it and its gradient there is zero. Directly, using $\sum_s P(s \mid o, \omega) = 1$:
+<div class="eqn"><div class="eqbody">$$\nabla_\omega D_{\mathrm{KL}}\!\big[\hat{Q} \,\big\|\, P(\cdot \mid o, \omega)\big]\Big|_{\omega_0}
+\;=\; -\sum_s P(s \mid o, \omega_0)\,\frac{\nabla_\omega P(s \mid o, \omega)\big|_{\omega_0}}{P(s \mid o, \omega_0)}
+\;=\; -\nabla_\omega \sum_s P(s \mid o, \omega)\Big|_{\omega_0} \;=\; 0.$$</div></div>
+So the two gradients are equal. By <a class="eqref" href="#eq-vem-m-grad">(4.4.5)</a> with one trial, the left side is $\mathbb{E}_{P(s \mid o, \omega_0)}[\nabla_\omega \ln P(o, s \mid \omega)]$ at $\omega_0$, which gives Fisher's identity $\nabla_\omega \ln P(o \mid \omega_0) = \mathbb{E}_{P(s \mid o, \omega_0)}[\nabla_\omega \ln P(o, s \mid \omega_0)]$.</p></details></div></article><nav class="pagenav"><a class="pv" href="../week-04/laplace-approximation.html"><span class="dir">Previous</span><span class="ttl">The Laplace approximation</span></a><a class="nx" href="../week-04/two-causes.html"><span class="dir">Next</span><span class="ttl">A mean-field learning failure</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script>
+</body>
+</html>

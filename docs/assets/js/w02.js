@@ -14,19 +14,31 @@
    * A hardcoded number would be right for the default slider positions and
    * quietly wrong for every other, which is worse than having no line at all. */
   function exactMode(u, vp, vu) {
-    var best = 0.05, bestV = -Infinity;
-    for (var i = 0; i < 8000; i++) {
-      var d = 0.05 + i * (8 - 0.05) / 7999;
+    var N = 8000, H = (8 - 0.05) / (N - 1), best = 0, bestV = -Infinity;
+    for (var i = 0; i < N; i++) {
+      var d = 0.05 + i * H;
       var v = -(d - DP) * (d - DP) / (2 * vp) - (u - g(d)) * (u - g(d)) / (2 * vu);
-      if (v > bestV) { bestV = v; best = d; }
+      if (v > bestV) { bestV = v; best = i; }
     }
-    return best;
+    /* The grid locates the highest peak to within one spacing, about 0.001,
+     * which shows in the fourth decimal of the readout. Refine it by bisection
+     * on the derivative inside the two neighbouring cells, where it changes
+     * sign from positive to negative at the peak. */
+    function slope(d) { return (DP - d) / vp + ((u - g(d)) / vu) * gp(d); }
+    var lo = 0.05 + Math.max(best - 1, 0) * H, hi = 0.05 + Math.min(best + 1, N - 1) * H;
+    if (!(slope(lo) > 0 && slope(hi) < 0)) return 0.05 + best * H;   /* peak at the grid's edge */
+    for (var k = 0; k < 60; k++) {
+      var mid = 0.5 * (lo + hi);
+      if (slope(mid) > 0) lo = mid; else hi = mid;
+    }
+    return 0.5 * (lo + hi);
   }
 
   /* ══════════════════════════════════════════════════════════════════════
    * 1. ascent-errors
-   *    Left: the estimate climbing the log joint from the prior location.
-   *    Right: the two terms of the gradient, meeting where their sum is zero.
+   *    Left: the log joint, with the walk drawn on it. Middle: the estimate
+   *    by step. Right: the two terms of the gradient, which cancel where their
+   *    sum is zero.
    *    The second panel is the one that matters. The trajectory shows THAT it
    *    converges; the error panel shows WHY it stops where it does.
    * ═════════════════════════════════════════════════════════════════════ */
@@ -41,19 +53,32 @@
 
     function run() {
       var u = sU.get(), vp = sVp.get(), vu = sVu.get(), eta = sEta.get();
-      var d = DP, path = [d], ep = [], eu = [];
+      var d = DP, path = [d], ep = [], eu = [], clamped = 0;
       for (var k = 0; k < STEPS; k++) {
         var a = (DP - d) / vp;                  /* prior prediction error   */
         var b = ((u - g(d)) / vu) * gp(d);      /* sensory term, weighted   */
         ep.push(a); eu.push(b);
         d += eta * (a + b);
+        var before = d;
         /* The estimate is a distance. Left free, a large rate can drive it
          * negative, where 1/d^2 is finite but meaningless and the curve turns
          * into nonsense the reader has to be told to ignore. Clamped, an
          * over-large rate instead shows the honest failure: oscillation. */
         if (!isFinite(d) || d < 0.05) { d = 0.05; }
         if (d > 8) { d = 8; }
+        if (d !== before) clamped++;
         path.push(d);
+      }
+      /* The two terms at the final iterate as well, so that the readout's sum
+       * and the reported distance refer to the same point, path[STEPS]. */
+      ep.push((DP - d) / vp);
+      eu.push(((u - g(d)) / vu) * gp(d));
+      /* Settled means the last ten steps moved by less than 1e-6. Without this
+       * test a run that oscillates between two values was reported as having
+       * settled at whichever of them it happened to stop on. */
+      var settled = true;
+      for (var j = STEPS - 10; j < STEPS; j++) {
+        if (Math.abs(path[j + 1] - path[j]) > 1e-6) settled = false;
       }
       var mode = exactMode(u, vp, vu);
       var hit = path.findIndex(function (p) { return Math.abs(p - mode) < 0.01 * mode; });
@@ -66,12 +91,14 @@
                - (u - g(d)) * (u - g(d)) / (2 * vu);
       };
       st = { path: path, ep: ep, eu: eu, mode: mode, hit: hit, u: u, F: F };
-      out.show([
-        ['settles at', path[path.length - 1].toFixed(4)],
+      var rows = [
+        [settled ? 'settles at' : 'not settled; step ' + STEPS + ' at', path[STEPS].toFixed(4)],
         ['exact mode', mode.toFixed(4)],
         ['steps to 1%', hit < 0 ? 'not within ' + STEPS : String(hit)],
-        ['errors sum to', (st.ep[STEPS - 1] + st.eu[STEPS - 1]).toFixed(4)]
-      ]);
+        ['errors sum to', (st.ep[STEPS] + st.eu[STEPS]).toFixed(4)]
+      ];
+      if (clamped) rows.push(['held at the edge of 0.05 to 8', clamped + (clamped === 1 ? ' step' : ' steps')]);
+      out.show(rows);
       plot.render();
     }
 
@@ -260,7 +287,7 @@
     var N = 40000, DMAX = 16;
     var st;
 
-    var sVp = A.slider({ label: 'prior variance, &Sigma;<sub>p</sub>', min: 0.05, max: 4, step: 0.05, value: 1 });
+    var sVp = A.slider({ label: 'prior variance, &Sigma;<sub>p</sub>', min: 0.01, max: 4, step: 0.01, value: 1 });
     var sVu = A.slider({ label: 'sensory variance, &Sigma;<sub>u</sub>', min: 0.005, max: 1, step: 0.005, value: 0.1, decimals: 3 });
     var sLin = el('label', { class: 'wctl' }, []);
     var chk = el('input', { type: 'checkbox' });

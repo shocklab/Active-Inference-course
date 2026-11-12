@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Laplace approximation · Active Inference</title><meta name="description" content="A Gaussian recognition density fitted to the curvature of the log joint at its peak, the free energy it gives, the size and sign of its error, and a log-normal density that gives a true bound on the same model."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css" crossorigin="anonymous"><style>
+:root{
+  --paper:#fdfcf9; --card:#ffffff;
+  --ink:#1b1b1e; --ink2:#3c3c42; --muted:#6d6d75; --faint:#90909a;
+  --rule:#e4e1d9; --rule2:#d3cfc4;
+  --accent:#0f5f57; --accent2:#14837a; --accent-tint:#e9f2f0; --accent-deep:#0a423d;
+  --clay:#9c4d2f; --clay-tint:#f9efe9;
+  --gold:#8a6d1f; --gold-tint:#faf5e6;
+  --tint:#f4f2ec; --code-bg:#f5f4f0;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SF Mono',Menlo,Consolas,monospace;
+  --measure:44rem; --margincol:13rem; --gap:2.5rem; --shell:80rem;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);
+     font-variant-numeric:oldstyle-nums proportional-nums;line-height:1.6}
+::selection{background:var(--accent);color:#fff}
+img,svg,canvas{max-width:100%}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2)}
+
+/* ── top bar ─────────────────────────────────────────────────────────── */
+.topbar{position:sticky;top:0;z-index:60;background:var(--accent-deep);
+        border-bottom:2px solid var(--accent);}
+.topbar .tin{max-width:var(--shell);margin:0 auto;padding:0 2rem;height:3rem;
+             display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.topbar a.home{font-family:var(--sans);font-size:.78rem;font-weight:500;letter-spacing:.13em;
+               text-transform:uppercase;color:rgba(255,255,255,.82)}
+.topbar a.home:hover{color:#fff}
+.topbar .tcode{font-family:var(--sans);font-size:.7rem;font-weight:500;letter-spacing:.2em;
+               text-transform:uppercase;color:rgba(255,255,255,.42)}
+.tocbtn{display:none;font-family:var(--sans);font-size:.75rem;letter-spacing:.1em;
+        text-transform:uppercase;color:rgba(255,255,255,.82);background:none;border:0;cursor:pointer}
+
+/* ── shell ───────────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:14rem minmax(0,1fr);gap:0 var(--gap);
+       max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.maincol{min-width:0;max-width:calc(var(--measure) + var(--margincol) + var(--gap))}
+
+/* ── side nav ────────────────────────────────────────────────────────── */
+.sidenav{position:sticky;top:3rem;align-self:start;max-height:calc(100vh - 3rem);
+         overflow-y:auto;padding:2.6rem 0 3rem;scrollbar-width:thin}
+.sidenav::-webkit-scrollbar{width:0}
+.sidenav .part{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--faint);margin:1.6rem 0 .55rem}
+.sidenav .part:first-child{margin-top:0}
+.sidenav a.wk{display:block;font-family:var(--sans);font-size:.83rem;line-height:1.35;
+              color:var(--ink2);padding:.34rem 0 .34rem .8rem;border-left:2px solid var(--rule)}
+.sidenav a.wk:hover{color:var(--accent);border-left-color:var(--rule2)}
+.sidenav a.wk.cur{color:var(--accent);font-weight:500;border-left-color:var(--accent)}
+.sidenav a.wk .n{color:var(--faint);font-variant-numeric:tabular-nums;margin-right:.45rem}
+.sidenav a.wk.cur .n{color:var(--accent2)}
+.sidenav .lessons{margin:.15rem 0 .5rem .8rem;border-left:1px solid var(--rule)}
+.sidenav .lessons a{display:block;font-family:var(--sans);font-size:.76rem;line-height:1.35;
+                    color:var(--muted);padding:.28rem 0 .28rem .75rem;border-left:2px solid transparent;margin-left:-1px}
+.sidenav .lessons a:hover{color:var(--accent)}
+.sidenav .lessons a.cur{color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.sidenav .navhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.16em;
+                text-transform:uppercase;color:var(--accent);padding-bottom:.6rem;
+                margin-bottom:1rem;border-bottom:1px solid var(--rule)}
+
+/* ── article head ────────────────────────────────────────────────────── */
+.ahead{padding:3.2rem 0 1.7rem;border-bottom:1px solid var(--rule);max-width:var(--measure)}
+.ahead .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.2em;
+                text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.ahead h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.2vw,2.9rem);
+          line-height:1.08;letter-spacing:-.015em;color:var(--ink);margin-bottom:.85rem;
+          font-variant-numeric:lining-nums}
+.ahead .deck{font-family:var(--serif);font-style:italic;font-size:1.18rem;line-height:1.5;
+             color:var(--muted)}
+.ahead .meta{font-family:var(--sans);font-size:.74rem;letter-spacing:.06em;color:var(--faint);
+             margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap}
+
+/* ── body ────────────────────────────────────────────────────────────── */
+.abody{padding:2rem 0 1rem;font-size:1.115rem;max-width:var(--measure)}
+.abody > *{max-width:var(--measure)}
+.abody p{margin:0 0 1.15rem;color:var(--ink);text-wrap:pretty}
+.abody p.lede{font-size:1.24rem;line-height:1.55;color:var(--ink2)}
+.abody strong{font-weight:600}
+.abody em{font-style:italic}
+.abody a{border-bottom:1px solid var(--rule2)}
+.abody a:hover{border-bottom-color:var(--accent2)}
+.abody h2{font-family:var(--serif);font-weight:500;font-size:1.72rem;line-height:1.16;
+          color:var(--ink);letter-spacing:-.01em;margin:2.9rem 0 .9rem;padding-top:1.6rem;
+          border-top:1px solid var(--rule);scroll-margin-top:4rem}
+.abody h2 .secno{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.6rem;font-weight:400}
+.abody h3{font-family:var(--serif);font-weight:600;font-size:1.24rem;color:var(--ink);
+          margin:2rem 0 .6rem;scroll-margin-top:4rem}
+.abody h4{font-family:var(--sans);font-weight:600;font-size:.78rem;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--accent);margin:1.6rem 0 .5rem}
+.abody ul,.abody ol{margin:0 0 1.25rem;padding-left:1.5rem}
+.abody li{margin-bottom:.45rem;color:var(--ink)}
+.abody ul>li::marker{color:var(--accent)}
+.abody ol>li::marker{color:var(--accent);font-family:var(--sans);font-size:.9em}
+.abody li>ul,.abody li>ol{margin:.45rem 0 .2rem}
+.abody blockquote{border-left:2px solid var(--accent);padding:.15rem 0 .15rem 1.3rem;
+                  margin:1.6rem 0;color:var(--ink2);font-style:italic}
+.abody blockquote p:last-child{margin-bottom:0}
+.abody hr{border:0;border-top:1px solid var(--rule);margin:2.4rem 0}
+
+/* ── code ────────────────────────────────────────────────────────────── */
+.abody code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);
+            padding:.1em .35em;border-radius:2px;border:1px solid var(--rule)}
+.abody pre{background:var(--code-bg);border:1px solid var(--rule);border-left:2px solid var(--accent);
+           padding:1rem 1.15rem;overflow-x:auto;margin:1.5rem 0;line-height:1.55}
+.abody pre code{background:none;border:0;padding:0;font-size:.83rem;color:var(--ink2)}
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.abody .tablewrap{overflow-x:auto;margin:1.7rem 0;
+           width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+.abody table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.86rem}
+.abody th{text-align:left;font-weight:600;color:var(--accent);border-bottom:1.5px solid var(--accent);
+          padding:.5rem .7rem;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;
+          vertical-align:bottom}
+.abody td{padding:.55rem .7rem;border-bottom:1px solid var(--rule);color:var(--ink2);vertical-align:top}
+.abody tbody tr:hover td{background:var(--tint)}
+
+/* ── maths ───────────────────────────────────────────────────────────── */
+.katex{font-size:1.045em}
+.katex-display{margin:0;padding:.15rem 0;overflow-x:auto;overflow-y:hidden}
+.eqn{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;max-width:var(--measure);
+     scroll-margin-top:4.5rem}
+.eqn > .eqbody{flex:1;min-width:0}
+.eqn > .eqno{flex:0 0 auto;font-family:var(--sans);font-size:.8rem;color:var(--faint);
+             font-variant-numeric:tabular-nums}
+.eqn > .eqno a{color:var(--faint);border:0}
+.eqn > .eqno a:hover{color:var(--accent)}
+.eqn:target{background:var(--gold-tint);box-shadow:0 0 0 .7rem var(--gold-tint);border-radius:2px}
+.eqn:target > .eqno a{color:var(--gold)}
+a.eqref{font-variant-numeric:tabular-nums;white-space:nowrap;border-bottom:1px solid var(--rule2)}
+
+/* ── margin notes ────────────────────────────────────────────────────── */
+.mn{float:right;clear:right;width:var(--margincol);
+    margin:.3rem calc(-1 * (var(--margincol) + var(--gap))) 1.1rem var(--gap);
+    font-family:var(--sans);font-size:.775rem;line-height:1.5;color:var(--muted)}
+.mn .mnl{display:block;font-weight:600;font-size:.66rem;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.mn p{margin:0 0 .5rem;font-size:inherit;line-height:inherit;color:inherit}
+.mn p:last-child{margin-bottom:0}
+.mn code{font-size:.85em}
+.mn a{border-bottom:1px solid var(--rule2)}
+
+/* ── boxes ───────────────────────────────────────────────────────────── */
+.box{margin:1.9rem 0;padding:1.15rem 1.35rem;border:1px solid var(--rule);
+     background:var(--card);max-width:var(--measure)}
+.box > :last-child{margin-bottom:0}
+.box .boxhd{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.15em;
+            text-transform:uppercase;margin-bottom:.6rem;display:flex;gap:.5rem;align-items:baseline}
+.box .boxhd .bt{color:var(--ink2);font-weight:500;letter-spacing:.02em;text-transform:none;
+                font-size:.95rem;font-family:var(--serif);font-style:italic}
+.box p,.box li{font-size:1.03rem}
+
+.box.definition,.box.theorem,.box.proposition,.box.lemma{
+  border-left:2px solid var(--accent);background:var(--card)}
+.box.definition .boxhd,.box.theorem .boxhd,.box.proposition .boxhd,.box.lemma .boxhd{color:var(--accent)}
+
+.box.keyidea{border:0;border-left:2px solid var(--accent);background:var(--accent-tint);
+             padding:1.2rem 1.4rem}
+.box.keyidea .boxhd{color:var(--accent)}
+
+.box.remark,.box.aside{border-left:2px solid var(--rule2);background:var(--tint)}
+.box.remark .boxhd,.box.aside .boxhd{color:var(--muted)}
+
+.box.warning{border-left:2px solid var(--clay);background:var(--clay-tint)}
+.box.warning .boxhd{color:var(--clay)}
+
+.box.derivation{border:1px solid var(--rule);border-left:2px solid var(--gold);background:#fdfcf7;
+                padding:1.25rem 1.45rem}
+.box.derivation .boxhd{color:var(--gold)}
+.box.derivation .eqn{margin:1rem 0}
+.box.derivation p{color:var(--ink2)}
+
+.box.exercise{border-left:2px solid var(--clay)}
+.box.exercise .boxhd{color:var(--clay)}
+.box.exercise details{margin-top:.9rem;border-top:1px solid var(--rule);padding-top:.7rem}
+.box.exercise summary{font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.11em;
+                      text-transform:uppercase;color:var(--clay);cursor:pointer;list-style:none}
+.box.exercise summary::-webkit-details-marker{display:none}
+.box.exercise summary::before{content:'▸ ';display:inline-block;transition:transform .15s}
+.box.exercise details[open] summary::before{content:'▾ '}
+.box.exercise details > :nth-child(2){margin-top:.8rem}
+
+.box.checkpoint{border-left:2px solid var(--accent2);background:var(--accent-tint)}
+.box.checkpoint .boxhd{color:var(--accent)}
+.box.checkpoint ul{margin-bottom:0}
+
+/* ── figures & widgets ───────────────────────────────────────────────── */
+.abody figure{margin:2.2rem 0;width:calc(var(--measure) + var(--gap) + var(--margincol));max-width:none}
+figure{margin:2.2rem 0}
+figure figcaption{font-family:var(--sans);font-size:.79rem;line-height:1.5;color:var(--muted);
+                  margin-top:.7rem;max-width:var(--measure)}
+figure figcaption .fno{font-weight:600;color:var(--accent);letter-spacing:.03em}
+figure.widget .wmount{border:1px solid var(--rule2);background:var(--card);padding:1rem}
+figure.widget .wmount .wfallback{font-family:var(--sans);font-size:.85rem;color:var(--muted);
+                                 padding:2rem 1rem;text-align:center}
+
+/* widget internals (used by aif-widgets.js) */
+.wpanel{display:grid;gap:1rem}
+.wrow{display:flex;flex-wrap:wrap;gap:1.1rem 1.6rem;align-items:flex-start}
+.wctl{font-family:var(--sans);font-size:.78rem;color:var(--ink2);display:flex;
+      flex-direction:column;gap:.28rem;min-width:11rem;flex:1 1 11rem}
+.wctl .wlab{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline}
+.wctl .wlab b{font-weight:500;color:var(--ink2)}
+.wctl .wlab .wval{font-family:var(--mono);font-size:.76rem;color:var(--accent);
+                  font-variant-numeric:tabular-nums}
+.wctl input[type=range]{width:100%;accent-color:var(--accent);height:1.1rem;cursor:pointer}
+.wbtn{font-family:var(--sans);font-size:.76rem;font-weight:500;letter-spacing:.04em;
+      background:var(--accent);color:#fff;border:0;padding:.42rem .9rem;cursor:pointer;
+      border-radius:2px}
+.wbtn:hover{background:var(--accent2)}
+.wbtn.ghost{background:transparent;color:var(--accent);border:1px solid var(--rule2)}
+.wbtn.ghost:hover{background:var(--accent-tint)}
+.wbtns{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.wnote{font-family:var(--sans);font-size:.78rem;line-height:1.5;color:var(--muted);
+       border-top:1px solid var(--rule);padding-top:.7rem}
+.wnote b{color:var(--accent);font-weight:600}
+.wreadout{font-family:var(--mono);font-size:.78rem;color:var(--ink2);display:flex;
+          flex-wrap:wrap;gap:.4rem 1.3rem;font-variant-numeric:tabular-nums}
+.wreadout span b{color:var(--faint);font-weight:500}
+.wtabs{display:flex;gap:.3rem;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.wtab{font-family:var(--sans);font-size:.75rem;padding:.34rem .75rem;cursor:pointer;
+      color:var(--muted);border:1px solid transparent;border-bottom:0;background:none}
+.wtab.on{color:var(--accent);background:var(--accent-tint);border-color:var(--rule);font-weight:500}
+canvas.wcanvas{display:block;width:100%;height:auto;background:var(--card)}
+
+/* ── notation table ──────────────────────────────────────────────────── */
+table.notation th{font-family:var(--serif);font-weight:400;font-size:1.02rem;color:var(--accent);
+                  text-transform:none;letter-spacing:0;white-space:nowrap;
+                  vertical-align:baseline;text-align:left;border-bottom:1px solid var(--rule);
+                  padding:.6rem 1.4rem .6rem 0;width:1%}
+table.notation td{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);
+                  vertical-align:baseline;padding:.6rem 0}
+table.notation tbody tr:hover td,table.notation tbody tr:hover th{background:var(--tint)}
+@media (max-width:600px){
+  table.notation th{white-space:normal;padding-right:.8rem}
+}
+
+/* ── footer nav ──────────────────────────────────────────────────────── */
+.pagenav{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;
+         border-top:1px solid var(--rule);margin-top:3.5rem;padding:1.7rem 0 0;
+         max-width:var(--measure)}
+.pagenav a{display:flex;flex-direction:column;gap:.22rem;max-width:20rem;border:0}
+.pagenav a.nx{text-align:right;margin-left:auto}
+.pagenav .dir{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.16em;
+              text-transform:uppercase;color:var(--accent)}
+.pagenav .ttl{font-family:var(--serif);font-size:1.02rem;color:var(--ink2);line-height:1.3}
+.pagenav a:hover .ttl{color:var(--accent)}
+.sitefoot{border-top:1px solid var(--rule);margin-top:3rem;padding:1.6rem 0 3.5rem;
+          font-family:var(--sans);font-size:.76rem;line-height:1.65;color:var(--faint);
+          max-width:var(--measure)}
+.sitefoot a{color:var(--muted);border-bottom:1px solid var(--rule)}
+.sitefoot a:hover{color:var(--accent)}
+.sitefoot p{margin-bottom:.4rem}
+
+/* ── landing page ────────────────────────────────────────────────────── */
+.cover{background:var(--accent-deep);color:#fff;padding:4.5rem 0 3.6rem;margin-bottom:0}
+.cover .cin{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.cover .eyebrow{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.22em;
+                text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:1.3rem}
+.cover h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,6vw,4.2rem);
+          line-height:1.04;letter-spacing:-.02em;max-width:24ch;margin-bottom:1.2rem}
+.cover .sub{font-family:var(--serif);font-style:italic;font-size:1.25rem;line-height:1.5;
+            color:rgba(255,255,255,.72);max-width:44rem}
+.cover .rule{width:3rem;height:2px;background:var(--accent2);margin:0 0 1.2rem}
+.wide{max-width:var(--shell);margin:0 auto;padding:0 2rem}
+.weeklist{border-top:1px solid var(--rule)}
+.landing .abody>*{max-width:none}
+.landing .abody .introcopy{max-width:44rem}
+.weekrow{display:flex;gap:2.2rem;padding:1.7rem 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.weekrow .wn{flex:0 0 3.4rem;text-align:right}
+.weekrow .wn .l{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.18em;
+                text-transform:uppercase;color:var(--faint)}
+.weekrow .wn .n{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--accent);
+                line-height:1;font-variant-numeric:lining-nums}
+.weekrow .wc{flex:1 1 20rem;min-width:0}
+.weekrow .wc h3{font-family:var(--serif);font-weight:500;font-size:1.28rem;margin-bottom:.3rem}
+.weekrow .wc h3 a{color:var(--ink);border:0}
+.weekrow .wc h3 a:hover{color:var(--accent)}
+.weekrow .wc p{font-family:var(--sans);font-size:.86rem;line-height:1.6;color:var(--muted);
+               margin-bottom:.55rem;max-width:46rem}
+.weekrow .wc ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.3rem 1.2rem}
+.weekrow .wc ul li{font-family:var(--sans);font-size:.79rem;margin:0}
+.weekrow .wc ul li a{color:var(--ink2);border-bottom:1px solid var(--rule)}
+.weekrow .wc ul li a:hover{color:var(--accent);border-bottom-color:var(--accent2)}
+.partband{font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.2em;
+          text-transform:uppercase;color:var(--accent);padding:2.2rem 0 .5rem}
+.partband span{color:var(--faint);font-weight:400;letter-spacing:.04em;text-transform:none;
+               font-family:var(--serif);font-style:italic;font-size:1rem;margin-left:.8rem}
+
+/* ── responsive ──────────────────────────────────────────────────────── */
+@media (max-width:1280px){
+  .shell{grid-template-columns:13rem minmax(0,1fr);gap:0 2rem;padding:0 1.6rem}
+  .maincol{max-width:var(--measure)}
+  .mn{float:none;clear:both;width:auto;margin:1rem 0 1.3rem;padding-left:1rem;
+      border-left:2px solid var(--rule2)}
+  .abody .tablewrap,.abody figure{width:auto;max-width:100%}
+  .cover .cin,.wide{padding:0 1.6rem}
+}
+@media (max-width:860px){
+  html{font-size:97%}
+  .shell{grid-template-columns:minmax(0,1fr);padding:0 1.3rem}
+  .sidenav{position:static;max-height:none;padding:1rem 0 0;display:none;
+           border-bottom:1px solid var(--rule);margin-bottom:1rem}
+  .sidenav.open{display:block}
+  .tocbtn{display:block}
+  .topbar .tin{padding:0 1.3rem}
+  .cover{padding:3rem 0 2.4rem}
+  .cover .cin,.wide{padding:0 1.3rem}
+  .abody{font-size:1.06rem}
+  .weekrow{gap:1rem}
+  .weekrow .wn{flex-basis:2.6rem}
+  .eqn{gap:.5rem}
+  .eqn > .eqno{font-size:.72rem}
+}
+@media print{
+  .topbar,.sidenav,.pagenav,.wbtns,.wctl{display:none}
+  .shell{display:block;max-width:none}
+  body{background:#fff}
+}
+</style><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script><script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(!window.renderMathInElement) return;
+  renderMathInElement(document.body,{
+    delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'\\[',right:'\\]',display:true},
+      {left:'$',right:'$',display:false},
+      {left:'\\(',right:'\\)',display:false}
+    ],
+    ignoredTags:['script','noscript','style','textarea','pre','code','option'],
+    throwOnError:false,
+    macros:{
+      '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
+      '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
+      // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
+      // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.querySelector('.tocbtn'),n=document.querySelector('.sidenav');
+  if(b&&n){b.addEventListener('click',function(){n.classList.toggle('open');});}
+});
+</script>
+</head>
+<body>
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><a class="wk cur" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="lessons"><a class="" href="../week-04/bounding-surprise.html">Bounding surprise</a><a class="" href="../week-04/mean-field-and-messages.html">Mean-field and variational messages</a><a class="cur" href="../week-04/laplace-approximation.html">The Laplace approximation</a><a class="" href="../week-04/learning.html">Learning with free energy</a><a class="" href="../week-04/two-causes.html">A mean-field learning failure</a><a class="" href="../week-04/exercises.html">Problems and code</a></div><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Variational free energy</div><h1>The Laplace approximation</h1><p class="deck">A Gaussian recognition density fitted to the curvature of the log joint at its peak, the free energy it gives, the size and sign of its error, and a log-normal density that gives a true bound on the same model.</p><div class="meta"><span>Week 4</span><span>&#167;3</span><span>70 min</span></div></header><article class="abody"><p><a href="../week-04/mean-field-and-messages.html">Lesson&nbsp;2</a> ended with <a href="../week-02/index.html">Week&nbsp;2</a>'s sound model, $u \mid d \sim \mathcal{N}(\theta/d^2, \Sigma_u)$ with a Gaussian prior on $d$ restricted to $d &gt; 0$. Expanding the square in the log likelihood,
+<div class="eqn"><div class="eqbody">$$-\frac{(u - \theta d^{-2})^2}{2\Sigma_u} \;=\; -\frac{u^2}{2\Sigma_u} \;+\; \frac{u\theta}{\Sigma_u}\,d^{-2} \;-\; \frac{\theta^2}{2\Sigma_u}\,d^{-4},$$</div></div>
+so for a positive observation the log joint contains $-d^2$ from the prior, $+d^{-2}$ and $-d^{-4}$ from the likelihood. The free-form update returns the exact posterior, and the Gaussian conjugate calculation does not evaluate its normaliser.</p>
+<p>Continuous active inference takes two steps instead. It restricts $Q$ to a Gaussian, $Q(d) = \mathcal{N}(d; m, \Sigma_q)$, and it replaces the log joint $\ell(d) = \ln P(u, d)$ by its second-order Taylor expansion about $m$. Together these make the <strong>Laplace approximation</strong>, the form used in <a href="https://doi.org/10.1016/j.jmp.2017.09.004">Buckley et al. (2017)</a>, section&nbsp;4, and in Weeks 5 to 8 of this course. This lesson derives it, computes its error and the sign of that error, and compares it with a fixed-form density for which $\mathcal{F}$ can be evaluated without any expansion.</p>
+<h2 id="entropy-of-a-gaussian-in-k-dimensions"><span class="secno">1</span>Entropy of a Gaussian in $K$ dimensions</h2>
+<p><a href="../week-04/bounding-surprise.html">Lesson&nbsp;1</a> derived the one-dimensional entropy $\tfrac12\ln(2\pi e\Sigma_q)$. The $K$-dimensional case needs one identity about the trace.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Differential entropy of a $K$-dimensional Gaussian</span></div><p>Let $Q(s) = \mathcal{N}(s; m, \Sigma_q) = (2\pi)^{-K/2}(\det \Sigma_q)^{-1/2}\exp\!\big(-\tfrac{1}{2}(s - m)^\top \Sigma_q^{-1}(s - m)\big)$, with $\Sigma_q$ symmetric and positive definite. Then
+<div class="eqn"><div class="eqbody">$$-\ln Q(s) \;=\; \frac{K}{2}\ln(2\pi) \;+\; \frac{1}{2}\ln\det\Sigma_q \;+\; \frac{1}{2}(s - m)^\top \Sigma_q^{-1}(s - m).$$</div></div>
+A number equals its own trace, $\operatorname{tr}(AB) = \operatorname{tr}(BA)$, and the trace is linear, so it can be exchanged with the expectation:
+<div class="eqn"><div class="eqbody">$$\mathbb{E}_{Q}\!\big[(s - m)^\top \Sigma_q^{-1}(s - m)\big]
+\;=\; \mathbb{E}_{Q}\!\Big[\operatorname{tr}\!\big(\Sigma_q^{-1}(s - m)(s - m)^\top\big)\Big]
+\;=\; \operatorname{tr}\!\Big(\Sigma_q^{-1}\,\mathbb{E}_{Q}\big[(s - m)(s - m)^\top\big]\Big)
+\;=\; \operatorname{tr}(\Sigma_q^{-1}\Sigma_q) \;=\; K.$$</div></div>
+Taking the expectation of $-\ln Q$,
+<div class="eqn" id="eq-gauss-entropy-kd"><div class="eqbody">$$\mathrm{H}\big[\mathcal{N}(m, \Sigma_q)\big]
+\;=\; \frac{K}{2}\ln(2\pi) + \frac{1}{2}\ln\det\Sigma_q + \frac{K}{2}
+\;=\; \frac{1}{2}\ln\det(2\pi e\,\Sigma_q).$$</div><div class="eqno"><a href="#eq-gauss-entropy-kd" title="Link to equation 4.3.1">(4.3.1)</a></div></div>
+For $K = 1$ this is the result of Lesson&nbsp;1.</p></div>
+<h2 id="an-untruncated-gaussian-has-infinite-free-energy"><span class="secno">2</span>An untruncated Gaussian has infinite free energy</h2>
+<p>Before approximating anything, put $Q(d) = \mathcal{N}(d; m, \Sigma_q)$ on the whole real line into the exact functional $\mathcal{F}[Q, u] = -\mathbb{E}_{Q}[\ln P(u, d)] - \mathrm{H}[Q]$ for the sound model, whose prior is $P(d) = Z_p^{-1}\mathcal{N}(d; d_p, \Sigma_p)$ on $d &gt; 0$ and zero for $d \le 0$. The result is $+\infty$, for two separate reasons.</p>
+<ol>
+<li><em>The supports differ.</em> $Q(d) &gt; 0$ for $d \le 0$, where $P(u, d) = 0$. By Lesson&nbsp;1, $\mathcal{F}$ is $+\infty$ whenever $Q$ puts mass where the joint vanishes.</li>
+<li><em>The log likelihood is not integrable at $d = 0$.</em> Even with the prior extended to the whole line, $-\ln P(u \mid d)$ grows like $\frac{\theta^2}{2\Sigma_u}d^{-4}$ as $d \to 0$. The Gaussian density at $0$ is $Q(0) = (2\pi\Sigma_q)^{-1/2} e^{-m^2/(2\Sigma_q)} &gt; 0$, so near $0$ the expected energy contains $Q(0)\frac{\theta^2}{2\Sigma_u}\int_{-\delta}^{\delta} d^{-4}\,\mathrm{d}d = +\infty$.</li>
+</ol>
+<p>So no Gaussian on the real line has finite free energy on this model. Two ways out are taken below: replace $\ell$ by a function that can be integrated against a Gaussian (Laplace), or replace the Gaussian by a density on $(0, \infty)$ that vanishes fast enough at $0$ (log-normal).</p>
+<h2 id="the-laplace-free-energy"><span class="secno">3</span>The Laplace free energy</h2>
+<p>Write $\ell(d) = \ln P(u, d)$ for the log joint on $d &gt; 0$, and let $m &gt; 0$ be a point where $\ell$ is twice continuously differentiable with $\ell''(m) &lt; 0$.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Quadratic expansion, optimal width, and the cancellation of constants</span></div><p>Expand $\ell$ to second order about $m$:
+<div class="eqn" id="eq-ell-quad"><div class="eqbody">$$\ell_{\mathrm{quad}}(d; m)
+\;=\; \ell(m) \;+\; \ell'(m)(d - m) \;+\; \tfrac{1}{2}\ell''(m)(d - m)^2.$$</div><div class="eqno"><a href="#eq-ell-quad" title="Link to equation 4.3.2">(4.3.2)</a></div></div>
+Replace $\ell$ by $\ell_{\mathrm{quad}}$ in the expected energy of $Q = \mathcal{N}(m, \Sigma_q)$. Since $\mathbb{E}_{Q}[d - m] = 0$ and $\mathbb{E}_{Q}[(d - m)^2] = \Sigma_q$,
+<div class="eqn"><div class="eqbody">$$-\mathbb{E}_{Q}\!\big[\ell_{\mathrm{quad}}(d; m)\big]
+\;=\; -\ell(m) \;-\; \tfrac{1}{2}\ell''(m)\,\Sigma_q.$$</div></div>
+Subtract the entropy $\tfrac12\ln(2\pi e\Sigma_q)$:
+<div class="eqn" id="eq-lap-two-arg"><div class="eqbody">$$\tilde{\mathcal{F}}(m, \Sigma_q)
+\;=\; -\ell(m) \;-\; \tfrac{1}{2}\ell''(m)\,\Sigma_q \;-\; \tfrac{1}{2}\ln(2\pi e\,\Sigma_q).$$</div><div class="eqno"><a href="#eq-lap-two-arg" title="Link to equation 4.3.3">(4.3.3)</a></div></div>
+For fixed $m$, minimise over $\Sigma_q &gt; 0$:
+<div class="eqn" id="eq-lap-opt-var"><div class="eqbody">$$\frac{\partial \tilde{\mathcal{F}}}{\partial \Sigma_q}
+\;=\; -\frac{1}{2}\ell''(m) \;-\; \frac{1}{2\Sigma_q} \;=\; 0
+\qquad\Longrightarrow\qquad
+\hat{\Sigma}_q(m) \;=\; -\frac{1}{\ell''(m)},$$</div><div class="eqno"><a href="#eq-lap-opt-var" title="Link to equation 4.3.4">(4.3.4)</a></div></div>
+which is positive because $\ell''(m) &lt; 0$. The second derivative is $\frac{1}{2\Sigma_q^2} &gt; 0$, so this is the unique minimum. Substitute back: the expectation term is $-\frac{1}{2}\ell''(m)\cdot\big(-1/\ell''(m)\big) = \tfrac12$, and the entropy term is $-\tfrac{1}{2}\ln(2\pi\hat{\Sigma}_q) - \tfrac{1}{2}$. The two halves cancel:
+<div class="eqn" id="eq-lap-fe-1d"><div class="eqbody">$$\tilde{\mathcal{F}}\big(m, \hat{\Sigma}_q(m)\big)
+\;=\; -\ell(m) \;-\; \frac{1}{2}\ln\big(2\pi\hat{\Sigma}_q(m)\big)
+\;=\; -\ell(m) \;+\; \frac{1}{2}\ln\!\left(\frac{-\ell''(m)}{2\pi}\right).$$</div><div class="eqno"><a href="#eq-lap-fe-1d" title="Link to equation 4.3.5">(4.3.5)</a></div></div></p>
+<p>In $K$ dimensions, with Hessian $H_\ell(m) = \nabla^2 \ell(m)$ negative definite, the same steps give $-\mathbb{E}_Q[\ell_{\mathrm{quad}}] = -\ell(m) - \tfrac{1}{2}\operatorname{tr}(H_\ell(m)\Sigma_q)$, and the objective is $-\ell(m) - \tfrac{1}{2}\operatorname{tr}(H_\ell\Sigma_q) - \tfrac12\ln\det(2\pi e\Sigma_q)$. Two derivatives with respect to the matrix $\Sigma_q$ are needed. The first, $\partial\operatorname{tr}(H\Sigma)/\partial\Sigma = H$ for symmetric $H$, holds because $\operatorname{tr}(H\Sigma) = \sum_{jk} H_{jk}\Sigma_{kj}$ is linear in the entries of $\Sigma$. The second, $\partial\ln\det\Sigma/\partial\Sigma = \Sigma^{-1}$, follows from the eigenvalues $\sigma_j$ of $\Sigma$: for a small symmetric change $\delta\Sigma$,
+<div class="eqn"><div class="eqbody">$$\ln\det(\Sigma + \delta\Sigma) - \ln\det\Sigma
+\;=\; \ln\det(I + \Sigma^{-1}\delta\Sigma)
+\;=\; \operatorname{tr}(\Sigma^{-1}\delta\Sigma) + O(\|\delta\Sigma\|^2),$$</div></div>
+since $\det(I + A) = \prod_j(1 + a_j) = 1 + \operatorname{tr}A + O(\|A\|^2)$ for the eigenvalues $a_j$ of a small $A$. Setting the derivative $-\tfrac12 H_\ell - \tfrac12\Sigma_q^{-1}$ to zero gives $\hat{\Sigma}_q(m) = -H_\ell(m)^{-1}$; then $-\tfrac{1}{2}\operatorname{tr}(H_\ell\hat{\Sigma}_q) = \tfrac{K}{2}$ cancels the $\tfrac{K}{2}$ in <a class="eqref" href="#eq-gauss-entropy-kd">(4.3.1)</a>, leaving
+<div class="eqn" id="eq-lap-fe-kd"><div class="eqbody">$$\mathcal{F}_{\mathrm{Lap}}(m)
+\;=\; -\ell(m) \;-\; \frac{1}{2}\ln\det\!\big(2\pi\hat{\Sigma}_q(m)\big)
+\;=\; -\ell(m) \;+\; \frac{1}{2}\ln\det\!\left(\frac{-H_\ell(m)}{2\pi}\right).$$</div><div class="eqno"><a href="#eq-lap-fe-kd" title="Link to equation 4.3.6">(4.3.6)</a></div></div></p></div>
+<div class="box definition"><div class="boxhd">Definition 4.3.1<span class="bt">Laplace approximation and Laplace free energy</span></div><p>Let $\ell(s) = \ln P(u, s)$ have a local maximum $\hat s$ at which the Hessian $H_\ell(\hat s)$ is negative definite (a <strong>nondegenerate peak</strong>).</p>
+<ul>
+<li>The <strong>Laplace approximation</strong> to $P(s \mid u)$ is the Gaussian $Q_{\mathrm{Lap}}(s) = \mathcal{N}\big(s;\, \hat s,\, -H_\ell(\hat s)^{-1}\big)$.</li>
+<li>The <strong>Laplace free energy</strong> is the number $\mathcal{F}_{\mathrm{Lap}}(\hat s) = -\ell(\hat s) + \frac{1}{2}\ln\det\!\big(-H_\ell(\hat s)/(2\pi)\big)$.</li>
+</ul></div>
+<p>The nondegeneracy matters: $\ell(x) = -x^4$ has a strict maximum at $0$ with $\ell''(0) = 0$, and there $\hat\Sigma_q$ is undefined.</p>
+<p>The Laplace free energy is not the free energy of the Laplace approximation. On the sound model,
+<div class="eqn"><div class="eqbody">$$\mathcal{F}_{\mathrm{Lap}}(\hat d) \;&lt;\; \infty \;=\; \mathcal{F}[Q_{\mathrm{Lap}}, u],$$</div></div>
+for the two reasons of the previous section. $\mathcal{F}_{\mathrm{Lap}}$ is the free energy of $Q_{\mathrm{Lap}}$ computed with $\ell$ replaced by $\ell_{\mathrm{quad}}$, and the bound $\mathcal{F} \ge -\ln P(u)$ of Lesson&nbsp;1 says nothing about it.</p>
+<h3 id="laplace-s-method">Laplace's method</h3>
+<p>There is a second route to <a class="eqref" href="#eq-lap-fe-1d">(4.3.5)</a> that says what it approximates. Write the evidence as an integral and replace $\ell$ by its expansion at the mode, where $\ell'(\hat d) = 0$:
+<div class="eqn" id="eq-laplace-method"><div class="eqbody">$$P(u) \;=\; \int e^{\ell(d)}\,\mathrm{d}d
+\;\approx\; \int_{-\infty}^{\infty} e^{\ell(\hat d) + \frac12\ell''(\hat d)(d - \hat d)^2}\,\mathrm{d}d
+\;=\; e^{\ell(\hat d)}\sqrt{\frac{2\pi}{-\ell''(\hat d)}} \;=\; P_{\mathrm{Lap}}(u),$$</div><div class="eqno"><a href="#eq-laplace-method" title="Link to equation 4.3.7">(4.3.7)</a></div></div>
+using the Gaussian integral $\int e^{-a x^2/2}\,\mathrm{d}x = \sqrt{2\pi/a}$. Taking $-\ln$ gives exactly <a class="eqref" href="#eq-lap-fe-1d">(4.3.5)</a> at $m = \hat d$. So $\mathcal{F}_{\mathrm{Lap}}(\hat d) = -\ln P_{\mathrm{Lap}}(u)$: the Laplace free energy is minus the logarithm of Laplace's method for the evidence integral, a standard approximation to an integral dominated by one peak. Its error is $\mathcal{F}_{\mathrm{Lap}} - (-\ln P(u)) = \ln P(u) - \ln P_{\mathrm{Lap}}(u)$, and that can be expanded.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The leading correction to Laplace's method</span></div><p>Write $h = d - \hat d$, $a = -\ell''(\hat d) &gt; 0$, $\ell_3 = \ell'''(\hat d)$, $\ell_4 = \ell''''(\hat d)$, and expand to fourth order:
+<div class="eqn"><div class="eqbody">$$\ell(d) \;=\; \ell(\hat d) - \tfrac12 a h^2 + \tfrac16\ell_3 h^3 + \tfrac1{24}\ell_4 h^4 + \cdots.$$</div></div>
+Factor out the Gaussian part and expand the exponential of the rest, $e^{x} = 1 + x + \tfrac12x^2 + \cdots$, keeping the terms that contribute at the leading order:
+<div class="eqn"><div class="eqbody">$$e^{\ell(d)} \;=\; e^{\ell(\hat d) - a h^2/2}\Big[1 + \tfrac16\ell_3h^3 + \tfrac1{24}\ell_4h^4 + \tfrac1{72}\ell_3^2h^6 + \cdots\Big].$$</div></div>
+Integrate term by term. Dividing by $P_{\mathrm{Lap}}(u)$ turns each integral into a moment of $h \sim \mathcal{N}(0, 1/a)$, for which $\mathbb{E}[h^3] = 0$, $\mathbb{E}[h^4] = 3/a^2$ and $\mathbb{E}[h^6] = 15/a^3$:
+<div class="eqn"><div class="eqbody">$$\frac{P(u)}{P_{\mathrm{Lap}}(u)} \;\approx\; 1 + \frac{\ell_4}{24}\cdot\frac{3}{a^2} + \frac{\ell_3^2}{72}\cdot\frac{15}{a^3}
+\;=\; 1 + \frac{\ell_4}{8a^2} + \frac{5\ell_3^2}{24a^3}.$$</div></div>
+With $\ln(1 + x) \approx x$,
+<div class="eqn" id="eq-laplace-correction"><div class="eqbody">$$\ln P(u) - \ln P_{\mathrm{Lap}}(u) \;\approx\; \frac{\ell''''(\hat d)}{8\,\ell''(\hat d)^2} \;+\; \frac{5\,\ell'''(\hat d)^2}{24\,|\ell''(\hat d)|^3}.$$</div><div class="eqno"><a href="#eq-laplace-correction" title="Link to equation 4.3.8">(4.3.8)</a></div></div>
+The cubic term enters only through its square, because $\mathbb{E}[h^3] = 0$: under a Gaussian centred on the mode its own expectation vanishes.</p></div>
+<p>The expansion can be checked on a known case. Stirling's formula is Laplace's method applied to $n! = \int_0^\infty e^{n\ln x - x}\,\mathrm{d}x$. The mode is $x = n$, with $\ell'' = -1/n$, $\ell''' = 2/n^2$ and $\ell'''' = -6/n^3$, so <a class="eqref" href="#eq-laplace-correction">(4.3.8)</a> gives $-\tfrac{3}{4n} + \tfrac{5}{6n} = \tfrac{1}{12n}$, the first correction term in Stirling's series. At $n = 5$ the exact difference $\ln n! - \ln P_{\mathrm{Lap}}$ is $0.016645$ against $1/(12n) = 0.016667$.</p>
+<p>The first term of <a class="eqref" href="#eq-laplace-correction">(4.3.8)</a> is negative wherever $\ell'''' &lt; 0$, and the second is never negative. The sign of the leading correction predicts the sign of the error when the omitted remainder is controlled. In the two examples below the sign is checked against numerical integration.</p>
+<h3 id="evaluation-on-the-sound-model">Evaluation on the sound model</h3>
+<p>Take Week&nbsp;2's defaults, $d_p = 2$, $\Sigma_p = 1$, $\theta = 1$, $\Sigma_u = 0.1$ and $u = 0.5$, with prior normaliser $Z_p = 0.977250$. The mode is $\hat d = 1.5500$, where $\ell(\hat d) = -0.7999$. Writing $g(d) = \theta/d^2$, the negative second derivative has three parts, as in <a href="../week-02/reading-the-update.html">Week&nbsp;2, Lesson&nbsp;4</a>:
+<div class="eqn"><div class="eqbody">$$-\ell''(\hat d)
+\;=\; \underbrace{\frac{1}{\Sigma_p}}_{1.0000}
+\;+\; \underbrace{\frac{g'(\hat d)^2}{\Sigma_u}}_{2.8841}
+\;-\; \underbrace{\frac{u - g(\hat d)}{\Sigma_u}\,g''(\hat d)}_{0.8709}
+\;=\; 3.0132.$$</div></div>
+So $\hat{\Sigma}_q = 1/3.0132 = 0.3319$ (standard deviation $0.5761$), $\tfrac{1}{2}\ln(2\pi\hat{\Sigma}_q) = 0.3674$, and
+<div class="eqn"><div class="eqbody">$$\mathcal{F}_{\mathrm{Lap}}(\hat d) \;=\; 0.7999 - 0.3674 \;=\; 0.4325\text{ nats}.$$</div></div>
+The surprise, computed by numerical integration of $e^{\ell}$ over $d &gt; 0$, is $-\ln P(u) = 0.3263$ nats, so $\mathcal{F}_{\mathrm{Lap}}$ is $0.1062$ nats above it.</p>
+<p>The derivatives at the mode are $\ell'''(\hat d) = 14.499$ and $\ell''''(\hat d) = -82.780$, and the two terms of <a class="eqref" href="#eq-laplace-correction">(4.3.8)</a> are $-1.1397$ and $1.6007$, summing to $0.4611$. The expansion gives the right sign, $\mathcal{F}_{\mathrm{Lap}}$ above the surprise, but not the size: $1.6007$ is not small compared with $1$, so this truncation gives no controlled estimate of the omitted terms. The posterior of the sound model is too skewed for a one-term correction. On the asymmetric potential of Exercise&nbsp;4.6.5 (<a href="../week-04/exercises.html">the problems</a>) the same formula gives $-0.0115$, predicting that $\mathcal{F}_{\mathrm{Lap}}$ lies below the surprise there, which it does, by $0.0104$ nats.</p>
+<p><a href="../week-04/learning.html">Lesson&nbsp;4</a> uses $\mathcal{F}_{\mathrm{Lap}}$ to learn the model's parameters, and computes where the resulting learning rules come to rest on this model.</p>
+<h2 id="where-the-quadratic-approximation-fails"><span class="secno">4</span>Where the quadratic approximation fails</h2>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">The Laplace free energy is not a bound</span></div><p>For every density $Q$, $\mathcal{F}[Q, u] = -\ln P(u) + D_{\mathrm{KL}}[Q \,\|\, P(\cdot \mid u)] \ge -\ln P(u)$. The Laplace free energy is computed with a quadratic approximation to the log joint. It is generally different from the exact free energy of the Laplace recognition density for the original model, so the variational bound does not apply to it. Its error can have either sign: on the sound model it lies above the surprise, and on the asymmetric potential of Exercise&nbsp;4.6.5 it lies below.</p></div>
+<p>Suppose the agent tries to improve on $m = \hat d$ by minimising <a class="eqref" href="#eq-lap-fe-1d">(4.3.5)</a> over $m$ as well. The derivative is
+<div class="eqn" id="eq-lap-grad-m"><div class="eqbody">$$\frac{\mathrm{d}\mathcal{F}_{\mathrm{Lap}}(m)}{\mathrm{d}m}
+\;=\; -\ell'(m) \;+\; \frac{1}{2}\,\frac{\mathrm{d}}{\mathrm{d}m}\ln\big(-\ell''(m)\big)
+\;=\; -\ell'(m) \;+\; \frac{\ell'''(m)}{2\,\ell''(m)}.$$</div><div class="eqno"><a href="#eq-lap-grad-m" title="Link to equation 4.3.9">(4.3.9)</a></div></div>
+At the mode the first term vanishes, and with $\ell''' &gt; 0$, $\ell'' &lt; 0$ the second is negative, so $\mathcal{F}_{\mathrm{Lap}}$ falls as $m$ increases past $\hat d$: moving right, the curvature $-\ell''(m)$ decreases, $\hat\Sigma_q(m)$ increases, and the term $-\tfrac12\ln(2\pi\hat\Sigma_q)$ falls faster than $-\ell(m)$ rises.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">Minimising the Laplace free energy over the mean moves it off the mode</span></div><p>On the sound model the minimiser of $\mathcal{F}_{\mathrm{Lap}}(m)$ is at $m = 2.0118$, against the mode $1.5500$. There the width is $\hat\Sigma_q^{1/2} = 1.2154$ and $\mathcal{F}_{\mathrm{Lap}} = -0.1305$ nats, which is $0.4569$ nats below the surprise $0.3263$.</p></div>
+<p><a href="https://doi.org/10.1016/j.jmp.2017.09.004">Buckley et al. (2017)</a>, section&nbsp;4, treat the variance term $-\tfrac12\ln(2\pi\hat\Sigma_q)$ as a constant and drop it, keeping the Laplace-encoded energy $-\ln P(u, m)$ alone, so their state update climbs $\ell(m)$ alone, $\dot m \propto \ell'(m)$, which is Week&nbsp;2's circuit, and stops at the mode. The calculation above shows one consequence of not doing so on this model; it is the course's own example, not the reason Buckley et al. give. The term cannot be dropped when parameters are learned, which Lesson&nbsp;4 takes up.</p>
+<div class="box warning"><div class="boxhd">Careful<span class="bt">Positive curvature away from the mode, and the Gauss&ndash;Newton curvature</span></div><p>At a nondegenerate peak $\ell'' &lt; 0$, but not necessarily at the points a state update passes through on the way there. The exact second derivative is
+<div class="eqn"><div class="eqbody">$$\ell''(m) \;=\; -\frac{1}{\Sigma_p} \;-\; \frac{g'(m)^2}{\Sigma_u} \;+\; \frac{u - g(m)}{\Sigma_u}\,g''(m),$$</div></div>
+and on the sound model $g''(m) = 6\theta/m^4 &gt; 0$, so where the sound is louder than predicted, $u &gt; g(m)$, the third term is positive. At $\Sigma_u = 0.02$ and $u = 0.8$, evaluated at $m = 2$, the result is $\ell''(2) = 6.1875 &gt; 0$: the log joint curves upwards there, $-1/\ell''(m)$ is negative, and no Gaussian has that curvature.</p>
+<p>Dropping the third term leaves the <strong>Gauss&ndash;Newton curvature</strong> $\ell''_{\mathrm{GN}}(m) = -\Sigma_p^{-1} - \Sigma_u^{-1}g'(m)^2$, which is negative at every $m &gt; 0$; at the same point it is $-4.1250$. At the default mode, $-\ell''_{\mathrm{GN}}(\hat d) = 3.8841$ against the exact $3.0132$, giving standard deviation $0.5074$ and $\mathcal{F}_{\mathrm{Lap,GN}} = 0.5594$ nats. Week&nbsp;5 meets this choice again when states are updated away from the mode.</p></div>
+<h2 id="a-log-normal-recognition-density"><span class="secno">5</span>A log-normal recognition density</h2>
+<p>A two-parameter density can respect $d &gt; 0$ and still give a free energy that is a true bound, with no Taylor expansion. Put the Gaussian on the log-distance $\rho = \ln d$ of <a href="../week-02/exercises.html">Week&nbsp;2, Lesson&nbsp;5</a>: $\rho \sim \mathcal{N}(m_\rho, \Sigma_\rho)$. By the change-of-variables rule $Q(d) = Q_\rho(\ln d)\,\big|\frac{\mathrm{d}\rho}{\mathrm{d}d}\big|$, the density of $d$ is the log-normal
+<div class="eqn" id="eq-lognormal-q"><div class="eqbody">$$Q_{\mathrm{LN}}(d; m_\rho, \Sigma_\rho)
+\;=\; \frac{1}{d\sqrt{2\pi\Sigma_\rho}}\exp\!\left(-\frac{(\ln d - m_\rho)^2}{2\Sigma_\rho}\right),
+\qquad d &gt; 0.$$</div><div class="eqno"><a href="#eq-lognormal-q" title="Link to equation 4.3.10">(4.3.10)</a></div></div>
+As $d \to 0^+$, $\ln d \to -\infty$, and the factor $\exp\!\big(-(\ln d - m_\rho)^2/(2\Sigma_\rho)\big)$ tends to zero faster than any power $d^{j}$, so it outweighs the $d^{-4}$ growth of the log likelihood.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Closed-form free energy of the log-normal family</span></div><p>Two ingredients are needed: the entropy of $Q_{\mathrm{LN}}$, and the moments $\mathbb{E}_{Q_{\mathrm{LN}}}[d^{j}]$ for $j \in \{1, 2, -2, -4\}$.</p>
+<ol>
+<li>
+<p><em>Entropy.</em> Substitute $d = e^\rho$, $\mathrm{d}d = e^\rho\,\mathrm{d}\rho$ and $Q_{\mathrm{LN}}(e^\rho) = e^{-\rho} Q_\rho(\rho)$:
+<div class="eqn" id="eq-ln-entropy"><div class="eqbody">$$\begin{aligned}
+\mathrm{H}[Q_{\mathrm{LN}}]
+&\;=\; -\int_{-\infty}^{\infty} e^{-\rho} Q_\rho(\rho)\,\ln\!\big(e^{-\rho} Q_\rho(\rho)\big)\,e^\rho\,\mathrm{d}\rho
+\;=\; -\int_{-\infty}^{\infty} Q_\rho(\rho)\big(-\rho + \ln Q_\rho(\rho)\big)\,\mathrm{d}\rho \\
+&\;=\; \mathbb{E}_{Q_\rho}[\rho] \;+\; \mathrm{H}[Q_\rho]
+\;=\; m_\rho \;+\; \tfrac{1}{2}\ln(2\pi e\,\Sigma_\rho).
+\end{aligned}$$</div><div class="eqno"><a href="#eq-ln-entropy" title="Link to equation 4.3.11">(4.3.11)</a></div></div></p>
+</li>
+<li>
+<p><em>Moments.</em> Write $d^{j} = e^{j\rho}$ and complete the square in the exponent:
+<div class="eqn"><div class="eqbody">$$j\rho - \frac{(\rho - m_\rho)^2}{2\Sigma_\rho}
+\;=\; -\frac{\big(\rho - (m_\rho + j\Sigma_\rho)\big)^2}{2\Sigma_\rho} \;+\; j m_\rho \;+\; \frac{1}{2}j^2\Sigma_\rho.$$</div></div>
+The shifted Gaussian integrates to $1$, so
+<div class="eqn" id="eq-ln-moments"><div class="eqbody">$$\mathbb{E}_{Q_{\mathrm{LN}}}[d^{j}] \;=\; \exp\!\big(j m_\rho + \tfrac{1}{2}j^2\Sigma_\rho\big)
+\qquad\text{for every real } j.$$</div><div class="eqno"><a href="#eq-ln-moments" title="Link to equation 4.3.12">(4.3.12)</a></div></div></p>
+</li>
+<li>
+<p><em>Assembly.</em> Write $A = \mathbb{E}[d]$, $B = \mathbb{E}[d^2]$, $C = \mathbb{E}[d^{-2}]$ and $D = \mathbb{E}[d^{-4}]$, each from <a class="eqref" href="#eq-ln-moments">(4.3.12)</a>. Expanding the squares in $-\ln P(d)$ and $-\ln P(u \mid d)$ and taking expectations,
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+-\mathbb{E}_{Q_{\mathrm{LN}}}[\ln P(d)]
+&\;=\; \frac{B - 2 d_p A + d_p^2}{2\Sigma_p} \;+\; \frac{1}{2}\ln(2\pi\Sigma_p) \;+\; \ln Z_p, \\
+-\mathbb{E}_{Q_{\mathrm{LN}}}[\ln P(u \mid d)]
+&\;=\; \frac{u^2 - 2 u\theta\,C + \theta^2 D}{2\Sigma_u} \;+\; \frac{1}{2}\ln(2\pi\Sigma_u).
+\end{aligned}$$</div></div>
+Subtracting <a class="eqref" href="#eq-ln-entropy">(4.3.11)</a> gives $\mathcal{F}_{\mathrm{LN}}(m_\rho, \Sigma_\rho)$ in closed form. It is the exact $\mathcal{F}$ of a density on $d &gt; 0$, so by Lesson&nbsp;1 $\mathcal{F}_{\mathrm{LN}}(m_\rho, \Sigma_\rho) \ge -\ln P(u)$ for every $m_\rho$ and every $\Sigma_\rho &gt; 0$.</p>
+</li>
+</ol></div>
+<p>To minimise it, differentiate. From <a class="eqref" href="#eq-ln-moments">(4.3.12)</a>, $\partial A/\partial m_\rho = A$, $\partial B/\partial m_\rho = 2B$, $\partial C/\partial m_\rho = -2C$, $\partial D/\partial m_\rho = -4D$, and $\partial A/\partial\Sigma_\rho = \tfrac12 A$, $\partial B/\partial\Sigma_\rho = 2B$, $\partial C/\partial\Sigma_\rho = 2C$, $\partial D/\partial\Sigma_\rho = 8D$. The stationarity conditions are
+<div class="eqn" id="eq-ln-stationary"><div class="eqbody">$$\frac{\partial\mathcal{F}_{\mathrm{LN}}}{\partial m_\rho} \;=\; \frac{B - d_p A}{\Sigma_p} + \frac{2\theta\,(uC - \theta D)}{\Sigma_u} - 1 \;=\; 0,
+\qquad
+\frac{\partial\mathcal{F}_{\mathrm{LN}}}{\partial \Sigma_\rho} \;=\; \frac{2B - d_p A}{2\Sigma_p} + \frac{2\theta\,(2\theta D - uC)}{\Sigma_u} - \frac{1}{2\Sigma_\rho} \;=\; 0.$$</div><div class="eqno"><a href="#eq-ln-stationary" title="Link to equation 4.3.13">(4.3.13)</a></div></div>
+They have no closed-form solution. Newton's method on these two equations gives $m_\rho = 0.6955$ and $\Sigma_\rho = 0.0972$ (standard deviation $0.3118$ in $\rho$), with $\mathcal{F}_{\mathrm{LN}} = 0.3588$ nats.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Recognition density</th>
+<th style="text-align: right;">Mode in $d$</th>
+<th style="text-align: right;">Mean $\mathbb{E}[d]$</th>
+<th style="text-align: right;">Standard deviation of $d$</th>
+<th style="text-align: right;">Free energy (nats)</th>
+<th style="text-align: right;">Difference from $-\ln P(u)$</th>
+<th>A bound?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exact posterior</td>
+<td style="text-align: right;">$1.5500$</td>
+<td style="text-align: right;">$2.0900$</td>
+<td style="text-align: right;">$0.7210$</td>
+<td style="text-align: right;">$0.3263$</td>
+<td style="text-align: right;">$0$</td>
+<td>equal</td>
+</tr>
+<tr>
+<td>Log-normal</td>
+<td style="text-align: right;">$1.8191$</td>
+<td style="text-align: right;">$2.1047$</td>
+<td style="text-align: right;">$0.6724$</td>
+<td style="text-align: right;">$0.3588$</td>
+<td style="text-align: right;">$0.0324$</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Laplace at $\hat d$</td>
+<td style="text-align: right;">$1.5500$</td>
+<td style="text-align: right;">$1.5500$</td>
+<td style="text-align: right;">$0.5761$</td>
+<td style="text-align: right;">$0.4325$</td>
+<td style="text-align: right;">$0.1062$</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Laplace at the minimiser of $\mathcal{F}_{\mathrm{Lap}}$</td>
+<td style="text-align: right;">$2.0118$</td>
+<td style="text-align: right;">$2.0118$</td>
+<td style="text-align: right;">$1.2154$</td>
+<td style="text-align: right;">$-0.1305$</td>
+<td style="text-align: right;">$-0.4569$</td>
+<td>no</td>
+</tr>
+</tbody>
+</table></div>
+<p>The exact column comes from numerical integration over $d &gt; 0$. The log-normal density is skewed to the right, as the posterior is, and its mean $2.1047$ is within $0.0146$ of the exact mean, where the symmetric Laplace Gaussian puts its mean at the mode. Its free energy is $0.0324$ nats above the surprise, against $0.1062$ for Laplace at the mode. Its standard deviation, $0.6724$, is below the exact $0.7210$. That is the direction <a href="../week-01/inverse-problem.html">Week&nbsp;1, Lesson&nbsp;4</a>'s comparison of the two divergences leads one to expect: minimising $D_{\mathrm{KL}}[Q \,\|\, P]$ penalises $Q$ heavily where $P$ is small, so the minimiser tends to stay inside the posterior rather than cover its tails. Here it is one computed case, not a theorem.</p>
+<figure id="fig-4-3-1"><svg viewBox="0 0 680 272" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Exact posterior density over distance d compared with the Laplace Gaussian at the mode and the log-normal density that minimises the free energy.">
+  <rect x="1" y="1" width="678" height="270" fill="#fdfcf9" stroke="#e4e1d9"/>
+  <line x1="58" y1="232" x2="642" y2="232" stroke="#3c3c42"/>
+  <line x1="58" y1="28" x2="58" y2="232" stroke="#3c3c42"/>
+  <line x1="239.0" y1="36" x2="239.0" y2="232" stroke="#9c4d2f" stroke-dasharray="3 3" opacity="0.7"/>
+  <line x1="302.1" y1="36" x2="302.1" y2="232" stroke="#0f5f57" stroke-dasharray="4 3" opacity="0.7"/>
+  <path d="M67.3 232.0 L70.6 232.0 L73.8 232.0 L77.0 232.0 L80.2 232.0 L83.4 232.0 L86.6 232.0 L89.8 232.0 L93.0 232.0 L96.2 232.0 L99.4 232.0 L102.7 232.0 L105.9 232.0 L109.1 232.0 L112.3 232.0 L115.5 232.0 L118.7 232.0 L121.9 232.0 L125.1 232.0 L128.3 232.0 L131.6 232.0 L134.8 232.0 L138.0 232.0 L141.2 232.0 L144.4 232.0 L147.6 231.9 L150.8 231.7 L154.0 231.2 L157.2 229.9 L160.4 227.6 L163.7 223.9 L166.9 218.4 L170.1 211.1 L173.3 202.0 L176.5 191.5 L179.7 179.8 L182.9 167.5 L186.1 155.0 L189.3 142.6 L192.5 130.6 L195.8 119.4 L199.0 109.1 L202.2 99.8 L205.4 91.5 L208.6 84.2 L211.8 78.0 L215.0 72.7 L218.2 68.4 L221.4 64.9 L224.7 62.1 L227.9 60.1 L231.1 58.6 L234.3 57.7 L237.5 57.3 L240.7 57.3 L243.9 57.7 L247.1 58.4 L250.3 59.3 L253.5 60.6 L256.8 62.0 L260.0 63.6 L263.2 65.4 L266.4 67.4 L269.6 69.4 L272.8 71.5 L276.0 73.8 L279.2 76.1 L282.4 78.4 L285.6 80.9 L288.9 83.3 L292.1 85.8 L295.3 88.4 L298.5 90.9 L301.7 93.5 L304.9 96.1 L308.1 98.7 L311.3 101.4 L314.5 104.0 L317.8 106.6 L321.0 109.3 L324.2 111.9 L327.4 114.5 L330.6 117.2 L333.8 119.8 L337.0 122.4 L340.2 125.0 L343.4 127.6 L346.6 130.2 L349.9 132.7 L353.1 135.3 L356.3 137.8 L359.5 140.3 L362.7 142.8 L365.9 145.2 L369.1 147.7 L372.3 150.1 L375.5 152.4 L378.7 154.8 L382.0 157.1 L385.2 159.4 L388.4 161.7 L391.6 163.9 L394.8 166.1 L398.0 168.2 L401.2 170.4 L404.4 172.4 L407.6 174.5 L410.9 176.5 L414.1 178.5 L417.3 180.4 L420.5 182.3 L423.7 184.1 L426.9 185.9 L430.1 187.7 L433.3 189.4 L436.5 191.1 L439.7 192.8 L443.0 194.4 L446.2 195.9 L449.4 197.4 L452.6 198.9 L455.8 200.3 L459.0 201.7 L462.2 203.1 L465.4 204.4 L468.6 205.6 L471.9 206.8 L475.1 208.0 L478.3 209.1 L481.5 210.2 L484.7 211.3 L487.9 212.3 L491.1 213.3 L494.3 214.3 L497.5 215.2 L500.7 216.0 L504.0 216.9 L507.2 217.7 L510.4 218.4 L513.6 219.2 L516.8 219.9 L520.0 220.6 L523.2 221.2 L526.4 221.8 L529.6 222.4 L532.8 223.0 L536.1 223.5 L539.3 224.0 L542.5 224.5 L545.7 224.9 L548.9 225.4 L552.1 225.8 L555.3 226.2 L558.5 226.5 L561.7 226.9 L565.0 227.2 L568.2 227.5 L571.4 227.8 L574.6 228.1 L577.8 228.4 L581.0 228.6 L584.2 228.9 L587.4 229.1 L590.6 229.3 L593.8 229.5 L597.1 229.7 L600.3 229.8 L603.5 230.0 L606.7 230.1 L609.9 230.3 L613.1 230.4 L616.3 230.5 L619.5 230.6 L622.7 230.7 L625.9 230.8 L629.2 230.9 L632.4 231.0 L635.6 231.1 L638.8 231.2 L642.0 231.2" fill="none" stroke="#0f5f57" stroke-width="2.4"/>
+  <path d="M67.3 232.0 L70.6 232.0 L73.8 232.0 L77.0 232.0 L80.2 232.0 L83.4 232.0 L86.6 232.0 L89.8 232.0 L93.0 232.0 L96.2 232.0 L99.4 232.0 L102.7 232.0 L105.9 232.0 L109.1 232.0 L112.3 232.0 L115.5 232.0 L118.7 231.9 L121.9 231.9 L125.1 231.8 L128.3 231.6 L131.6 231.4 L134.8 231.1 L138.0 230.6 L141.2 230.0 L144.4 229.1 L147.6 227.9 L150.8 226.5 L154.0 224.7 L157.2 222.5 L160.4 219.8 L163.7 216.7 L166.9 213.2 L170.1 209.1 L173.3 204.5 L176.5 199.5 L179.7 193.9 L182.9 187.9 L186.1 181.6 L189.3 174.8 L192.5 167.7 L195.8 160.4 L199.0 152.9 L202.2 145.2 L205.4 137.5 L208.6 129.8 L211.8 122.1 L215.0 114.5 L218.2 107.2 L221.4 100.0 L224.7 93.2 L227.9 86.7 L231.1 80.6 L234.3 74.8 L237.5 69.6 L240.7 64.8 L243.9 60.4 L247.1 56.6 L250.3 53.3 L253.5 50.5 L256.8 48.2 L260.0 46.4 L263.2 45.1 L266.4 44.3 L269.6 44.0 L272.8 44.1 L276.0 44.6 L279.2 45.5 L282.4 46.8 L285.6 48.5 L288.9 50.5 L292.1 52.8 L295.3 55.4 L298.5 58.2 L301.7 61.3 L304.9 64.6 L308.1 68.0 L311.3 71.6 L314.5 75.4 L317.8 79.2 L321.0 83.2 L324.2 87.2 L327.4 91.3 L330.6 95.4 L333.8 99.5 L337.0 103.6 L340.2 107.8 L343.4 111.9 L346.6 116.0 L349.9 120.0 L353.1 124.0 L356.3 128.0 L359.5 131.8 L362.7 135.6 L365.9 139.4 L369.1 143.0 L372.3 146.6 L375.5 150.0 L378.7 153.4 L382.0 156.7 L385.2 159.9 L388.4 163.0 L391.6 166.0 L394.8 168.9 L398.0 171.7 L401.2 174.4 L404.4 177.0 L407.6 179.5 L410.9 181.9 L414.1 184.3 L417.3 186.5 L420.5 188.7 L423.7 190.7 L426.9 192.7 L430.1 194.6 L433.3 196.4 L436.5 198.2 L439.7 199.8 L443.0 201.4 L446.2 203.0 L449.4 204.4 L452.6 205.8 L455.8 207.1 L459.0 208.4 L462.2 209.6 L465.4 210.8 L468.6 211.8 L471.9 212.9 L475.1 213.9 L478.3 214.8 L481.5 215.7 L484.7 216.6 L487.9 217.4 L491.1 218.2 L494.3 218.9 L497.5 219.6 L500.7 220.2 L504.0 220.9 L507.2 221.5 L510.4 222.0 L513.6 222.6 L516.8 223.1 L520.0 223.6 L523.2 224.0 L526.4 224.4 L529.6 224.9 L532.8 225.2 L536.1 225.6 L539.3 226.0 L542.5 226.3 L545.7 226.6 L548.9 226.9 L552.1 227.2 L555.3 227.4 L558.5 227.7 L561.7 227.9 L565.0 228.2 L568.2 228.4 L571.4 228.6 L574.6 228.8 L577.8 228.9 L581.0 229.1 L584.2 229.3 L587.4 229.4 L590.6 229.6 L593.8 229.7 L597.1 229.8 L600.3 229.9 L603.5 230.1 L606.7 230.2 L609.9 230.3 L613.1 230.4 L616.3 230.5 L619.5 230.5 L622.7 230.6 L625.9 230.7 L629.2 230.8 L632.4 230.8 L635.6 230.9 L638.8 231.0 L642.0 231.0" fill="none" stroke="#2c5f8a" stroke-width="2.0"/>
+  <path d="M67.3 224.5 L70.6 223.5 L73.8 222.5 L77.0 221.3 L80.2 220.0 L83.4 218.6 L86.6 217.1 L89.8 215.4 L93.0 213.6 L96.2 211.6 L99.4 209.4 L102.7 207.1 L105.9 204.6 L109.1 201.9 L112.3 199.0 L115.5 196.0 L118.7 192.7 L121.9 189.3 L125.1 185.6 L128.3 181.8 L131.6 177.8 L134.8 173.5 L138.0 169.1 L141.2 164.5 L144.4 159.7 L147.6 154.8 L150.8 149.7 L154.0 144.5 L157.2 139.2 L160.4 133.8 L163.7 128.3 L166.9 122.7 L170.1 117.1 L173.3 111.5 L176.5 105.8 L179.7 100.3 L182.9 94.8 L186.1 89.4 L189.3 84.1 L192.5 78.9 L195.8 74.0 L199.0 69.2 L202.2 64.7 L205.4 60.5 L208.6 56.6 L211.8 52.9 L215.0 49.7 L218.2 46.7 L221.4 44.2 L224.7 42.1 L227.9 40.3 L231.1 39.0 L234.3 38.1 L237.5 37.7 L240.7 37.7 L243.9 38.2 L247.1 39.1 L250.3 40.4 L253.5 42.1 L256.8 44.3 L260.0 46.8 L263.2 49.8 L266.4 53.1 L269.6 56.7 L272.8 60.7 L276.0 64.9 L279.2 69.4 L282.4 74.2 L285.6 79.1 L288.9 84.2 L292.1 89.5 L295.3 95.0 L298.5 100.5 L301.7 106.0 L304.9 111.6 L308.1 117.3 L311.3 122.9 L314.5 128.4 L317.8 134.0 L321.0 139.4 L324.2 144.7 L327.4 149.9 L330.6 155.0 L333.8 159.9 L337.0 164.7 L340.2 169.3 L343.4 173.7 L346.6 177.9 L349.9 181.9 L353.1 185.8 L356.3 189.4 L359.5 192.8 L362.7 196.1 L365.9 199.1 L369.1 202.0 L372.3 204.7 L375.5 207.2 L378.7 209.5 L382.0 211.6 L385.2 213.6 L388.4 215.4 L391.6 217.1 L394.8 218.7 L398.0 220.1 L401.2 221.4 L404.4 222.5 L407.6 223.6 L410.9 224.5 L414.1 225.4 L417.3 226.2 L420.5 226.9 L423.7 227.5 L426.9 228.1 L430.1 228.6 L433.3 229.0 L436.5 229.4 L439.7 229.7 L443.0 230.0 L446.2 230.3 L449.4 230.5 L452.6 230.7 L455.8 230.9 L459.0 231.1 L462.2 231.2 L465.4 231.3 L468.6 231.4 L471.9 231.5 L475.1 231.6 L478.3 231.7 L481.5 231.7 L484.7 231.8 L487.9 231.8 L491.1 231.8 L494.3 231.9 L497.5 231.9 L500.7 231.9 L504.0 231.9 L507.2 231.9 L510.4 231.9 L513.6 232.0 L516.8 232.0 L520.0 232.0 L523.2 232.0 L526.4 232.0 L529.6 232.0 L532.8 232.0 L536.1 232.0 L539.3 232.0 L542.5 232.0 L545.7 232.0 L548.9 232.0 L552.1 232.0 L555.3 232.0 L558.5 232.0 L561.7 232.0 L565.0 232.0 L568.2 232.0 L571.4 232.0 L574.6 232.0 L577.8 232.0 L581.0 232.0 L584.2 232.0 L587.4 232.0 L590.6 232.0 L593.8 232.0 L597.1 232.0 L600.3 232.0 L603.5 232.0 L606.7 232.0 L609.9 232.0 L613.1 232.0 L616.3 232.0 L619.5 232.0 L622.7 232.0 L625.9 232.0 L629.2 232.0 L632.4 232.0 L635.6 232.0 L638.8 232.0 L642.0 232.0" fill="none" stroke="#9c4d2f" stroke-width="2.0" stroke-dasharray="6 4"/>
+  <text x="58" y="248" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">0</text>
+  <text x="174.8" y="248" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">1</text>
+  <text x="291.6" y="248" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">2</text>
+  <text x="408.4" y="248" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">3</text>
+  <text x="525.2" y="248" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">4</text>
+  <text x="642.0" y="248" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#6d6d75">5</text>
+  <text x="350" y="264" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" font-weight="600" fill="#6d6d75">distance d</text>
+  <text x="239.0" y="24" text-anchor="end" dx="-4" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#9c4d2f">mode 1.55</text>
+  <text x="302.1" y="24" text-anchor="start" dx="4" font-family="'IBM Plex Sans',sans-serif" font-size="10" fill="#0f5f57">exact mean 2.09</text>
+  <line x1="430" y1="54" x2="452" y2="54" stroke="#0f5f57" stroke-width="2.4"/>
+  <text x="458" y="58" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">exact posterior</text>
+  <line x1="430" y1="74" x2="452" y2="74" stroke="#2c5f8a" stroke-width="2.0"/>
+  <text x="458" y="78" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">log-normal (F = 0.359)</text>
+  <line x1="430" y1="94" x2="452" y2="94" stroke="#9c4d2f" stroke-width="2.0" stroke-dasharray="6 4"/>
+  <text x="458" y="98" font-family="'IBM Plex Sans',sans-serif" font-size="10.5" fill="#3c3c42">Laplace at the mode (F = 0.432)</text>
+</svg><figcaption><span class="fno">Figure 4.3.1.</span> The exact posterior of the sound model at $u = 0.5$ (green), the Laplace Gaussian at the mode $\hat d = 1.5500$ (clay, dashed), and the log-normal density that minimises $\mathcal{F}$ in its family (blue). The curves are computed from the same arrays as the table.</figcaption></figure>
+<figure class="widget" id="fig-4-3-2"><div class="wmount" data-widget="laplace-vs-lognormal"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 4.3.2.</span> The exact posterior, the Laplace Gaussian at the mode, and the log-normal density that minimises $\mathcal{F}$, across observations $u$, sensory variances $\Sigma_u$ and prior variances $\Sigma_p$. A wide prior or a quiet sound puts much of the Laplace Gaussian at $d &lt; 0$, while the log-normal stays on $d &gt; 0$. A sharp ear and a loud sound can make the posterior bimodal, and the Laplace Gaussian then describes only the peak it is fitted to.</figcaption></figure>
+<div class="box exercise"><div class="boxhd">Exercise 4.3.1<span class="bt">Exactness of Laplace on linear Gaussian models</span></div><p>Suppose $\ell(s) = \ln P(u, s)$ is exactly quadratic on $\mathbb{R}^K$:
+<div class="eqn"><div class="eqbody">$$\ell(s) \;=\; \ell(\hat s) \;-\; \tfrac{1}{2}(s - \hat s)^\top \Pi_{\mathrm{post}}(s - \hat s),$$</div></div>
+with $\Pi_{\mathrm{post}}$ symmetric and positive definite. Prove that $\mathcal{F}_{\mathrm{Lap}}(\hat s) = -\ln P(u)$.</p><details><summary>Solution</summary><p>The Hessian is the same everywhere, $H_\ell(s) = -\Pi_{\mathrm{post}}$, and every third and higher derivative of $\ell$ is zero. So $\hat{\Sigma}_q = -H_\ell^{-1} = \Pi_{\mathrm{post}}^{-1}$. Integrate $e^{\ell}$ over $\mathbb{R}^K$ with the Gaussian normaliser:
+<div class="eqn"><div class="eqbody">$$P(u) \;=\; \int_{\mathbb{R}^K} e^{\ell(\hat s)}\exp\!\Big(-\tfrac{1}{2}(s - \hat s)^\top \Pi_{\mathrm{post}}(s - \hat s)\Big)\,\mathrm{d}s
+\;=\; e^{\ell(\hat s)}\,(2\pi)^{K/2}\big(\det \Pi_{\mathrm{post}}^{-1}\big)^{1/2}.$$</div></div>
+Taking $-\ln$,
+<div class="eqn"><div class="eqbody">$$-\ln P(u) \;=\; -\ell(\hat s) \;-\; \frac{1}{2}\ln\det\!\big(2\pi\Pi_{\mathrm{post}}^{-1}\big)
+\;=\; -\ell(\hat s) \;-\; \frac{1}{2}\ln\det\!\big(2\pi\hat{\Sigma}_q\big)
+\;=\; \mathcal{F}_{\mathrm{Lap}}(\hat s).$$</div></div>
+Here $\ell_{\mathrm{quad}} = \ell$ everywhere, so $Q_{\mathrm{Lap}}$ is the exact posterior and Laplace's method <a class="eqref" href="#eq-laplace-method">(4.3.7)</a> is exact.</p></details></div></article><nav class="pagenav"><a class="pv" href="../week-04/mean-field-and-messages.html"><span class="dir">Previous</span><span class="ttl">Mean-field and variational messages</span></a><a class="nx" href="../week-04/learning.html"><span class="dir">Next</span><span class="ttl">Learning with free energy</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
+<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w04.js"></script>
+</body>
+</html>

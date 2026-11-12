@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -399,7 +402,7 @@ the first then gives $u - g(d) = \Sigma_u\varepsilon$. So $\varepsilon = (u - g(
 the precision-weighted error, and $e = u - g(d)$, the raw residual. The system is
 linear with matrix</p>
 <div class="eqn"><div class="eqbody">$$\begin{pmatrix} 0 & -1 \\ \Sigma_u & -1 \end{pmatrix},$$</div></div>
-<p>whose trace is $-1$ and determinant $\Sigma_u > 0$. Two eigenvalues with negative sum
+<p>whose trace is $-1$ and determinant $\Sigma_u &gt; 0$. Two eigenvalues with negative sum
 and positive product have negative real parts, so the fixed point is stable.</p>
 <p>(b) The connection of strength $\Sigma_u$ runs from $\varepsilon$ to $e$, and
 $\varepsilon e - 1$ is built from those two activities. At the fixed point
@@ -447,7 +450,7 @@ width changes from sound to sound, so $\tfrac12\ln(2\pi\Sigma_{\text{post}})$ wi
 Gaussian width read from the curvature at the mode is an approximation. Week&nbsp;4
 makes that approximation explicit as the Laplace approximation and finds where it
 fails.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 3.5.4<span class="bt">A hyperprior delays the collapse</span></div><p>In the linear model with $\Sigma_p^{*} < 3\Sigma_u$, add to the point rule's batch
+<div class="box exercise"><div class="boxhd">Exercise 3.5.4<span class="bt">A hyperprior delays the collapse</span></div><p>In the linear model with $\Sigma_p^{*} &lt; 3\Sigma_u$, add to the point rule's batch
 objective over $N$ trials the inverse-gamma hyperprior of Lesson&nbsp;4 with $n_0$ and
 $\Sigma_0$.</p>
 <p>(a) Show that the objective is now bounded above and has a maximum at a positive
@@ -471,12 +474,12 @@ the derivative of the batch objective to zero and multiplying by $2x^2$,</p>
 <div class="eqn"><div class="eqbody">$$A \;-\; (n_0 + 2)\,x \;-\; N x\left[1 - \frac{(S + s)\,x}{(x + s)^2}\right] \;=\; 0 .$$</div></div>
 <p>The bracket is $1 - (S+s)x/(x+s)^2$. Since $x/(x+s)^2$ is largest at $x = s$, where it
 is $1/(4s)$, the bracket is at least $1 - (S+s)/(4s) = (3s - S)/(4s)$, which is
-positive when $S < 3s$. So at every stationary point
+positive when $S &lt; 3s$. So at every stationary point
 $N x\,(3s - S)/(4s) \leq A$, that is</p>
 <div class="eqn"><div class="eqbody">$$x \;\leq\; \frac{4sA}{(3s - S)\,N} ,$$</div></div>
 <p>and every stationary point, the maximiser included, tends to zero as $N \to \infty$.
-For a realised batch the same steps need $B_N < 4s$ in place of $S + s < 4s$, and a
-finite batch need not meet that even when $S < 3s$, since its mean squared deviation
+For a realised batch the same steps need $B_N &lt; 4s$ in place of $S + s &lt; 4s$, and a
+finite batch need not meet that even when $S &lt; 3s$, since its mean squared deviation
 can exceed its expectation. With independent trials $B_N \to S + s$ as $N \to \infty$
 by the law of large numbers, so for large enough $N$ the bound applies to the realised
 batch as well. Near zero the bracket tends to one, so the maximiser is
@@ -533,7 +536,7 @@ say which step fails in Week&nbsp;2's model.</p><details><summary>Solution</summ
 $(\hat d - d_p)/\Sigma_p = (u - d_p)/(\Sigma_p + \Sigma_u)$. Its average over the
 process uses $\mathbb E_{P^*}[u] = d_p^{*} + \mathbb E_{P^*}[z] = d_p^{*}$:</p>
 <div class="eqn"><div class="eqbody">$$\varphi(d_p) \;=\; \frac{d_p^{*} - d_p}{\Sigma_p + \Sigma_u} .$$</div></div>
-<p>It vanishes only at $d_p = d_p^{*}$, and $\varphi' = -1/(\Sigma_p + \Sigma_u) < 0$, so
+<p>It vanishes only at $d_p = d_p^{*}$, and $\varphi' = -1/(\Sigma_p + \Sigma_u) &lt; 0$, so
 the zero attracts. Neither the animal's variances nor the world's enter the location of
 the zero, so the location is learned without bias even by an animal whose variances
 are wrong.</p>
@@ -551,9 +554,9 @@ point rule's error in $\theta$.</p><details><summary>Solution</summary><p>Differ
 \psi'' \;=\; \frac{(u - 2\theta h)\,h'' - 2\theta h'^2}{\Sigma_u} .$$</div></div>
 <p>With $h = d^{-2}$, $h' = -2d^{-3}$ and $h'' = 6d^{-4}$. Where $u = \theta h$, the factor
 $u - 2\theta h$ is $-\theta h = -\theta d^{-2}$, so</p>
-<div class="eqn"><div class="eqbody">$$\psi' \;=\; \frac{2\theta}{\Sigma_u d^{5}} \;>\; 0,
+<div class="eqn"><div class="eqbody">$$\psi' \;=\; \frac{2\theta}{\Sigma_u d^{5}} \;&gt;\; 0,
 \qquad
-\psi'' \;=\; \frac{-6\theta - 8\theta}{\Sigma_u d^{6}} \;=\; -\frac{14\theta}{\Sigma_u d^{6}} \;<\; 0 .$$</div></div>
+\psi'' \;=\; \frac{-6\theta - 8\theta}{\Sigma_u d^{6}} \;=\; -\frac{14\theta}{\Sigma_u d^{6}} \;&lt;\; 0 .$$</div></div>
 <p>In the expansion
 $\mathbb E_{d\mid u}[\psi] - \psi(\hat d) \approx \psi'(m - \hat d) + \tfrac12 \psi''[V + (m - \hat d)^2]$,
 a posterior whose mean lies beyond its mode makes the first term positive, and the
@@ -565,7 +568,7 @@ it drops matter. In Lesson&nbsp;3's louder world the second-order sum averages t
 $-0.7429$ while the exact gap averages to $0.0303$. The
 sign comes from the full posterior calculation, which gives the power overestimated
 when the world equals Week&nbsp;2's model and underestimated in the louder world.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 3.5.9<span class="bt">Learning with momentum &dagger;</span></div><p><a href="https://doi.org/10.1016/j.jmp.2017.09.004">Buckley et al. (2017)</a>, section 8, write
+<div class="box exercise"><div class="boxhd">Exercise 3.5.9<span class="bt">Second-order parameter dynamics &dagger;</span></div><p><a href="https://doi.org/10.1016/j.jmp.2017.09.004">Buckley et al. (2017)</a>, section 8, write
 the dynamics of a parameter in second-order form: the parameter's acceleration, rather
 than its velocity, is proportional to the gradient. Apply this to the prior location in
 the linear model, in continuous time and with the update replaced by its expectation
@@ -586,11 +589,11 @@ $\bar u$ at full speed and reaching $\bar u - x(0)$ on the other side. Gradient 
 form, $\dot x = -\omega_0^2 x$, decays to the target instead. The second-order form
 needs something else to stop.</p>
 <p>(c) With friction, $\ddot x + b\dot x + \omega_0^2 x = 0$, whose characteristic roots are
-$\tfrac12\big(-b \pm \sqrt{b^2 - 4\omega_0^2}\big)$. For $b < 2\omega_0$ the roots are
-complex and $x$ oscillates with decaying amplitude; for $b > 2\omega_0$ both are real and
+$\tfrac12\big(-b \pm \sqrt{b^2 - 4\omega_0^2}\big)$. For $b &lt; 2\omega_0$ the roots are
+complex and $x$ oscillates with decaying amplitude; for $b &gt; 2\omega_0$ both are real and
 negative and the slower one, $\tfrac12\big(-b + \sqrt{b^2 - 4\omega_0^2}\big)$, approaches
 zero as $b$ grows, so heavy friction is slow. The fastest return without overshoot is at
-$b = 2\omega_0$, critical damping, where $x(t) = x(0)(1 + \omega_0 t)e^{-\omega_0 t}$.</p></details></div>
+$b = 2\omega_0$, critical damping, where $x(t) = x(0)(1 + \omega_0 t)\exp(-\omega_0 t)$.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 3.5.10<span class="bt">Precision as the learned quantity in the circuit</span></div><p>Week&nbsp;2's circuit applies each precision as a gain at an error unit. Suppose the
 animal stores $\Pi_u$ at that unit and learns it in log coordinates. Write the update,
 say what it uses, and check that its stationary point is the same as that of the
@@ -604,7 +607,7 @@ same zero as the log-variance update, since a step in one coordinate is exactly 
 opposite step in the other. That zero is where the average change in the logarithm
 vanishes. The average change in $\Pi_u$ itself is not zero there: the step multiplies
 $\Pi_u$ by an exponential, whose average exceeds one whenever the exponent varies, as
-Lesson&nbsp;2 noted for the variance.</p></details></div></article><nav class="pagenav"><a class="pv" href="../week-03/what-the-mode-leaves-out.html"><span class="dir">Previous</span><span class="ttl">What the mode leaves out</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
+Lesson&nbsp;2 noted for the variance.</p></details></div></article><nav class="pagenav"><a class="pv" href="../week-03/what-the-mode-leaves-out.html"><span class="dir">Previous</span><span class="ttl">What the mode leaves out</span></a><a class="nx" href="../week-04/bounding-surprise.html"><span class="dir">Next</span><span class="ttl">Bounding surprise</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
 <script defer src="../assets/js/aif-core.js"></script>
 </body>
 </html>

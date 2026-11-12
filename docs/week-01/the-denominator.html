@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -481,6 +484,19 @@ enumeration costs exponentially many terms. Here <strong>big-O notation</strong>
 how cost grows as the problem size increases; it is not an exact instruction
 count or a measured running time.</p>
 <figure class="widget" id="fig-1-5-1"><div class="wmount" data-widget="chain-messages"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 1.5.1.</span> Change the chain length and sensor reliability. The table displays backward messages and the final evidence. For short chains the widget also enumerates every assignment and compares the answers. Message entries are probabilities of the selected observation conditional on a boundary state, not a probability distribution over that state.</figcaption></figure>
+<p>The evidence readout does not move when the chain length changes, and the
+reason is in the numbers chosen. The initial probabilities are stationary for
+$T$:</p>
+<div class="eqn"><div class="eqbody">$$T\begin{pmatrix}0.40\\0.60\end{pmatrix}
+=\begin{pmatrix}0.70(0.40)+0.20(0.60)\\0.30(0.40)+0.80(0.60)\end{pmatrix}
+=\begin{pmatrix}0.40\\0.60\end{pmatrix}.$$</div></div>
+<p>So every state in the chain, wherever it sits, has marginal probabilities
+$(0.40,0.60)$, and the evidence is
+$0.40\,P(o=1\mid s_n=0)+0.60\,P(o=1\mid s_n=1)$ for every length $n$, which is
+$0.58$ at the starting reliability. Length changes the number of
+assignments and the intermediate messages, not the answer. With a non-stationary
+initial distribution the evidence would change with $n$, and the comparison with
+enumeration would work in the same way.</p>
 <p>This calculation is an instance of the sum-product algorithm. Its messages are
 local: a node uses its adjacent factors and incoming messages. Local computation
 therefore does not forbid marginalisation or normalisation. It constrains the
@@ -539,7 +555,7 @@ noise, multiplying the densities produces an exponential with a quadratic
 exponent. Completing the square evaluates its integral. <a href="../week-02/reading-the-update.html">Week&nbsp;2, Lesson&nbsp;4</a> shows all
 the intermediate lines.</p>
 <p>For the inverse-square observation function of <a href="../week-02/exact.html">Week&nbsp;2, Lesson&nbsp;2</a>, $g(d)=1/d^2$ with
-$d>0$, the exponent contains</p>
+$d&gt;0$, the exponent contains</p>
 <div class="eqn"><div class="eqbody">$$-\frac{(d-d_p)^2}{2\Sigma_p}
 -\frac{(u-d^{-2})^2}{2\Sigma_u}.$$</div></div>
 <p>The prior location $d_p$ and variance $\Sigma_p$ describe distance; $\Sigma_u$
@@ -603,7 +619,7 @@ it a useful reference for methods intended for larger problems.</p>
 A factorised approximation cannot represent that dependence, however long its
 optimisation runs. These are different sources of error. Comparing them requires
 both an accuracy measure and the computation used to obtain it.</p>
-<p>Week&nbsp;4 derives one useful optimisation objective. Its availability motivates
+<p><a href="../week-04/index.html">Week&nbsp;4</a> derives one useful optimisation objective. Its availability motivates
 studying it; it does not make sampling, exact structured inference or other
 approximation families obsolete.</p>
 <div class="box checkpoint"><div class="boxhd">Check yourself</div><ul>

@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -375,7 +378,7 @@ normaliser has no bearing on, so it cancels exactly.</p>
 rule. So the agent maximises the joint. Both factors are things it has: a prior
 it holds and a likelihood it can evaluate by predicting an intensity and
 comparing.</p>
-<h2 id="take-the-logarithm"><span class="secno">2</span>Take the logarithm</h2>
+<h2 id="logarithms"><span class="secno">2</span>Logarithms</h2>
 <p>Taking logarithms turns a product into a sum and exposes the quadratic
 penalties in the Gaussian factors. It also avoids multiplying very small
 densities. The log joint still depends on the density's coordinate convention,
@@ -392,10 +395,10 @@ finite free energy equal to $-\ell$: the point mass is singular relative to the
 posterior and its KL divergence is infinite. For suitable distributions with a
 small fixed width, $\mathbb E_Q[\ell]$ can approximate the log joint at their
 centre. Comparing centres then approximates MAP when the entropy term is fixed.
-The width cannot be set to zero as an ordinary substitution. Week&nbsp;4 develops
+The width cannot be set to zero as an ordinary substitution. <a href="../week-04/index.html">Week&nbsp;4</a> develops
 the distributional approximation.</p></div>
 <h2 id="expanding-the-log-joint"><span class="secno">3</span>Expanding the log joint</h2>
-<p>Substitute the Gaussian likelihood and the truncated Gaussian prior. On $d>0$, taking the prior first:</p>
+<p>Substitute the Gaussian likelihood and the truncated Gaussian prior. On $d&gt;0$, taking the prior first:</p>
 <div class="eqn"><div class="eqbody">$$\ln P(d) \;=\; \ln\!\left[\frac{1}{Z_p\sqrt{2\pi\Sigma_p}}\exp\!\left(-\frac{(d - d_p)^2}{2\Sigma_p}\right)\right]
 \;=\; -\frac{(d - d_p)^2}{2\Sigma_p} \;-\; \tfrac{1}{2}\ln(2\pi\Sigma_p) - \ln Z_p,$$</div></div>
 <p>using $\ln(ab) = \ln a + \ln b$ and $\ln e^{x} = x$. The likelihood goes the same
@@ -473,7 +476,7 @@ network and nothing is summed over the state space. The rule is local.</p>
 <p>Having the gradient, move in the direction it points:</p>
 <div class="eqn" id="eq-ascent"><div class="eqbody">$$\dot{d} \;=\; \nu \, \frac{\partial \ell}{\partial d}
 \;=\; \nu\big(\varepsilon_p + g'(d)\,\varepsilon_u\big),$$</div><div class="eqno"><a href="#eq-ascent" title="Link to equation 2.3.7">(2.3.7)</a></div></div>
-<p>Here $\nu>0$ is a mobility, with units of squared distance per unit time.
+<p>Here $\nu&gt;0$ is a mobility, with units of squared distance per unit time.
 The gradient has units of inverse distance. A forward-Euler step of duration
 $\Delta t$ is</p>
 <div class="eqn"><div class="eqbody">$$d_{k+1}=d_k+\eta\ell'(d_k),\qquad \eta=\nu\Delta t.$$</div></div>
@@ -504,7 +507,7 @@ Weighted by $g'(2.0) = -0.250$, the sensory term
 contributes $-0.625$. The gradient is negative, so the
 estimate moves down: the sound was louder than expected, therefore the source is
 closer than expected.</p>
-<figure id="fig-2-3-1"><div class="widget" data-widget="ascent-errors"></div><figcaption><span class="fno">Figure 2.3.1.</span> The estimate climbing the log joint from the prior location. Left, the trajectory against the exact posterior mode. Right, the two terms of <a class="eqref" href="#eq-gradient-eps">(2.3.6)</a> over the same steps, meeting where their sum is zero.</figcaption></figure>
+<figure class="widget" id="fig-2-3-1"><div class="wmount" data-widget="ascent-errors"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 2.3.1.</span> The estimate climbing the log joint from the prior location, in three panels. Left, the log joint $\ell(d)$ up to a constant, with the iterates drawn on it and the exact posterior mode marked. Middle, the estimate at each step against the exact mode. Right, the two terms of <a class="eqref" href="#eq-gradient-eps">(2.3.6)</a>, $\varepsilon_p$ and $g'(d)\,\varepsilon_u$, over the same steps, with their sum: at the mode the two terms cancel and the sum is zero. The readout says whether the last ten steps have stopped moving, and notes any step held at the edge of the range $0.05$ to $8$.</figcaption></figure>
 <p>It settles at $d = 1.5500$, reaching within one per cent of the
 exact mode after 29 steps. The mode computed by quadrature
 in Lesson&nbsp;2 was $1.5500$. They agree for this starting point and step size. Gradient ascent can also converge to another local maximum or fail to converge, as the exercises demonstrate.</p>
@@ -517,8 +520,8 @@ $\varepsilon_u = 0.8379$, and the estimate still predicts an intensity
 of $0.4162$ against the $0.5$ heard. The animal has not moved far
 enough to account for the whole of what it heard. It has stopped where accounting
 for more would cost more in prior implausibility than it gains in fit.</p>
-<div class="box warning"><div class="boxhd">Careful<span class="bt">A phrase to keep clear of</span></div><p>It is tempting to say the animal has not "explained away" the observation.
-Resist it. <strong>Explaining away</strong> is Week&nbsp;1's technical term for something
+<div class="box warning"><div class="boxhd">Careful<span class="bt">A residual is not explaining away</span></div><p>It is tempting to say the animal has not "explained away" the observation.
+Resist it. Explaining away is <a href="../week-01/index.html">Week&nbsp;1</a>'s technical term for something
 quite different: two independent causes of a shared effect becoming
 anti-correlated once that effect is observed, so that evidence for one is
 evidence against the other. It needs at least two causes and there is only one
@@ -529,32 +532,32 @@ name.</p></div>
 <p>$\eta$ was set to $0.05$ without comment. It cannot be set freely, and
 the bound on it turns out to depend on the precisions, which is the first sign of
 something the rest of the course keeps running into.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Local stability of an Euler step</span></div><p>Write $d^{*}$ for the peak, the same point the earlier sections called $\hat d$,
-and $e_k = d_k - d^{*}$ for the error at step $k$. Both symbols refer to the same local maximum. Near
-the peak, expand the gradient to first order. Since $\ell'(d^{*}) = 0$ by
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">Local stability of an Euler step</span></div><p>Let $\hat d$ be the peak, as in the earlier sections, and write
+$e_k = d_k - \hat d$ for the error at step $k$. Near
+the peak, expand the gradient to first order. Since $\ell'(\hat d) = 0$ by
 definition of the peak,</p>
-<div class="eqn"><div class="eqbody">$$\ell'(d_k) \;\approx\; \ell'(d^{*}) + \ell''(d^{*})\,e_k
-\;=\; \ell''(d^{*})\,e_k .$$</div></div>
+<div class="eqn"><div class="eqbody">$$\ell'(d_k) \;\approx\; \ell'(\hat d) + \ell''(\hat d)\,e_k
+\;=\; \ell''(\hat d)\,e_k .$$</div></div>
 <p>Substituting into the discrete update $d_{k+1} = d_k + \eta\,\ell'(d_k)$
-and subtracting $d^{*}$ from both sides:</p>
-<div class="eqn"><div class="eqbody">$$e_{k+1} \;\approx\; e_k + \eta\,\ell''(d^{*})\,e_k \;=\; \big(1 + \eta\,\ell''(d^{*})\big)\,e_k .$$</div></div>
+and subtracting $\hat d$ from both sides:</p>
+<div class="eqn"><div class="eqbody">$$e_{k+1} \;\approx\; e_k + \eta\,\ell''(\hat d)\,e_k \;=\; \big(1 + \eta\,\ell''(\hat d)\big)\,e_k .$$</div></div>
 <p>The error is multiplied by a fixed factor each step, so it shrinks precisely when
 that factor is less than one in magnitude:</p>
-<div class="eqn"><div class="eqbody">$$\big|\,1 + \eta\,\ell''(d^{*})\,\big| \;<\; 1 .$$</div></div>
-<p>At a maximum $\ell'' < 0$, so writing $|\ell''|$ for its magnitude the
-condition is $-1 < 1 - \eta|\ell''| < 1$, and the right inequality holds for
-any $\eta > 0$. The left one gives</p>
-<div class="eqn" id="eq-eta-bound"><div class="eqbody">$$\eta \;<\; \frac{2}{|\ell''(d^{*})|} .$$</div><div class="eqno"><a href="#eq-eta-bound" title="Link to equation 2.3.9">(2.3.9)</a></div></div></div>
+<div class="eqn"><div class="eqbody">$$\big|\,1 + \eta\,\ell''(\hat d)\,\big| \;&lt;\; 1 .$$</div></div>
+<p>At a maximum $\ell'' &lt; 0$, so writing $|\ell''|$ for its magnitude the
+condition is $-1 &lt; 1 - \eta|\ell''| &lt; 1$, and the right inequality holds for
+any $\eta &gt; 0$. The left one gives</p>
+<div class="eqn" id="eq-eta-bound"><div class="eqbody">$$\eta \;&lt;\; \frac{2}{|\ell''(\hat d)|} .$$</div><div class="eqno"><a href="#eq-eta-bound" title="Link to equation 2.3.9">(2.3.9)</a></div></div></div>
 <p>This is a local condition near a nondegenerate maximum. If
-$0<\eta|\ell''|<1$, the linearised error decreases without changing sign.
-If $1<\eta|\ell''|<2$, it alternates in sign while decreasing. At the boundary
+$0&lt;\eta|\ell''|&lt;1$, the linearised error decreases without changing sign.
+If $1&lt;\eta|\ell''|&lt;2$, it alternates in sign while decreasing. At the boundary
 $\eta|\ell''|=2$, the linearisation has multiplier $-1$, and higher-order terms
 are needed to determine the nonlinear behaviour. Above it the fixed point is
 locally unstable.</p>
 <p>For the worked mode, the curvature is $-3.013$ and the local upper
 bound is $0.664$. The chosen rate $0.05$ satisfies it.
 That does not guarantee convergence from every starting point or keep every step
-inside $d>0$. Both need checking separately.</p>
+inside $d&gt;0$. Both need checking separately.</p>
 <p>The numbers here come from differentiating <a class="eqref" href="#eq-gradient-eps">(2.3.6)</a> a second time, which
 is done in full as the first exercise of Lesson&nbsp;4, once the notation for the
 precisions is in place. What matters now is not the formula but that
@@ -562,7 +565,7 @@ $\ell''$ depends on $\Sigma_u$, so the bound moves when the ear changes.</p>
 <p>Now sharpen the ear. Take $\Sigma_u = 0.01$, ten times more precise.
 The peak moves to $1.4261$, nearer what the data alone would say, and
 the curvature there stiffens to $-47.34$. The bound collapses to
-$\eta < 0.0423$, and the rate that worked before is now above it.
+$\eta &lt; 0.0423$, and the rate that worked before is now above it.
 Set the widget's sensory variance to $0.01$ and leave the rate at
 $0.05$: the estimate stops converging and cycles between
 $1.3493$ and $1.5824$, straddling the peak at $1.4261$
@@ -571,16 +574,24 @@ and never landing on it.</p>
 stability issue. It is not, by itself, evidence that a continuous biological
 inference process becomes unstable when sensory precision increases.</p>
 <div class="box exercise"><div class="boxhd">Exercise 2.3.1<span class="bt">Reading the balance condition</span></div><p><a class="eqref" href="#eq-balance">(2.3.8)</a> says the estimate settles where $\varepsilon_p = -g'(d)\varepsilon_u$.
-Here $g' < 0$ everywhere, since intensity falls with distance. Use this to
+Here $g' &lt; 0$ everywhere, since intensity falls with distance. Use this to
 determine, without computing anything, whether the MAP estimate lies above or
 below the prior location, given that the animal heard a louder sound than the prior
-predicted.</p><details><summary>Solution</summary><p>Louder than predicted means $u > g(d_p)$, so at $d = d_p$ we have
-$\varepsilon_u > 0$. Since $g' < 0$, the sensory term $g'(d)\varepsilon_u$ is
+predicted.</p><details><summary>Solution</summary><p>Louder than predicted means $u &gt; g(d_p)$, so at $d = d_p$ we have
+$\varepsilon_u &gt; 0$. Since $g' &lt; 0$, the sensory term $g'(d)\varepsilon_u$ is
 negative, and the gradient at the starting point is negative, so $d$ decreases.</p>
-<p>It keeps decreasing while the gradient stays negative. At the resting point
-<a class="eqref" href="#eq-balance">(2.3.8)</a> gives $\varepsilon_p = -g'\varepsilon_u$, and with $g' < 0$ and
-$\varepsilon_u$ still positive the right-hand side is positive, so
-$\varepsilon_p > 0$, which means $d_p - \hat d > 0$, so $\hat d < d_p$.</p>
+<p>That gives the direction of the first step, not where the estimate stops. To
+place the resting point, show that the gradient is negative at every
+$d \ge d_p$. There the prior term $(d_p - d)/\Sigma_p$ is at most zero. Because
+$g$ is decreasing, $g(d) \le g(d_p) &lt; u$, so
+$\varepsilon_u = (u - g(d))/\Sigma_u &gt; 0$, and with $g'(d) &lt; 0$ the sensory term
+$g'(d)\,\varepsilon_u$ is strictly negative. The gradient is the sum of a term at
+most zero and a negative term, so it is negative for every $d \ge d_p$. No
+stationary point lies there, and the MAP estimate satisfies $\hat d &lt; d_p$.</p>
+<p>This also fixes the sign of the sensory error at the resting point, which the
+balance condition alone does not. There $\varepsilon_p = (d_p - \hat d)/\Sigma_p &gt; 0$,
+and <a class="eqref" href="#eq-balance">(2.3.8)</a> gives $-g'(\hat d)\,\varepsilon_u = \varepsilon_p &gt; 0$; with
+$g'(\hat d) &lt; 0$ this forces $\varepsilon_u &gt; 0$ at $\hat d$ as well.</p>
 <p>The estimate ends below the prior location, as it must: a loud sound is evidence of a
 near source. Confirming with the figures, $\hat d = 1.5500$ against a
 prior location of $2.0$.</p></details></div>

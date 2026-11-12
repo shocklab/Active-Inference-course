@@ -191,7 +191,11 @@ correctness audit and a depth audit (`handoffs/audits/2026-11-09-week03-*.md`).*
 - Sources: Bogacz (2017) §2.4–2.5, §5.1 **[read]**; Buckley et al. (2017) §1, §8.4
   **[read]**.
 
-### Week 4 · Variational free energy — **the pivot of the course**
+### Week 4 · Variational free energy — **the pivot of the course** — **built**
+*Drafted 2026-11-12: five lessons (bounding surprise; mean-field and messages; the
+Laplace approximation; learning by EM; the two-cause model) and a problems page, with
+NumPy and JAX notebooks, checked by a correctness audit and two rechecks. The two-cause
+lesson is the mean-field failure demo below.*
 - Jensen's inequality and the bound on surprise, in full.
 - The three decompositions, each derived line by line, with what each is for:
   energy minus entropy · complexity minus accuracy · divergence minus evidence.
@@ -333,7 +337,9 @@ correctness audit and a depth audit (`handoffs/audits/2026-11-09-week03-*.md`).*
   scheme. The outline previously said "variational message passing" here, which named
   the wrong member of the family.
   Sources: Parr, Marković, Kiebel & Friston (2019), *Sci. Rep.* 9:1889,
-  doi:10.1038/s41598-018-38246-3; Smith, Friston & Whyte §2.3.
+  doi:10.1038/s41598-018-38246-3; Smith, Friston & Whyte §2.3. Parr et al. (2019) was
+  read only far enough to check Week 4's one-paragraph forward reference to it; read it
+  in full before deriving the marginal scheme here.
 - **The prediction-error formulation** *(audit gap 2)*. The discrete update rewritten
   as prediction errors, which is the explicit bridge back to Week 5. Without this the
   two halves of the course never meet. Source: Smith, Friston & Whyte §2.4.

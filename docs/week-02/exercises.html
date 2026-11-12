@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -403,7 +406,7 @@ $|g'| = 2/d^3$ also decays, but as a power, so it retains some sensitivity at
 every finite distance. Both remain nonzero at every finite positive distance, although their rates of decay differ.</p>
 <p>(c) With a flat prior the first term is absent and the resting point needs
 $e^{-d/L}(u - e^{-d/L}) = 0$. The exponential is never zero, so $e^{-d/L} = u$,
-giving $\hat d = -L\ln u$ provided $0 < u < 1$. This is a maximum-likelihood estimate. A uniform prior over the positive half-line is improper and, here, does not produce a normalisable posterior because the likelihood tends to a positive constant.</p>
+giving $\hat d = -L\ln u$ provided $0 &lt; u &lt; 1$. This is a maximum-likelihood estimate. A uniform prior over the positive half-line is improper and, here, does not produce a normalisable posterior because the likelihood tends to a positive constant.</p>
 <p>With a Gaussian prior the condition becomes
 $\Pi_p(d_p - d) = \tfrac{\Pi_u}{L}e^{-d/L}(u - e^{-d/L})$, which sets a linear
 function of $d$ equal to a combination of $e^{-d/L}$ and $e^{-2d/L}$. A numerical method can solve the resulting transcendental equation; we do not claim that every non-flat prior prevents an analytic solution.</p></details></div>
@@ -479,7 +482,7 @@ and the estimate approaches whatever satisfies $g(\hat d) = \bar u$: the prior
 washes out, which is the usual asymptotic story and here it is visible directly
 in the gradient.</p>
 <p>For the step size, the curvature acquires a term $-n\Pi_u g'^2$, growing linearly
-in $n$, so the bound $\eta < 2/|\ell''|$ falls off like $1/n$. More data
+in $n$, so the bound $\eta &lt; 2/|\ell''|$ falls off like $1/n$. More data
 makes the peak sharper and the ascent stiffer, which is the same trade the
 precision slider showed in Lesson&nbsp;3.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 2.5.4<span class="bt">Sequential listening</span></div><p>Instead of collecting $n$ readings and processing them together, the animal
@@ -534,7 +537,7 @@ is the first serious cost of the move made in Lesson&nbsp;3. Trading the whole
 posterior for its peak was cheap when there was one peak. A distribution with two
 modes has something to say that no single number can carry, and reporting
 $3.7234$ conceals the existence of $0.8817$ entirely.
-Week&nbsp;4's $Q$ is a distribution rather than a point in part for this reason,
+<a href="../week-04/index.html">Week&nbsp;4</a>'s $Q$ is a distribution rather than a point in part for this reason,
 though a unimodal $Q$ will turn out to have its own version of the problem.</p></details></div>
 <div class="box exercise"><div class="boxhd">Exercise 2.5.6<span class="bt">The mode moves when you rename the axis &dagger;</span></div><p>The animal could equally well estimate $\rho = \ln d$, the log-distance, which
 describes the same physical situation in different coordinates.</p>
@@ -597,7 +600,11 @@ Across a factor of four in distance, the information the ear carries about that
 distance falls by a factor of $4^6 = 4096$. Far away, the animal is nearly blind
 however good its ear, for fixed sensory precision. At any finite positive distance, increasing $\Pi_u$ can compensate; maintaining fixed state precision here requires it to grow as $d^6$.</p>
 <p>(c) The measurement becomes $\ln u$, whose predicted value is
-$\ln g(d) = -2\ln d$, with derivative $-2/d$. The sensitivity is now $4\Pi/d^2$
+$\ln g(d) = -2\ln d$, with derivative $-2/d$. Write $\Pi_{\ln u}$ for the
+precision of the new noise, the inverse of its fixed variance in log-intensity
+units. This is a different quantity from $\Pi_u$, and it is not the posterior
+precision. By the result of (a), with $-2/d$ in place of $g'$, the sensory
+channel now contributes $(-2/d)^2\Pi_{\ln u} = 4\Pi_{\ln u}/d^2$
 rather than $4\Pi_u/d^6$: it still decays, but as an inverse square rather than
 an inverse sixth power.</p>
 <p>Compressing the sensory scale has spread the discriminable range out. This is a different noise model: constant noise in log intensity corresponds to signal-dependent noise in linear intensity. Merely transforming an already-recorded observation invertibly would not create information; changing the physical measurement noise can change it.</p></details></div>
@@ -615,9 +622,9 @@ posterior probability of that state. Thus</p>
 <p>For leaving, the loss is state-independent, so its expectation is its fixed
 cost: two for A and five for B. Minimising expected loss makes A leave and B
 stay. Their beliefs agree; their action costs differ.</p>
-<p>More generally, let $p$ be the hazard probability, $c_H>0$ the loss of staying
+<p>More generally, let $p$ be the hazard probability, $c_H&gt;0$ the loss of staying
 in the hazardous state and $c_L$ the fixed cost of leaving. Leaving is preferable
-when $c_L<pc_H$, or $p>c_L/c_H$. For these animals the thresholds are
+when $c_L&lt;pc_H$, or $p&gt;c_L/c_H$. For these animals the thresholds are
 $0.20$ and $0.50$.</p></div>
 <figure class="widget" id="fig-2-5-1"><div class="wmount" data-widget="posterior-decisions"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 2.5.1.</span> Both animals share the hazard probability. Move it and compare expected losses for staying and leaving. Equal expected losses are displayed as a tie. This is a Bayesian decision example, not yet an expected-free-energy policy rule.</figcaption></figure>
 <p>The same distinction applies to distance estimation. If a reported distance $b$
@@ -634,7 +641,23 @@ amount. Why is reporting the mode not automatically justified?</p><details><summ
 of the report across possible true distances. We must specify the asymmetric
 loss, average it under the posterior, and minimise that expected loss. Changing
 the cost of underestimation can change the optimal report while leaving the
-posterior unchanged.</p></details></div>
+posterior unchanged.</p>
+<p>For a concrete case, charge $c_2&gt;0$ per unit of underestimate and $c_1&gt;0$ per
+unit of overestimate:</p>
+<div class="eqn"><div class="eqbody">$$R(b)=\mathbb E\big[c_1(b-d)\,\mathbf 1\{d&lt;b\}+c_2(d-b)\,\mathbf 1\{d&gt;b\}\big]
+=c_1\int_{0}^{b}(b-d)\,p(d)\,\mathrm d d+c_2\int_{b}^{\infty}(d-b)\,p(d)\,\mathrm d d ,$$</div></div>
+<p>with $p$ the posterior density and $\Phi$ its cumulative distribution function, as in Lesson&nbsp;2.
+Differentiate under each integral. The integrands vanish at $d=b$, so the
+moving limits contribute nothing, and the derivatives of the integrands with
+respect to $b$ are $c_1\,p(d)$ and $-c_2\,p(d)$:</p>
+<div class="eqn"><div class="eqbody">$$R'(b)=c_1\Phi(b)-c_2\big[1-\Phi(b)\big]=(c_1+c_2)\Phi(b)-c_2 .$$</div></div>
+<p>$R'$ increases with $b$, from $-c_2$ to $c_1$, so $R$ is minimised at the
+report $\hat b$ where $R'(\hat b)=0$:</p>
+<div class="eqn"><div class="eqbody">$$\Phi(\hat b)=\frac{c_2}{c_1+c_2}.$$</div></div>
+<p>The best report is the $c_2/(c_1+c_2)$ quantile of the posterior. Equal costs
+give the median. Making underestimates costlier raises $c_2$, and the report
+moves up the posterior towards larger distances. Nothing in this calculation
+refers to the mode.</p></details></div>
 <p>Week&nbsp;10 introduces a particular objective for policies, involving preferences
 and expected information gain. Its relation to decision losses must be derived;
 it cannot be inferred merely from using Bayesian beliefs.</p>

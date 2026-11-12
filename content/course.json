@@ -32,7 +32,7 @@
       "n": 4,
       "part": "I. Inference",
       "title": "Variational free energy",
-      "summary": "The heart of the course. Jensen’s inequality, the bound on surprise, and the three decompositions of free energy written out line by line."
+      "summary": "Jensen’s inequality and the bound on surprise, the three decompositions of free energy, mean-field and Laplace approximations, and learning by expectation maximisation, with a two-cause model on which mean-field learning goes wrong."
     },
     {
       "n": 5,

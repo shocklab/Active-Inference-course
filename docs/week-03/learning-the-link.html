@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -467,7 +470,7 @@ which is the derivative in $d$ of $-\big(u - \theta_{\downarrow}h(d)\big)^2/(2\S
 So the loop climbs the log joint of a model with power $\theta_{\downarrow}$ and sensory
 variance $\Sigma_{\mathrm{eff}}$ in place of $\Sigma_u$, and settles at that model's mode,
 which need not equal the mode of the model the animal is meant to hold. (The two
-coincide when $d_p > 0$ on a trial with $u = \theta_{\downarrow}/d_p^2$, where both errors vanish at
+coincide when $d_p &gt; 0$ on a trial with $u = \theta_{\downarrow}/d_p^2$, where both errors vanish at
 $d = d_p$ whatever the sensory variance.) A mismatch between the two
 strengths acts as a mis-set sensory variance, and because learning adds the same
 amount to both, the ratio $\theta_{\downarrow}/\theta_{\uparrow}$, and with it
@@ -483,12 +486,18 @@ enforces.</p></div>
 $\varepsilon_u h(\hat d)$, which weights each trial's sensory error by the link shape at
 its estimate. It is not a condition on the sensory error alone, nor on the prior
 error. Trials with near sources have large $h(\hat d)$ and count for more.</p>
+<p>The slow update of Lesson&nbsp;1 changes $\theta$ by adding $\beta\,\varepsilon_u h(\hat d)$, and nothing in the step keeps $\theta$
+positive: a trial with a large negative sensory error and a near estimate can carry
+it below zero, where $g$ predicts a negative sound level for every distance. The
+simulations refuse such a step. $\theta$ keeps its value on that trial, and the widget
+counts the trial in a row labelled "updates withheld". No update is withheld in the
+runs this lesson quotes.</p>
 <p>The widget below sets up a world whose sources are twice as powerful as the animal
 believes, $\theta^{*} = 2$ against the animal's starting
 $\theta = 1$, with every other parameter as in Week&nbsp;2. It shows the
 learned power across trials and the running averages of the two errors and of the
 learning signal over the last $200$ trials.</p>
-<figure id="fig-3-3-2"><div class="widget" data-widget="wrong-link"></div><figcaption><span class="fno">Figure 3.3.2.</span> A world louder than the animal's model. Left, the learned source power across trials, against the true value. Right, the averages of the prior error, the sensory error and the learning signal over a window of recent trials. With learning switched off, the power stays at its starting value and the averages show what the mismatch does to inference alone.</figcaption></figure>
+<figure class="widget" id="fig-3-3-2"><div class="wmount" data-widget="wrong-link"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 3.3.2.</span> A world louder than the animal's model. Left, the learned source power across trials, against the true value. Right, the averages of the prior error, the sensory error and the learning signal over a window of recent trials. With learning switched off, the power stays at its starting value and the averages show what the mismatch does to inference alone.</figcaption></figure>
 <p>With learning off, over the last $200$ of $2000$ trials the average
 sensory error is $-0.035$, close to zero, and the average prior error is
 $0.646$. Sounds come in louder than the animal's model predicts for
@@ -533,11 +542,11 @@ overshoots the power, by $12.0$ per cent.</p>
 <h2 id="three-parameters-that-cannot-be-told-apart"><span class="secno">4</span>Three parameters that cannot be told apart</h2>
 <p>The widget learns $\theta$ alone. Learning $\theta$, $d_p$ and $\Sigma_p$ together runs
 into a problem that no learning rule can solve, because it is a property of the model.</p>
-<div class="box derivation"><div class="boxhd">Derivation<span class="bt">A rescaling the evidence cannot see</span></div><p>Take any $c > 0$ and define $d' = c\,d$. If $d$ has the truncated prior with location
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">A rescaling the evidence cannot see</span></div><p>Take any $c &gt; 0$ and define $d' = c\,d$. If $d$ has the truncated prior with location
 $d_p$ and variance $\Sigma_p$, then $d'$ has a truncated Gaussian prior with location
 $c\,d_p$ and variance $c^{2}\Sigma_p$: a positive multiple of a Gaussian is Gaussian
-with the mean and standard deviation multiplied by $c$, and $d > 0$ exactly when
-$d' > 0$. The prediction in terms of $d'$ is</p>
+with the mean and standard deviation multiplied by $c$, and $d &gt; 0$ exactly when
+$d' &gt; 0$. The prediction in terms of $d'$ is</p>
 <div class="eqn"><div class="eqbody">$$\frac{\theta}{d^{2}} \;=\; \frac{\theta}{(d'/c)^{2}} \;=\; \frac{c^{2}\theta}{d'^{2}} .$$</div></div>
 <p>So the model with parameters $(\theta, d_p, \Sigma_p)$ and the model with
 $(c^{2}\theta,\ c\,d_p,\ c^{2}\Sigma_p)$ generate the same distribution of $u$: the
@@ -556,26 +565,41 @@ sound alone how far away sources are in metres.</p>
 is not indifferent.</p>
 <div class="box derivation"><div class="boxhd">Derivation<span class="bt">The settled log joint along the rescaling</span></div><p>The prior density of $d' = c\,d$ at $c\,d$ is the density of $d$ at $d$ divided by $c$,
 since $\mathrm dd' = c\,\mathrm dd$, and the likelihood is unchanged because the
-prediction is. So the log joint of the rescaled model at $c\,d$ is $\ell(d) - \ln c$.
-Maximising over $d$ is the same as maximising over $c\,d$, so</p>
-<div class="eqn"><div class="eqbody">$$\hat\ell\big(u;\ c^{2}\theta,\ c\,d_p,\ c^{2}\Sigma_p\big) \;=\; \hat\ell\big(u;\ \theta, d_p, \Sigma_p\big) \;-\; \ln c .$$</div></div>
-<p>Differentiate with respect to $c$ at $c = 1$. The chain rule gives the parameters'
-rates of change $2\theta$, $d_p$ and $2\Sigma_p$, so</p>
-<div class="eqn" id="eq-scale-id"><div class="eqbody">$$2\theta\,\frac{\partial\hat\ell}{\partial\theta} \;+\; d_p\,\frac{\partial\hat\ell}{\partial d_p}
-\;+\; 2\Sigma_p\,\frac{\partial\hat\ell}{\partial\Sigma_p} \;=\; -1$$</div><div class="eqno"><a href="#eq-scale-id" title="Link to equation 3.3.4">(3.3.4)</a></div></div>
-<p>for every observation.</p></div>
-<p>At Week&nbsp;2's observation the left-hand side of <a class="eqref" href="#eq-scale-id">(3.3.4)</a>, by finite
-differences, is $-1.000000$, and $\hat\ell$ falls from
+prediction is. So, for every $d &gt; 0$ and every $c &gt; 0$, the log joint satisfies</p>
+<div class="eqn" id="eq-scale-joint"><div class="eqbody">$$\ell\big(c\,d,\ u;\ c^{2}\theta,\ c\,d_p,\ c^{2}\Sigma_p\big) \;=\; \ell\big(d,\ u;\ \theta, d_p, \Sigma_p\big) \;-\; \ln c .$$</div><div class="eqno"><a href="#eq-scale-joint" title="Link to equation 3.3.4">(3.3.4)</a></div></div>
+<p>Both sides are smooth in $c$. Differentiate with respect to $c$ at $c = 1$, holding
+$d$ fixed. On the left the chain rule gives the rates of change $d$, $2\theta$, $d_p$
+and $2\Sigma_p$ of the four arguments; on the right $\ln c$ has derivative $1$. So</p>
+<div class="eqn"><div class="eqbody">$$d\,\frac{\partial\ell}{\partial d} \;+\; 2\theta\,\frac{\partial\ell}{\partial\theta}
+\;+\; d_p\,\frac{\partial\ell}{\partial d_p} \;+\; 2\Sigma_p\,\frac{\partial\ell}{\partial\Sigma_p} \;=\; -1$$</div></div>
+<p>at every $d$. At a stationary point $\hat d$ the first term is zero, which leaves</p>
+<div class="eqn" id="eq-scale-id"><div class="eqbody">$$2\theta\,\frac{\partial\ell}{\partial\theta} \;+\; d_p\,\frac{\partial\ell}{\partial d_p}
+\;+\; 2\Sigma_p\,\frac{\partial\ell}{\partial\Sigma_p} \;=\; -1
+\qquad\text{at } d = \hat d ,$$</div><div class="eqno"><a href="#eq-scale-id" title="Link to equation 3.3.5">(3.3.5)</a></div></div>
+<p>for every observation. The partial derivatives here are those of the log joint
+$\ell$ evaluated at $\hat d$, which are the learning signals the point rules use.</p>
+<p>Maximising over $d$ is the same as maximising over $c\,d$, so <a class="eqref" href="#eq-scale-joint">(3.3.4)</a> also
+gives $\hat\ell(u;\ c^{2}\theta,\ c\,d_p,\ c^{2}\Sigma_p) = \hat\ell(u;\ \theta, d_p, \Sigma_p) - \ln c$
+for the settled log joint. Where $\hat d$ lies on a smooth branch of strict maxima,
+as Lesson&nbsp;1 assumes, the envelope result there turns each $\partial\ell/\partial\omega$
+at $\hat d$ into $\partial\hat\ell/\partial\omega$, and <a class="eqref" href="#eq-scale-id">(3.3.5)</a> holds for
+$\hat\ell$ too. Where two maxima of equal height tie, $\hat\ell$ as a function of the
+parameters can have a corner, and its separate partial derivatives need not exist.
+<a class="eqref" href="#eq-scale-id">(3.3.5)</a> still holds at each of the tied maxima, and $\hat\ell$ still falls by
+exactly $\ln c$ along the rescaling.</p></div>
+<p>At Week&nbsp;2's observation the maximum is strict and the branch smooth, and the
+left-hand side of <a class="eqref" href="#eq-scale-id">(3.3.5)</a>, by finite differences of $\hat\ell$, is
+$-1.000000$. $\hat\ell$ falls from
 $-0.7999$ to $-1.4931$ at $c = 2$, a drop of
-$\ln 2$. Since <a class="eqref" href="#eq-scale-id">(3.3.4)</a> holds on every trial, it holds for the drifts
-too, so the three drifts can never vanish together: learning all three by this rule
-has no resting point. Every trial pushes the parameters towards smaller $c$, and
-$\hat\ell$ grows without bound as $c \to 0$.</p>
+$\ln 2$. Since <a class="eqref" href="#eq-scale-id">(3.3.5)</a> holds for the learning signals on every
+trial, it holds for their averages, the drifts, so the three drifts can never vanish
+together: learning all three by this rule has no resting point. Every trial pushes
+the parameters towards smaller $c$, and $\hat\ell$ grows without bound as $c \to 0$.</p>
 <div class="box warning"><div class="boxhd">Careful<span class="bt">Identifiability</span></div><p>A parameter that the evidence does not determine is <strong>unidentifiable</strong>. Updates that
 follow the evidence do not fail visibly along such a direction: they wander along it,
 or settle wherever the start and the noise leave them, and the learned values look
 like answers. Updates that follow the settled log joint, as this week's do, are worse
-off: <a class="eqref" href="#eq-scale-id">(3.3.4)</a> gives them a steady push along the direction, towards a sharper
+off: <a class="eqref" href="#eq-scale-id">(3.3.5)</a> gives them a steady push along the direction, towards a sharper
 and nearer prior and a quieter source. An agent whose distances have to mean
 something, because it must reach the source, needs a second signal that fixes the
 scale, such as the time it takes to get there. Each widget in this week learns one
@@ -595,11 +619,11 @@ link is wrong by a factor of two. Explain, using <a class="eqref" href="#eq-stat
 is nonetheless positive. Then make the world quieter than the model,
 $\theta^{*} = 0.5$, predict the sign of the learning signal, and check it
 and the two simple error averages in the notebook. Does every world with
-$\theta^{*} < \theta$ give the sign you predicted?</p><details><summary>Solution</summary><p>The learning signal weights each trial's sensory error by $h(\hat d) = 1/\hat d^{2}$.
+$\theta^{*} &lt; \theta$ give the sign you predicted?</p><details><summary>Solution</summary><p>The learning signal weights each trial's sensory error by $h(\hat d) = 1/\hat d^{2}$.
 In a world louder than the model, the trials with the loudest sounds are inferred as
 the nearest sources, so they have the largest $h(\hat d)$. On those trials the prior
 pulls the estimate back towards $d_p$, the estimate is farther than the sound alone
-would say, and the prediction falls short of the sound: $\varepsilon_u > 0$. On distant
+would say, and the prediction falls short of the sound: $\varepsilon_u &gt; 0$. On distant
 trials the opposite happens with small weight. The simple average of $\varepsilon_u$
 can cancel while the weighted one does not.</p>
 <p>At $\theta^{*} = 0.5$ the same argument with the signs reversed suggests a

@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -391,7 +394,11 @@ Again, by the product rule,</p>
 <div class="eqn"><div class="eqbody">$$\frac{\partial^2 N}{\partial x^2} \;=\; -\frac{1}{\Sigma_p}N \;+\; \frac{(x - d_p)^2}{\Sigma_p^2}N
 \;=\; 2\,\frac{\partial N}{\partial \Sigma_p} .$$</div></div>
 <p>So $\partial N/\partial\Sigma_p = \tfrac12\,\partial^2 N/\partial x^2$, the heat
-equation with the variance in the role of time. Integrate over the half-line, and use
+equation with the variance in the role of time. Differentiating $Z_p$ under the
+integral sign is allowed here as it was for the location: for $\Sigma_p$ in a closed
+interval $[a, b]$ with $a &gt; 0$, the first display bounds $|\partial N/\partial\Sigma_p|$
+by $\big[(x - d_p)^2/(2a^2) + 1/(2a)\big](2\pi a)^{-1/2}e^{-(x - d_p)^2/(2b)}$, which is
+integrable on the half-line. Integrate over the half-line, and use
 $\partial N/\partial x \to 0$ as $x \to \infty$:</p>
 <div class="eqn" id="eq-dz-dvp"><div class="eqbody">$$\frac{\partial Z_p}{\partial \Sigma_p}
 \;=\; \frac12\int_0^\infty \frac{\partial^2 N}{\partial x^2}\,\mathrm dx
@@ -399,7 +406,7 @@ $\partial N/\partial x \to 0$ as $x \to \infty$:</p>
 \;=\; -\frac12\,\frac{\partial N}{\partial x}\bigg|_{x = 0}
 \;=\; -\frac{d_p}{2\Sigma_p}\,\mathcal N(0; d_p, \Sigma_p) .$$</div><div class="eqno"><a href="#eq-dz-dvp" title="Link to equation 3.2.3">(3.2.3)</a></div></div></div>
 <p>Widening the prior spreads mass in both directions, and the half that crosses zero
-is lost, so $Z_p$ falls when $d_p > 0$. At Week&nbsp;2's values
+is lost, so $Z_p$ falls when $d_p &gt; 0$. At Week&nbsp;2's values
 $\mathcal N(0; d_p, \Sigma_p) = 0.053991$, and <a class="eqref" href="#eq-dz-dvp">(3.2.3)</a> gives
 $-0.053991$; a finite-difference derivative of $Z_p$ agrees to eight decimal
 places, and the check is an assertion in this week's <code>values.py</code>. Both derivatives
@@ -431,8 +438,9 @@ $\varepsilon_u = 0.8379$, so the three derivatives are
 $-0.5052$, $-0.3435$ and $-4.6490$. Each agrees with
 a finite-difference derivative of <a class="eqref" href="#eq-ell">(3.2.1)</a> at the same point.</p>
 <h2 id="what-each-update-does"><span class="secno">3</span>What each update does</h2>
-<p><strong>The prior location</strong> moves opposite to the prior error, which means towards the
-inferred state: if the state was inferred below the prior location, $\varepsilon_p > 0$
+<h3 id="the-prior-location">The prior location</h3>
+<p>The prior location moves opposite to the prior error, which means towards the
+inferred state: if the state was inferred below the prior location, $\varepsilon_p &gt; 0$
 and $d_p$ falls. The term $-\zeta_p$ adds a steady push downwards that does not
 depend on the trial. The drift of Lesson&nbsp;1, the update averaged over the trials
 the process produces, vanishes where</p>
@@ -451,9 +459,10 @@ asserted in <code>values.py</code>.</p></div>
 the prior the animal holds. "The mean chases the inferred state" is the informal
 version, and the $\zeta_p$ term is what makes it the prior's actual mean rather
 than its location parameter.</p>
-<p><strong>The prior variance</strong> grows when <a class="eqref" href="#eq-grad-vp">(3.2.6)</a> is positive. Multiplying it by
+<h3 id="the-prior-variance">The prior variance</h3>
+<p>The prior variance grows when <a class="eqref" href="#eq-grad-vp">(3.2.6)</a> is positive. Multiplying it by
 $2\Sigma_p^2$, that is when</p>
-<div class="eqn"><div class="eqbody">$$(d - d_p)^2 \;>\; \Sigma_p\big(1 - d_p\zeta_p\big):$$</div></div>
+<div class="eqn"><div class="eqbody">$$(d - d_p)^2 \;&gt;\; \Sigma_p\big(1 - d_p\zeta_p\big):$$</div></div>
 <p>the squared distance between the inferred state and the prior location exceeds the
 spread the truncated prior actually has about $d_p$, which is
 $0.8895$ at Week&nbsp;2's values rather than $\Sigma_p = 1.0$. It
@@ -461,7 +470,8 @@ shrinks when the squared distance is smaller. The drift vanishes where</p>
 <div class="eqn"><div class="eqbody">$$\mathbb E_{P^*}\big[(\hat d - d_p)^2\big] \;=\; \Sigma_p\big(1 - d_p\zeta_p\big),$$</div></div>
 <p>and an exercise shows that the right-hand side is the truncated prior's own second
 moment about $d_p$, $0.889504$ at Week&nbsp;2's values.</p>
-<p><strong>The sensory variance</strong> grows when $\varepsilon_u^2 > \Pi_u$, that is when the
+<h3 id="the-sensory-variance">The sensory variance</h3>
+<p>The sensory variance grows when $\varepsilon_u^2 &gt; \Pi_u$, that is when the
 squared residual $(u - g(d))^2$ exceeds $\Sigma_u$, and its drift vanishes where</p>
 <div class="eqn" id="eq-stat-vu"><div class="eqbody">$$\mathbb E_{P^*}\big[(u - g(\hat d))^2\big] \;=\; \Sigma_u .$$</div><div class="eqno"><a href="#eq-stat-vu" title="Link to equation 3.2.9">(3.2.9)</a></div></div>
 <p>At Week&nbsp;2's observation the squared residual at the mode is
@@ -544,8 +554,8 @@ activity of one of the two units the connection joins.</p>
 <div class="box warning"><div class="boxhd">Careful<span class="bt">A variance near zero</span></div><p>The plain update $\Sigma_u \leftarrow \Sigma_u + \beta\,\partial\ell/\partial\Sigma_u$
 behaves badly when $\Sigma_u$ is small, because the gradient is not bounded there.</p>
 <p>On a trial with zero residual the step is $-\beta/(2\Sigma_u)$, and it carries the
-variance below zero whenever $\beta/(2\Sigma_u) > \Sigma_u$, that is whenever
-$\Sigma_u < \sqrt{\beta/2}$. With $\beta = 0.002$ that is any variance below
+variance below zero whenever $\beta/(2\Sigma_u) &gt; \Sigma_u$, that is whenever
+$\Sigma_u &lt; \sqrt{\beta/2}$. With $\beta = 0.002$ that is any variance below
 $0.0316$, and a negative variance has no meaning. On a trial with residual
 $\delta_u = 0.2$ and $\Sigma_u = 0.01$, the step is
 $\beta\cdot\tfrac12(0.2^2/0.01^2 - 1/0.01) = 0.3000$,
@@ -558,9 +568,12 @@ vanishes at the same value by <a class="eqref" href="#eq-grad-logvar">(3.2.10)</
 keeps the variance positive; it does not keep the steps small, since
 <a class="eqref" href="#eq-grad-logvar">(3.2.10)</a> still grows without bound as $\Sigma_u \to 0$ at a fixed nonzero
 residual. The simulations of this week use it for both variances. The other is to forbid small
-variances outright: Bogacz notes, in his section on learning model parameters, that Friston (2005) imposes a minimum
-value of one on the estimated variance, and in a footnote calls the constraint a
-hyperprior. Lesson&nbsp;4 derives a smooth version.</p>
+variances outright: Bogacz notes, in his section on learning model parameters, that
+<a href="https://doi.org/10.1098/rstb.2005.1622">Friston (2005)</a> imposes a minimum value of one
+on the estimated variance, and in a footnote calls the constraint a hyperprior. A fixed
+floor depends on the units of the observation: measuring $u$ in units $a$ times smaller
+gives $u' = a u$ and $\Sigma_u' = a^2\Sigma_u$, so the same floor of one excludes a
+different set of variances in each unit. Lesson&nbsp;4 derives a smooth version.</p>
 <p>Neither repair addresses why the variance is heading towards zero, which is
 sometimes the rule's fault rather than the step's. Lesson&nbsp;4 shows when.</p></div>
 <div class="box exercise"><div class="boxhd">Exercise 3.2.1<span class="bt">The second moment of the truncated prior</span></div><p>Show that $\int_0^\infty (x - d_p)^2 N(x)\,\mathrm dx / Z_p = \Sigma_p(1 - d_p\zeta_p)$,
@@ -594,7 +607,7 @@ $-\beta\delta_u^2/2$ holds only when $\delta_u^2 \gg 1/\Pi_u$, which is the oppo
 regime. The next precision is $\Pi_u + \tfrac{\beta}{2}(1/\Pi_u - \delta_u^2)$.
 Multiplying it by the positive number $2/(\beta\Pi_u)$ shows that it is negative
 exactly when</p>
-<div class="eqn"><div class="eqbody">$$\delta_u^2 \;>\; \frac{1}{\Pi_u} + \frac{2\Pi_u}{\beta} .$$</div></div>
+<div class="eqn"><div class="eqbody">$$\delta_u^2 \;&gt;\; \frac{1}{\Pi_u} + \frac{2\Pi_u}{\beta} .$$</div></div>
 <p>The right-hand side is large at both ends, so a negative precision needs a residual
 large compared with both the variance and $2\Pi_u/\beta$; a single outlier can supply
 one.</p>

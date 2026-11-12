@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -404,7 +407,7 @@ a grid stores values at chosen locations; samples represent an empirical
 distribution. Each makes different demands on memory and computation.</p>
 <p>This week begins with a point estimate because it lets us derive a compact
 update and examine what uncertainty it omits. It is a methodological choice.
-Week&nbsp;4 returns to distributions and makes their approximation error explicit.</p>
+<a href="../week-04/index.html">Week&nbsp;4</a> returns to distributions and makes their approximation error explicit.</p>
 <h2 id="a-prediction-error-implementation"><span class="secno">5</span>A prediction-error implementation</h2>
 <p>For a Gaussian prior and Gaussian observation noise, differentiating the log
 joint produces a sum of weighted residuals. <a href="../week-02/climbing.html">Lesson&nbsp;3</a> derives this result;

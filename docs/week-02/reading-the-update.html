@@ -337,8 +337,11 @@ document.addEventListener('DOMContentLoaded',function(){
     macros:{
       '\\E':'\\mathbb{E}','\\R':'\\mathbb{R}','\\KL':'D_{\\mathrm{KL}}',
       '\\given':'\\,|\\,','\\Cat':'\\mathrm{Cat}','\\Dir':'\\mathrm{Dir}',
-      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}','\\softmax':'\\sigma',
-      '\\ta':'\\tilde{s}'
+      '\\N':'\\mathcal{N}','\\H':'\\mathrm{H}',
+      // softmax is written out: the course reserves sigma for a standard
+      // deviation (notation.md), so a macro that printed sigma for softmax
+      // contradicted the notation page it serves.
+      '\\softmax':'\\operatorname{softmax}'
       // No '\\to' macro: it once mapped to \\tilde{o} and silently replaced the
       // standard arrow, so every "x \\to 0" on the site printed as "x õ 0".
     }
@@ -373,7 +376,7 @@ because the link has been made the identity, so that $u$ and $d$ carry the same
 units and the two precisions become the same kind of quantity. With a general
 $g$ the conversion costs a factor of $g'^2$, which the curvature exercise at the
 end works out.</p>
-<aside class="mn"><span class="mnl">Why not just say variance</span><p>Writing inverse variance as precision makes the multiplicative gain on an error signal explicit. Weeks&nbsp;5 to 8 make that gain a physical quantity that the
+<aside class="mn"><span class="mnl">Precision</span><p>Writing inverse variance as precision makes the multiplicative gain on an error signal explicit. Weeks&nbsp;5 to 8 make that gain a physical quantity that the
 system can adjust.</p></aside>
 <p>Rewriting <a class="eqref" href="#eq-recall">(2.4.1)</a>:</p>
 <div class="eqn" id="eq-precision-form"><div class="eqbody">$$\dot{d} \;=\; \nu\Big(\Pi_p\,(d_p - d) \;+\; \Pi_u\,g'(d)\,\big(u - g(d)\big)\Big).$$</div><div class="eqno"><a href="#eq-precision-form" title="Link to equation 2.4.3">(2.4.3)</a></div></div>
@@ -439,7 +442,7 @@ progressively less about distance, and the rule knows it without being told.</p>
 channel is, and once by $g'$, how informative this particular measurement is
 <em>here</em>. The first is a property of the ear. The second is a property of where the
 estimate currently sits, so it changes as the estimate moves.</p></div>
-<p>The sign matters too. $g' < 0$ everywhere, since intensity falls with distance,
+<p>The sign matters too. $g' &lt; 0$ everywhere, since intensity falls with distance,
 so a positive sensory error, louder than predicted, drives the estimate <em>down</em>.
 Had the link been $g(d) = d^2$, the same error would drive it up. The rule needs
 no separate knowledge of which way round the world works; the derivative carries
@@ -456,7 +459,7 @@ it.</p>
 by its precision, and the weights sum to one because they have been divided by
 their total.</p></div>
 <p>Setting the gradient to zero located the peak. It did not show that the whole
-posterior is Gaussian, and Week&nbsp;1 promised that it is, with its parameters
+posterior is Gaussian, and <a href="../week-01/index.html">Week&nbsp;1</a> promised that it is, with its parameters
 written down in two lines. Here are the two lines.</p>
 <div class="box derivation"><div class="boxhd">Derivation<span class="bt">The linear posterior is exactly Gaussian</span></div><p>Work with the exponent of the joint, dropping constants that do not contain $d$:</p>
 <div class="eqn"><div class="eqbody">$$\ln P(d)P(u\mid d) \;=\; -\tfrac{1}{2}\Pi_p (d - d_p)^2 \;-\; \tfrac{1}{2}\Pi_u (u - d)^2 \;+\; \text{const}.$$</div></div>
@@ -477,10 +480,45 @@ parameters straight off <a class="eqref" href="#eq-completed-square">(2.4.5)</a>
 average $m$, and the precision is $\Pi = \Pi_p + \Pi_u$. Precisions of independent
 sources add.</p>
 <p>Being Gaussian, it has no skew and its mode and mean coincide. The inverse-square example has a non-quadratic exponent. Restricting a Gaussian to a half-line can also introduce skewness; the widget shows this boundary effect separately.</p></div>
-<aside class="mn"><span class="mnl">Conjugacy, named</span><p>This is what Week&nbsp;1 called conjugacy: the posterior landed back in the
+<aside class="mn"><span class="mnl">Conjugacy</span><p>This is what Week&nbsp;1 called conjugacy: the posterior landed back in the
 prior's family, so the update changed two numbers and not the form. It is what
 lets the same update run over and over without the expression growing, and
 <a class="eqref" href="#eq-completed-square">(2.4.5)</a> is the whole of why it works here. For the inverse-square $g$, the exponent is not quadratic in $d$, so this Gaussian calculation no longer applies.</p></aside>
+<p>The same square also gives the evidence $P(u)$, which <a href="../week-01/the-denominator.html">Week&nbsp;1, Lesson&nbsp;5</a> said would be
+evaluated by completing it. That needs the constants the derivation above
+dropped, so keep them this time.</p>
+<div class="box derivation"><div class="boxhd">Derivation<span class="bt">The evidence of the linear model</span></div><p>With both normalising factors written out, and $d$ ranging over the whole real
+line,</p>
+<div class="eqn"><div class="eqbody">$$P(d)\,P(u\mid d) \;=\; \frac{1}{2\pi\sqrt{\Sigma_p\Sigma_u}}
+\exp\!\Big[-\tfrac{1}{2}\Pi_p (d - d_p)^2 - \tfrac{1}{2}\Pi_u (u - d)^2\Big].$$</div></div>
+<p>The derivation above showed that the exponent equals
+$-\tfrac{1}{2}\Pi(d-m)^2$ plus the terms that carry no $d$, which were
+$-\tfrac{1}{2}\big(\Pi_p d_p^2 + \Pi_u u^2 - \Pi m^2\big)$. Evaluate that
+bracket. Since $\Pi m = \Pi_p d_p + \Pi_u u$,</p>
+<div class="eqn"><div class="eqbody">$$\Pi\big(\Pi_p d_p^2 + \Pi_u u^2\big) - (\Pi m)^2
+\;=\; \Pi_p\Pi_u d_p^2 + \Pi_p\Pi_u u^2 - 2\Pi_p\Pi_u d_p u
+\;=\; \Pi_p\Pi_u (u - d_p)^2 ,$$</div></div>
+<p>the $\Pi_p^2 d_p^2$ and $\Pi_u^2 u^2$ terms cancelling. Dividing by $\Pi$, the
+bracket is $\Pi_p\Pi_u (u-d_p)^2/\Pi$, and</p>
+<div class="eqn"><div class="eqbody">$$\frac{\Pi_p\Pi_u}{\Pi_p + \Pi_u}
+\;=\; \frac{1}{\Sigma_p\Sigma_u}\cdot\frac{\Sigma_p\Sigma_u}{\Sigma_u + \Sigma_p}
+\;=\; \frac{1}{\Sigma_p + \Sigma_u}.$$</div></div>
+<p>So</p>
+<div class="eqn"><div class="eqbody">$$P(d)\,P(u\mid d) \;=\; \frac{1}{2\pi\sqrt{\Sigma_p\Sigma_u}}
+\exp\!\Big[-\frac{(u - d_p)^2}{2(\Sigma_p + \Sigma_u)}\Big]
+\exp\!\Big[-\tfrac{1}{2}\Pi (d - m)^2\Big].$$</div></div>
+<p>Only the last factor contains $d$. Its integral over the real line is the
+Gaussian integral $\int e^{-\Pi(d-m)^2/2}\,\mathrm{d}d = \sqrt{2\pi/\Pi}$, and
+$1/\Pi = \Sigma_p\Sigma_u/(\Sigma_p + \Sigma_u)$. Multiplying,</p>
+<div class="eqn"><div class="eqbody">$$\frac{1}{2\pi\sqrt{\Sigma_p\Sigma_u}}\sqrt{\frac{2\pi\,\Sigma_p\Sigma_u}{\Sigma_p + \Sigma_u}}
+\;=\; \frac{1}{\sqrt{2\pi(\Sigma_p + \Sigma_u)}},$$</div></div>
+<p>and therefore</p>
+<div class="eqn" id="eq-linear-evidence"><div class="eqbody">$$P(u) \;=\; \int_{-\infty}^{\infty} P(d)\,P(u\mid d)\,\mathrm{d}d
+\;=\; \mathcal{N}\big(u;\, d_p,\, \Sigma_p + \Sigma_u\big).$$</div><div class="eqno"><a href="#eq-linear-evidence" title="Link to equation 2.4.6">(2.4.6)</a></div></div>
+<p>Before any observation, $u$ is the sum of $d$ and an independent noise, so its
+mean is $d_p$ and its variance the sum of the two variances. At the lesson's
+values the formula gives $P(u = 0.5) = 0.136788$; integrating
+the joint numerically over $-6 &lt; d &lt; 8$ gives $0.136788$.</p></div>
 <p>Completing a square is an identity, so it can be checked rather than trusted.
 Divide the exact linear posterior by the claimed Gaussian on a fine grid: the
 quotient must be <em>constant</em> in $d$, not merely small. Over the whole grid that
@@ -497,13 +535,13 @@ $d_p = 2.0$, $u = 0.5$:</p>
 <p>with variance $1/(\Pi_p + \Pi_u) = 0.090909$.</p>
 <p>Checking that against quadrature on the same wide grid: the mode comes out at
 $0.636361$, the mean at $0.636364$, and the skew at
-$-8.8 \times 10^{-16}$, which is zero to machine precision. Mode and mean agree
+$1.3 \times 10^{-15}$, which is zero to machine precision. Mode and mean agree
 to five figures and part in the sixth. The algebra says they are equal exactly;
 the disagreement is the spacing of the grid the mode was read off, which the mean
 does not suffer because it is an integral over every point rather than the
 location of one.</p>
 <p>For the inverse-square model, the stationary equation is nonlinear. Multiply
-$\Pi_p(d_p-d)-2\Pi_ud^{-3}(u-d^{-2})=0$ by $d^5$, valid on $d>0$, to obtain</p>
+$\Pi_p(d_p-d)-2\Pi_ud^{-3}(u-d^{-2})=0$ by $d^5$, valid on $d&gt;0$, to obtain</p>
 <div class="eqn"><div class="eqbody">$$\Pi_p(d_pd^5-d^6)-2\Pi_uud^2+2\Pi_u=0.$$</div></div>
 <p>This polynomial has degree six. That does not prevent numerical root finding,
 and an optimisation method must still distinguish maxima from minima and check
@@ -512,7 +550,7 @@ choice of parameters.</p>
 <p>The nonlinear example uses a positive-distance prior from the outset. The linear
 comparison here has support on the real line, including negative values. Its
 negative mass is 1.7% for the chosen parameters. If we
-restrict it to $d>0$, it becomes a truncated Gaussian with different moments.
+restrict it to $d&gt;0$, it becomes a truncated Gaussian with different moments.
 The widget uses that positive domain, which explains why its linear mode and
 mean need not coincide.</p>
 <h2 id="the-circuit"><span class="secno">5</span>The circuit</h2>
@@ -568,7 +606,12 @@ of <a href="../week-02/two-rules.html">Lesson&nbsp;1</a>. Give each quantity a u
   <path d="M420 172 L420 96" fill="none" stroke="#3c3c42" stroke-width="1.6" marker-end="url(#ah)"/>
   <path d="M400 92 C330 126 240 100 176 78" fill="none" stroke="#2c5f8a" stroke-width="1.8" marker-end="url(#ahb)"/>
   <text x="306" y="112" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="13" fill="#2c5f8a">&#215; 1</text>
-</svg><figcaption><span class="fno">Figure 2.4.1.</span> The update of <a class="eqref" href="#eq-precision-form">(2.4.3)</a> drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. Arrow labels give what multiplies a signal in transit, so the sensory error returns scaled by $g'(d)$ and the prior error returns unchanged. The diagram assumes the required derivative and precisions are available. The final sum is multiplied by the mobility ν to give the continuous update.</figcaption></figure>
+
+  <text x="118" y="170" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="15" font-weight="600" fill="#3c3c42">&#8722;</text>
+  <text x="112" y="190" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="15" font-weight="600" fill="#3c3c42">+</text>
+  <text x="384" y="62" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="15" font-weight="600" fill="#3c3c42">&#8722;</text>
+  <text x="432" y="114" text-anchor="middle" font-family="'IBM Plex Sans',sans-serif" font-size="15" font-weight="600" fill="#3c3c42">+</text>
+</svg><figcaption><span class="fno">Figure 2.4.1.</span> The update of <a class="eqref" href="#eq-precision-form">(2.4.3)</a> drawn as a circuit. Filled nodes hold estimates, open nodes hold errors, and each error node applies its own precision as a gain. At each error node, $+$ marks the input it adds and $-$ the input it subtracts. Arrow labels give what multiplies a signal in transit, so the sensory error returns scaled by $g'(d)$ and the prior error returns unchanged. The diagram assumes the required derivative and precisions are available. The final sum is multiplied by the mobility ν to give the continuous update.</figcaption></figure>
 <p>Trace it. The estimate $d$ sends a prediction $g(d)$ down to the sensory error
 unit, which subtracts it from what the ear delivered. That unit's activity is the
 precision-weighted error $\varepsilon_u = \Pi_u(u - g(d))$, the weighting being
@@ -598,12 +641,12 @@ names.</p></div>
 <p>The circuit implements the gradient we derived. It presupposes a way to compute
 $g(d)$ and $g'(d)$, suitable error signals and known precisions. Its mathematical
 form alone is not evidence that cortex implements it.</p>
-<p>The update retains a point estimate. Week&nbsp;4 introduces distributions and asks
+<p>The update retains a point estimate. <a href="../week-04/index.html">Week&nbsp;4</a> introduces distributions and asks
 how their uncertainty can be represented. In several dimensions a Gaussian
 requires a covariance matrix, so communication and storage requirements change.
 Week&nbsp;5 examines that extension. <a href="../week-03/index.html">Week&nbsp;3</a> addresses learning model parameters
 rather than treating them as known.</p>
-<figure id="fig-2-4-2"><div class="widget" data-widget="precision-posterior"></div><figcaption><span class="fno">Figure 2.4.2.</span> Vary the two precisions and watch the posterior move. The mode is what the update of this lesson finds; the mean is what it does not.</figcaption></figure>
+<figure class="widget" id="fig-2-4-2"><div class="wmount" data-widget="precision-posterior"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 2.4.2.</span> Vary the two precisions and watch the posterior move. The mode is what the update of this lesson finds; the mean is what it does not.</figcaption></figure>
 <div class="box exercise"><div class="boxhd">Exercise 2.4.1<span class="bt">Where the curvature comes from</span></div><p>Lesson&nbsp;3 needed $\ell''$ to bound the step size. Differentiate
 <a class="eqref" href="#eq-precision-form">(2.4.3)</a> once more to get it, and evaluate the pieces at
 $\hat d = 1.5500$. You will need
