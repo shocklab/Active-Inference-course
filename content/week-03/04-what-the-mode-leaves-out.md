@@ -146,6 +146,9 @@ the posterior-averaged rule returns to the truth after a disturbance.
 
 ## The linear case
 
+Before reading on, try the problem [lesson:3.5|Repairing the point rule], which runs a
+creature in this section's world and asks for the averages derived below.
+
 In a linear Gaussian model every expectation can be done by hand, so the size of the
 bias can be computed exactly. Let the world draw $d$ from $\mathcal N(d_p, \Sigma_p^{*})$
 on the whole line, and let $u$ be $d$ plus noise of variance $\Sigma_u$, so that $u$

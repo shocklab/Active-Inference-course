@@ -1431,6 +1431,47 @@ assert V["sqdev_mode"] > V["sqdev_post"]
 # Sigma = (sum r^2 + n0 Sigma0) / (N + n0 + 2)
 V["hp_n0"], V["hp_s0"] = 4, 0.1
 
+# ── the interactive problem "Repairing the point rule" (w03-derive.js) ──
+# The linear world with Sigma_p^* = LIN_S and Sigma_u = LIN_VU_BAD, so that
+# 3 Sigma_u exceeds Sigma_p^*. Nights of EX_PER sounds; the creature counts as
+# deaf when its shrinkage factor ends a night below EX_DEAF.
+EX_SEED, EX_BETA, EX_NIGHTS, EX_PER, EX_DEAF = 2026, 0.01, 200, 20, 0.1
+
+
+def _ex_run(post):
+    """runField of w03-derive.js line for line: the point rule, or its target
+    plus the posterior variance. Returns the learned variance at the end of
+    each night and the night the creature went deaf (None if it did not)."""
+    r = mulberry32(EX_SEED)
+    x, nights, died = VAR_PRIOR, [], None
+    for i in range(EX_NIGHTS * EX_PER):
+        d = D_PRIOR + sqrt(LIN_S) * normal(r)
+        u = d + sqrt(LIN_VU_BAD) * normal(r)
+        dh = (LIN_VU_BAD * D_PRIOR + x * u) / (x + LIN_VU_BAD)
+        t = (dh - D_PRIOR) * (dh - D_PRIOR)
+        if post:
+            t = t + x * LIN_VU_BAD / (x + LIN_VU_BAD)
+        x = x * exp(EX_BETA * 0.5 * (t / x - 1.0))
+        if (i + 1) % EX_PER == 0:
+            nights.append(x)
+            if x / (x + LIN_VU_BAD) < EX_DEAF:
+                died = len(nights)
+                break
+    return nights, died
+
+
+_ex_pt, V["ex_died"] = _ex_run(False)
+_ex_po, _ex_po_died = _ex_run(True)
+assert V["ex_died"] is not None and _ex_po_died is None and len(_ex_po) == EX_NIGHTS
+V["ex_beta"], V["ex_nights"], V["ex_per"], V["ex_deaf"] = EX_BETA, EX_NIGHTS, EX_PER, EX_DEAF
+V["ex_sp_died"] = _ex_pt[-1]
+V["ex_k_died"] = _ex_pt[-1] / (_ex_pt[-1] + LIN_VU_BAD)
+V["ex_k_star"] = LIN_S / (LIN_S + LIN_VU_BAD)
+V["ex_fix_final"] = _ex_po[-1]
+V["ex_fix_k"] = _ex_po[-1] / (_ex_po[-1] + LIN_VU_BAD)
+V["ex_fix_mean"] = float(np.mean(_ex_po[EX_NIGHTS // 2:]))
+V["ex_npts"] = 24                      # hidden points per check, as in w03-derive.js
+
 VALUES = V
 
 

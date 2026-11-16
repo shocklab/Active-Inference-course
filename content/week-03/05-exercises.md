@@ -2,8 +2,9 @@
 title: Problems and code
 deck: Worked problems on learning rules, their stationary points, the missing term and the dynamics of learning.
 week: 3
-time: 100 min
+time: 120 min
 number_sections: false
+scripts: [w03-derive.js]
 ---
 
 Work the problems before opening the solutions. The ones marked with a dagger are
@@ -101,6 +102,138 @@ channel whose noise is less than three times the prior's spread has its variance
 learned all the way to zero: the more the prior can
 absorb, the less noise the rule sees. The model is symmetric in the two variances
 because $d$ and $u - d$ enter it in the same way.
+:::
+
+::: exercise Repairing the point rule
+A creature lives in the linear model of [lesson:3.4]. It knows $d_p$ and
+$\Sigma_u = {{lin_vu_bad}}$, and learns its prior variance by the point rule: on each
+sound it settles on the mode $\hat d$ and takes the log-variance step of [lesson:3.2],
+
+$$
+\Sigma_p \;\leftarrow\; \Sigma_p \exp\!\Big(\tfrac{\beta}{2}\Big(\frac{(\hat d - d_p)^2}{\Sigma_p} - 1\Big)\Big),
+$$
+
+with $\beta = {{ex_beta}}$, starting at $\Sigma_p = {{var_prior:.0f}}$, for up to
+{{ex_nights}} nights of {{ex_per}} sounds each. The step compares $(\hat d - d_p)^2$
+with $\Sigma_p$, and the drift of $\ln\Sigma_p$ vanishes where the average of
+$(\hat d - d_p)^2$ over the world equals $\Sigma_p$. The shrinkage factor
+$\Sigma_p/(\Sigma_p + \Sigma_u)$ of [lesson:3.4] is the fraction of each sound's
+deviation from $d_p$ that the mode follows; below {{ex_deaf}} the creature is counted
+deaf. The world's prior variance $\Sigma_p^{*}$ is hidden from it.
+
+Run the creature in the widget below, then look at the world it could not see.
+
+(a) Find $\mathbb E_{P^*}\!\left[(\hat d - d_p)^2\right]$ as a function of $\Sigma_p$,
+$\Sigma_p^{*}$ and $\Sigma_u$.
+
+(b) Find a term $c(\Sigma_p, \Sigma_u)$, built only from what the creature has, which,
+added to $(\hat d - d_p)^2$ in the step, makes the average of the sum equal $\Sigma_p$
+at $\Sigma_p = \Sigma_p^{*}$ in every world. Show that this condition determines $c$.
+
+The widget checks each answer at hidden values of the parameters. When (b) passes, it
+runs the creature again on the same sounds with your $c$ added on every sound.
+
+::: widget derive-missing-term | The point rule in a world the creature cannot see. Run it, reveal the world, derive the expected squared deviation of the mode and the term that makes the drift vanish at the truth, then run the creature again with that term.
+:::
+---solution---
+(a) By [lesson:3.4], the mode is the precision-weighted average
+
+$$
+\hat d - d_p \;=\; \frac{\Sigma_p}{\Sigma_p + \Sigma_u}\,(u - d_p),
+$$
+
+so
+
+$$
+(\hat d - d_p)^2 \;=\; \frac{\Sigma_p^2}{(\Sigma_p + \Sigma_u)^2}\,(u - d_p)^2 .
+$$
+
+The factor in front does not depend on the sound, so only $(u - d_p)^2$ is averaged.
+Split the deviation of the sound into the deviation of the source and the noise:
+
+$$
+\begin{aligned}
+(u - d_p)^2 &= \big((d - d_p) + (u - d)\big)^2 \\
+&= (d - d_p)^2 + (u - d)^2 \\
+&\quad + 2\,(d - d_p)(u - d) .
+\end{aligned}
+$$
+
+In the world, $d - d_p$ has mean zero and variance $\Sigma_p^{*}$, and the noise
+$u - d$ has mean zero and variance $\Sigma_u$ and is independent of $d$, so the cross
+term averages to $2\,\mathbb E_{P^*}[d - d_p]\,\mathbb E_{P^*}[u - d] = 0$. Hence
+$\mathbb E_{P^*}[(u - d_p)^2] = \Sigma_p^{*} + \Sigma_u$, and
+
+$$
+\mathbb E_{P^*}\!\left[(\hat d - d_p)^2\right] \;=\; \frac{\Sigma_p^2\,(\Sigma_p^{*} + \Sigma_u)}{(\Sigma_p + \Sigma_u)^2} .
+$$
+
+At small $\Sigma_p$ this is close to $\Sigma_p^2(\Sigma_p^{*} + \Sigma_u)/\Sigma_u^2$, which
+falls like $\Sigma_p^2$ while the $\Sigma_p$ it is compared with falls like $\Sigma_p$,
+so near zero the step always pushes down. In the widget's world
+$3\Sigma_u = {{lin_bad_threshold}}$ exceeds $\Sigma_p^{*} = {{lin_s:.0f}}$, so by
+[lesson:3.4] the drift is negative at every $\Sigma_p$. The creature started at the
+truth and went deaf on night {{ex_died}}, with $\Sigma_p = {{ex_sp_died:.4f}}$ and a
+shrinkage factor of ${{ex_k_died:.3f}}$ against the world's ${{ex_k_star:.3f}}$.
+
+(b) Because $c$ depends only on $\Sigma_p$ and $\Sigma_u$, it is the same on every sound
+at a fixed $\Sigma_p$, and averaging leaves it unchanged. The step's argument becomes
+$\big((\hat d - d_p)^2 + c(\Sigma_p, \Sigma_u)\big)/\Sigma_p - 1$, so the drift of
+$\ln\Sigma_p$ is
+
+$$
+\frac12\left(\frac{\mathbb E_{P^*}\!\left[(\hat d - d_p)^2\right] + c(\Sigma_p, \Sigma_u)}{\Sigma_p} - 1\right).
+$$
+
+It vanishes at $\Sigma_p = \Sigma_p^{*}$ when, substituting (a) there,
+
+$$
+\frac{(\Sigma_p^{*})^2\,(\Sigma_p^{*} + \Sigma_u)}{(\Sigma_p^{*} + \Sigma_u)^2} + c(\Sigma_p^{*}, \Sigma_u) \;=\; \Sigma_p^{*} .
+$$
+
+One factor of $\Sigma_p^{*} + \Sigma_u$ cancels in the first term, which leaves
+
+$$
+\begin{aligned}
+c(\Sigma_p^{*}, \Sigma_u)
+&= \Sigma_p^{*} - \frac{(\Sigma_p^{*})^2}{\Sigma_p^{*} + \Sigma_u} \\
+&= \frac{\Sigma_p^{*}(\Sigma_p^{*} + \Sigma_u) - (\Sigma_p^{*})^2}{\Sigma_p^{*} + \Sigma_u} \\
+&= \frac{\Sigma_p^{*}\,\Sigma_u}{\Sigma_p^{*} + \Sigma_u} .
+\end{aligned}
+$$
+
+The condition must hold in every world, that is for every pair of positive numbers
+$(\Sigma_p^{*}, \Sigma_u)$, and those pairs cover the whole domain of $c$. So it fixes
+the value of $c$ at every point: for all positive $x$ and $y$, $c(x, y) = xy/(x + y)$.
+A different function differs from this at some pair $(x, y)$, and in the world with
+$\Sigma_p^{*} = x$ and $\Sigma_u = y$ its drift at the truth is not zero. Written in
+the creature's variables,
+
+$$
+c(\Sigma_p, \Sigma_u) \;=\; \frac{\Sigma_p\Sigma_u}{\Sigma_p + \Sigma_u} \;=\; \Sigma_{\text{post}} ,
+$$
+
+the variance of the creature's posterior on $d$, the reciprocal of the summed precisions
+of [lesson:2.4].
+
+The repaired step compares $(\hat d - d_p)^2 + \Sigma_{\text{post}}$ with $\Sigma_p$, and
+that sum is the posterior average of $(d - d_p)^2$: the posterior on $d$ is Gaussian with
+mean $\hat d$ and variance $\Sigma_{\text{post}}$, and the average of a square about a
+point is the squared distance of the mean from it plus the variance. So the repair is
+the posterior-averaged rule of [lesson:3.4], found here from the requirement that the
+truth be a stationary point rather than from the score. The same lesson shows that
+rule to be a stochastic, online form of expectation maximisation, and the point rule to
+depart from it by putting the mode in place of the posterior in the E step. The term
+that replacement discards is $\Sigma_{\text{post}}$, the spread of the posterior about
+$\hat d$. Rerun on the same sounds, the repaired creature ends at
+$\Sigma_p = {{ex_fix_final:.3f}}$, averages ${{ex_fix_mean:.3f}}$ over the second half
+of the nights, and keeps a shrinkage factor of ${{ex_fix_k:.3f}}$.
+
+The answer is unique because $c$ may not use the sound. If it could, the condition would
+not fix it: adding $(u - d_p)^2 - \Sigma_u - (\hat d - d_p)^2$ makes the compared
+quantity $(u - d_p)^2 - \Sigma_u$, whose average is $\Sigma_p^{*}$ at every $\Sigma_p$,
+so its drift also vanishes at the truth. That repair uses $u = d + \text{noise}$, and in
+Week&nbsp;2's model, where $u$ is not $d$ plus noise, it has no counterpart.
 :::
 
 ::: exercise Adding the missing term

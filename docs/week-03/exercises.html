@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk cur" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><div class="lessons"><a class="" href="../week-03/two-timescales.html">Two timescales</a><a class="" href="../week-03/prior-and-noise.html">Learning the prior and the noise</a><a class="" href="../week-03/learning-the-link.html">Learning the link</a><a class="" href="../week-03/what-the-mode-leaves-out.html">What the mode leaves out</a><a class="cur" href="../week-03/exercises.html">Problems and code</a></div><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Learning the model</div><h1>Problems and code</h1><p class="deck">Worked problems on learning rules, their stationary points, the missing term and the dynamics of learning.</p><div class="meta"><span>Week 3</span><span>&#167;5</span><span>100 min</span></div></header><article class="abody"><p>Work the problems before opening the solutions. The ones marked with a dagger are
+<div class="topbar"><div class="tin"><a class="home" href="../index.html">&#8592; Active Inference</a><button class="tocbtn" type="button">Contents</button><span class="tcode">Open course</span></div></div><div class="shell"><nav class="sidenav"><div class="navhd">Contents</div><div class="part">I. Inference</div><a class="wk" href="../week-01/index.html"><span class="n">01</span>The hypothesis-testing agent</a><a class="wk" href="../week-02/index.html"><span class="n">02</span>Hidden state estimation</a><a class="wk cur" href="../week-03/index.html"><span class="n">03</span>Learning the model</a><div class="lessons"><a class="" href="../week-03/two-timescales.html">Two timescales</a><a class="" href="../week-03/prior-and-noise.html">Learning the prior and the noise</a><a class="" href="../week-03/learning-the-link.html">Learning the link</a><a class="" href="../week-03/what-the-mode-leaves-out.html">What the mode leaves out</a><a class="cur" href="../week-03/exercises.html">Problems and code</a></div><a class="wk" href="../week-04/index.html"><span class="n">04</span>Variational free energy</a><div class="part">II. Continuous time</div><a class="wk" href="../week-05/index.html"><span class="n">05</span>Predictive coding</a><a class="wk" href="../week-06/index.html"><span class="n">06</span>Generalised coordinates of motion</a><a class="wk" href="../week-07/index.html"><span class="n">07</span>Generalised filtering</a><a class="wk" href="../week-08/index.html"><span class="n">08</span>Action, learning and attention</a><div class="part">III. Discrete time</div><a class="wk" href="../week-09/index.html"><span class="n">09</span>Discrete generative models</a><a class="wk" href="../week-10/index.html"><span class="n">10</span>Expected free energy</a><a class="wk" href="../week-11/index.html"><span class="n">11</span>Policy selection and learning</a><div class="part">IV. Perspective</div><a class="wk" href="../week-12/index.html"><span class="n">12</span>Extensions, connections and objections</a><div class="part">Reference</div><a class="wk" href="../notation.html"><span class="n">&#167;</span>Notation</a><a class="wk" href="../orientation.html"><span class="n">&#167;</span>How to use this course</a><a class="wk" href="../ai-use.html"><span class="n">&#167;</span>AI use and attribution</a></nav><main class="maincol"><header class="ahead"><div class="eyebrow">Learning the model</div><h1>Problems and code</h1><p class="deck">Worked problems on learning rules, their stationary points, the missing term and the dynamics of learning.</p><div class="meta"><span>Week 3</span><span>&#167;5</span><span>120 min</span></div></header><article class="abody"><p>Work the problems before opening the solutions. The ones marked with a dagger are
 used again later in the course.</p>
 <h2 id="the-notebooks">The notebooks</h2>
 <div class="tablewrap"><table>
@@ -432,7 +432,89 @@ channel whose noise is less than three times the prior's spread has its variance
 learned all the way to zero: the more the prior can
 absorb, the less noise the rule sees. The model is symmetric in the two variances
 because $d$ and $u - d$ enter it in the same way.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 3.5.3<span class="bt">Adding the missing term</span></div><p>In the linear model of Lesson&nbsp;4, the animal climbs
+<div class="box exercise"><div class="boxhd">Exercise 3.5.3<span class="bt">Repairing the point rule</span></div><p>A creature lives in the linear model of Lesson&nbsp;4. It knows $d_p$ and
+$\Sigma_u = 0.5$, and learns its prior variance by the point rule: on each
+sound it settles on the mode $\hat d$ and takes the log-variance step of Lesson&nbsp;2,</p>
+<div class="eqn"><div class="eqbody">$$\Sigma_p \;\leftarrow\; \Sigma_p \exp\!\Big(\tfrac{\beta}{2}\Big(\frac{(\hat d - d_p)^2}{\Sigma_p} - 1\Big)\Big),$$</div></div>
+<p>with $\beta = 0.01$, starting at $\Sigma_p = 1$, for up to
+200 nights of 20 sounds each. The step compares $(\hat d - d_p)^2$
+with $\Sigma_p$, and the drift of $\ln\Sigma_p$ vanishes where the average of
+$(\hat d - d_p)^2$ over the world equals $\Sigma_p$. The shrinkage factor
+$\Sigma_p/(\Sigma_p + \Sigma_u)$ of Lesson&nbsp;4 is the fraction of each sound's
+deviation from $d_p$ that the mode follows; below 0.1 the creature is counted
+deaf. The world's prior variance $\Sigma_p^{*}$ is hidden from it.</p>
+<p>Run the creature in the widget below, then look at the world it could not see.</p>
+<p>(a) Find $\mathbb E_{P^*}\!\left[(\hat d - d_p)^2\right]$ as a function of $\Sigma_p$,
+$\Sigma_p^{*}$ and $\Sigma_u$.</p>
+<p>(b) Find a term $c(\Sigma_p, \Sigma_u)$, built only from what the creature has, which,
+added to $(\hat d - d_p)^2$ in the step, makes the average of the sum equal $\Sigma_p$
+at $\Sigma_p = \Sigma_p^{*}$ in every world. Show that this condition determines $c$.</p>
+<p>The widget checks each answer at hidden values of the parameters. When (b) passes, it
+runs the creature again on the same sounds with your $c$ added on every sound.</p>
+<figure class="widget" id="fig-3-5-1"><div class="wmount" data-widget="derive-missing-term"><div class="wfallback">This figure is interactive and needs JavaScript.</div></div><figcaption><span class="fno">Figure 3.5.1.</span> The point rule in a world the creature cannot see. Run it, reveal the world, derive the expected squared deviation of the mode and the term that makes the drift vanish at the truth, then run the creature again with that term.</figcaption></figure><details><summary>Solution</summary><p>(a) By Lesson&nbsp;4, the mode is the precision-weighted average</p>
+<div class="eqn"><div class="eqbody">$$\hat d - d_p \;=\; \frac{\Sigma_p}{\Sigma_p + \Sigma_u}\,(u - d_p),$$</div></div>
+<p>so</p>
+<div class="eqn"><div class="eqbody">$$(\hat d - d_p)^2 \;=\; \frac{\Sigma_p^2}{(\Sigma_p + \Sigma_u)^2}\,(u - d_p)^2 .$$</div></div>
+<p>The factor in front does not depend on the sound, so only $(u - d_p)^2$ is averaged.
+Split the deviation of the sound into the deviation of the source and the noise:</p>
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+(u - d_p)^2 &= \big((d - d_p) + (u - d)\big)^2 \\
+&= (d - d_p)^2 + (u - d)^2 \\
+&\quad + 2\,(d - d_p)(u - d) .
+\end{aligned}$$</div></div>
+<p>In the world, $d - d_p$ has mean zero and variance $\Sigma_p^{*}$, and the noise
+$u - d$ has mean zero and variance $\Sigma_u$ and is independent of $d$, so the cross
+term averages to $2\,\mathbb E_{P^*}[d - d_p]\,\mathbb E_{P^*}[u - d] = 0$. Hence
+$\mathbb E_{P^*}[(u - d_p)^2] = \Sigma_p^{*} + \Sigma_u$, and</p>
+<div class="eqn"><div class="eqbody">$$\mathbb E_{P^*}\!\left[(\hat d - d_p)^2\right] \;=\; \frac{\Sigma_p^2\,(\Sigma_p^{*} + \Sigma_u)}{(\Sigma_p + \Sigma_u)^2} .$$</div></div>
+<p>At small $\Sigma_p$ this is close to $\Sigma_p^2(\Sigma_p^{*} + \Sigma_u)/\Sigma_u^2$, which
+falls like $\Sigma_p^2$ while the $\Sigma_p$ it is compared with falls like $\Sigma_p$,
+so near zero the step always pushes down. In the widget's world
+$3\Sigma_u = 1.5$ exceeds $\Sigma_p^{*} = 1$, so by
+Lesson&nbsp;4 the drift is negative at every $\Sigma_p$. The creature started at the
+truth and went deaf on night 75, with $\Sigma_p = 0.0547$ and a
+shrinkage factor of $0.099$ against the world's $0.667$.</p>
+<p>(b) Because $c$ depends only on $\Sigma_p$ and $\Sigma_u$, it is the same on every sound
+at a fixed $\Sigma_p$, and averaging leaves it unchanged. The step's argument becomes
+$\big((\hat d - d_p)^2 + c(\Sigma_p, \Sigma_u)\big)/\Sigma_p - 1$, so the drift of
+$\ln\Sigma_p$ is</p>
+<div class="eqn"><div class="eqbody">$$\frac12\left(\frac{\mathbb E_{P^*}\!\left[(\hat d - d_p)^2\right] + c(\Sigma_p, \Sigma_u)}{\Sigma_p} - 1\right).$$</div></div>
+<p>It vanishes at $\Sigma_p = \Sigma_p^{*}$ when, substituting (a) there,</p>
+<div class="eqn"><div class="eqbody">$$\frac{(\Sigma_p^{*})^2\,(\Sigma_p^{*} + \Sigma_u)}{(\Sigma_p^{*} + \Sigma_u)^2} + c(\Sigma_p^{*}, \Sigma_u) \;=\; \Sigma_p^{*} .$$</div></div>
+<p>One factor of $\Sigma_p^{*} + \Sigma_u$ cancels in the first term, which leaves</p>
+<div class="eqn"><div class="eqbody">$$\begin{aligned}
+c(\Sigma_p^{*}, \Sigma_u)
+&= \Sigma_p^{*} - \frac{(\Sigma_p^{*})^2}{\Sigma_p^{*} + \Sigma_u} \\
+&= \frac{\Sigma_p^{*}(\Sigma_p^{*} + \Sigma_u) - (\Sigma_p^{*})^2}{\Sigma_p^{*} + \Sigma_u} \\
+&= \frac{\Sigma_p^{*}\,\Sigma_u}{\Sigma_p^{*} + \Sigma_u} .
+\end{aligned}$$</div></div>
+<p>The condition must hold in every world, that is for every pair of positive numbers
+$(\Sigma_p^{*}, \Sigma_u)$, and those pairs cover the whole domain of $c$. So it fixes
+the value of $c$ at every point: for all positive $x$ and $y$, $c(x, y) = xy/(x + y)$.
+A different function differs from this at some pair $(x, y)$, and in the world with
+$\Sigma_p^{*} = x$ and $\Sigma_u = y$ its drift at the truth is not zero. Written in
+the creature's variables,</p>
+<div class="eqn"><div class="eqbody">$$c(\Sigma_p, \Sigma_u) \;=\; \frac{\Sigma_p\Sigma_u}{\Sigma_p + \Sigma_u} \;=\; \Sigma_{\text{post}} ,$$</div></div>
+<p>the variance of the creature's posterior on $d$, the reciprocal of the summed precisions
+of <a href="../week-02/reading-the-update.html">Week&nbsp;2, Lesson&nbsp;4</a>.</p>
+<p>The repaired step compares $(\hat d - d_p)^2 + \Sigma_{\text{post}}$ with $\Sigma_p$, and
+that sum is the posterior average of $(d - d_p)^2$: the posterior on $d$ is Gaussian with
+mean $\hat d$ and variance $\Sigma_{\text{post}}$, and the average of a square about a
+point is the squared distance of the mean from it plus the variance. So the repair is
+the posterior-averaged rule of Lesson&nbsp;4, found here from the requirement that the
+truth be a stationary point rather than from the score. The same lesson shows that
+rule to be a stochastic, online form of expectation maximisation, and the point rule to
+depart from it by putting the mode in place of the posterior in the E step. The term
+that replacement discards is $\Sigma_{\text{post}}$, the spread of the posterior about
+$\hat d$. Rerun on the same sounds, the repaired creature ends at
+$\Sigma_p = 0.935$, averages $0.967$ over the second half
+of the nights, and keeps a shrinkage factor of $0.652$.</p>
+<p>The answer is unique because $c$ may not use the sound. If it could, the condition would
+not fix it: adding $(u - d_p)^2 - \Sigma_u - (\hat d - d_p)^2$ makes the compared
+quantity $(u - d_p)^2 - \Sigma_u$, whose average is $\Sigma_p^{*}$ at every $\Sigma_p$,
+so its drift also vanishes at the truth. That repair uses $u = d + \text{noise}$, and in
+Week&nbsp;2's model, where $u$ is not $d$ plus noise, it has no counterpart.</p></details></div>
+<div class="box exercise"><div class="boxhd">Exercise 3.5.4<span class="bt">Adding the missing term</span></div><p>In the linear model of Lesson&nbsp;4, the animal climbs
 $\hat\ell + \tfrac12\ln(2\pi\Sigma_{\text{post}})$ in $\Sigma_p$ instead of $\hat\ell$.
 Show that the drift now vanishes at $\Sigma_p = \Sigma_p^{*}$, and say why this
 does not follow from the point rule plus a correction that would be available in
@@ -450,7 +532,7 @@ width changes from sound to sound, so $\tfrac12\ln(2\pi\Sigma_{\text{post}})$ wi
 Gaussian width read from the curvature at the mode is an approximation. Week&nbsp;4
 makes that approximation explicit as the Laplace approximation and finds where it
 fails.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 3.5.4<span class="bt">A hyperprior delays the collapse</span></div><p>In the linear model with $\Sigma_p^{*} &lt; 3\Sigma_u$, add to the point rule's batch
+<div class="box exercise"><div class="boxhd">Exercise 3.5.5<span class="bt">A hyperprior delays the collapse</span></div><p>In the linear model with $\Sigma_p^{*} &lt; 3\Sigma_u$, add to the point rule's batch
 objective over $N$ trials the inverse-gamma hyperprior of Lesson&nbsp;4 with $n_0$ and
 $\Sigma_0$.</p>
 <p>(a) Show that the objective is now bounded above and has a maximum at a positive
@@ -496,7 +578,7 @@ statement shows that an online learner converges to it. Choosing $N_w$ is a mode
 scale, since by <a href="../week-03/two-timescales.html">Lesson&nbsp;1</a> an online learner relaxes over about
 $1/\big(\beta|\varphi'|\big)$ trials, but it does not fix one. Either way, the
 hyperprior bounds the objective without removing the bias of the point rule.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 3.5.5<span class="bt">Choosing a learning rate</span></div><p>In the linear running average of Lesson&nbsp;1 with
+<div class="box exercise"><div class="boxhd">Exercise 3.5.6<span class="bt">Choosing a learning rate</span></div><p>In the linear running average of Lesson&nbsp;1 with
 $\kappa = \beta/(\Sigma_p + \Sigma_u)$, the prior location's memory has half-life
 $\ln 2/(-\ln(1 - \kappa))$ trials and its fluctuation about the target has variance
 $\kappa\,(\Sigma_p^{*} + \Sigma_u)/(2 - \kappa)$, where $\Sigma_p^{*} + \Sigma_u$ is the
@@ -516,7 +598,7 @@ right $\beta$ depends on how often the world changes compared with how noisy eac
 trial is. A learner that does not know the rate of change has to learn it, which is a
 parameter of a model of how the parameters themselves drift. That is a model one level
 up, the kind of hierarchy Week&nbsp;5 begins to build.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 3.5.6<span class="bt">Implement it</span></div><p>Using the NumPy notebook's <code>run</code> function, repeat <a href="../week-03/learning-the-link.html">Lesson&nbsp;3</a>'s experiment in a world
+<div class="box exercise"><div class="boxhd">Exercise 3.5.7<span class="bt">Implement it</span></div><p>Using the NumPy notebook's <code>run</code> function, repeat <a href="../week-03/learning-the-link.html">Lesson&nbsp;3</a>'s experiment in a world
 quieter than the model, $\theta^{*} = \tfrac12$, with learning off and then on. Report
 the averages of the two errors and of the learning signal over the last 200 trials, and
 compare their signs with the louder world.</p><details><summary>Solution</summary><p>With learning off, the averages over the last 200 trials are $0.127$
@@ -527,7 +609,7 @@ $1$ to $0.880$ by the last trial.</p>
 prior error was $0.646$ and the sensory error $-0.035$; here
 both keep their signs and only their sizes move. A reader who judged the link by the
 sign of either error alone would call both worlds the same.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 3.5.7<span class="bt">The location in the linear world</span></div><p>In the linear world of Lesson&nbsp;1, the process draws $d$ from
+<div class="box exercise"><div class="boxhd">Exercise 3.5.8<span class="bt">The location in the linear world</span></div><p>In the linear world of Lesson&nbsp;1, the process draws $d$ from
 $\mathcal N(d_p^{*}, \Sigma_p^{*})$ on the whole line and $u = d + z$ with
 $z \sim \mathcal N(0, \Sigma_u^{*})$. The animal holds fixed positive variances
 $\Sigma_p$ and $\Sigma_u$, not necessarily the world's, and learns $d_p$ by the point
@@ -544,7 +626,7 @@ are wrong.</p>
 there, so its average over the process is not the average of the posterior means, and
 by Lesson&nbsp;4 the point rule's drift differs from the posterior-averaged rule's by the
 average of $(m - \hat d)/\Sigma_p$, which is not zero when the posteriors are skewed.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 3.5.8<span class="bt">The two pulls on the source power</span></div><p>For the source power, the per-trial derivative as a function of the state is
+<div class="box exercise"><div class="boxhd">Exercise 3.5.9<span class="bt">The two pulls on the source power</span></div><p>For the source power, the per-trial derivative as a function of the state is
 $\psi(d) = \big(u - \theta h(d)\big)h(d)/\Sigma_u$ with $h(d) = 1/d^2$. Find $\psi'$ and
 $\psi''$, evaluate both where the residual $u - \theta h(d)$ is zero, and say what the
 second-order expansion of Lesson&nbsp;4 can and cannot tell you about the sign of the
@@ -568,7 +650,7 @@ it drops matter. In Lesson&nbsp;3's louder world the second-order sum averages t
 $-0.7429$ while the exact gap averages to $0.0303$. The
 sign comes from the full posterior calculation, which gives the power overestimated
 when the world equals Week&nbsp;2's model and underestimated in the louder world.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 3.5.9<span class="bt">Second-order parameter dynamics &dagger;</span></div><p><a href="https://doi.org/10.1016/j.jmp.2017.09.004">Buckley et al. (2017)</a>, section 8, write
+<div class="box exercise"><div class="boxhd">Exercise 3.5.10<span class="bt">Second-order parameter dynamics &dagger;</span></div><p><a href="https://doi.org/10.1016/j.jmp.2017.09.004">Buckley et al. (2017)</a>, section 8, write
 the dynamics of a parameter in second-order form: the parameter's acceleration, rather
 than its velocity, is proportional to the gradient. Apply this to the prior location in
 the linear model, in continuous time and with the update replaced by its expectation
@@ -594,7 +676,7 @@ complex and $x$ oscillates with decaying amplitude; for $b &gt; 2\omega_0$ both 
 negative and the slower one, $\tfrac12\big(-b + \sqrt{b^2 - 4\omega_0^2}\big)$, approaches
 zero as $b$ grows, so heavy friction is slow. The fastest return without overshoot is at
 $b = 2\omega_0$, critical damping, where $x(t) = x(0)(1 + \omega_0 t)\exp(-\omega_0 t)$.</p></details></div>
-<div class="box exercise"><div class="boxhd">Exercise 3.5.10<span class="bt">Precision as the learned quantity in the circuit</span></div><p>Week&nbsp;2's circuit applies each precision as a gain at an error unit. Suppose the
+<div class="box exercise"><div class="boxhd">Exercise 3.5.11<span class="bt">Precision as the learned quantity in the circuit</span></div><p>Week&nbsp;2's circuit applies each precision as a gain at an error unit. Suppose the
 animal stores $\Pi_u$ at that unit and learns it in log coordinates. Write the update,
 say what it uses, and check that its stationary point is the same as that of the
 log-variance update.</p><details><summary>Solution</summary><p>Since $\ln\Pi_u = -\ln\Sigma_u$, the derivative in $\ln\Pi_u$ is minus the derivative in
@@ -608,6 +690,6 @@ opposite step in the other. That zero is where the average change in the logarit
 vanishes. The average change in $\Pi_u$ itself is not zero there: the step multiplies
 $\Pi_u$ by an exponential, whose average exceeds one whenever the exponent varies, as
 Lesson&nbsp;2 noted for the variance.</p></details></div></article><nav class="pagenav"><a class="pv" href="../week-03/what-the-mode-leaves-out.html"><span class="dir">Previous</span><span class="ttl">What the mode leaves out</span></a><a class="nx" href="../week-04/bounding-surprise.html"><span class="dir">Next</span><span class="ttl">Bounding surprise</span></a></nav><footer class="sitefoot"><p>Active Inference, an open course by <a href="https://www.shocklab.net">Jonathan Shock</a>, Department of Mathematics &amp; Applied Mathematics, University of Cape Town.</p><p>Released under <a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>. Corrections and contributions welcome on <a href="https://github.com/shocklab/Active-Inference-course">GitHub</a>.</p><p class="ai-attribution">AI use: developed with substantial assistance from Claude (Anthropic) and revised with Codex (OpenAI), under Jonathan Shock&rsquo;s direction. <a href="../ai-use.html">How AI was used and how the material is checked</a>.</p></footer></main></div>
-<script defer src="../assets/js/aif-core.js"></script>
+<script defer src="../assets/js/aif-core.js"></script><script defer src="../assets/js/w03-derive.js"></script>
 </body>
 </html>
